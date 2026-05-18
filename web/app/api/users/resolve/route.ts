@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPublicClient, http } from "viem";
 import { mainnet } from "viem/chains";
-import { normalize } from "viem/ens";
 import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -171,15 +170,12 @@ async function handleResolve(req: NextRequest) {
 
   // 2 + 3. ENS-shaped (includes .base.eth and .eth).
   if (handle.endsWith(".eth")) {
-    let normalized: string;
-    try {
-      normalized = normalize(handle);
-    } catch {
-      return NextResponse.json(
-        { ok: false, handle: rawHandle, error: "invalid_name" },
-        { status: 400 },
-      );
-    }
+    // handle is already lowercased; the HTTP resolvers and viem are tolerant
+    // of unicode names since we don't accept those from users today. If we
+    // ever support unicode, swap in a hand-rolled normalize (viem/ens
+    // normalize() didn't survive Vercel's build tree-shake — returned
+    // undefined and crashed with "Cannot read properties of undefined").
+    const normalized = handle;
 
     let result: RestResult = null;
 
