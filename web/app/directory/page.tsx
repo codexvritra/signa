@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle, Plus } from "lucide-react";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { shortAddress } from "@/lib/format";
-import { listAgents } from "@/lib/agents";
-
-const agents = listAgents();
+import { useAgents } from "@/hooks/useAgents";
+import { Spinner } from "@/components/ui/Spinner";
 
 export default function DirectoryPage() {
+  const { agents, loading } = useAgents();
+
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
@@ -32,34 +33,48 @@ export default function DirectoryPage() {
               Agents you can DM.
             </h1>
             <p className="text-white/55 max-w-xl mt-5 text-[16px] leading-relaxed">
-              A curated list of XMTP agents on Base.
-              {agents.length > 0 && (
-                <> Tap any to start a conversation with their address pre-filled.</>
-              )}
+              A live list of XMTP agents on Base. Anyone running an agent can{" "}
+              <Link
+                href="/directory/submit"
+                className="text-[var(--accent)] hover:text-[var(--accent-2)] underline underline-offset-2"
+              >
+                submit theirs
+              </Link>{" "}
+              — wallet signature from the agent verifies ownership.
             </p>
+            <div className="mt-6">
+              <Link
+                href="/directory/submit"
+                className="inline-flex items-center gap-1.5 bg-white text-black text-sm font-medium rounded-md px-3.5 py-1.5 hover:bg-white/90 transition-colors"
+              >
+                <Plus className="size-3.5" />
+                Submit an agent
+              </Link>
+            </div>
           </div>
         </section>
 
         <section className="flex-1">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 sm:py-16">
-            {agents.length === 0 ? (
-              <div className="grid sm:grid-cols-[180px_1fr] gap-4 sm:gap-12">
-                <div className="text-xs uppercase tracking-wider text-white/40">
-                  Empty
-                </div>
-                <div className="max-w-xl space-y-3">
-                  <p className="text-[15px] text-white leading-relaxed">
-                    No agents registered yet.
-                  </p>
-                  <p className="text-sm text-white/55 leading-relaxed">
-                    Deploy an agent, then add an entry to{" "}
-                    <code className="text-[13px] bg-white/[0.05] rounded px-1.5 py-0.5 font-mono">
-                      web/data/agents.json
-                    </code>
-                    . On the next deploy, it shows up here with a Message
-                    button.
-                  </p>
-                </div>
+            {loading ? (
+              <div className="flex justify-center py-12 text-white/40">
+                <Spinner size={16} />
+              </div>
+            ) : agents.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-[15px] text-white font-medium font-display">
+                  No agents listed yet.
+                </p>
+                <p className="text-sm text-white/55 mt-2 max-w-md mx-auto leading-relaxed">
+                  Be the first.{" "}
+                  <Link
+                    href="/directory/submit"
+                    className="text-[var(--accent)] hover:text-[var(--accent-2)] underline underline-offset-2"
+                  >
+                    Submit your agent
+                  </Link>{" "}
+                  — takes one signature from the agent&apos;s wallet.
+                </p>
               </div>
             ) : (
               <div className="border-t border-white/[0.06]">

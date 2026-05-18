@@ -48,6 +48,19 @@ export type SignedAction =
       basename: string | null;
       ens_name: string | null;
       ts: number;
+    }
+  | {
+      kind: "agent_submit";
+      address: string;
+      name: string;
+      description: string;
+      tags: string[];
+      ts: number;
+    }
+  | {
+      kind: "agent_delete";
+      address: string;
+      ts: number;
     };
 
 /**
@@ -69,8 +82,24 @@ export function buildMessageToSign(action: SignedAction): string {
       return `SIGNA delete v1\nts:${action.ts}\npost:${action.post_id}`;
     case "register":
       return `SIGNA register v1\nts:${action.ts}\naddress:${action.address}\nbasename:${action.basename ?? "-"}\nens:${action.ens_name ?? "-"}`;
+    case "agent_submit":
+      return `SIGNA agent submit v1\nts:${action.ts}\naddress:${action.address}\nname:${action.name}\ntags:${action.tags.join(",")}\ndesc:${action.description}`;
+    case "agent_delete":
+      return `SIGNA agent delete v1\nts:${action.ts}\naddress:${action.address}`;
   }
 }
+
+export type AgentEntry = {
+  address: string;
+  name: string;
+  description: string;
+  tags: string[];
+  verified: boolean;
+  submitted_at: string;
+};
+
+export const MAX_AGENT_NAME = 50;
+export const MAX_AGENT_DESC = 280;
 
 export const MAX_POST_LENGTH = 500;
 export const SIG_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes

@@ -18,7 +18,7 @@ import { Fragment } from "react";
 import { cn } from "@/lib/cn";
 import { shortAddress } from "@/lib/format";
 import { isGroup, getGroupName } from "@/lib/conversation";
-import { isKnownAgentAddress, getKnownAgent, isVerifiedAgent } from "@/lib/agents";
+import { useAgents } from "@/hooks/useAgents";
 import { AgentBadge } from "@/components/ui/AgentBadge";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { GroupInfoPanel } from "./GroupInfoPanel";
@@ -86,7 +86,8 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
   const groupName = activeConversation && isGroupConv
     ? getGroupName(activeConversation)
     : undefined;
-  const isAgent = !isGroupConv && isKnownAgentAddress(peerAddress);
+  const { isKnownAgent, getKnownAgent, isVerifiedAgent } = useAgents();
+  const isAgent = !isGroupConv && isKnownAgent(peerAddress);
   const knownAgent = isAgent ? getKnownAgent(peerAddress) : null;
   const verified = !isGroupConv && isVerifiedAgent(peerAddress);
 

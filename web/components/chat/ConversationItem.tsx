@@ -8,8 +8,8 @@ import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
 import { AgentBadge } from "@/components/ui/AgentBadge";
 import { isGroup, getGroupName } from "@/lib/conversation";
-import { isKnownAgentAddress, getKnownAgent } from "@/lib/agents";
 import { getMessageText } from "@/lib/message";
+import { useAgents } from "@/hooks/useAgents";
 import { useChat, type PeerInfo } from "@/context/ChatProvider";
 
 export function ConversationItem({
@@ -36,10 +36,11 @@ export function ConversationItem({
   onToggleMute: () => void;
 }) {
   const { ownInboxId } = useChat();
+  const { isKnownAgent, getKnownAgent } = useAgents();
   const peerAddress = peerInfo?.address ?? null;
   const isGroupConv = isGroup(conversation);
   const groupName = isGroupConv ? getGroupName(conversation) : undefined;
-  const isAgent = !isGroupConv && isKnownAgentAddress(peerAddress);
+  const isAgent = !isGroupConv && isKnownAgent(peerAddress);
   const knownAgent = isAgent ? getKnownAgent(peerAddress) : null;
   const lastFromMe = lastMessage?.senderInboxId === ownInboxId;
 

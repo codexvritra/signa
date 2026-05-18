@@ -13,7 +13,7 @@ import { NewChatModal } from "@/components/chat/NewChatModal";
 import { SettingsPanel } from "./SettingsPanel";
 import { HelpModal } from "./HelpModal";
 import { useKeyboardShortcuts, shortcutLabel } from "@/hooks/useKeyboardShortcuts";
-import { listAgents } from "@/lib/agents";
+import { useAgents } from "@/hooks/useAgents";
 import { cn } from "@/lib/cn";
 
 const ONBOARDING_KEY = "agent-messenger:onboarded";
@@ -66,13 +66,14 @@ export function AppShell({
     }
   }, [searchParams, client, router]);
 
+  const { agents } = useAgents();
+
   // One-time onboarding hint after XMTP is ready
   useEffect(() => {
     if (!client) return;
     if (typeof window === "undefined") return;
     try {
       if (localStorage.getItem(ONBOARDING_KEY)) return;
-      const agents = listAgents();
       const tipShortcut = shortcutLabel("K");
       const action =
         agents.length > 0
@@ -101,7 +102,7 @@ export function AppShell({
     } catch {
       // ignore
     }
-  }, [client, router]);
+  }, [client, router, agents.length]);
 
   if (initStatus === "ready" && client) {
     return (
