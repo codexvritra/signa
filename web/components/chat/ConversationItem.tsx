@@ -7,7 +7,10 @@ import { cn } from "@/lib/cn";
 import { formatRelative, nsToDate, shortAddress } from "@/lib/format";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
+import { AgentBadge } from "@/components/ui/AgentBadge";
 import { isGroup, getGroupName } from "@/lib/conversation";
+import { isKnownAgentAddress, getKnownAgent } from "@/lib/agents";
+import { getMessageText } from "@/lib/message";
 import type { PeerInfo } from "@/context/ChatProvider";
 
 export function ConversationItem({
@@ -28,11 +31,10 @@ export function ConversationItem({
   const peerAddress = peerInfo?.address ?? null;
   const isGroupConv = isGroup(conversation);
   const groupName = isGroupConv ? getGroupName(conversation) : undefined;
+  const isAgent = !isGroupConv && isKnownAgentAddress(peerAddress);
+  const knownAgent = isAgent ? getKnownAgent(peerAddress) : null;
 
-  const lastText =
-    lastMessage && typeof lastMessage.content === "string"
-      ? lastMessage.content
-      : "";
+  const lastText = lastMessage ? getMessageText(lastMessage) : "";
 
   const lastAt = (() => {
     try {
@@ -67,14 +69,19 @@ export function ConversationItem({
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-medium text-white truncate">
-            {isGroupConv ? (
-              groupName ?? "Untitled group"
-            ) : peerAddress ? (
-              <PeerName address={peerAddress} />
-            ) : (
-              shortAddress(conversation.id, 4, 4)
-            )}
+          <span className="text-sm font-medium text-white truncate flex items-center gap-1.5 min-w-0">
+            <span className="truncate">
+              {isGroupConv ? (
+                groupName ?? "Untitled group"
+              ) : knownAgent ? (
+                knownAgent.name
+              ) : peerAddress ? (
+                <PeerName address={peerAddress} />
+              ) : (
+                shortAddress(conversation.id, 4, 4)
+              )}
+            </span>
+            {isAgent && <AgentBadge size="xs" />}
           </span>
           {lastAt && (
             <span className="text-[10px] text-white/30 flex-shrink-0">

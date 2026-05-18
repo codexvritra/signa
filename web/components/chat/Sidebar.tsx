@@ -6,9 +6,11 @@ import { Plus, Sparkles, RefreshCw, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useChat } from "@/context/ChatProvider";
 import { ConversationItem } from "./ConversationItem";
+import { ConversationSkeleton } from "./ConversationSkeleton";
 import { SidebarEmpty } from "./EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
 import { isGroup, getGroupName } from "@/lib/conversation";
+import { getMessageText } from "@/lib/message";
 import { cn } from "@/lib/cn";
 
 export function Sidebar({
@@ -43,12 +45,10 @@ export function Sidebar({
     const filtered = !q
       ? withMeta
       : withMeta.filter(({ conv, lastMessage }) => {
-          // search by peer address (for DMs), group name, or last message content
           const peer = peerInfoByConvId.get(conv.id);
-          const lastText =
-            lastMessage && typeof lastMessage.content === "string"
-              ? lastMessage.content.toLowerCase()
-              : "";
+          const lastText = lastMessage
+            ? getMessageText(lastMessage).toLowerCase()
+            : "";
           const groupName = isGroup(conv) ? getGroupName(conv)?.toLowerCase() ?? "" : "";
           const addr = peer?.address?.toLowerCase() ?? "";
           return (
@@ -128,8 +128,10 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 pb-3 flex flex-col gap-1">
-        {filteredAndSorted.length === 0 && !conversationsLoading ? (
+      <div className="flex-1 overflow-y-auto pb-3 flex flex-col gap-1">
+        {conversationsLoading && conversations.length === 0 ? (
+          <ConversationSkeleton />
+        ) : filteredAndSorted.length === 0 ? (
           searchQuery ? (
             <div className="text-center text-xs text-white/40 px-4 py-8">
               No chats match “{searchQuery}”
@@ -138,17 +140,19 @@ export function Sidebar({
             <SidebarEmpty />
           )
         ) : (
-          filteredAndSorted.map(({ conv, lastMessage }) => (
-            <ConversationItem
-              key={conv.id}
-              conversation={conv}
-              peerInfo={peerInfoByConvId.get(conv.id)}
-              active={conv.id === activeConversationId}
-              unread={unreadByConvId.get(conv.id) ?? 0}
-              lastMessage={lastMessage}
-              onSelect={() => setActiveConversationId(conv.id)}
-            />
-          ))
+          <div className="px-2 flex flex-col gap-1">
+            {filteredAndSorted.map(({ conv, lastMessage }) => (
+              <ConversationItem
+                key={conv.id}
+                conversation={conv}
+                peerInfo={peerInfoByConvId.get(conv.id)}
+                active={conv.id === activeConversationId}
+                unread={unreadByConvId.get(conv.id) ?? 0}
+                lastMessage={lastMessage}
+                onSelect={() => setActiveConversationId(conv.id)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </aside>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 import { useChat } from "@/context/ChatProvider";
 import { Sidebar } from "@/components/chat/Sidebar";
@@ -10,8 +11,11 @@ import { ConversationView } from "@/components/chat/ConversationView";
 import { ConversationEmptyState } from "@/components/chat/EmptyState";
 import { NewChatModal } from "@/components/chat/NewChatModal";
 import { SettingsPanel } from "./SettingsPanel";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useKeyboardShortcuts, shortcutLabel } from "@/hooks/useKeyboardShortcuts";
+import { listAgents } from "@/lib/agents";
 import { cn } from "@/lib/cn";
+
+const ONBOARDING_KEY = "agent-messenger:onboarded";
 
 export function AppShell({
   settingsOpen,
@@ -57,6 +61,43 @@ export function AppShell({
       router.replace("/");
     }
   }, [searchParams, client, router]);
+
+  // One-time onboarding hint after XMTP is ready
+  useEffect(() => {
+    if (!client) return;
+    if (typeof window === "undefined") return;
+    try {
+      if (localStorage.getItem(ONBOARDING_KEY)) return;
+      const agents = listAgents();
+      const tipShortcut = shortcutLabel("K");
+      const action =
+        agents.length > 0
+          ? {
+              label: "Browse agents",
+              onClick: () => router.push("/directory"),
+            }
+          : {
+              label: "New chat",
+              onClick: () => {
+                setModalPrefill(undefined);
+                setModalOpen(true);
+              },
+            };
+      toast(
+        agents.length > 0
+          ? "You're in. Browse agents to start a chat."
+          : "You're in. Start a chat with any wallet address.",
+        {
+          description: `Tip: press ${tipShortcut} anywhere to open the new-chat shortcut.`,
+          duration: 8000,
+          action,
+        },
+      );
+      localStorage.setItem(ONBOARDING_KEY, "1");
+    } catch {
+      // ignore
+    }
+  }, [client, router]);
 
   if (initStatus === "ready" && client) {
     return (

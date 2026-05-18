@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { SmilePlus, Reply } from "lucide-react";
+import { SmilePlus, Reply, CornerUpLeft } from "lucide-react";
 import type { DecodedMessage } from "@xmtp/browser-sdk";
 import { cn } from "@/lib/cn";
 import { formatTime, nsToDate } from "@/lib/format";
 import { renderTextWithLinks } from "@/lib/text";
+import { normalizeMessageContent } from "@/lib/message";
 import { ReactionPicker } from "./ReactionPicker";
 import { ReactionRow } from "./ReactionRow";
 import { useChat } from "@/context/ChatProvider";
@@ -25,12 +26,8 @@ export function MessageBubble({
   const { sendReaction, ownInboxId } = useChat();
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const content = typeof message.content === "string" ? message.content : "";
-  // for replies, content can be string too (decoded text reply)
-  const isReplyMsg = !!(message as unknown as { contentType?: { typeId?: string } })
-    .contentType?.typeId?.includes("reply");
-
-  if (!content && !isReplyMsg) return null;
+  const { text, replyTo, isReply } = normalizeMessageContent(message);
+  if (!text) return null;
 
   const sentAt = (() => {
     try {
@@ -40,6 +37,12 @@ export function MessageBubble({
       // ignore
     }
     return null;
+  })();
+
+  const replyPreview = (() => {
+    if (!isReply || !replyTo) return null;
+    const inner = normalizeMessageContent(replyTo);
+    return inner.text ? inner.text.slice(0, 120) : "message";
   })();
 
   function handlePick(emoji: string) {
@@ -69,10 +72,22 @@ export function MessageBubble({
                 : "bg-white/[0.06] text-white/95 border border-white/10",
             )}
           >
-            {renderTextWithLinks(content, isMine)}
+            {replyPreview && (
+              <div
+                className={cn(
+                  "rounded-lg px-2 py-1 mb-1 flex items-start gap-1.5 text-[11px] leading-snug border-l-2",
+                  isMine
+                    ? "bg-black/5 border-black/30 text-black/60"
+                    : "bg-white/[0.05] border-violet-400/50 text-white/55",
+                )}
+              >
+                <CornerUpLeft className="size-3 mt-0.5 flex-shrink-0 opacity-60" />
+                <span className="truncate">{replyPreview}</span>
+              </div>
+            )}
+            <div>{renderTextWithLinks(text, isMine)}</div>
           </div>
 
-          {/* hover actions */}
           <div
             className={cn(
               "absolute top-0 hidden group-hover:flex items-center gap-0.5 -translate-y-1/2 z-10",

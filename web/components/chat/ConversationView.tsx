@@ -14,6 +14,8 @@ import { TypingDots } from "./TypingDots";
 import { cn } from "@/lib/cn";
 import { shortAddress } from "@/lib/format";
 import { isGroup, getGroupName } from "@/lib/conversation";
+import { isKnownAgentAddress, getKnownAgent } from "@/lib/agents";
+import { AgentBadge } from "@/components/ui/AgentBadge";
 import { GroupInfoPanel } from "./GroupInfoPanel";
 
 export function ConversationView({ onBack }: { onBack: () => void }) {
@@ -48,6 +50,8 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
   const groupName = activeConversation && isGroupConv
     ? getGroupName(activeConversation)
     : undefined;
+  const isAgent = !isGroupConv && isKnownAgentAddress(peerAddress);
+  const knownAgent = isAgent ? getKnownAgent(peerAddress) : null;
 
   // load group member count
   useEffect(() => {
@@ -132,14 +136,19 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
           )}
           onClick={isGroupConv ? () => setGroupInfoOpen(true) : undefined}
         >
-          <div className="text-sm font-medium text-white truncate">
-            {isGroupConv ? (
-              groupName ?? "Untitled group"
-            ) : peerAddress ? (
-              <PeerName address={peerAddress} />
-            ) : (
-              shortAddress(activeConversation.id, 4, 4)
-            )}
+          <div className="text-sm font-medium text-white truncate flex items-center gap-1.5">
+            <span className="truncate">
+              {isGroupConv ? (
+                groupName ?? "Untitled group"
+              ) : knownAgent ? (
+                knownAgent.name
+              ) : peerAddress ? (
+                <PeerName address={peerAddress} />
+              ) : (
+                shortAddress(activeConversation.id, 4, 4)
+              )}
+            </span>
+            {isAgent && <AgentBadge size="sm" />}
           </div>
           {isGroupConv ? (
             <div className="text-[11px] text-white/40 hover:text-white/60 transition-colors">

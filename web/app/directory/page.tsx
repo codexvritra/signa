@@ -4,18 +4,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, MessageCircle, Sparkles, Github } from "lucide-react";
 import { AppHeader } from "@/components/shell/AppHeader";
+import { Footer } from "@/components/shell/Footer";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { shortAddress } from "@/lib/format";
-import agentsData from "@/data/agents.json";
+import { listAgents } from "@/lib/agents";
 
-type AgentEntry = {
-  name: string;
-  address: string;
-  description: string;
-  tags?: string[];
-};
-
-const agents = agentsData as AgentEntry[];
+const agents = listAgents();
 
 export default function DirectoryPage() {
   return (
@@ -137,6 +131,7 @@ export default function DirectoryPage() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
