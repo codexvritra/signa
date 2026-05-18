@@ -12,6 +12,7 @@ import { Footer } from "@/components/shell/Footer";
 import { formatUsd, formatPct, type TokenSummary } from "@/lib/geckoterminal";
 import { shortAddress } from "@/lib/format";
 import { getToken as getKnownToken } from "@/lib/tokens";
+import { WatchButton } from "./WatchButton";
 
 export const dynamic = "force-dynamic";
 
@@ -118,15 +119,18 @@ export default async function TokenDetailPage({
                   {t.address}
                 </div>
               </div>
-              <a
-                href={`https://bankr.bot/agents/${t.address}`}
-                target="_blank"
-                rel="noreferrer"
-                className="bg-[var(--accent)] text-black font-semibold rounded-md px-5 py-2.5 text-[14px] uppercase tracking-wide inline-flex items-center gap-2 hover:brightness-110 transition flex-shrink-0"
-              >
-                Buy on Bankr
-                <span aria-hidden className="font-mono">→</span>
-              </a>
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <a
+                  href={`https://bankr.bot/agents/${t.address}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-[var(--accent)] text-black font-semibold rounded-md px-5 py-2.5 text-[14px] uppercase tracking-wide inline-flex items-center gap-2 hover:brightness-110 transition"
+                >
+                  Buy on Bankr
+                  <span aria-hidden className="font-mono">→</span>
+                </a>
+                <WatchButton address={t.address} symbol={t.symbol} />
+              </div>
             </div>
           </div>
         </section>

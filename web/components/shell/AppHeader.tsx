@@ -24,20 +24,20 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
           </div>
         </Link>
         <nav className="hidden sm:flex items-center gap-1 text-[13px]">
+          <NavLink href="/me" active={pathname?.startsWith("/me") ?? false}>
+            Me
+          </NavLink>
           <NavLink href="/" active={pathname === "/"}>
             Chat
-          </NavLink>
-          <NavLink href="/feed" active={pathname?.startsWith("/feed") ?? false}>
-            Feed
           </NavLink>
           <NavLink href="/tokens" active={pathname?.startsWith("/tokens") ?? false}>
             Tokens
           </NavLink>
-          <NavLink href="/directory" active={pathname?.startsWith("/directory") ?? false}>
-            Agents
+          <NavLink href="/feed" active={pathname?.startsWith("/feed") ?? false}>
+            Feed
           </NavLink>
           <NavLink href="/launchpad" active={pathname?.startsWith("/launchpad") ?? false}>
-            Launchpad
+            Agents
           </NavLink>
         </nav>
       </div>
