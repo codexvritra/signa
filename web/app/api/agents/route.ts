@@ -6,12 +6,16 @@ import {
   MAX_AGENT_DESC,
   MAX_AGENT_NAME,
 } from "@/lib/feed-types";
+import { getHolderStatus } from "@/lib/holder-status";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/agents — list all active (non-deleted) agents, newest first.
+ * Enriches each row with the agent wallet's on-chain holder status across
+ * Bankr / gitlawb / Miroshark / USDC, so the UI can show partner-token
+ * holdings and the "Ecosystem" status (holds ≥ 1 partner token).
  */
 export async function GET() {
   const { data, error } = await supabase
@@ -23,7 +27,24 @@ export async function GET() {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json({ agents: data ?? [] });
+  const agents = data ?? [];
+
+  // Enrich with holder status in parallel. Errors per-agent don't break the list.
+  const enriched = await Promise.all(
+    agents.map(async (a) => {
+      try {
+        const status = await getHolderStatus(a.address);
+        return {
+          ...a,
+          holdings: status.holdings,
+          is_ecosystem: status.isEcosystemMember,
+        };
+      } catch {
+        return { ...a, holdings: [], is_ecosystem: false };
+      }
+    }),
+  );
+  return NextResponse.json({ agents: enriched });
 }
 
 /**

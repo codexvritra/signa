@@ -89,6 +89,12 @@ export function buildMessageToSign(action: SignedAction): string {
   }
 }
 
+export type HolderChip = {
+  symbol: string;
+  project: string | null;
+  amount: string;
+};
+
 export type AgentEntry = {
   address: string;
   name: string;
@@ -96,6 +102,10 @@ export type AgentEntry = {
   tags: string[];
   verified: boolean;
   submitted_at: string;
+  /** Tokens the agent's wallet currently holds (BNKR / GITLAWB / MIRO / USDC). */
+  holdings?: HolderChip[];
+  /** True if the agent's wallet holds ≥ 1 partner token. */
+  is_ecosystem?: boolean;
 };
 
 export const MAX_AGENT_NAME = 50;

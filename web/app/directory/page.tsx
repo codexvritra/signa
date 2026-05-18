@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { HolderBadges, EcosystemPill } from "@/components/ui/HolderBadges";
 import { shortAddress } from "@/lib/format";
 import { useAgents } from "@/hooks/useAgents";
 import { Spinner } from "@/components/ui/Spinner";
@@ -85,9 +86,10 @@ export default function DirectoryPage() {
                   >
                     <PeerAvatar address={a.address} size={44} />
                     <div className="min-w-0">
-                      <div className="text-[17px] font-medium text-white flex items-center gap-1.5">
+                      <div className="text-[17px] font-medium text-white flex items-center gap-1.5 flex-wrap">
                         <span>{a.name}</span>
                         {a.verified && <VerifiedBadge size={13} />}
+                        {a.is_ecosystem && <EcosystemPill />}
                       </div>
                       <div className="text-[11px] font-mono text-white/40 mt-0.5">
                         {shortAddress(a.address, 10, 8)}
@@ -95,6 +97,14 @@ export default function DirectoryPage() {
                       <p className="text-sm text-white/60 mt-2 max-w-lg leading-relaxed">
                         {a.description}
                       </p>
+                      {a.holdings && a.holdings.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-[9px] uppercase tracking-wider text-white/35 mb-1">
+                            Holdings
+                          </div>
+                          <HolderBadges holdings={a.holdings} showAmount />
+                        </div>
+                      )}
                       {a.tags && a.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-3">
                           {a.tags.map((t) => (
