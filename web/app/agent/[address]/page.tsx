@@ -2,16 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
-  ArrowUpRight,
   MessageCircle,
-  Check,
-  X,
+  Twitter,
 } from "lucide-react";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { PeerAvatar } from "@/components/ui/Avatar";
+import { HolderBadges } from "@/components/ui/HolderBadges";
 import { shortAddress } from "@/lib/format";
 import { headers } from "next/headers";
+import { getHolderStatus } from "@/lib/holder-status";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +47,16 @@ async function getAgent(address: string): Promise<Agent | null> {
   }
 }
 
+/** Compose a viral share-tweet URL pre-filled for this agent. */
+function shareTweetUrl(agent: Agent): string {
+  const url = `https://www.signaagent.xyz/agent/${agent.address}`;
+  const text =
+    `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on @base.\n\n` +
+    `wallet + XMTP DM + one-click tokenize via @bankrbot.\n\n` +
+    url;
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+}
+
 export default async function AgentProfilePage({
   params,
 }: {
@@ -61,6 +71,16 @@ export default async function AgentProfilePage({
 
   const launched = !!agent.launched_at;
 
+  // Live on-chain read of the agent wallet's partner-token + USDC holdings.
+  // Cached 5 min in-process by getHolderStatus.
+  let holdings: { symbol: string; project: string | null; amount: string }[] = [];
+  try {
+    const status = await getHolderStatus(agent.address);
+    holdings = status.holdings;
+  } catch {
+    // best-effort; chip just doesn't render on RPC failure
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
@@ -72,23 +92,26 @@ export default async function AgentProfilePage({
               className="text-xs text-white/45 hover:text-white inline-flex items-center gap-1 mb-8"
             >
               <ArrowLeft className="size-3" />
-              Back to launchpad
+              ../launchpad
             </Link>
 
             <div className="flex items-start gap-4">
-              <PeerAvatar address={agent.avatar_seed || agent.address} size={64} />
+              <PeerAvatar
+                address={agent.avatar_seed || agent.address}
+                size={64}
+              />
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] uppercase tracking-wider text-white/40 mb-1 flex items-center gap-1.5">
+                <div className="font-mono text-[10px] text-[var(--accent)] mb-1 flex items-center gap-1.5">
                   {launched ? (
                     <>
                       <span className="size-1.5 rounded-full bg-[var(--accent)]" />
-                      Launched on SIGNA
+                      $ signa agent ls --address {agent.address.slice(0, 10)}…
                     </>
                   ) : (
-                    <>Agent</>
+                    <span>agent</span>
                   )}
                 </div>
-                <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.03em]">
+                <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.035em] leading-tight">
                   {agent.name}
                 </h1>
                 <div className="text-[11px] font-mono text-white/40 mt-1 break-all">
@@ -97,6 +120,14 @@ export default async function AgentProfilePage({
                 <p className="text-white/65 mt-4 text-[15px] leading-relaxed max-w-2xl">
                   {agent.description}
                 </p>
+                {holdings.length > 0 && (
+                  <div className="mt-4">
+                    <div className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5">
+                      Holds
+                    </div>
+                    <HolderBadges holdings={holdings} showAmount />
+                  </div>
+                )}
                 {agent.tags && agent.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-4">
                     {agent.tags.map((t) => (
@@ -110,115 +141,130 @@ export default async function AgentProfilePage({
                   </div>
                 )}
               </div>
-              <Link
-                href={`/?to=${agent.address}`}
-                className="bg-white text-black text-sm font-medium rounded-md px-3.5 py-1.5 inline-flex items-center gap-1.5 hover:bg-white/90 transition-colors flex-shrink-0"
-              >
-                <MessageCircle className="size-3.5" />
-                Message
-              </Link>
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <Link
+                  href={`/?to=${agent.address}`}
+                  className="bg-[var(--accent)] text-black text-sm font-semibold rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:brightness-110 transition uppercase tracking-wide"
+                >
+                  <MessageCircle className="size-3.5" />
+                  DM
+                </Link>
+                <a
+                  href={shareTweetUrl(agent)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border border-white/15 text-white text-sm rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-white/[0.04] transition"
+                >
+                  <Twitter className="size-3.5" />
+                  Share
+                </a>
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Stack as terminal block, not card grid */}
         <section className="border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
-            <div className="text-xs uppercase tracking-wider text-white/45 mb-4 font-medium">
-              The stack
+            <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
+              $ signa stack ls
             </div>
-            <div className="grid sm:grid-cols-2 gap-2">
-              <StackRow
-                title="Communication"
-                provider="SIGNA · XMTP V3"
-                live
-                value="DM-able by anyone, anywhere"
-                href={`/?to=${agent.address}`}
-                cta="Open DM"
-                dot="bg-[var(--accent)]"
-              />
-              <StackRow
-                title="Identity"
-                provider="ERC-8004"
-                live={!!agent.erc8004_token_id}
-                value={
-                  agent.erc8004_token_id
-                    ? `Token #${agent.erc8004_token_id}`
-                    : "Roadmap — finalized EIP, mainnet 2026-01-29"
-                }
-                href={
-                  agent.erc8004_token_id
-                    ? `https://basescan.org/address/${agent.address}`
-                    : "https://eips.ethereum.org/EIPS/eip-8004"
-                }
-                cta={agent.erc8004_token_id ? "View on-chain" : "Read EIP"}
-                dot="bg-amber-300"
-              />
-              <StackRow
-                title="Code"
-                provider="gitlawb"
-                live={!!agent.gitlawb_did}
-                value={
-                  agent.gitlawb_did
-                    ? agent.gitlawb_did.slice(0, 24) + "…"
-                    : "Backup pending — push prompt to gitlawb"
-                }
-                href={
-                  agent.gitlawb_did
-                    ? `https://gitlawb.com/agents/${encodeURIComponent(agent.gitlawb_did)}`
-                    : "https://gitlawb.com/start"
-                }
-                cta={agent.gitlawb_did ? "View on gitlawb" : "Set up gitlawb"}
-                dot="bg-emerald-400"
-              />
-              <StackRow
-                title="Money"
-                provider="Bankr"
-                live={!!agent.bankr_token_address}
-                value={
-                  agent.bankr_token_address
-                    ? `$${agent.name.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8)} · ${shortAddress(agent.bankr_token_address)}`
-                    : "Not tokenized yet"
-                }
-                href={
-                  agent.bankr_token_address
-                    ? `https://bankr.bot/agents/${agent.bankr_token_address}`
-                    : `https://bankr.bot/agents/${agent.address}`
-                }
-                cta={
-                  agent.bankr_token_address ? "Trade on Bankr" : "Tokenize"
-                }
-                dot="bg-violet-400"
-              />
-              <StackRow
-                title="Intelligence"
-                provider="MiroShark"
-                live={!!agent.miroshark_sim_id}
-                value={
-                  agent.miroshark_sim_id
-                    ? `Pre-launch sim ${agent.miroshark_sim_id}`
-                    : "No sim yet"
-                }
-                href={
-                  agent.miroshark_sim_id
-                    ? `https://github.com/aaronjmars/MiroShark`
-                    : "https://github.com/aaronjmars/MiroShark"
-                }
-                cta={agent.miroshark_sim_id ? "View sim" : "Run sim"}
-                dot="bg-cyan-400"
-              />
+            <div className="border border-white/10 bg-black/30 font-mono text-[12px] leading-[1.85]">
+              <div className="px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
+                <span className="text-white/40 text-[10px] uppercase tracking-wider">
+                  stack.toml
+                </span>
+                <span className="text-white/30 text-[10px]">
+                  {agent.address.slice(0, 6)}…{agent.address.slice(-4)}
+                </span>
+              </div>
+              <div className="px-3 py-2 space-y-0.5">
+                <StackLine
+                  slot="dm"
+                  status="live"
+                  value="XMTP V3 · MLS · e2e encrypted"
+                  href={`/?to=${agent.address}`}
+                  cta="open"
+                />
+                <StackLine
+                  slot="token"
+                  status={agent.bankr_token_address ? "live" : "pending"}
+                  value={
+                    agent.bankr_token_address
+                      ? `via @bankrbot · ${shortAddress(agent.bankr_token_address)}`
+                      : "tokenize via @bankrbot — one click"
+                  }
+                  href={
+                    agent.bankr_token_address
+                      ? `https://bankr.bot/agents/${agent.bankr_token_address}`
+                      : `https://bankr.bot/agents/${agent.address}`
+                  }
+                  cta={
+                    agent.bankr_token_address ? "trade ↗" : "tokenize ↗"
+                  }
+                />
+                <StackLine
+                  slot="code"
+                  status={agent.gitlawb_did ? "live" : "pending"}
+                  value={
+                    agent.gitlawb_did
+                      ? `${agent.gitlawb_did.slice(0, 28)}…`
+                      : "push prompt → @gitlawb (decentralized git)"
+                  }
+                  href={
+                    agent.gitlawb_did
+                      ? `https://gitlawb.com/agents/${encodeURIComponent(agent.gitlawb_did)}`
+                      : "https://gitlawb.com/start"
+                  }
+                  cta={agent.gitlawb_did ? "view ↗" : "set up ↗"}
+                />
+                <StackLine
+                  slot="id"
+                  status={agent.erc8004_token_id ? "live" : "pending"}
+                  value={
+                    agent.erc8004_token_id
+                      ? `ERC-8004 #${agent.erc8004_token_id}`
+                      : "ERC-8004 · trustless agent identity (roadmap)"
+                  }
+                  href={
+                    agent.erc8004_token_id
+                      ? `https://basescan.org/address/${agent.address}`
+                      : "https://eips.ethereum.org/EIPS/eip-8004"
+                  }
+                  cta={agent.erc8004_token_id ? "on-chain ↗" : "read EIP ↗"}
+                />
+                <StackLine
+                  slot="sim"
+                  status={agent.miroshark_sim_id ? "live" : "pending"}
+                  value={
+                    agent.miroshark_sim_id
+                      ? `MiroShark sim #${agent.miroshark_sim_id}`
+                      : "demand pre-test via @miroshark_ (optional)"
+                  }
+                  href={
+                    agent.miroshark_sim_id
+                      ? `https://github.com/aaronjmars/MiroShark`
+                      : "https://github.com/aaronjmars/MiroShark"
+                  }
+                  cta={agent.miroshark_sim_id ? "view ↗" : "run ↗"}
+                />
+              </div>
             </div>
 
             {agent.launched_by && (
-              <div className="mt-6 text-[12px] text-white/45">
-                Launched by{" "}
+              <div className="mt-6 font-mono text-[11px] text-white/40">
+                <span className="text-white/30">launched_by</span>{" "}
                 <Link
                   href={`/feed/${agent.launched_by}`}
-                  className="text-white/70 hover:text-white underline underline-offset-2 font-mono"
+                  className="text-white/70 hover:text-white underline underline-offset-4"
                 >
                   {shortAddress(agent.launched_by)}
                 </Link>
                 {agent.launched_at && (
-                  <> · {new Date(agent.launched_at).toLocaleDateString()}</>
+                  <span className="text-white/30">
+                    {" "}
+                    @ {new Date(agent.launched_at).toISOString().slice(0, 10)}
+                  </span>
                 )}
               </div>
             )}
@@ -228,15 +274,14 @@ export default async function AgentProfilePage({
         {agent.system_prompt && (
           <section className="border-b border-white/[0.06]">
             <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
-              <div className="text-xs uppercase tracking-wider text-white/45 mb-3 font-medium">
-                System prompt
+              <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
+                $ cat system_prompt.txt
               </div>
-              <pre className="card rounded-md p-4 text-[12px] text-white/75 font-mono whitespace-pre-wrap leading-relaxed">
+              <pre className="border border-white/10 bg-black/30 p-4 text-[12px] text-white/80 font-mono whitespace-pre-wrap leading-relaxed">
                 {agent.system_prompt}
               </pre>
-              <p className="text-[11px] text-white/35 mt-2">
-                The launch transaction commits to <code>sha256</code> of this
-                prompt. Any change in plaintext invalidates the on-record hash.
+              <p className="text-[11px] text-white/35 mt-2 font-mono">
+                # the launch tx commits to sha256(prompt). edits invalidate the hash.
               </p>
             </div>
           </section>
@@ -247,53 +292,43 @@ export default async function AgentProfilePage({
   );
 }
 
-function StackRow({
-  title,
-  provider,
+function StackLine({
+  slot,
+  status,
   value,
   href,
   cta,
-  live,
-  dot,
 }: {
-  title: string;
-  provider: string;
+  slot: string;
+  status: "live" | "pending";
   value: string;
   href: string;
   cta: string;
-  live: boolean;
-  dot: string;
 }) {
+  const live = status === "live";
   return (
-    <a
-      href={href}
-      target={href.startsWith("http") ? "_blank" : undefined}
-      rel="noreferrer"
-      className="card rounded-md p-3.5 hover:bg-white/[0.03] transition-colors group flex flex-col gap-2"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className={`inline-block size-1.5 rounded-full ${dot}`} />
-          <span className="text-[10px] uppercase tracking-wider text-white/45 font-medium">
-            {title}
-          </span>
-        </div>
-        {live ? (
-          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-300/85">
-            <Check className="size-3" /> live
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 text-[10px] text-white/30">
-            <X className="size-3" /> pending
-          </span>
-        )}
-      </div>
-      <div className="text-[14px] font-medium text-white">{provider}</div>
-      <div className="text-[12px] text-white/55 leading-relaxed">{value}</div>
-      <div className="text-[11px] text-[var(--accent)] inline-flex items-center gap-1 mt-1">
+    <div className="grid grid-cols-[58px_1fr_auto] gap-3 items-baseline group">
+      <span className="text-[var(--accent)]">{slot.padEnd(6, " ")}</span>
+      <span className="text-white/80 truncate">
+        <span
+          className={
+            live
+              ? "text-emerald-300/90 mr-2"
+              : "text-white/30 mr-2"
+          }
+        >
+          {live ? "[live]" : "[pending]"}
+        </span>
+        {value}
+      </span>
+      <a
+        href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel="noreferrer"
+        className="text-[var(--accent)] hover:brightness-125 underline underline-offset-4 opacity-70 group-hover:opacity-100 transition"
+      >
         {cta}
-        <ArrowUpRight className="size-3" />
-      </div>
-    </a>
+      </a>
+    </div>
   );
 }
