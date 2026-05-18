@@ -136,11 +136,15 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      // (b) REST fallback
+      // (b) REST fallback via web3.bio (handles ENS + Basenames cleanly,
+      // free, no API key, no rate-limit weirdness).
       if (!address) {
+        const platform = handle.endsWith(".base.eth")
+          ? "basenames"
+          : "ens";
+        const url = `https://api.web3.bio/profile/${platform}/${encodeURIComponent(normalized)}`;
+        console.log(`[resolve] REST fallback → ${url}`);
         try {
-          const url = `https://api.ensdata.net/${encodeURIComponent(normalized)}`;
-          console.log(`[resolve] REST fallback → ${url}`);
           const res = await fetch(url, {
             cache: "no-store",
             headers: { accept: "application/json" },
@@ -148,7 +152,7 @@ export async function GET(req: NextRequest) {
           if (res.ok) {
             const j: { address?: string } = await res.json();
             console.log(
-              `[resolve] REST ensdata response for ${normalized}: ${
+              `[resolve] web3.bio response for ${normalized}: ${
                 j.address ?? "no_address_field"
               }`,
             );
@@ -156,11 +160,13 @@ export async function GET(req: NextRequest) {
               address = j.address.toLowerCase();
             }
           } else {
-            console.log(`[resolve] REST ensdata HTTP ${res.status} for ${normalized}`);
+            console.log(
+              `[resolve] web3.bio HTTP ${res.status} for ${normalized}`,
+            );
           }
         } catch (e) {
           console.error(
-            `[resolve] REST fallback THREW for ${normalized}:`,
+            `[resolve] web3.bio THREW for ${normalized}:`,
             e instanceof Error ? e.message : e,
           );
         }
