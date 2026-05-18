@@ -17,11 +17,13 @@ export function MessageBubble({
   message,
   isMine,
   showTime,
+  senderLabel,
   onReply,
 }: {
   message: DecodedMessage;
   isMine: boolean;
   showTime: boolean;
+  senderLabel?: string;
   onReply: (msg: DecodedMessage) => void;
 }) {
   const { sendReaction, ownInboxId } = useChat();
@@ -73,6 +75,11 @@ export function MessageBubble({
           isMine && "items-end",
         )}
       >
+        {senderLabel && !isMine && (
+          <span className="text-[10px] font-mono text-white/40 pl-2">
+            {senderLabel}
+          </span>
+        )}
         <div className="relative">
           <div
             className={cn(

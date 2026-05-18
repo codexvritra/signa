@@ -205,6 +205,17 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
           const showSeparator =
             myDate && (!prevDate || !sameDay(prevDate, myDate));
 
+          // In groups, show sender label above the first message of a run
+          // from a non-self sender so you know who said what.
+          const isFirstInRun =
+            !prev ||
+            prev.senderInboxId !== m.senderInboxId ||
+            (prevDate && myDate && !sameDay(prevDate, myDate));
+          let senderLabel: string | undefined;
+          if (isGroupConv && !isMine && isFirstInRun) {
+            senderLabel = `${m.senderInboxId.slice(0, 6)}…${m.senderInboxId.slice(-4)}`;
+          }
+
           return (
             <Fragment key={m.id}>
               {showSeparator && myDate && <DateSeparator date={myDate} />}
@@ -212,6 +223,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
                 message={m}
                 isMine={isMine}
                 showTime={isLastInRun}
+                senderLabel={senderLabel}
                 onReply={startReply}
               />
             </Fragment>
