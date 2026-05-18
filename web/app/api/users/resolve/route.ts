@@ -117,14 +117,16 @@ export async function GET(req: NextRequest) {
     // baseClient does NOT work for Basenames — the L1 universal resolver
     // is the source of truth.)
     if (!address) {
+      console.log(`[resolve] cache miss — live lookup ${normalized} via ${MAINNET_RPC}`);
       try {
         const resolved = await mainnetClient.getEnsAddress({
           name: normalized,
         });
+        console.log(`[resolve] live result for ${normalized}: ${resolved ?? "null"}`);
         if (resolved) address = resolved.toLowerCase();
       } catch (e) {
         console.error(
-          `[resolve] ENS lookup failed for ${normalized}:`,
+          `[resolve] ENS lookup THREW for ${normalized}:`,
           e instanceof Error ? e.message : e,
         );
       }
