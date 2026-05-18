@@ -154,15 +154,13 @@ export default async function AgentProfilePage({
                   DM
                 </Link>
                 {agent.bankr_token_address ? (
-                  <a
-                    href={`https://bankr.bot/agents/${agent.bankr_token_address}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    href={`/tokens/${agent.bankr_token_address}`}
                     className="border border-violet-400/40 text-violet-200 text-sm font-semibold rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-violet-400/[0.06] transition uppercase tracking-wide"
-                    title="Trade this agent's token on Bankr"
+                    title="Open this agent's token page on SIGNA"
                   >
                     Trade
-                  </a>
+                  </Link>
                 ) : (
                   <a
                     href={`https://bankr.bot/agents/${agent.address}`}

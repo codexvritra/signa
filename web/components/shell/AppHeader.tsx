@@ -30,11 +30,14 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
           <NavLink href="/feed" active={pathname?.startsWith("/feed") ?? false}>
             Feed
           </NavLink>
+          <NavLink href="/tokens" active={pathname?.startsWith("/tokens") ?? false}>
+            Tokens
+          </NavLink>
           <NavLink href="/directory" active={pathname?.startsWith("/directory") ?? false}>
             Agents
           </NavLink>
-          <NavLink href="/ecosystem" active={pathname?.startsWith("/ecosystem") ?? false}>
-            Ecosystem
+          <NavLink href="/launchpad" active={pathname?.startsWith("/launchpad") ?? false}>
+            Launchpad
           </NavLink>
         </nav>
       </div>
