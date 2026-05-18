@@ -23,7 +23,7 @@ export async function GET(
   const { data, error } = await supabase
     .from("agents")
     .select(
-      "address, name, description, tags, verified, submitted_at, system_prompt, avatar_seed, launched_at, launched_by, gitlawb_did, erc8004_token_id, bankr_token_address, miroshark_sim_id",
+      "address, name, description, tags, verified, submitted_at, system_prompt, avatar_seed, launched_at, launched_by, gitlawb_did, erc8004_token_id, bankr_token_address, miroshark_sim_id, runtime_enabled, runtime_enabled_at, runtime_last_seen_at, encrypted_key",
     )
     .eq("address", address)
     .is("deleted_at", null)
@@ -34,7 +34,16 @@ export async function GET(
   if (!data) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  return NextResponse.json({ agent: data });
+  // Never expose the encrypted ciphertext to public callers — flatten
+  // to a boolean. The Railway runtime fetches the blob via a different
+  // internal endpoint (authenticated by RUNTIME_FETCH_SECRET).
+  const { encrypted_key, ...publicFields } = data as {
+    encrypted_key: string | null;
+    [k: string]: unknown;
+  };
+  return NextResponse.json({
+    agent: { ...publicFields, encrypted_key: encrypted_key ? "<redacted>" : null },
+  });
 }
 
 /**

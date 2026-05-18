@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "tsx src/index.ts",
+    "start:multi-runtime": "tsx src/multi-runtime.ts",
     "generate-wallet": "tsx src/generate-wallet.ts",
     "typecheck": "tsc --noEmit"
   },

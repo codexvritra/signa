@@ -30,6 +30,10 @@ type Agent = {
   erc8004_token_id: string | null;
   bankr_token_address: string | null;
   miroshark_sim_id: string | null;
+  runtime_enabled?: boolean;
+  runtime_enabled_at?: string | null;
+  runtime_last_seen_at?: string | null;
+  encrypted_key?: string | null;
 };
 
 async function getAgent(address: string): Promise<Agent | null> {
@@ -268,6 +272,26 @@ export default async function AgentProfilePage({
                 )}
               </div>
             )}
+
+            {/* Runtime status row */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {agent.runtime_enabled ? (
+                <Link
+                  href={`/agent/${agent.address}/runtime`}
+                  className="inline-flex items-center gap-1.5 border border-emerald-300/30 bg-emerald-300/[0.04] px-2 py-1 text-[11px] text-emerald-200 hover:bg-emerald-300/[0.08] transition rounded-sm"
+                >
+                  <span className="size-1 rounded-full bg-emerald-300 animate-pulse" />
+                  runtime live{agent.runtime_last_seen_at ? ` · last DM ${new Date(agent.runtime_last_seen_at).toISOString().slice(11, 16)} UTC` : ""}
+                </Link>
+              ) : (
+                <Link
+                  href={`/agent/${agent.address}/runtime`}
+                  className="inline-flex items-center gap-1.5 border border-white/15 px-2 py-1 text-[11px] text-white/55 hover:text-white hover:bg-white/[0.04] transition rounded-sm font-mono"
+                >
+                  $ signa runtime enable →
+                </Link>
+              )}
+            </div>
           </div>
         </section>
 

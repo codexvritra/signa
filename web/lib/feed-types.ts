@@ -81,6 +81,17 @@ export type SignedAction =
       avatar_seed: string;
       launched_by: string;
       ts: number;
+    }
+  | {
+      /**
+       * Signed by the agent wallet to authorize SIGNA to take custody
+       * of the private key and run the agent on its behalf. The body
+       * embeds the address so the signature can't be replayed against
+       * another agent.
+       */
+      kind: "agent_runtime_enable";
+      address: string;
+      ts: number;
     };
 
 /**
@@ -117,6 +128,15 @@ export function buildMessageToSign(action: SignedAction): string {
         `avatar_seed:${action.avatar_seed}`,
         `system_prompt_sha256:${action.system_prompt_hash}`,
         `desc:${action.description}`,
+      ].join("\n");
+    case "agent_runtime_enable":
+      return [
+        `SIGNA agent runtime enable v1`,
+        `ts:${action.ts}`,
+        `address:${action.address}`,
+        `I authorize SIGNA to take custody of this agent's private key`,
+        `and run an XMTP + LLM runtime on its behalf. I can disable`,
+        `this at any time.`,
       ].join("\n");
   }
 }
