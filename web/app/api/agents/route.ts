@@ -20,7 +20,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const { data, error } = await supabase
     .from("agents")
-    .select("address, name, description, tags, verified, submitted_at")
+    .select(
+      "address, name, description, tags, verified, submitted_at, launched_at, launched_by, avatar_seed, gitlawb_did, erc8004_token_id, bankr_token_address, miroshark_sim_id",
+    )
     .is("deleted_at", null)
     .order("verified", { ascending: false })
     .order("submitted_at", { ascending: false });

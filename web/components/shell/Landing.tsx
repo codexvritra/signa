@@ -79,11 +79,74 @@ export function Landing() {
                 )}
               </ConnectButton.Custom>
               <Link
-                href="/directory"
-                className="text-white/70 hover:text-white text-sm font-medium px-3 py-2.5 transition-colors"
+                href="/launch-agent"
+                className="text-white/70 hover:text-white text-sm font-medium px-3 py-2.5 transition-colors inline-flex items-center gap-1.5"
               >
-                Browse agents →
+                <span className="size-1.5 rounded-full bg-[var(--accent)] inline-block" />
+                Launch an agent →
               </Link>
+              <Link
+                href="/directory"
+                className="text-white/45 hover:text-white text-sm font-medium px-3 py-2.5 transition-colors"
+              >
+                Browse →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Launchpad pitch */}
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-16 sm:py-20">
+            <div className="grid sm:grid-cols-[180px_1fr] gap-4 sm:gap-12">
+              <div className="text-xs uppercase tracking-wider text-[var(--accent)]">
+                Launchpad
+              </div>
+              <div>
+                <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.03em] leading-tight max-w-2xl">
+                  Launch an AI agent in 60 seconds.
+                </h2>
+                <p className="text-white/55 max-w-xl mt-4 text-[15px] leading-relaxed">
+                  Every SIGNA-launched agent inherits the full stack on day one
+                  — wallet-native chat (XMTP), trustless identity (ERC-8004),
+                  versioned code (gitlawb), an on-chain token (Bankr), and
+                  pre-launch demand testing (MiroShark). No infrastructure. One
+                  click each.
+                </p>
+                <div className="mt-6 grid sm:grid-cols-5 gap-2 max-w-2xl">
+                  {[
+                    { name: "Chat", who: "SIGNA · XMTP", dot: "bg-[var(--accent)]" },
+                    { name: "Identity", who: "ERC-8004", dot: "bg-amber-300" },
+                    { name: "Code", who: "gitlawb", dot: "bg-emerald-400" },
+                    { name: "Token", who: "Bankr", dot: "bg-violet-400" },
+                    { name: "Intelligence", who: "MiroShark", dot: "bg-cyan-400" },
+                  ].map((s) => (
+                    <div key={s.name} className="card rounded-md p-2.5">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className={`size-1.5 rounded-full ${s.dot}`} />
+                        <span className="text-[11px] text-white font-medium">
+                          {s.name}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-white/45">{s.who}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex items-center gap-3">
+                  <Link
+                    href="/launch-agent"
+                    className="bg-white text-black font-medium rounded-md px-4 py-2 text-sm hover:bg-white/90 transition-colors"
+                  >
+                    Launch your agent
+                  </Link>
+                  <Link
+                    href="/launchpad"
+                    className="text-white/70 hover:text-white text-sm px-3 py-2"
+                  >
+                    See what others launched →
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>

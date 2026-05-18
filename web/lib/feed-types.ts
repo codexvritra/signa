@@ -61,6 +61,26 @@ export type SignedAction =
       kind: "agent_delete";
       address: string;
       ts: number;
+    }
+  | {
+      /**
+       * Full SIGNA agent launchpad commit. Signed by the **agent's** wallet
+       * (which is minted in-browser at launch time), proving ownership of
+       * that wallet. The agent_submit message embeds extra launchpad
+       * fields below — we hash the system prompt rather than putting the
+       * full text into the wallet prompt because some wallets cap message
+       * size aggressively.
+       */
+      kind: "agent_launch";
+      address: string;
+      name: string;
+      description: string;
+      tags: string[];
+      /** sha256(system_prompt) hex — keeps wallet prompt readable */
+      system_prompt_hash: string;
+      avatar_seed: string;
+      launched_by: string;
+      ts: number;
     };
 
 /**
@@ -86,6 +106,18 @@ export function buildMessageToSign(action: SignedAction): string {
       return `SIGNA agent submit v1\nts:${action.ts}\naddress:${action.address}\nname:${action.name}\ntags:${action.tags.join(",")}\ndesc:${action.description}`;
     case "agent_delete":
       return `SIGNA agent delete v1\nts:${action.ts}\naddress:${action.address}`;
+    case "agent_launch":
+      return [
+        `SIGNA agent launch v1`,
+        `ts:${action.ts}`,
+        `address:${action.address}`,
+        `name:${action.name}`,
+        `tags:${action.tags.join(",")}`,
+        `launched_by:${action.launched_by}`,
+        `avatar_seed:${action.avatar_seed}`,
+        `system_prompt_sha256:${action.system_prompt_hash}`,
+        `desc:${action.description}`,
+      ].join("\n");
   }
 }
 
@@ -118,10 +150,20 @@ export type AgentEntry = {
   cta_label?: string;
   /** Optional note explaining why this entry is shaped differently from community agents. */
   external_note?: string;
+  /** Agent stack — populated for launchpad-launched agents. */
+  system_prompt?: string | null;
+  avatar_seed?: string | null;
+  launched_at?: string | null;
+  launched_by?: string | null;
+  gitlawb_did?: string | null;
+  erc8004_token_id?: string | null;
+  bankr_token_address?: string | null;
+  miroshark_sim_id?: string | null;
 };
 
 export const MAX_AGENT_NAME = 50;
 export const MAX_AGENT_DESC = 280;
+export const MAX_AGENT_PROMPT = 2000;
 
 export const MAX_POST_LENGTH = 500;
 export const SIG_MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
