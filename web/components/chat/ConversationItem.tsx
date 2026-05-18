@@ -1,11 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Dm, DecodedMessage } from "@xmtp/browser-sdk";
+import { Users } from "lucide-react";
+import type { Conversation, DecodedMessage } from "@xmtp/browser-sdk";
 import { cn } from "@/lib/cn";
 import { formatRelative, nsToDate, shortAddress } from "@/lib/format";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
+import { isGroup, getGroupName } from "@/lib/conversation";
 import type { PeerInfo } from "@/context/ChatProvider";
 
 export function ConversationItem({
@@ -16,7 +18,7 @@ export function ConversationItem({
   lastMessage,
   onSelect,
 }: {
-  conversation: Dm;
+  conversation: Conversation;
   peerInfo: PeerInfo | undefined;
   active: boolean;
   unread: number;
@@ -24,6 +26,9 @@ export function ConversationItem({
   onSelect: () => void;
 }) {
   const peerAddress = peerInfo?.address ?? null;
+  const isGroupConv = isGroup(conversation);
+  const groupName = isGroupConv ? getGroupName(conversation) : undefined;
+
   const lastText =
     lastMessage && typeof lastMessage.content === "string"
       ? lastMessage.content
@@ -53,11 +58,19 @@ export function ConversationItem({
           : "border border-transparent hover:bg-white/[0.03]",
       )}
     >
-      <PeerAvatar address={peerAddress} size={36} />
+      {isGroupConv ? (
+        <div className="size-9 rounded-full brand-gradient flex items-center justify-center flex-shrink-0">
+          <Users className="size-4 text-white" />
+        </div>
+      ) : (
+        <PeerAvatar address={peerAddress} size={36} />
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-medium text-white truncate">
-            {peerAddress ? (
+            {isGroupConv ? (
+              groupName ?? "Untitled group"
+            ) : peerAddress ? (
               <PeerName address={peerAddress} />
             ) : (
               shortAddress(conversation.id, 4, 4)

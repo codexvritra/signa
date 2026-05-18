@@ -14,11 +14,17 @@ import { useAccount, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import {
   Client,
+  ReactionAction,
+  ReactionSchema,
+  encodeText,
+  type Conversation,
   type DecodedMessage,
   type Dm,
+  type Group,
 } from "@xmtp/browser-sdk";
 import { buildXmtpSigner, ethIdentifier, XMTP_ENV } from "@/lib/xmtp";
 import { getPeerAddressFromDm } from "@/lib/peer";
+import { isDm } from "@/lib/conversation";
 import { ding, notify, requestNotificationPermission } from "@/lib/notifications";
 
 type XmtpClient = Awaited<ReturnType<typeof Client.create>>;
@@ -39,21 +45,21 @@ type ChatContextValue = {
   initError: string | null;
   initXmtp: () => Promise<void>;
 
-  // conversations
-  conversations: Dm[];
+  // conversations (DMs + groups)
+  conversations: Conversation[];
   conversationsLoading: boolean;
   refreshConversations: () => Promise<void>;
 
   // active
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
-  activeConversation: Dm | null;
+  activeConversation: Conversation | null;
 
   // messages
   messagesByConvId: Map<string, DecodedMessage[]>;
   loadMessagesFor: (convId: string) => Promise<void>;
 
-  // peers
+  // peers (per DM)
   peerInfoByConvId: Map<string, PeerInfo>;
 
   // unread + typing
@@ -62,7 +68,17 @@ type ChatContextValue = {
 
   // actions
   openOrCreateDmWith: (address: string) => Promise<Dm | null>;
-  sendMessage: (text: string) => Promise<void>;
+  createGroupWith: (
+    addresses: string[],
+    options?: { name?: string; description?: string },
+  ) => Promise<Group | null>;
+  sendMessage: (text: string, replyToId?: string) => Promise<void>;
+  sendReaction: (messageId: string, emoji: string, action?: "add" | "remove") => Promise<void>;
+  markRead: () => Promise<void>;
+
+  // search
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
 };
 
 const ChatContext = createContext<ChatContextValue | null>(null);
@@ -81,7 +97,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [initStatus, setInitStatus] = useState<InitStatus>("idle");
   const [initError, setInitError] = useState<string | null>(null);
 
-  const [conversations, setConversations] = useState<Dm[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [conversationsLoading, setConversationsLoading] = useState(false);
 
   const [activeConversationId, _setActiveConversationId] = useState<string | null>(null);
@@ -93,6 +109,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [expectingReplyByConvId, setExpectingReplyByConvId] = useState<Map<string, boolean>>(
     new Map(),
   );
+  const [searchQuery, setSearchQuery] = useState("");
 
   const activeIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -122,14 +139,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }, [address, walletClient]);
 
-  // ---------------- conversation list ----------------
+  // ---------------- conversation list (DMs + groups) ----------------
   const refreshConversations = useCallback(async () => {
     if (!client) return;
     setConversationsLoading(true);
     try {
       await client.conversations.sync();
-      const dms = await client.conversations.listDms();
-      setConversations(dms);
+      const all = await client.conversations.list();
+      setConversations(all);
     } catch (e) {
       console.error("Failed to load conversations", e);
     } finally {
@@ -142,22 +159,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     void refreshConversations();
   }, [client, refreshConversations]);
 
-  // ---------------- peer info resolution ----------------
+  // ---------------- peer info resolution (DMs only) ----------------
   useEffect(() => {
     if (!client || conversations.length === 0) return;
     const ownId = client.inboxId;
     if (!ownId) return;
     let cancelled = false;
     (async () => {
-      for (const dm of conversations) {
+      for (const conv of conversations) {
         if (cancelled) return;
-        if (peerInfoByConvId.has(dm.id)) continue;
-        const peerAddress = await getPeerAddressFromDm(dm, ownId);
+        if (peerInfoByConvId.has(conv.id)) continue;
+        if (!isDm(conv)) continue;
+        const peerAddress = await getPeerAddressFromDm(conv, ownId);
         if (cancelled) return;
         setPeerInfoByConvId((prev) => {
-          if (prev.has(dm.id)) return prev;
+          if (prev.has(conv.id)) return prev;
           const next = new Map(prev);
-          next.set(dm.id, { address: peerAddress });
+          next.set(conv.id, { address: peerAddress });
           return next;
         });
       }
@@ -180,7 +198,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             if (cancelled || !msg) return;
             const convId = msg.conversationId;
 
-            // append to map
             setMessagesByConvId((prev) => {
               const next = new Map(prev);
               const existing = next.get(convId) ?? [];
@@ -191,7 +208,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
             const isFromMe = msg.senderInboxId === client.inboxId;
             if (!isFromMe) {
-              // mark typing-indicator off for this conv
               setExpectingReplyByConvId((prev) => {
                 if (!prev.get(convId)) return prev;
                 const next = new Map(prev);
@@ -210,9 +226,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                   next.set(convId, (prev.get(convId) ?? 0) + 1);
                   return next;
                 });
-                // browser notif + sound
                 const peer = peerInfoByConvId.get(convId);
-                const title = peer?.address ? `${peer.address.slice(0, 6)}…${peer.address.slice(-4)}` : "New message";
+                const title = peer?.address
+                  ? `${peer.address.slice(0, 6)}…${peer.address.slice(-4)}`
+                  : "New message";
                 const body =
                   typeof msg.content === "string"
                     ? msg.content.slice(0, 140)
@@ -220,12 +237,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 notify(title, body);
                 ding();
               }
-
-              // ensure new convo from peer shows up in sidebar
-              setConversations((prev) => {
-                if (prev.some((c) => c.id === convId)) return prev;
-                return prev;
-              });
               void refreshConversations();
             }
           },
@@ -247,19 +258,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     };
   }, [client, peerInfoByConvId, refreshConversations]);
 
-  // ---------------- conversation stream (new DMs) ----------------
+  // ---------------- conversation stream (new DMs + groups) ----------------
   useEffect(() => {
     if (!client) return;
     let cancelled = false;
     let stopStream: (() => void) | null = null;
     (async () => {
       try {
-        const stream = await client.conversations.streamDms({
+        const stream = await client.conversations.stream({
           onValue: (conv) => {
             if (cancelled || !conv) return;
             setConversations((prev) => {
               if (prev.some((c) => c.id === conv.id)) return prev;
-              return [conv as Dm, ...prev];
+              return [conv, ...prev];
             });
           },
           onError: (err) => {
@@ -282,11 +293,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // ---------------- load messages for a conv ----------------
   const loadMessagesFor = useCallback(
     async (convId: string) => {
-      const dm = conversations.find((c) => c.id === convId);
-      if (!dm) return;
+      const conv = conversations.find((c) => c.id === convId);
+      if (!conv) return;
       try {
-        await dm.sync();
-        const msgs = await dm.messages();
+        await conv.sync();
+        const msgs = await conv.messages();
         setMessagesByConvId((prev) => {
           const next = new Map(prev);
           next.set(convId, msgs);
@@ -310,14 +321,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           next.set(id, 0);
           return next;
         });
-        // load fresh messages for the active conv
         void loadMessagesFor(id);
+        // fire read receipt (best-effort)
+        const conv = conversations.find((c) => c.id === id);
+        if (conv) {
+          conv.sendReadReceipt().catch(() => {});
+        }
       }
     },
-    [loadMessagesFor],
+    [loadMessagesFor, conversations],
   );
 
-  // when tab regains focus while a conv is active, clear unread
   useEffect(() => {
     function onFocus() {
       const id = activeIdRef.current;
@@ -364,12 +378,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
         const dm = await client.conversations.createDmWithIdentifier(peerId);
         await dm.sync();
-        // ensure it shows in our list
         setConversations((prev) => {
           if (prev.some((c) => c.id === dm.id)) return prev;
           return [dm, ...prev];
         });
-        // pre-cache peer info
         setPeerInfoByConvId((prev) => {
           if (prev.has(dm.id)) return prev;
           const next = new Map(prev);
@@ -386,24 +398,82 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     [client, address],
   );
 
-  // ---------------- send message ----------------
+  // ---------------- create group ----------------
+  const createGroupWith = useCallback(
+    async (
+      addresses: string[],
+      options?: { name?: string; description?: string },
+    ): Promise<Group | null> => {
+      if (!client) return null;
+      const cleaned: string[] = [];
+      for (const raw of addresses) {
+        const t = raw.trim();
+        if (!t) continue;
+        if (!/^0x[a-fA-F0-9]{40}$/.test(t)) {
+          toast.error("Invalid address", { description: t });
+          return null;
+        }
+        if (t.toLowerCase() === address?.toLowerCase()) continue;
+        cleaned.push(t.toLowerCase());
+      }
+      if (cleaned.length === 0) {
+        toast.error("Need at least one other member");
+        return null;
+      }
+      try {
+        const ids = cleaned.map(ethIdentifier);
+        const reach = await Client.canMessage(ids, XMTP_ENV);
+        const unreachable = cleaned.filter((a) => !reach.get(a));
+        if (unreachable.length > 0) {
+          toast.error("Some addresses haven't enabled XMTP", {
+            description: unreachable.join(", "),
+          });
+          return null;
+        }
+        const group = await client.conversations.createGroupWithIdentifiers(ids, {
+          groupName: options?.name,
+          groupDescription: options?.description,
+        });
+        await group.sync();
+        setConversations((prev) => {
+          if (prev.some((c) => c.id === group.id)) return prev;
+          return [group, ...prev];
+        });
+        toast.success("Group created");
+        return group;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        toast.error("Couldn't create group", { description: msg });
+        return null;
+      }
+    },
+    [client, address],
+  );
+
+  // ---------------- send message (with optional reply ref) ----------------
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, replyToId?: string) => {
       const trimmed = text.trim();
       if (!trimmed) return;
       const id = activeConversationId;
       if (!id) return;
-      const dm = conversations.find((c) => c.id === id);
-      if (!dm) return;
+      const conv = conversations.find((c) => c.id === id);
+      if (!conv) return;
       try {
-        await dm.sendText(trimmed);
-        // mark expecting reply
+        if (replyToId) {
+          const encoded = await encodeText(trimmed);
+          await conv.sendReply({
+            reference: replyToId,
+            content: encoded,
+          });
+        } else {
+          await conv.sendText(trimmed);
+        }
         setExpectingReplyByConvId((prev) => {
           const next = new Map(prev);
           next.set(id, true);
           return next;
         });
-        // auto-clear after 60s
         setTimeout(() => {
           setExpectingReplyByConvId((prev) => {
             if (!prev.get(id)) return prev;
@@ -412,7 +482,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             return next;
           });
         }, 60_000);
-        // refresh messages
         await loadMessagesFor(id);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
@@ -421,6 +490,46 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     },
     [activeConversationId, conversations, loadMessagesFor],
   );
+
+  // ---------------- reactions ----------------
+  const sendReaction = useCallback(
+    async (messageId: string, emoji: string, action: "add" | "remove" = "add") => {
+      const id = activeConversationId;
+      if (!id) return;
+      const conv = conversations.find((c) => c.id === id);
+      if (!conv) return;
+      const msgs = messagesByConvId.get(id) ?? [];
+      const target = msgs.find((m) => m.id === messageId);
+      if (!target) return;
+      try {
+        await conv.sendReaction({
+          reference: messageId,
+          referenceInboxId: target.senderInboxId,
+          action: action === "add" ? ReactionAction.Added : ReactionAction.Removed,
+          content: emoji,
+          schema: ReactionSchema.Unicode,
+        });
+        await loadMessagesFor(id);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        toast.error("Couldn't react", { description: msg });
+      }
+    },
+    [activeConversationId, conversations, messagesByConvId, loadMessagesFor],
+  );
+
+  // ---------------- explicit mark-read (used by ConversationView) ----------------
+  const markRead = useCallback(async () => {
+    const id = activeConversationId;
+    if (!id) return;
+    const conv = conversations.find((c) => c.id === id);
+    if (!conv) return;
+    try {
+      await conv.sendReadReceipt();
+    } catch {
+      // ignore
+    }
+  }, [activeConversationId, conversations]);
 
   const activeConversation = useMemo(
     () =>
@@ -449,7 +558,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     unreadByConvId,
     expectingReplyByConvId,
     openOrCreateDmWith,
+    createGroupWith,
     sendMessage,
+    sendReaction,
+    markRead,
+    searchQuery,
+    setSearchQuery,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

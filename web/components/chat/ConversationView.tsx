@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Copy, Check, Users } from "lucide-react";
+import type { DecodedMessage } from "@xmtp/browser-sdk";
 import { toast } from "sonner";
 import { useChat } from "@/context/ChatProvider";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
 import { MessageBubble } from "./MessageBubble";
-import { MessageInput } from "./MessageInput";
+import { MessageInput, type ReplyTarget } from "./MessageInput";
 import { TypingDots } from "./TypingDots";
 import { cn } from "@/lib/cn";
 import { shortAddress } from "@/lib/format";
+import { isGroup, getGroupName } from "@/lib/conversation";
 
 export function ConversationView({ onBack }: { onBack: () => void }) {
   const {
@@ -27,6 +28,8 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
+  const [memberCount, setMemberCount] = useState<number | null>(null);
 
   const messages = activeConversationId
     ? messagesByConvId.get(activeConversationId) ?? []
@@ -38,11 +41,41 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
   const expecting =
     !!activeConversationId && !!expectingReplyByConvId.get(activeConversationId);
 
+  const isGroupConv = activeConversation ? isGroup(activeConversation) : false;
+  const groupName = activeConversation && isGroupConv
+    ? getGroupName(activeConversation)
+    : undefined;
+
+  // load group member count
+  useEffect(() => {
+    if (!activeConversation || !isGroupConv) {
+      setMemberCount(null);
+      return;
+    }
+    let cancelled = false;
+    activeConversation
+      .members()
+      .then((m) => {
+        if (!cancelled) setMemberCount(m.length);
+      })
+      .catch(() => {
+        if (!cancelled) setMemberCount(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeConversation, isGroupConv]);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages.length, expecting]);
+
+  // clear reply target when switching conversations
+  useEffect(() => {
+    setReplyTarget(null);
+  }, [activeConversationId]);
 
   async function copyAddress() {
     if (!peerAddress) return;
@@ -56,11 +89,20 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
     }
   }
 
+  function startReply(msg: DecodedMessage) {
+    const preview = typeof msg.content === "string" ? msg.content : "message";
+    const isMine = msg.senderInboxId === client?.inboxId;
+    setReplyTarget({
+      id: msg.id,
+      preview: preview.slice(0, 80),
+      authorLabel: isMine ? "yourself" : "them",
+    });
+  }
+
   if (!activeConversation) return null;
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Header */}
       <header className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
         <button
           onClick={onBack}
@@ -69,38 +111,53 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
         >
           <ArrowLeft className="size-5" />
         </button>
-        <PeerAvatar address={peerAddress} size={36} />
+        {isGroupConv ? (
+          <div className="size-9 rounded-full brand-gradient flex items-center justify-center flex-shrink-0">
+            <Users className="size-4 text-white" />
+          </div>
+        ) : (
+          <PeerAvatar address={peerAddress} size={36} />
+        )}
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-white truncate">
-            {peerAddress ? (
+            {isGroupConv ? (
+              groupName ?? "Untitled group"
+            ) : peerAddress ? (
               <PeerName address={peerAddress} />
             ) : (
               shortAddress(activeConversation.id, 4, 4)
             )}
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-white/40 font-mono">
-            <span className="truncate">{peerAddress ?? "unknown"}</span>
-            {peerAddress && (
-              <button
-                onClick={copyAddress}
-                className="hover:text-white/80 transition-colors p-0.5"
-                aria-label="Copy address"
-              >
-                {copied ? (
-                  <Check className="size-3" />
-                ) : (
-                  <Copy className="size-3" />
-                )}
-              </button>
-            )}
-          </div>
+          {isGroupConv ? (
+            <div className="text-[11px] text-white/40">
+              {memberCount != null
+                ? `${memberCount} ${memberCount === 1 ? "member" : "members"}`
+                : "loading members…"}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-[11px] text-white/40 font-mono">
+              <span className="truncate">{peerAddress ?? "unknown"}</span>
+              {peerAddress && (
+                <button
+                  onClick={copyAddress}
+                  className="hover:text-white/80 transition-colors p-0.5"
+                  aria-label="Copy address"
+                >
+                  {copied ? (
+                    <Check className="size-3" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2"
+        className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2 pr-14"
       >
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center text-white/30 text-sm py-12">
@@ -118,6 +175,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
               message={m}
               isMine={isMine}
               showTime={isLastInRun}
+              onReply={startReply}
             />
           );
         })}
@@ -134,9 +192,12 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
         )}
       </div>
 
-      {/* Composer */}
       <div className="px-4 pb-4 pt-2">
-        <MessageInput onSend={sendMessage} />
+        <MessageInput
+          onSend={sendMessage}
+          replyTarget={replyTarget}
+          onClearReply={() => setReplyTarget(null)}
+        />
       </div>
     </div>
   );

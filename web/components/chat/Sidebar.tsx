@@ -2,12 +2,13 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, Sparkles, RefreshCw } from "lucide-react";
+import { Plus, Sparkles, RefreshCw, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useChat } from "@/context/ChatProvider";
 import { ConversationItem } from "./ConversationItem";
 import { SidebarEmpty } from "./EmptyState";
 import { Spinner } from "@/components/ui/Spinner";
+import { isGroup, getGroupName } from "@/lib/conversation";
 import { cn } from "@/lib/cn";
 
 export function Sidebar({
@@ -26,18 +27,38 @@ export function Sidebar({
     unreadByConvId,
     messagesByConvId,
     refreshConversations,
+    searchQuery,
+    setSearchQuery,
   } = useChat();
 
-  const sorted = useMemo(() => {
-    const withTime = conversations.map((c) => {
+  const filteredAndSorted = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const withMeta = conversations.map((c) => {
       const msgs = messagesByConvId.get(c.id) ?? [];
       const last = msgs[msgs.length - 1];
       const ns = (last as unknown as { sentAtNs?: bigint } | undefined)?.sentAtNs;
       const t = ns ? Number(ns / 1_000_000n) : 0;
       return { conv: c, lastTime: t, lastMessage: last };
     });
-    return withTime.sort((a, b) => b.lastTime - a.lastTime);
-  }, [conversations, messagesByConvId]);
+    const filtered = !q
+      ? withMeta
+      : withMeta.filter(({ conv, lastMessage }) => {
+          // search by peer address (for DMs), group name, or last message content
+          const peer = peerInfoByConvId.get(conv.id);
+          const lastText =
+            lastMessage && typeof lastMessage.content === "string"
+              ? lastMessage.content.toLowerCase()
+              : "";
+          const groupName = isGroup(conv) ? getGroupName(conv)?.toLowerCase() ?? "" : "";
+          const addr = peer?.address?.toLowerCase() ?? "";
+          return (
+            addr.includes(q) ||
+            lastText.includes(q) ||
+            groupName.includes(q)
+          );
+        });
+    return filtered.sort((a, b) => b.lastTime - a.lastTime);
+  }, [conversations, messagesByConvId, peerInfoByConvId, searchQuery]);
 
   return (
     <aside
@@ -66,7 +87,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <div className="flex gap-1.5 px-3 pb-3">
+      <div className="flex gap-1.5 px-3 pb-2">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -85,11 +106,39 @@ export function Sidebar({
         </Link>
       </div>
 
+      <div className="px-3 pb-3">
+        <div className="relative">
+          <Search className="size-3.5 text-white/30 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search chats…"
+            className="w-full rounded-xl bg-white/[0.03] border border-white/10 pl-8 pr-7 py-1.5 text-xs text-white outline-none focus:border-white/20 transition-colors placeholder:text-white/30"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white p-0.5"
+              aria-label="Clear search"
+            >
+              <X className="size-3" />
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto px-2 pb-3 flex flex-col gap-1">
-        {sorted.length === 0 && !conversationsLoading ? (
-          <SidebarEmpty />
+        {filteredAndSorted.length === 0 && !conversationsLoading ? (
+          searchQuery ? (
+            <div className="text-center text-xs text-white/40 px-4 py-8">
+              No chats match “{searchQuery}”
+            </div>
+          ) : (
+            <SidebarEmpty />
+          )
         ) : (
-          sorted.map(({ conv, lastMessage }) => (
+          filteredAndSorted.map(({ conv, lastMessage }) => (
             <ConversationItem
               key={conv.id}
               conversation={conv}
