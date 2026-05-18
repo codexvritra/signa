@@ -108,7 +108,7 @@ export function SettingsPanel({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="w-full max-w-md glass-strong rounded-2xl p-5 shadow-2xl"
+            className="w-full max-w-md glass-strong rounded-lg p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">
@@ -247,7 +247,7 @@ function Section({
       <div className="text-[10px] uppercase tracking-wider text-white/40 mb-1.5 px-1">
         {label}
       </div>
-      <div className="glass rounded-xl divide-y divide-white/[0.05]">{children}</div>
+      <div className="glass rounded-md divide-y divide-white/[0.05]">{children}</div>
     </div>
   );
 }

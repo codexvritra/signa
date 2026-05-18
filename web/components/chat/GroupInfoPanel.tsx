@@ -91,7 +91,7 @@ export function GroupInfoPanel({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="w-full max-w-md glass-strong rounded-2xl p-5 shadow-2xl"
+            className="w-full max-w-md glass-strong rounded-lg p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">
@@ -121,7 +121,7 @@ export function GroupInfoPanel({
               Members
             </div>
 
-            <div className="glass rounded-xl flex flex-col divide-y divide-white/[0.05] max-h-80 overflow-y-auto">
+            <div className="glass rounded-md flex flex-col divide-y divide-white/[0.05] max-h-80 overflow-y-auto">
               {members === null ? (
                 <div className="flex items-center justify-center py-6">
                   <Spinner size={16} className="text-white/40" />
@@ -163,7 +163,7 @@ export function GroupInfoPanel({
               <button
                 onClick={handleLeave}
                 disabled={leaving}
-                className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-300 text-sm font-medium rounded-xl px-3 py-2 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-300 text-sm font-medium rounded-md px-3 py-2 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
               >
                 {leaving ? <Spinner size={12} /> : <LogOut className="size-3.5" />}
                 {leaving ? "Leaving…" : "Leave group"}

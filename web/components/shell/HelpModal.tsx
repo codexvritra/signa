@@ -36,7 +36,7 @@ export function HelpModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="w-full max-w-sm glass-strong rounded-2xl p-5 shadow-2xl"
+            className="w-full max-w-sm glass-strong rounded-lg p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">
@@ -54,7 +54,7 @@ export function HelpModal({
                 <X className="size-4" />
               </button>
             </div>
-            <div className="glass rounded-xl divide-y divide-white/[0.05]">
+            <div className="glass rounded-md divide-y divide-white/[0.05]">
               {shortcuts.map((s) => (
                 <div
                   key={s.label}

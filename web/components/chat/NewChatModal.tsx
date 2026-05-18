@@ -93,7 +93,7 @@ export function NewChatModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="w-full max-w-md glass-strong rounded-2xl p-5 shadow-2xl"
+            className="w-full max-w-md glass-strong rounded-lg p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-3">
@@ -113,7 +113,7 @@ export function NewChatModal({
             </div>
 
             {/* Mode tabs */}
-            <div className="flex gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/10 mb-4">
+            <div className="flex gap-1 p-1 rounded-md bg-white/[0.04] border border-white/10 mb-4">
               <button
                 onClick={() => setMode("dm")}
                 className={cn(
@@ -151,7 +151,7 @@ export function NewChatModal({
                     if (e.key === "Enter") void startDm();
                   }}
                   placeholder="0x…"
-                  className="w-full rounded-xl bg-white/[0.03] border border-white/10 px-3 py-2.5 text-sm font-mono text-white outline-none focus:border-white/25 transition-colors"
+                  className="w-full rounded-md bg-white/[0.03] border border-white/10 px-3 py-2.5 text-sm font-mono text-white outline-none focus:border-white/25 transition-colors"
                 />
                 <div className="flex justify-end gap-2 mt-4">
                   <button
@@ -180,7 +180,7 @@ export function NewChatModal({
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   placeholder="e.g. Alpha squad"
-                  className="w-full rounded-xl bg-white/[0.03] border border-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-white/25 transition-colors mb-3"
+                  className="w-full rounded-md bg-white/[0.03] border border-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-white/25 transition-colors mb-3"
                 />
                 <label className="block text-xs text-white/60 mb-1.5">
                   Members (one address each)
@@ -193,7 +193,7 @@ export function NewChatModal({
                         value={m}
                         onChange={(e) => updateMember(idx, e.target.value)}
                         placeholder="0x…"
-                        className="flex-1 rounded-xl bg-white/[0.03] border border-white/10 px-3 py-2 text-sm font-mono text-white outline-none focus:border-white/25 transition-colors"
+                        className="flex-1 rounded-md bg-white/[0.03] border border-white/10 px-3 py-2 text-sm font-mono text-white outline-none focus:border-white/25 transition-colors"
                       />
                       {groupMembers.length > 1 && (
                         <button

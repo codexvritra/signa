@@ -160,7 +160,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
+      <header className="flex items-center gap-2.5 px-4 h-[57px] border-b border-white/[0.06] flex-shrink-0">
         <button
           onClick={onBack}
           className="lg:hidden text-white/60 hover:text-white p-1 -ml-1"
@@ -171,13 +171,13 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
         {isGroupConv ? (
           <button
             onClick={() => setGroupInfoOpen(true)}
-            className="size-9 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0 hover:bg-white/[0.08] transition-colors"
+            className="size-8 rounded-md bg-white/[0.04] border border-white/[0.08] flex items-center justify-center flex-shrink-0 hover:bg-white/[0.08] transition-colors"
             aria-label="Group info"
           >
-            <Users className="size-4 text-white/70" />
+            <Users className="size-3.5 text-white/65" />
           </button>
         ) : (
-          <PeerAvatar address={peerAddress} size={36} />
+          <PeerAvatar address={peerAddress} size={32} />
         )}
         <div
           className={cn(
@@ -186,7 +186,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
           )}
           onClick={isGroupConv ? () => setGroupInfoOpen(true) : undefined}
         >
-          <div className="text-sm font-medium text-white truncate flex items-center gap-1.5">
+          <div className="text-[13px] font-medium text-white truncate flex items-center gap-1.5">
             <span className="truncate">
               {isGroupConv ? (
                 groupName ?? "Untitled group"
@@ -198,7 +198,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
                 shortAddress(activeConversation.id, 4, 4)
               )}
             </span>
-            {isAgent && <AgentBadge size="sm" />}
+            {isAgent && <AgentBadge size="xs" />}
           </div>
           {isGroupConv ? (
             <div className="text-[11px] text-white/40 hover:text-white/60 transition-colors">
