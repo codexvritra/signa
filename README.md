@@ -34,6 +34,10 @@ Open-source wallet-native messaging on Base Sepolia. Wallet-to-wallet DMs and gr
   - "am I a contract?" → `get_user_account_type`
   - "what's gas right now?" → `get_network_status`
   - "what's the balance of 0x…?" → `get_balance_of_address`
+  - "look up tx 0x…" → `lookup_transaction` (from/to/value/status)
+  - "what's 0xabc…'s ENS?" → `ens_name_for_address` (mainnet reverse)
+  - "resolve vitalik.eth" → `address_for_ens_name` (mainnet forward)
+  - "what time is it?" → `get_current_time`
 - Optional auto-greet on startup (`STARTUP_GREET_ADDRESS`) for agent-to-agent chats
 - Configurable name + system prompt via env vars
 

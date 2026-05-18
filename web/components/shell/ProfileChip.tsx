@@ -8,6 +8,7 @@ import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
 import { shortAddress } from "@/lib/format";
 import { useDisplayName } from "@/hooks/useDisplayName";
+import { XMTP_ENV } from "@/lib/xmtp";
 
 export function ProfileChip() {
   const { ownAddress } = useChat();
@@ -33,12 +34,20 @@ export function ProfileChip() {
       <div className="glass rounded-xl p-2.5 flex items-center gap-2.5">
         <PeerAvatar address={ownAddress} size={28} />
         <div className="flex-1 min-w-0">
-          <div className="text-xs font-medium text-white truncate">
-            {displayName ? (
-              displayName
-            ) : (
-              <PeerName address={ownAddress} fallback={shortAddress(ownAddress)} />
-            )}
+          <div className="text-xs font-medium text-white truncate flex items-center gap-1.5">
+            <span className="truncate">
+              {displayName ? (
+                displayName
+              ) : (
+                <PeerName address={ownAddress} fallback={shortAddress(ownAddress)} />
+              )}
+            </span>
+            <span
+              className="text-[8px] uppercase tracking-wider font-semibold bg-amber-400/15 text-amber-200 border border-amber-300/20 rounded-full px-1.5 py-0.5 flex-shrink-0"
+              title={`Connected to the XMTP "${XMTP_ENV}" network`}
+            >
+              {XMTP_ENV}
+            </span>
           </div>
           <div className="text-[10px] font-mono text-white/40 truncate">
             {shortAddress(ownAddress, 6, 4)}

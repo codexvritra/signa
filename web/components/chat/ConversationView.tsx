@@ -216,8 +216,28 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
         className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2 pr-14"
       >
         {messages.length === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-center text-white/30 text-sm py-12">
-            No messages yet. Say hi.
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 gap-3">
+            {isGroupConv ? (
+              <div className="size-12 rounded-2xl brand-gradient flex items-center justify-center">
+                <Users className="size-5 text-white" />
+              </div>
+            ) : (
+              <PeerAvatar address={peerAddress} size={48} />
+            )}
+            <div className="space-y-1">
+              <div className="text-white font-medium text-sm">
+                {isGroupConv
+                  ? `This is the start of ${groupName ?? "your group"}`
+                  : knownAgent
+                    ? `Say hi to ${knownAgent.name}`
+                    : "Start the conversation"}
+              </div>
+              <div className="text-white/40 text-xs max-w-xs">
+                {isAgent
+                  ? `Try asking: "what's my balance?" or "what's the gas price?"`
+                  : "Messages are end-to-end encrypted via XMTP."}
+              </div>
+            </div>
           </div>
         )}
         {messages.map((m, i) => {

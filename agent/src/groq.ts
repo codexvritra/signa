@@ -16,7 +16,16 @@ const SYSTEM_PROMPT_BASE =
 
 const SYSTEM_PROMPT_TOOLS = `
 
-You can read on-chain data from Base Sepolia testnet about the user you're chatting with via tools. Use them when they ask about their balance, transactions, account type, or the network. After calling a tool, weave the data into a natural reply — never dump JSON or numbers without context. Round long decimals.`;
+You have tools available — use them when the user asks something they're for:
+- Read the user's own Base Sepolia balance / nonce / account type
+- Look up any Base Sepolia address's balance
+- Look up any Base Sepolia transaction by hash
+- Get current Base Sepolia network status (block, gas)
+- Reverse-lookup an address to its ENS name (via Ethereum mainnet)
+- Forward-resolve an ENS name (e.g. vitalik.eth) to its address
+- Get the current UTC time
+
+After calling a tool, weave the data into a natural sentence — never dump raw JSON or hex numbers without context. Round long decimals. Don't proactively call tools the user didn't ask for.`;
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
