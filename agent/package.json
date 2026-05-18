@@ -1,0 +1,25 @@
+{
+  "name": "agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "generate-wallet": "tsx src/generate-wallet.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@xmtp/agent-sdk": "^2.3.0",
+    "dotenv": "^16.4.0",
+    "groq-sdk": "^0.15.0",
+    "tsx": "^4.19.0",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
