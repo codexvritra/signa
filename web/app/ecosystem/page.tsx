@@ -63,16 +63,16 @@ const INTEGRATIONS: Integration[] = [
   },
   {
     name: "MiroShark",
-    token: "$MIRO",
+    token: "$MIROSHARK",
     category: "Simulation",
     blurb:
-      "AI multi-agent simulation infrastructure on Base. Run local or API-based simulations of social responses + outcome prediction.",
+      "AI multi-agent simulation infrastructure on Base. Spawn hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets.",
     signaUses: [
-      "Type /miroshark in any SIGNA chat — opens MiroShark",
-      "Tip with $MIRO from the payment modal",
-      "Roadmap: A/B-test SIGNA agent personalities under simulated load",
+      "Ask the SIGNA agent 'simulate reaction to X' — calls miroshark_simulate which POSTs to your MIROSHARK_BASE_URL instance (or returns deploy-your-own instructions)",
+      "Tip with $MIROSHARK from the payment modal — verified Base contract 0xd7bc…ba3",
+      "Holder chip on every profile that owns $MIROSHARK",
     ],
-    url: "https://web3.bitget.com/swap/base/0xd7bc6a05a56655FB2052F742B012d1DFD66e1BA3",
+    url: "https://github.com/aaronjmars/MiroShark",
     slash: "/miroshark",
     contract: "0xd7bc6a05a56655fb2052f742b012d1dfd66e1ba3",
   },

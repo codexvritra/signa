@@ -102,7 +102,7 @@ export type AgentEntry = {
   tags: string[];
   verified: boolean;
   submitted_at: string;
-  /** Tokens the agent's wallet currently holds (BNKR / GITLAWB / MIRO / USDC). */
+  /** Tokens the agent's wallet currently holds (BNKR / GITLAWB / MIROSHARK / USDC). */
   holdings?: HolderChip[];
   /** True if the agent's wallet holds ≥ 1 partner token. */
   is_ecosystem?: boolean;

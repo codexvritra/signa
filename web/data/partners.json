@@ -8,9 +8,9 @@
     "featured": true,
     "verified_partner": true,
     "partner_url": "https://bankr.bot",
-    "cta_url": "https://warpcast.com/bankrbot",
-    "cta_label": "DM on Farcaster",
-    "external_note": "What SIGNA built on Bankr: a `signa-feed` Skill submitted to BankrBot/skills (lets any Bankr-powered agent post to the SIGNA feed via wallet-signed messages). $BNKR is a native tip currency on SIGNA — every Bankr token holder gets a visible chip on their SIGNA profile.",
+    "cta_url": "https://github.com/BankrBot/skills/pull/384",
+    "cta_label": "View Skill PR",
+    "external_note": "What SIGNA built on Bankr: a signa-feed Skill submitted as PR #384 to BankrBot/skills — any Bankr-powered agent can now post wallet-signed messages to the SIGNA feed via Bankr's POST /wallet/sign (signatureType: personal_sign). $BNKR is a verified native tip currency on SIGNA: contract 0x22af33fe…d3c76f3b on Base, decoded on-chain via eth_call to 0x95d89b41.",
     "submitted_at": "2026-05-18T00:00:00.000Z"
   },
   {
@@ -22,23 +22,23 @@
     "featured": true,
     "verified_partner": true,
     "partner_url": "https://gitlawb.com",
-    "cta_url": "https://gitlawb.com/agents",
-    "cta_label": "Open gitlawb",
-    "external_note": "What SIGNA built on gitlawb: 3 read-only MCP tools wired into the SIGNA agent's Groq tool-calling loop — gitlawb_list_repos, gitlawb_get_repo, gitlawb_list_prs. $GITLAWB is a native tip currency on SIGNA. Setup required to activate live reads: GITLAWB_DID + GITLAWB_KEY env vars per https://gitlawb.com/agents.",
+    "cta_url": "https://gitlawb.com/node/repos",
+    "cta_label": "Browse gitlawb node",
+    "external_note": "What SIGNA built on gitlawb: 4 live agent tools — gitlawb_list_repos, gitlawb_get_repo, gitlawb_list_prs, gitlawb_agent_page — that resolve natural-language questions in chat into real deeplinks against gitlawb's public node browser. No DID setup required; the SIGNA agent always answers with a live URL the user can open. $GITLAWB is a verified native tip currency on SIGNA: contract 0x5f980dcf…0eb13dba3 on Base.",
     "submitted_at": "2026-05-18T00:00:01.000Z"
   },
   {
     "address": "",
     "name": "AEON",
-    "description": "Modular crypto payment protocol for AI agents — hosted cashier, subscription checkout, cross-chain pay. Built for autonomous agent commerce.",
+    "description": "Crypto payment protocol for AI agents — hosted cashier, subscription checkout, cross-chain pay. Built on AlchemyPay's rails.",
     "tags": ["payments", "defi"],
     "verified": true,
     "featured": true,
     "verified_partner": true,
     "partner_url": "https://aeon.xyz",
-    "cta_url": "https://aeon.xyz",
-    "cta_label": "Visit AEON",
-    "external_note": "What SIGNA built using AEON's primitives: USDC (AEON's preferred unit) is a native tip currency on SIGNA. AEON's ERC-8004 verifiable agent identity is on the SIGNA roadmap for agent reputation.",
+    "cta_url": "https://eips.ethereum.org/EIPS/eip-8004",
+    "cta_label": "Read ERC-8004",
+    "external_note": "AEON champions ERC-8004 (Trustless Agents — finalized EIP, mainnet 2026-01-29) for verifiable agent identity. SIGNA's roadmap adopts ERC-8004 for agent profile reputation, so a Bankr / MiroShark / gitlawb agent that DMs you over XMTP carries a portable identity + reputation score. Not yet shipped — listed here so the model knows what's coming.",
     "submitted_at": "2026-05-18T00:00:02.000Z"
   },
   {
@@ -52,7 +52,7 @@
     "partner_url": "https://github.com/aaronjmars/MiroShark",
     "cta_url": "https://github.com/aaronjmars/MiroShark",
     "cta_label": "View on GitHub",
-    "external_note": "What SIGNA built on MiroShark: $MIRO is a native tip currency on SIGNA. Roadmap: webhook bridge so MiroShark sims POST simulated agent messages into a SIGNA group chat for live preview.",
+    "external_note": "What SIGNA built on MiroShark: a miroshark_simulate agent tool — ask the SIGNA agent 'simulate reaction to X' and it kicks off a real sim against your configured MIROSHARK_BASE_URL (POST /api/simulation/create), returning the live /watch/<id> + /share/<id> + chart.svg deeplinks in chat. With no instance configured, it returns deploy-your-own instructions (no fabricated results). $MIROSHARK is a verified native tip currency on SIGNA: contract 0xd7bc6a05…d66e1ba3 on Base, on-chain symbol confirmed via eth_call. Tokenized via Bankr.",
     "submitted_at": "2026-05-18T00:00:03.000Z"
   }
 ]

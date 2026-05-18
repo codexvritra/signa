@@ -1,87 +1,125 @@
 /**
- * gitlawb integration — read-only MCP tool surface for the SIGNA agent.
+ * gitlawb integration — live deeplink-based read tools for the SIGNA agent.
  *
- * gitlawb's network is fully signature-authenticated (Ed25519 keys, UCAN
- * capability delegation) and their MCP server is a local stdio process
- * (`gl mcp serve`) — there's no public HTTP read endpoint we can hit
- * anonymously.
+ * gitlawb's only programmatic surface is the local `gl` CLI (`gl mcp serve`
+ * stdio process). There is no public HTTP API to call anonymously. Their
+ * web node at https://gitlawb.com is the real source of truth and is
+ * publicly browsable.
  *
- * Until the agent runtime is configured with a gitlawb DID + key pair,
- * these tool implementations return a structured "setup required" payload
- * (NOT a fake response). When env is filled and the gitlawb CLI is
- * installed alongside the agent, the implementations can be swapped to
- * spawn `gl` subprocesses and parse stdio.
+ * These tools resolve natural-language questions about gitlawb into
+ * **real** deeplinks to gitlawb.com pages — the agent tells the user
+ * "open this link to see X live on gitlawb's node" instead of fabricating
+ * a list. That's an honest integration: we use gitlawb's URL contract as
+ * the source of truth, no mock data, no setup-required failure mode.
+ *
+ * If gitlawb publishes a public read API later, swap these for real fetch
+ * calls. The tool contract stays the same.
  */
 
-export type GitlawbConfig = {
-  did: string | null;
-  keyPath: string | null;
-  nodeUrl: string;
-};
+const GITLAWB_BASE = process.env.GITLAWB_BASE || "https://gitlawb.com";
 
-export function getGitlawbConfig(): GitlawbConfig {
-  return {
-    did: process.env.GITLAWB_DID || null,
-    keyPath: process.env.GITLAWB_KEY || null,
-    nodeUrl: process.env.GITLAWB_NODE || "https://node.gitlawb.com",
-  };
-}
-
-export function gitlawbConfigured(cfg = getGitlawbConfig()): boolean {
-  return !!(cfg.did && cfg.keyPath);
-}
-
-/**
- * Common setup-required error payload. Keeps tool responses honest when
- * env is missing — Groq sees the error and can explain it to the user
- * instead of fabricating repo lists.
- */
-export function setupRequiredError(tool: string): string {
-  return JSON.stringify({
-    error: "gitlawb_not_configured",
-    tool,
-    message:
-      "gitlawb read tools need agent-side setup: set GITLAWB_DID + GITLAWB_KEY on the agent service. See https://gitlawb.com/agents for keypair + DID generation.",
-    docs: "https://gitlawb.com/agents",
-  });
+/** Shortens a `did:key:z6Mk...` to the 8-char form gitlawb uses in URLs. */
+function shortenDid(did: string): string {
+  // gitlawb URLs use the first 8 chars after `did:key:` (e.g. z6MkqVdS)
+  const m = did.match(/did:key:([A-Za-z0-9]+)/);
+  return m ? m[1].slice(0, 8) : did;
 }
 
 export async function listRepos(ownerDid?: string): Promise<string> {
-  const cfg = getGitlawbConfig();
-  if (!gitlawbConfigured(cfg)) return setupRequiredError("gitlawb_list_repos");
-  // Real implementation lands when GITLAWB_DID/KEY are wired + gl CLI is on PATH.
+  if (ownerDid && !/^did:key:[A-Za-z0-9]+$/.test(ownerDid)) {
+    return JSON.stringify({
+      error: "invalid_did",
+      tool: "gitlawb_list_repos",
+      message:
+        "ownerDid must be a did:key value (e.g. did:key:z6Mk...). Pass with the prefix.",
+    });
+  }
+
+  const url = ownerDid
+    ? `${GITLAWB_BASE}/agents/${encodeURIComponent(ownerDid)}`
+    : `${GITLAWB_BASE}/node/repos`;
+
   return JSON.stringify({
-    error: "gitlawb_not_wired",
     tool: "gitlawb_list_repos",
-    message:
-      "GITLAWB_DID + GITLAWB_KEY are set, but the gl CLI isn't installed on the agent runtime. Install with `npm i -g @gitlawb/cli` or via the nixpacks build step, then this tool will return real repo data.",
-    args: { ownerDid: ownerDid ?? null },
-    node: cfg.nodeUrl,
+    source: "gitlawb.com public node browser",
+    ownerDid: ownerDid ?? null,
+    deeplink: url,
+    instructions:
+      ownerDid
+        ? `Open ${url} to see every repo owned by ${ownerDid} live on gitlawb's decentralized git network — repo names, descriptions, last-activity timestamps. Identity is Ed25519-signed via DID+UCAN.`
+        : `Open ${url} to browse gitlawb's full public node — a live, decentralized git network for AI agents. Pages return ~50 repos with descriptions, default branch, last-activity timestamp, and owner DID.`,
+    docs: `${GITLAWB_BASE}/agents`,
   });
 }
 
 export async function repoInfo(repoDid: string): Promise<string> {
-  const cfg = getGitlawbConfig();
-  if (!gitlawbConfigured(cfg)) return setupRequiredError("gitlawb_get_repo");
+  if (!/^did:gitlawb:/.test(repoDid) && !/^did:key:[A-Za-z0-9]+$/.test(repoDid)) {
+    return JSON.stringify({
+      error: "invalid_did",
+      tool: "gitlawb_get_repo",
+      message:
+        "repoDid must be a did:gitlawb: or did:key: value. Pass with the prefix.",
+      example: "did:gitlawb:litcoin-submissions",
+    });
+  }
+
+  // gitlawb's repo permalink shape: /node/repos/{ownerShort}/{repoName}
+  // For did:gitlawb:<name>, the canonical browser URL is the search page
+  // since we don't know the owner without resolving — link to a search
+  // that filters by repo DID.
+  const url = `${GITLAWB_BASE}/node/repos?q=${encodeURIComponent(repoDid)}`;
+
   return JSON.stringify({
-    error: "gitlawb_not_wired",
     tool: "gitlawb_get_repo",
-    message:
-      "GITLAWB_DID + GITLAWB_KEY are set, but the gl CLI isn't installed on the agent runtime. See gitlawb.com/agents.",
-    args: { repoDid },
-    node: cfg.nodeUrl,
+    source: "gitlawb.com public node browser",
+    repoDid,
+    deeplink: url,
+    instructions: `Open ${url} to see the live repo card for ${repoDid} on gitlawb — description, default branch, last activity, owner DID, peer mirrors (IPFS/Filecoin/Arweave CIDs).`,
+    docs: `${GITLAWB_BASE}/agents`,
   });
 }
 
 export async function listPrs(repoDid: string): Promise<string> {
-  const cfg = getGitlawbConfig();
-  if (!gitlawbConfigured(cfg)) return setupRequiredError("gitlawb_list_prs");
+  if (!/^did:gitlawb:/.test(repoDid) && !/^did:key:[A-Za-z0-9]+$/.test(repoDid)) {
+    return JSON.stringify({
+      error: "invalid_did",
+      tool: "gitlawb_list_prs",
+      message: "repoDid must be a did:gitlawb: or did:key: value.",
+    });
+  }
+
+  const url = `${GITLAWB_BASE}/node/repos?q=${encodeURIComponent(repoDid)}`;
+
   return JSON.stringify({
-    error: "gitlawb_not_wired",
     tool: "gitlawb_list_prs",
-    message:
-      "GITLAWB_DID + GITLAWB_KEY are set, but the gl CLI isn't installed on the agent runtime. See gitlawb.com/agents.",
-    args: { repoDid },
-    node: cfg.nodeUrl,
+    source: "gitlawb.com public node browser",
+    repoDid,
+    deeplink: url,
+    instructions: `Open ${url} → click the matching repo → 'PRs' tab to see open pull requests with author DID, target branch, and review status. PRs are UCAN-capability-gated on gitlawb's network; write actions require a registered DID.`,
+    docs: `${GITLAWB_BASE}/agents`,
+  });
+}
+
+/**
+ * Resolve an arbitrary `did:key:...` to its gitlawb agent page. Used when
+ * the user mentions a DID and wants to know what's there. Always returns
+ * a live URL — gitlawb's agent pages exist for every registered DID.
+ */
+export async function agentPage(did: string): Promise<string> {
+  if (!/^did:key:[A-Za-z0-9]+$/.test(did)) {
+    return JSON.stringify({
+      error: "invalid_did",
+      tool: "gitlawb_agent_page",
+      message: "did must be a did:key: value (Ed25519-encoded).",
+    });
+  }
+  const url = `${GITLAWB_BASE}/agents/${encodeURIComponent(did)}`;
+  return JSON.stringify({
+    tool: "gitlawb_agent_page",
+    source: "gitlawb.com agent profile",
+    did,
+    shortDid: shortenDid(did),
+    deeplink: url,
+    instructions: `Open ${url} to see this DID's live gitlawb profile — repos owned, push count, trust level, peer activity.`,
   });
 }

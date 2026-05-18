@@ -35,11 +35,11 @@ export type HolderStatus = {
   holdings: HolderEntry[]; // tokens with non-zero balance only
   /** number of distinct partner tokens held (non-USDC, non-ETH) */
   partnerCount: number;
-  /** Eligibility: holds at least one partner token (BNKR / GITLAWB / MIRO) */
+  /** Eligibility: holds at least one partner token (BNKR / GITLAWB / MIROSHARK) */
   isEcosystemMember: boolean;
 };
 
-const PARTNER_SYMBOLS = new Set(["BNKR", "GITLAWB", "MIRO"]);
+const PARTNER_SYMBOLS = new Set(["BNKR", "GITLAWB", "MIROSHARK"]);
 
 // In-memory cache, 5-min TTL. Per-server-instance, ephemeral. Good enough
 // for low traffic; replace with Redis/Supabase cache for scale.

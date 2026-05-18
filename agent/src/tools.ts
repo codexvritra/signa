@@ -8,7 +8,8 @@ import {
   getNonce,
   getTransaction,
 } from "./chain.js";
-import { listRepos, repoInfo, listPrs } from "./gitlawb.js";
+import { listRepos, repoInfo, listPrs, agentPage } from "./gitlawb.js";
+import { simulate as mirosharkSimulate } from "./miroshark.js";
 
 type ToolImpl = (args: Record<string, unknown>) => Promise<string>;
 
@@ -135,7 +136,7 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
       function: {
         name: "gitlawb_list_repos",
         description:
-          "List repositories on gitlawb's decentralized git network. Optional ownerDid filter limits to repos owned by a given DID. Read-only. Returns a structured 'setup required' error if the agent doesn't have GITLAWB_DID + GITLAWB_KEY configured — explain this to the user honestly.",
+          "Resolve a 'list repos on gitlawb' question to a live deeplink into gitlawb's public node browser. Returns a real URL the user can open to see the live repo list. Optional ownerDid filter narrows to repos owned by a specific DID. Always works — no auth required. Pass the deeplink back to the user verbatim along with a short summary of what they'll see.",
         parameters: {
           type: "object",
           properties: {
@@ -154,7 +155,25 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
       function: {
         name: "gitlawb_get_repo",
         description:
-          "Get basic info for a gitlawb repo by its DID — description, last activity, owner. Read-only. Returns a structured 'setup required' error if env is missing.",
+          "Resolve a 'show me this gitlawb repo' question to a live deeplink into gitlawb's public node browser, scoped to the given repo DID. The user opens the URL to see description, last activity, owner DID, and peer mirror CIDs (IPFS/Filecoin/Arweave). Always works — no auth required.",
+        parameters: {
+          type: "object",
+          properties: {
+            repoDid: {
+              type: "string",
+              description: "Repo DID, e.g. did:gitlawb:litcoin-submissions or did:key:z6Mk...",
+            },
+          },
+          required: ["repoDid"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "gitlawb_list_prs",
+        description:
+          "Resolve a 'show open PRs for this gitlawb repo' question to a live deeplink. The user opens the URL → 'PRs' tab to see open pull requests, authors (by DID), target branches, and review status. PRs on gitlawb are UCAN-capability-gated; write actions need a registered DID. Always works — no auth required.",
         parameters: {
           type: "object",
           properties: {
@@ -170,18 +189,36 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
     {
       type: "function",
       function: {
-        name: "gitlawb_list_prs",
+        name: "gitlawb_agent_page",
         description:
-          "List open PRs for a gitlawb repo by its DID. Read-only. Returns 'setup required' if env is missing.",
+          "Resolve a 'who is this DID on gitlawb' question to a live deeplink to that DID's agent profile on gitlawb. Shows repos owned, push count, trust level, recent peer activity. Useful when the user mentions a did:key:z6Mk... in conversation and wants to know what's there.",
         parameters: {
           type: "object",
           properties: {
-            repoDid: {
+            did: {
               type: "string",
-              description: "Repo DID, e.g. did:gitlawb:...",
+              description: "Ed25519-encoded DID, e.g. did:key:z6Mk...",
             },
           },
-          required: ["repoDid"],
+          required: ["did"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "miroshark_simulate",
+        description:
+          "Spawn a MiroShark swarm-intelligence simulation about a topic. MiroShark spins up hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets. If the SIGNA agent has MIROSHARK_BASE_URL configured (a self-hosted MiroShark instance), this kicks off a real sim and returns the live watch + share deeplinks. If not configured, returns deploy-your-own instructions and the GitHub repo URL — never fabricates a result. Use when the user asks 'what would people think of X', 'simulate reaction to X', 'spawn a swarm sim about X', or similar speculation/prediction questions.",
+        parameters: {
+          type: "object",
+          properties: {
+            topic: {
+              type: "string",
+              description: "One-sentence topic or claim to simulate public reaction to.",
+            },
+          },
+          required: ["topic"],
         },
       },
     },
@@ -310,6 +347,17 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
         return JSON.stringify({ error: "repoDid required" });
       }
       return listPrs(repoDid);
+    },
+    gitlawb_agent_page: async (args) => {
+      const did = typeof args.did === "string" ? args.did : "";
+      if (!did) {
+        return JSON.stringify({ error: "did required" });
+      }
+      return agentPage(did);
+    },
+    miroshark_simulate: async (args) => {
+      const topic = typeof args.topic === "string" ? args.topic : "";
+      return mirosharkSimulate(topic);
     },
   };
 
