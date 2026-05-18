@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Open-source agent messaging on Base Sepolia. Wallet-to-wallet and wallet-to-agent chat over XMTP.",
     start_url: "/",
     display: "standalone",
-    background_color: "#07070b",
-    theme_color: "#8b5cf6",
+    background_color: "#000000",
+    theme_color: "#000000",
     icons: [
       {
         src: "/icon",

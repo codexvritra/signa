@@ -10,12 +10,44 @@ export default function Icon() {
         style={{
           width: "100%",
           height: "100%",
+          background: "#000",
           display: "flex",
-          background:
-            "linear-gradient(135deg, #8b5cf6 0%, #d946ef 50%, #f472b6 100%)",
-          borderRadius: 8,
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        <div
+          style={{
+            display: "flex",
+            position: "relative",
+            width: 24,
+            height: 20,
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: 15,
+              height: 10,
+              border: "1.5px solid white",
+              borderRadius: 3,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: 0,
+              bottom: 0,
+              width: 16,
+              height: 12,
+              background: "white",
+              borderRadius: 3,
+            }}
+          />
+        </div>
+      </div>
     ),
     { ...size },
   );

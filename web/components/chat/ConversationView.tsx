@@ -171,10 +171,10 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
         {isGroupConv ? (
           <button
             onClick={() => setGroupInfoOpen(true)}
-            className="size-9 rounded-full brand-gradient flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+            className="size-9 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0 hover:bg-white/[0.08] transition-colors"
             aria-label="Group info"
           >
-            <Users className="size-4 text-white" />
+            <Users className="size-4 text-white/70" />
           </button>
         ) : (
           <PeerAvatar address={peerAddress} size={36} />
@@ -234,8 +234,8 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 gap-3">
             {isGroupConv ? (
-              <div className="size-12 rounded-2xl brand-gradient flex items-center justify-center">
-                <Users className="size-5 text-white" />
+              <div className="size-12 rounded-2xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
+                <Users className="size-5 text-white/70" />
               </div>
             ) : (
               <PeerAvatar address={peerAddress} size={48} />

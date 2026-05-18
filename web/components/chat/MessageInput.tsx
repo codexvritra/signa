@@ -99,7 +99,7 @@ export function MessageInput({
           className={cn(
             "size-8 rounded-full flex items-center justify-center transition-all",
             text.trim() && !disabled && !sending
-              ? "brand-gradient text-white shadow-lg hover:scale-105 active:scale-95"
+              ? "bg-white text-black hover:bg-white/90 active:scale-95"
               : "bg-white/5 text-white/30 cursor-not-allowed",
           )}
           aria-label="Send"

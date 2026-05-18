@@ -96,8 +96,8 @@ export function GroupInfoPanel({
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="size-10 rounded-full brand-gradient flex items-center justify-center flex-shrink-0">
-                  <Users className="size-5 text-white" />
+                <div className="size-10 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
+                  <Users className="size-5 text-white/70" />
                 </div>
                 <div className="min-w-0">
                   <div className="text-base font-semibold text-white truncate">

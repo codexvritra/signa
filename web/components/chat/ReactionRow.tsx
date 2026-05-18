@@ -87,7 +87,7 @@ export function ReactionRow({
           className={cn(
             "text-[11px] rounded-full px-1.5 py-0.5 flex items-center gap-0.5 border transition-colors",
             a.mine
-              ? "bg-violet-500/20 border-violet-400/40 text-white"
+              ? "bg-[var(--accent-dim)] border-[var(--accent)]/30 text-white"
               : "bg-white/[0.05] border-white/10 text-white/80 hover:bg-white/[0.08]",
           )}
         >

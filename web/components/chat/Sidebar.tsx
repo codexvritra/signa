@@ -97,21 +97,19 @@ export function Sidebar({
       </div>
 
       <div className="flex gap-1.5 px-3 pb-2">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={onNewChat}
-          className="flex-1 brand-gradient text-white text-sm font-medium rounded-xl px-3 py-2 flex items-center justify-center gap-1.5 shadow-md"
+          className="flex-1 bg-white text-black text-sm font-medium rounded-md px-3 py-2 flex items-center justify-center gap-1.5 hover:bg-white/90 transition-colors"
         >
-          <Plus className="size-4" />
+          <Plus className="size-3.5" />
           New chat
-        </motion.button>
+        </button>
         <Link
           href="/directory"
-          className="glass text-white text-sm font-medium rounded-xl px-3 py-2 hover:bg-white/[0.06] transition-colors flex items-center gap-1.5"
+          className="border border-white/[0.1] text-white/75 text-sm font-medium rounded-md px-3 py-2 hover:bg-white/[0.04] hover:text-white transition-colors flex items-center justify-center"
           title="Agent directory"
         >
-          <Sparkles className="size-4" />
+          <Sparkles className="size-3.5" />
         </Link>
       </div>
 

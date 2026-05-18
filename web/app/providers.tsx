@@ -16,9 +16,9 @@ export function Providers({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
-            accentColor: "#8b5cf6",
-            accentColorForeground: "white",
-            borderRadius: "medium",
+            accentColor: "#ffffff",
+            accentColorForeground: "#000000",
+            borderRadius: "small",
             overlayBlur: "small",
           })}
           initialChain={baseSepolia.id}

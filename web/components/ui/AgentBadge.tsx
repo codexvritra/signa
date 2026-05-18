@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 export function AgentBadge({
@@ -9,24 +8,18 @@ export function AgentBadge({
   size?: "xs" | "sm" | "md";
 }) {
   const dims = {
-    xs: "text-[8px] px-1 py-0 gap-0.5",
-    sm: "text-[9px] px-1.5 py-0.5 gap-0.5",
-    md: "text-[10px] px-2 py-0.5 gap-1",
-  }[size];
-  const icon = {
-    xs: "size-2",
-    sm: "size-2.5",
-    md: "size-3",
+    xs: "text-[9px] px-1.5 py-0",
+    sm: "text-[10px] px-1.5 py-0.5",
+    md: "text-[11px] px-2 py-0.5",
   }[size];
   return (
     <span
       className={cn(
-        "brand-gradient text-white rounded-full font-semibold uppercase tracking-wider inline-flex items-center",
+        "rounded-sm font-medium uppercase tracking-[0.08em] inline-flex items-center bg-[var(--accent-dim)] text-[var(--accent)] border border-[var(--accent)]/25",
         dims,
         className,
       )}
     >
-      <Sparkles className={icon} />
       Agent
     </span>
   );

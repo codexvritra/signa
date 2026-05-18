@@ -71,8 +71,8 @@ export function ConversationItem({
       )}
     >
       {isGroupConv ? (
-        <div className="size-9 rounded-full brand-gradient flex items-center justify-center flex-shrink-0">
-          <Users className="size-4 text-white" />
+        <div className="size-9 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0">
+          <Users className="size-4 text-white/70" />
         </div>
       ) : (
         <PeerAvatar address={peerAddress} size={36} />
@@ -112,7 +112,7 @@ export function ConversationItem({
               : "no messages yet"}
           </span>
           {unread > 0 && (
-            <span className="text-[10px] font-semibold brand-gradient text-white rounded-full px-1.5 min-w-[18px] h-[18px] flex items-center justify-center flex-shrink-0">
+            <span className="text-[10px] font-semibold bg-[var(--accent)] text-black rounded-full px-1.5 min-w-[18px] h-[18px] flex items-center justify-center flex-shrink-0">
               {unread > 99 ? "99+" : unread}
             </span>
           )}

@@ -163,7 +163,7 @@ export function NewChatModal({
                   <button
                     onClick={startDm}
                     disabled={busy || !dmAddress.trim()}
-                    className="brand-gradient text-white text-sm font-medium rounded-lg px-4 py-1.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-opacity"
+                    className="bg-white text-black text-sm font-medium rounded-md px-4 py-1.5 hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                   >
                     {busy && <Spinner size={12} />}
                     {busy ? "Opening…" : "Open chat"}
@@ -226,7 +226,7 @@ export function NewChatModal({
                     disabled={
                       busy || groupMembers.every((m) => !m.trim())
                     }
-                    className="brand-gradient text-white text-sm font-medium rounded-lg px-4 py-1.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-opacity"
+                    className="bg-white text-black text-sm font-medium rounded-md px-4 py-1.5 hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                   >
                     {busy && <Spinner size={12} />}
                     {busy ? "Creating…" : "Create group"}

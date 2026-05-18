@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowLeft, MessageCircle, Sparkles, Github } from "lucide-react";
+import { ArrowLeft, MessageCircle, Github } from "lucide-react";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { PeerAvatar } from "@/components/ui/Avatar";
@@ -15,121 +14,105 @@ export default function DirectoryPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
-      <main className="flex-1 flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
-        <div className="w-full max-w-3xl flex flex-col gap-6">
-          <Link
-            href="/"
-            className="text-xs text-white/50 hover:text-white flex items-center gap-1 self-start"
-          >
-            <ArrowLeft className="size-3" />
-            Back to chats
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col gap-2"
-          >
-            <div className="flex items-center gap-2 text-white/60 text-xs uppercase tracking-wider">
-              <Sparkles className="size-3.5" />
-              Agent directory
+      <main className="flex-1">
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 pt-12 pb-12 sm:pt-16 sm:pb-16">
+            <Link
+              href="/"
+              className="text-xs text-white/45 hover:text-white inline-flex items-center gap-1 mb-8"
+            >
+              <ArrowLeft className="size-3" />
+              Back
+            </Link>
+            <div className="text-xs uppercase tracking-wider text-white/40 mb-3">
+              Directory
             </div>
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-              Find an agent to talk to
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-[-0.03em] leading-[1.05] max-w-2xl">
+              Agents you can DM.
             </h1>
-            <p className="text-white/55 max-w-lg">
-              A curated list of agents running on XMTP dev. Click any to start a chat.
+            <p className="text-white/55 max-w-xl mt-5 text-[16px] leading-relaxed">
+              A curated list of XMTP agents running on Base Sepolia.
+              {agents.length > 0 && (
+                <> Tap any to start a conversation with their address pre-filled.</>
+              )}
             </p>
-          </motion.div>
+          </div>
+        </section>
 
-          {agents.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="glass rounded-2xl p-8 text-center flex flex-col items-center gap-3"
-            >
-              <Sparkles className="size-6 text-white/40" />
-              <div className="space-y-1">
-                <p className="text-white font-medium">
-                  No agents registered yet
-                </p>
-                <p className="text-sm text-white/50 max-w-md">
-                  When you deploy an agent on Railway, add it to{" "}
-                  <code className="text-xs font-mono bg-white/[0.05] px-1.5 py-0.5 rounded">
-                    web/data/agents.json
-                  </code>{" "}
-                  and push to GitHub — it&apos;ll appear here.
-                </p>
+        <section className="flex-1">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 sm:py-16">
+            {agents.length === 0 ? (
+              <div className="grid sm:grid-cols-[180px_1fr] gap-4 sm:gap-12">
+                <div className="text-xs uppercase tracking-wider text-white/40">
+                  Empty
+                </div>
+                <div className="max-w-xl space-y-4">
+                  <p className="text-[15px] text-white leading-relaxed">
+                    No agents registered yet.
+                  </p>
+                  <p className="text-sm text-white/55 leading-relaxed">
+                    Deploy an agent on Railway, then add it to{" "}
+                    <code className="text-[13px] bg-white/[0.05] rounded px-1.5 py-0.5 font-mono">
+                      web/data/agents.json
+                    </code>{" "}
+                    in the repo. After pushing to GitHub, Vercel rebuilds and
+                    the entry appears here with a Message button.
+                  </p>
+                  <a
+                    href="https://github.com/sishirupretii/agent-messenger#deploy-agent-railway"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-white/75 hover:text-white border border-white/[0.1] rounded-md px-3 py-1.5 hover:bg-white/[0.04] transition-colors"
+                  >
+                    <Github className="size-3.5" />
+                    How to deploy an agent
+                  </a>
+                </div>
               </div>
-              <Link
-                href="https://github.com/sishirupretii/agent-messenger#agent-railway"
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-white/70 hover:text-white flex items-center gap-1 mt-1"
-              >
-                <Github className="size-3" />
-                How to deploy an agent
-              </Link>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial="hidden"
-              animate="show"
-              variants={{
-                hidden: {},
-                show: { transition: { staggerChildren: 0.05 } },
-              }}
-              className="grid sm:grid-cols-2 gap-3"
-            >
-              {agents.map((a) => (
-                <motion.div
-                  key={a.address}
-                  variants={{
-                    hidden: { opacity: 0, y: 8 },
-                    show: { opacity: 1, y: 0 },
-                  }}
-                  className="glass rounded-2xl p-4 flex flex-col gap-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <PeerAvatar address={a.address} size={40} />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-white truncate">
+            ) : (
+              <div className="border-t border-white/[0.06]">
+                {agents.map((a) => (
+                  <div
+                    key={a.address}
+                    className="py-6 border-b border-white/[0.06] grid sm:grid-cols-[60px_1fr_auto] gap-4 sm:gap-6 items-start"
+                  >
+                    <PeerAvatar address={a.address} size={44} />
+                    <div className="min-w-0">
+                      <div className="text-[17px] font-medium text-white">
                         {a.name}
                       </div>
-                      <div className="text-[11px] font-mono text-white/40 truncate">
-                        {shortAddress(a.address, 8, 6)}
+                      <div className="text-[11px] font-mono text-white/40 mt-0.5">
+                        {shortAddress(a.address, 10, 8)}
                       </div>
+                      <p className="text-sm text-white/60 mt-2 max-w-lg leading-relaxed">
+                        {a.description}
+                      </p>
+                      {a.tags && a.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {a.tags.map((t) => (
+                            <span
+                              key={t}
+                              className="text-[10px] uppercase tracking-wider text-white/55 border border-white/[0.1] rounded-full px-2 py-0.5"
+                            >
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                    <Link
+                      href={`/?to=${a.address}`}
+                      className="bg-white text-black text-sm font-medium rounded-md px-3.5 py-1.5 inline-flex items-center gap-1.5 hover:bg-white/90 transition-colors self-center"
+                    >
+                      <MessageCircle className="size-3.5" />
+                      Message
+                    </Link>
                   </div>
-                  <p className="text-sm text-white/60 leading-snug">
-                    {a.description}
-                  </p>
-                  {a.tags && a.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {a.tags.map((t) => (
-                        <span
-                          key={t}
-                          className="text-[10px] uppercase tracking-wider text-white/50 bg-white/[0.05] rounded-full px-2 py-0.5"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <Link
-                    href={`/?to=${a.address}`}
-                    className="brand-gradient text-white text-sm font-medium rounded-xl px-3 py-2 flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity"
-                  >
-                    <MessageCircle className="size-3.5" />
-                    Message
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

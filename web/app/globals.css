@@ -2,16 +2,22 @@
 
 :root {
   color-scheme: dark;
-  --background: #07070b;
-  --foreground: #f5f5f7;
-  --muted: rgba(255, 255, 255, 0.6);
-  --subtle: rgba(255, 255, 255, 0.4);
-  --hairline: rgba(255, 255, 255, 0.08);
-  --surface: rgba(255, 255, 255, 0.03);
-  --surface-strong: rgba(255, 255, 255, 0.06);
-  --brand-from: #8b5cf6;
-  --brand-via: #d946ef;
-  --brand-to: #f472b6;
+  --background: #000000;
+  --foreground: #fafafa;
+  --muted: rgba(255, 255, 255, 0.62);
+  --subtle: rgba(255, 255, 255, 0.42);
+  --faint: rgba(255, 255, 255, 0.28);
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-strong: rgba(255, 255, 255, 0.12);
+  --surface: #0a0a0c;
+  --surface-raised: #111114;
+  --surface-hover: #16161a;
+  /* single restrained accent — lime, used very sparingly */
+  --accent: #a3e635;
+  --accent-dim: rgba(163, 230, 53, 0.14);
+  --accent-text: #d9f99d;
+  --warning: #fbbf24;
+  --error: #f87171;
 }
 
 @theme inline {
@@ -28,14 +34,10 @@ body {
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
 }
 
 body {
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(139, 92, 246, 0.18), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 10% 110%, rgba(217, 70, 239, 0.10), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 100% 80%, rgba(244, 114, 182, 0.08), transparent 60%);
-  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -47,11 +49,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 input,
@@ -62,52 +64,48 @@ button {
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.28);
 }
 
-/* selection */
 ::selection {
-  background: rgba(139, 92, 246, 0.35);
+  background: rgba(163, 230, 53, 0.28);
   color: white;
 }
 
-/* glass surface utility */
-.glass {
+/* ---------- surfaces ---------- */
+/* Solid raised surfaces replace the previous backdrop-blur glass.
+   The .glass / .glass-strong aliases remain so legacy components keep
+   working but render as solid hairline cards. */
+.glass,
+.card {
   background-color: var(--surface);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid var(--hairline);
 }
 
-.glass-strong {
-  background-color: var(--surface-strong);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--hairline);
+.glass-strong,
+.card-raised {
+  background-color: var(--surface-raised);
+  border: 1px solid var(--hairline-strong);
 }
 
+/* ---------- accents (was brand-gradient) ---------- */
+/* Primary buttons: confident white-on-black. */
 .brand-gradient {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-from),
-    var(--brand-via),
-    var(--brand-to)
-  );
+  background-color: var(--foreground);
+  color: #000;
+  font-weight: 500;
+}
+.brand-gradient:hover {
+  background-color: #ffffff;
 }
 
+/* Highlighted heading word — single specific lime tone, not a rainbow */
 .brand-text {
-  background-image: linear-gradient(
-    135deg,
-    var(--brand-from),
-    var(--brand-via),
-    var(--brand-to)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent);
+  font-weight: 600;
 }
 
-/* typing dots */
+/* ---------- typing dots ---------- */
 @keyframes typing-dot {
   0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
   30% { opacity: 1; transform: translateY(-2px); }
@@ -117,3 +115,13 @@ textarea::placeholder {
 }
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* ---------- subtle text utilities ---------- */
+.text-muted { color: var(--muted); }
+.text-subtle { color: var(--subtle); }
+.text-faint { color: var(--faint); }
+
+/* Hairline divider for inline use */
+.hairline {
+  border-color: var(--hairline);
+}

@@ -36,14 +36,14 @@ export default function GlobalError({
         <div className="flex gap-2">
           <button
             onClick={reset}
-            className="brand-gradient text-white text-sm font-medium rounded-xl px-4 py-2 flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+            className="bg-white text-black text-sm font-medium rounded-md px-4 py-2 inline-flex items-center gap-1.5 hover:bg-white/90 transition-colors"
           >
             <RefreshCw className="size-3.5" />
             Try again
           </button>
           <a
             href="/"
-            className="glass text-white text-sm font-medium rounded-xl px-4 py-2 hover:bg-white/[0.06] transition-colors"
+            className="border border-white/[0.12] text-white text-sm font-medium rounded-md px-4 py-2 hover:bg-white/[0.04] transition-colors"
           >
             Home
           </a>

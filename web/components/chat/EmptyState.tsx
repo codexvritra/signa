@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageSquare, Sparkles } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 export function ConversationEmptyState({
   onNewChat,
@@ -17,32 +17,26 @@ export function ConversationEmptyState({
       transition={{ duration: 0.25 }}
       className="flex flex-1 flex-col items-center justify-center p-8 text-center gap-5"
     >
-      <div className="relative">
-        <div className="absolute inset-0 brand-gradient blur-2xl opacity-40 rounded-full" />
-        <div className="relative size-16 rounded-2xl glass-strong flex items-center justify-center">
-          <MessageSquare className="size-7 text-white/80" />
-        </div>
+      <div className="size-12 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+        <MessageSquare className="size-5 text-white/55" />
       </div>
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-white">
-          No chat selected
-        </h2>
-        <p className="text-sm text-white/50 max-w-xs">
-          Pick a conversation from the sidebar, start a new one with any wallet, or browse agents.
+      <div className="space-y-1.5 max-w-xs">
+        <h2 className="text-[17px] font-medium text-white">No chat selected</h2>
+        <p className="text-sm text-white/50 leading-relaxed">
+          Pick a conversation from the sidebar, start a new one, or browse agents.
         </p>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 text-sm">
         <button
           onClick={onNewChat}
-          className="brand-gradient text-white text-sm font-medium rounded-xl px-4 py-2 hover:opacity-90 transition-opacity"
+          className="bg-white text-black font-medium rounded-md px-3.5 py-1.5 hover:bg-white/90 transition-colors"
         >
           New chat
         </button>
         <button
           onClick={onBrowseAgents}
-          className="glass text-white text-sm font-medium rounded-xl px-4 py-2 hover:bg-white/[0.06] transition-colors flex items-center gap-1.5"
+          className="border border-white/[0.12] text-white font-medium rounded-md px-3.5 py-1.5 hover:bg-white/[0.04] transition-colors"
         >
-          <Sparkles className="size-3.5" />
           Browse agents
         </button>
       </div>

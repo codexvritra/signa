@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07070b",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -65,14 +65,13 @@ export default function RootLayout({
         <Toaster
           theme="dark"
           position="top-center"
-          richColors
           closeButton
           toastOptions={{
             style: {
-              background: "rgba(20, 20, 24, 0.85)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "#0a0a0c",
+              border: "1px solid rgba(255,255,255,0.1)",
               color: "white",
+              fontSize: 13,
             },
           }}
         />

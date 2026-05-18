@@ -154,35 +154,30 @@ export function AppShell({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-full max-w-md flex flex-col items-center gap-5 text-center"
+          className="w-full max-w-sm flex flex-col items-start gap-6"
         >
-          <div className="relative">
-            <div className="absolute inset-0 brand-gradient blur-3xl opacity-50 rounded-full" />
-            <div className="relative size-14 rounded-2xl brand-gradient shadow-2xl" />
-          </div>
-          <div className="space-y-1.5">
-            <h1 className="text-2xl font-semibold tracking-tight">
+          <div className="size-2 rounded-full bg-[var(--accent)] mt-1" />
+          <div className="space-y-2">
+            <h1 className="text-[26px] font-semibold tracking-tight leading-tight">
               Enable XMTP messaging
             </h1>
-            <p className="text-sm text-white/55 max-w-sm">
-              One-time signature to derive your XMTP identity. No gas. Takes ~10–30s the
-              first time, instant after.
+            <p className="text-sm text-white/55 leading-relaxed">
+              One signature to derive your XMTP identity. No gas. Takes ~10–30s
+              the first time, instant after.
             </p>
           </div>
-          <motion.button
-            whileHover={{ scale: initStatus === "loading" ? 1 : 1.03 }}
-            whileTap={{ scale: initStatus === "loading" ? 1 : 0.97 }}
+          <button
             onClick={initXmtp}
             disabled={initStatus === "loading"}
-            className="brand-gradient text-white font-medium rounded-xl px-6 py-3 shadow-lg disabled:opacity-70 flex items-center gap-2"
+            className="bg-white text-black font-medium rounded-md px-4 py-2 text-sm disabled:opacity-70 inline-flex items-center gap-2 hover:bg-white/90 transition-colors"
           >
-            {initStatus === "loading" && <Spinner size={14} />}
+            {initStatus === "loading" && <Spinner size={12} className="text-black" />}
             {initStatus === "loading"
               ? "Setting up… check your wallet"
               : "Enable messaging"}
-          </motion.button>
+          </button>
           {initError && (
-            <div className="glass rounded-xl px-3 py-2 text-xs text-red-300 break-words max-w-sm">
+            <div className="card rounded-md px-3 py-2 text-xs text-[var(--error)] break-words w-full">
               {initError}
             </div>
           )}

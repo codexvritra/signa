@@ -1,222 +1,190 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import {
-  MessageSquare,
-  Bot,
-  Lock,
-  Wallet,
-  PenLine,
-  Send,
-  ArrowRight,
-  Github,
-  Sparkles,
-} from "lucide-react";
+import { ArrowUpRight, Github } from "lucide-react";
+import { LogoMark } from "@/components/ui/LogoMark";
 import { Footer } from "./Footer";
 
-const features = [
-  {
-    icon: MessageSquare,
-    title: "Wallet-to-wallet chat",
-    desc: "End-to-end encrypted DMs and group chats between any two wallets via XMTP V3 (MLS).",
-  },
-  {
-    icon: Bot,
-    title: "Talk to agents",
-    desc: "DM autonomous agents powered by Llama 3.3 70B that can read on-chain data and reply naturally.",
-  },
-  {
-    icon: Lock,
-    title: "Your wallet is your identity",
-    desc: "No accounts, no passwords, no emails. Sign once with your wallet — your address is your handle.",
-  },
-];
-
-const steps = [
-  {
-    icon: Wallet,
-    title: "Connect your wallet",
-    desc: "MetaMask, Coinbase, Rainbow, any WalletConnect wallet. Switch to Base Sepolia.",
-  },
-  {
-    icon: PenLine,
-    title: "Enable XMTP",
-    desc: "Sign once to derive your XMTP identity. No gas. Takes ~10–30s the first time.",
-  },
-  {
-    icon: Send,
-    title: "Start messaging",
-    desc: "Paste any wallet address to DM them, browse the agent directory, or create a group.",
-  },
+const ROWS: Array<{
+  k: string;
+  v: string;
+  hint?: string;
+}> = [
+  { k: "Transport", v: "XMTP V3 (MLS)", hint: "End-to-end encrypted, decentralized" },
+  { k: "Network", v: "Base Sepolia", hint: "Wallet identity; XMTP itself is chain-agnostic" },
+  { k: "Agents", v: "Llama 3.3 70B on Groq", hint: "With tool-calling against on-chain data" },
+  { k: "Source", v: "MIT", hint: "github.com/sishirupretii/agent-messenger" },
 ];
 
 export function Landing() {
   return (
     <>
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 sm:py-16">
+      <main className="flex-1 flex flex-col">
         {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="w-full max-w-2xl text-center flex flex-col items-center gap-6"
-        >
-          <a
-            href="https://github.com/sishirupretii/agent-messenger"
-            target="_blank"
-            rel="noreferrer"
-            className="glass rounded-full px-3 py-1 text-xs text-white/70 hover:text-white transition-colors flex items-center gap-1.5"
-          >
-            <Github className="size-3" />
-            Open source · MIT
-            <ArrowRight className="size-3 opacity-50" />
-          </a>
-          <div className="relative">
-            <div className="absolute inset-0 brand-gradient blur-3xl opacity-60 rounded-full" />
-            <div className="relative size-16 sm:size-20 rounded-2xl brand-gradient shadow-2xl" />
-          </div>
-          <div className="space-y-3">
-            <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight leading-[1.05]">
-              Talk to wallets.
-              <br />
-              Talk to <span className="brand-text">agents.</span>
-            </h1>
-            <p className="text-white/55 max-w-md mx-auto leading-relaxed text-base sm:text-lg">
-              Open-source agent messaging on Base Sepolia. Connect a wallet to
-              message any other wallet — or any agent — over XMTP.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <ConnectButton.Custom>
-              {({ openConnectModal, mounted }) => (
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={openConnectModal}
-                  disabled={!mounted}
-                  className="brand-gradient text-white font-medium rounded-xl px-6 py-3 shadow-lg disabled:opacity-50"
-                >
-                  Connect wallet
-                </motion.button>
-              )}
-            </ConnectButton.Custom>
-            <Link
-              href="/directory"
-              className="glass text-white font-medium rounded-xl px-5 py-3 hover:bg-white/[0.06] transition-colors flex items-center gap-2"
-            >
-              <Sparkles className="size-4" />
-              Browse agents
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* Features */}
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: {},
-            show: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
-          }}
-          className="grid sm:grid-cols-3 gap-3 mt-16 w-full max-w-3xl"
-        >
-          {features.map(({ icon: Icon, title, desc }) => (
-            <motion.div
-              key={title}
-              variants={{
-                hidden: { opacity: 0, y: 12 },
-                show: { opacity: 1, y: 0 },
-              }}
-              className="glass rounded-2xl p-5 flex flex-col gap-2"
-            >
-              <Icon className="size-4 text-white/70" />
-              <div className="text-sm font-medium text-white">{title}</div>
-              <div className="text-xs text-white/45 leading-relaxed">{desc}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* How it works */}
-        <div className="w-full max-w-3xl mt-20 sm:mt-24">
-          <div className="text-center mb-8">
-            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">
-              How it works
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-              Three steps from cold wallet to chat
-            </h2>
-          </div>
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={{
-              hidden: {},
-              show: { transition: { staggerChildren: 0.08 } },
-            }}
-            className="grid sm:grid-cols-3 gap-3"
-          >
-            {steps.map(({ icon: Icon, title, desc }, i) => (
-              <motion.div
-                key={title}
-                variants={{
-                  hidden: { opacity: 0, y: 12 },
-                  show: { opacity: 1, y: 0 },
-                }}
-                className="glass rounded-2xl p-5 flex flex-col gap-2 relative"
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 pt-20 pb-24 sm:pt-28 sm:pb-32">
+            <div className="flex items-center gap-2 text-xs text-white/55 mb-10">
+              <span className="size-1.5 rounded-full bg-[var(--accent)]" />
+              <span>Live on Base Sepolia</span>
+              <span className="text-white/20">·</span>
+              <a
+                href="https://github.com/sishirupretii/agent-messenger"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-white transition-colors inline-flex items-center gap-1"
               >
-                <div className="flex items-center justify-between">
-                  <div className="size-9 rounded-xl brand-gradient flex items-center justify-center">
-                    <Icon className="size-4 text-white" />
-                  </div>
-                  <span className="text-2xl font-bold text-white/10">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="text-sm font-medium text-white mt-2">{title}</div>
-                <div className="text-xs text-white/45 leading-relaxed">{desc}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+                Source on GitHub
+                <ArrowUpRight className="size-3" />
+              </a>
+            </div>
 
-        {/* CTA strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.3 }}
-          className="w-full max-w-3xl mt-20 sm:mt-24 glass-strong rounded-2xl p-6 sm:p-8 text-center flex flex-col items-center gap-4"
-        >
-          <h3 className="text-xl sm:text-2xl font-semibold">
-            Run your own agent
-          </h3>
-          <p className="text-sm text-white/55 max-w-md">
-            Fork the repo, deploy to Railway, plug in your Groq key — your agent
-            gets its own wallet address that anyone can DM.
-          </p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            <a
-              href="https://github.com/sishirupretii/agent-messenger"
-              target="_blank"
-              rel="noreferrer"
-              className="bg-white text-black font-medium rounded-xl px-4 py-2 hover:bg-white/90 transition-colors text-sm flex items-center gap-1.5"
-            >
-              <Github className="size-3.5" />
-              View on GitHub
-            </a>
-            <Link
-              href="/about"
-              className="glass text-white font-medium rounded-xl px-4 py-2 hover:bg-white/[0.06] transition-colors text-sm"
-            >
-              How it works
-            </Link>
+            <h1 className="text-5xl sm:text-7xl font-semibold leading-[0.95] tracking-[-0.04em] max-w-3xl">
+              Messaging built for{" "}
+              <span className="brand-text">wallets</span>
+              <br />
+              and the agents that{" "}
+              <span className="text-white/55">live on them.</span>
+            </h1>
+
+            <p className="text-white/55 max-w-xl mt-8 text-[17px] leading-relaxed">
+              Connect a wallet, sign once, message any other address — or any
+              agent. End-to-end encrypted over XMTP. Open source.
+            </p>
+
+            <div className="mt-10 flex items-center gap-3">
+              <ConnectButton.Custom>
+                {({ openConnectModal, mounted }) => (
+                  <button
+                    onClick={openConnectModal}
+                    disabled={!mounted}
+                    className="bg-white text-black font-medium rounded-md px-5 py-2.5 text-sm hover:bg-white/90 transition-colors disabled:opacity-50"
+                  >
+                    Connect wallet
+                  </button>
+                )}
+              </ConnectButton.Custom>
+              <Link
+                href="/directory"
+                className="text-white/70 hover:text-white text-sm font-medium px-3 py-2.5 transition-colors"
+              >
+                Browse agents →
+              </Link>
+            </div>
           </div>
-        </motion.div>
+        </section>
+
+        {/* Specs / stack table */}
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-16 sm:py-20">
+            <div className="grid sm:grid-cols-[180px_1fr] gap-4 sm:gap-12">
+              <div className="text-xs uppercase tracking-wider text-white/40">
+                Stack
+              </div>
+              <div className="border-t border-white/[0.06]">
+                {ROWS.map((row) => (
+                  <div
+                    key={row.k}
+                    className="grid grid-cols-[1fr_2fr] sm:grid-cols-[200px_1fr] gap-4 py-4 border-b border-white/[0.06]"
+                  >
+                    <div className="text-xs text-white/45 pt-0.5">{row.k}</div>
+                    <div>
+                      <div className="text-[15px] text-white">{row.v}</div>
+                      {row.hint && (
+                        <div className="text-xs text-white/40 mt-0.5">
+                          {row.hint}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* What you can do */}
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-16 sm:py-20">
+            <div className="grid sm:grid-cols-[180px_1fr] gap-4 sm:gap-12">
+              <div className="text-xs uppercase tracking-wider text-white/40">
+                What works
+              </div>
+              <div className="space-y-6 max-w-2xl">
+                <Feature title="One-to-one DMs">
+                  Paste any wallet address. End-to-end encrypted via XMTP V3.
+                  ENS names and avatars resolve automatically.
+                </Feature>
+                <Feature title="Group chats">
+                  Multi-party rooms with member resolution, leave-group support,
+                  per-message sender labels.
+                </Feature>
+                <Feature title="Reactions, replies, read receipts">
+                  Hover any message. Standard XMTP content types — interoperable
+                  with any other XMTP V3 client.
+                </Feature>
+                <Feature title="Agents that read on-chain">
+                  DM an agent the same way you DM a person. The agent uses Groq
+                  tool-calling to read your Base Sepolia balance, look up tx hashes,
+                  resolve ENS, and answer in natural language.
+                </Feature>
+                <Feature title="Self-hostable">
+                  Fork the repo, deploy web to Vercel + agent to Railway.
+                  Add your agent to <code className="text-[13px] bg-white/[0.05] rounded px-1.5 py-0.5 font-mono">data/agents.json</code> for it to show in the directory.
+                </Feature>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quiet CTA strip */}
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 sm:py-14 flex flex-wrap items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <LogoMark size={20} className="text-white" />
+              <span className="text-[15px] font-medium">Ready when you are.</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <ConnectButton.Custom>
+                {({ openConnectModal, mounted }) => (
+                  <button
+                    onClick={openConnectModal}
+                    disabled={!mounted}
+                    className="bg-white text-black font-medium rounded-md px-4 py-2 text-sm hover:bg-white/90 transition-colors disabled:opacity-50"
+                  >
+                    Connect wallet
+                  </button>
+                )}
+              </ConnectButton.Custom>
+              <a
+                href="https://github.com/sishirupretii/agent-messenger"
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/70 hover:text-white text-sm font-medium px-3 py-2 transition-colors inline-flex items-center gap-1.5"
+              >
+                <Github className="size-3.5" />
+                Read the source
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </>
+  );
+}
+
+function Feature({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="text-[15px] font-medium text-white mb-1">{title}</div>
+      <div className="text-sm text-white/55 leading-relaxed">{children}</div>
+    </div>
   );
 }
