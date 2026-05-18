@@ -1,18 +1,32 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { WagmiProvider } from "wagmi";
+import { WagmiProvider, type State } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { base } from "wagmi/chains";
 import { wagmiConfig } from "@/lib/wagmi";
 import { ChatProvider } from "@/context/ChatProvider";
 
-export function Providers({ children }: { children: ReactNode }) {
+/**
+ * `initialState` is read server-side from the `wagmi.store` cookie via
+ * `cookieToInitialState` in the root layout, then passed in here so the
+ * WagmiProvider hydrates with the previously-connected wallet on every
+ * server-rendered route. Without this, dynamic routes like /feed/bankr
+ * appeared to "disconnect" the wallet on navigation because the provider
+ * mounted empty and had to wait for auto-reconnect.
+ */
+export function Providers({
+  children,
+  initialState,
+}: {
+  children: ReactNode;
+  initialState?: State;
+}) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({

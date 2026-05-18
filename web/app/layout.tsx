@@ -2,9 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import { Toaster } from "sonner";
+import { headers } from "next/headers";
+import { cookieToInitialState } from "wagmi";
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { Providers } from "./providers";
+import { wagmiConfig } from "@/lib/wagmi";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,18 +66,28 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Hydrate WagmiProvider with the wallet state stored in the
+  // `wagmi.store` cookie. Without this, dynamic-rendered routes
+  // (e.g. /feed/bankr) mount the provider empty and show the
+  // wallet as disconnected for a beat before auto-reconnect runs.
+  const requestHeaders = await headers();
+  const initialWagmiState = cookieToInitialState(
+    wagmiConfig,
+    requestHeaders.get("cookie"),
+  );
+
   return (
     <html
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable} ${GeistMono.variable}`}
     >
       <body>
-        <Providers>{children}</Providers>
+        <Providers initialState={initialWagmiState}>{children}</Providers>
         <Toaster
           theme="dark"
           position="top-center"
