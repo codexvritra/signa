@@ -27,12 +27,16 @@ export const dynamic = "force-dynamic";
  * `on_signa` is true iff the address has a row in the users table.
  */
 
-// Default to Cloudflare's free public Ethereum mainnet RPC. Reliably
-// reachable from Vercel serverless egress. Override with ETHEREUM_RPC_URL
-// for higher rate limits. The mainnet universal resolver handles both
-// `.eth` and `.base.eth` — Basenames expose L1 forward records, so we
-// don't need a separate Base client here.
-const MAINNET_RPC = process.env.ETHEREUM_RPC_URL || "https://cloudflare-eth.com";
+// Default to publicnode.com — empirically the only common public RPC
+// that supports the viem v2 Universal Resolver's `resolveWithGateways`
+// call (needed for CCIP-read / wildcard / Basenames). Verified locally:
+//   ✓ publicnode.com:  vitalik.eth → 0xd8…6045   jesse.base.eth → 0x2211…7DA9
+//   ✗ cloudflare-eth:  reverts "Internal error" on resolveWithGateways
+//   ✗ public-rpc.com:  rejects the call shape
+//   ✗ rpc.ankr.com:    rejects the call shape
+// Override with ETHEREUM_RPC_URL for paid endpoints (Alchemy, Infura).
+const MAINNET_RPC =
+  process.env.ETHEREUM_RPC_URL || "https://ethereum.publicnode.com";
 
 const mainnetClient = createPublicClient({
   chain: mainnet,
