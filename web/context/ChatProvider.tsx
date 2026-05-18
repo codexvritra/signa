@@ -26,6 +26,7 @@ import { buildXmtpSigner, ethIdentifier, XMTP_ENV } from "@/lib/xmtp";
 import { getPeerAddressFromDm } from "@/lib/peer";
 import { isDm } from "@/lib/conversation";
 import { ding, notify, requestNotificationPermission } from "@/lib/notifications";
+import { useFeedRegister } from "@/hooks/useFeedRegister";
 
 type XmtpClient = Awaited<ReturnType<typeof Client.create>>;
 export type InitStatus = "idle" | "loading" | "ready" | "error";
@@ -178,6 +179,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [activeConversationId]);
 
   const ownInboxId = client?.inboxId ?? null;
+
+  // After XMTP is ready, register this address with the feed backend so
+  // they show up in @mention autocomplete and can author posts.
+  useFeedRegister({ xmtpReady: !!client });
 
   // ---------------- init ----------------
   const initXmtp = useCallback(async () => {
