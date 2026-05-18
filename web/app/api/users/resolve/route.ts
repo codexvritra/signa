@@ -110,25 +110,60 @@ export async function GET(req: NextRequest) {
       address = viaDb.address;
     }
 
-    // Fallback to live ENS resolve. We always use the mainnet universal
-    // resolver — viem's getEnsAddress on mainnet handles both `.eth` and
-    // `.base.eth` correctly because Basenames expose L1 forward records
-    // via Basename's UR contract on mainnet. (Calling getEnsAddress on
-    // baseClient does NOT work for Basenames — the L1 universal resolver
-    // is the source of truth.)
+    // Fallback to live ENS resolve. Two paths in order — whichever
+    // returns an address first wins:
+    //   (a) viem getEnsAddress against MAINNET_RPC (universal resolver
+    //       — handles .eth + .base.eth via CCIP-read)
+    //   (b) REST fallback against ensdata.net (free, no key, JSON,
+    //       resolves both .eth and .base.eth) — safety net for when
+    //       Vercel serverless egress has weirdness with the RPC.
     if (!address) {
-      console.log(`[resolve] cache miss — live lookup ${normalized} via ${MAINNET_RPC}`);
+      console.log(
+        `[resolve] cache miss — live lookup ${normalized} via ${MAINNET_RPC}`,
+      );
       try {
         const resolved = await mainnetClient.getEnsAddress({
           name: normalized,
         });
-        console.log(`[resolve] live result for ${normalized}: ${resolved ?? "null"}`);
+        console.log(
+          `[resolve] viem result for ${normalized}: ${resolved ?? "null"}`,
+        );
         if (resolved) address = resolved.toLowerCase();
       } catch (e) {
         console.error(
-          `[resolve] ENS lookup THREW for ${normalized}:`,
+          `[resolve] viem ENS lookup THREW for ${normalized}:`,
           e instanceof Error ? e.message : e,
         );
+      }
+
+      // (b) REST fallback
+      if (!address) {
+        try {
+          const url = `https://api.ensdata.net/${encodeURIComponent(normalized)}`;
+          console.log(`[resolve] REST fallback → ${url}`);
+          const res = await fetch(url, {
+            cache: "no-store",
+            headers: { accept: "application/json" },
+          });
+          if (res.ok) {
+            const j: { address?: string } = await res.json();
+            console.log(
+              `[resolve] REST ensdata response for ${normalized}: ${
+                j.address ?? "no_address_field"
+              }`,
+            );
+            if (j.address && /^0x[a-fA-F0-9]{40}$/.test(j.address)) {
+              address = j.address.toLowerCase();
+            }
+          } else {
+            console.log(`[resolve] REST ensdata HTTP ${res.status} for ${normalized}`);
+          }
+        } catch (e) {
+          console.error(
+            `[resolve] REST fallback THREW for ${normalized}:`,
+            e instanceof Error ? e.message : e,
+          );
+        }
       }
     }
 
