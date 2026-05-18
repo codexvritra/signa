@@ -84,7 +84,7 @@ function shortHash(s: string, head = 8, tail = 6): string {
 
 /**
  * Parse text into rich spans: URLs, tx hashes, addresses (linked to
- * Basescan Sepolia), and lightweight markdown (**bold**, *italic*, `code`).
+ * Basescan), and lightweight markdown (**bold**, *italic*, `code`).
  */
 export function renderTextWithLinks(text: string, isInverted = false): ReactNode {
   if (!text) return null;
@@ -120,7 +120,7 @@ export function renderTextWithLinks(text: string, isInverted = false): ReactNode
             target="_blank"
             rel="noreferrer"
             className={`${linkClass} font-mono`}
-            title={`View tx on Basescan Sepolia`}
+            title={`View tx on Basescan`}
           >
             {shortHash(s.value)}
           </a>
@@ -133,7 +133,7 @@ export function renderTextWithLinks(text: string, isInverted = false): ReactNode
             target="_blank"
             rel="noreferrer"
             className={`${linkClass} font-mono`}
-            title={`View address on Basescan Sepolia`}
+            title={`View address on Basescan`}
           >
             {shortHash(s.value, 6, 4)}
           </a>

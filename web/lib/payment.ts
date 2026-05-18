@@ -1,8 +1,8 @@
 import { parseEther, type Address, type Hex } from "viem";
 import type { Conversation } from "@xmtp/browser-sdk";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 
-export const PAYMENT_CHAIN_ID = baseSepolia.id; // 84532
+export const PAYMENT_CHAIN_ID = base.id; // 8453 — Base mainnet
 export const PAYMENT_NAMESPACE = "eip155";
 
 export function parseEthAmount(input: string): bigint | null {
@@ -17,7 +17,7 @@ export function parseEthAmount(input: string): bigint | null {
 }
 
 /**
- * After a user has successfully sent an ETH transfer on Base Sepolia,
+ * After a user has successfully sent an ETH transfer on Base mainnet,
  * publish a TransactionReference XMTP message so the tx appears as a
  * native payment card in the conversation.
  */
@@ -48,8 +48,7 @@ export async function shareTransactionReference(
     ) => Promise<string>;
   };
 
-  // amount is encoded as a "human" number scaled by decimals.
-  // We send the raw wei value with decimals=18.
+  // amount sent as raw wei numeric (with decimals=18 to scale).
   const amountNumber = Number(args.amountWei);
 
   return convAny.sendTransactionReference({

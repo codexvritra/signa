@@ -17,10 +17,10 @@ const SYSTEM_PROMPT_BASE =
 const SYSTEM_PROMPT_TOOLS = `
 
 You have tools available — use them when the user asks something they're for:
-- Read the user's own Base Sepolia balance / nonce / account type
-- Look up any Base Sepolia address's balance
-- Look up any Base Sepolia transaction by hash
-- Get current Base Sepolia network status (block, gas)
+- Read the user's own Base mainnet balance / nonce / account type
+- Look up any Base mainnet address's balance
+- Look up any Base mainnet transaction by hash
+- Get current Base mainnet network status (block, gas)
 - Reverse-lookup an address to its ENS name (via Ethereum mainnet)
 - Forward-resolve an ENS name (e.g. vitalik.eth) to its address
 - Get the current UTC time

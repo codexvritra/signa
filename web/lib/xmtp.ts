@@ -1,7 +1,7 @@
 import { IdentifierKind, type Signer, type Identifier } from "@xmtp/browser-sdk";
 import { toBytes } from "viem";
 
-export const XMTP_ENV = "dev" as const;
+export const XMTP_ENV = "production" as const;
 
 type SignableWalletClient = {
   signMessage: (args: {

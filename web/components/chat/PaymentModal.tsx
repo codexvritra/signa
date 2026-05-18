@@ -2,9 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowDownLeft, ArrowUpRight, Loader2 } from "lucide-react";
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useChainId, useSwitchChain } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
+import { X, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import {
+  useAccount,
+  useSendTransaction,
+  useWaitForTransactionReceipt,
+  useChainId,
+  useSwitchChain,
+} from "wagmi";
+import { base } from "wagmi/chains";
 import { toast } from "sonner";
 import { useChat } from "@/context/ChatProvider";
 import { parseEthAmount, shareTransactionReference } from "@/lib/payment";
@@ -33,15 +39,15 @@ export function PaymentModal({
   const { switchChainAsync } = useSwitchChain();
 
   const [amount, setAmount] = useState("0.001");
-  const [step, setStep] = useState<"input" | "switching" | "signing" | "mining" | "shared" | "error">(
-    "input",
-  );
+  const [step, setStep] = useState<
+    "input" | "switching" | "signing" | "mining" | "shared" | "error"
+  >("input");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { sendTransactionAsync, data: txHash, reset: resetTx } = useSendTransaction();
   const { isLoading: isMining, isSuccess: isMined } = useWaitForTransactionReceipt({
     hash: txHash,
-    chainId: baseSepolia.id,
+    chainId: base.id,
     query: { enabled: !!txHash },
   });
 
@@ -56,7 +62,7 @@ export function PaymentModal({
 
   const parsed = parseEthAmount(amount);
   const canSend = !!parsed && parsed > 0n && !!from && !!toAddress;
-  const wrongChain = chainId !== baseSepolia.id;
+  const wrongChain = chainId !== base.id;
 
   async function send() {
     if (!canSend || !from || !toAddress || !parsed) return;
@@ -64,13 +70,13 @@ export function PaymentModal({
     try {
       if (wrongChain) {
         setStep("switching");
-        await switchChainAsync({ chainId: baseSepolia.id });
+        await switchChainAsync({ chainId: base.id });
       }
       setStep("signing");
       await sendTransactionAsync({
         to: toAddress as `0x${string}`,
         value: parsed,
-        chainId: baseSepolia.id,
+        chainId: base.id,
       });
       setStep("mining");
     } catch (e) {
@@ -80,7 +86,6 @@ export function PaymentModal({
     }
   }
 
-  // When tx is mined, publish a TransactionReference message to the chat
   useEffect(() => {
     if (!isMined || !txHash || !activeConversation || !from || !toAddress || !parsed)
       return;
@@ -102,7 +107,6 @@ export function PaymentModal({
       } catch (e) {
         if (cancelled) return;
         const msg = e instanceof Error ? e.message : String(e);
-        // Tx succeeded but we couldn't post the receipt. Still a success.
         toast.success("Payment sent", {
           description: "Couldn't post the in-chat receipt: " + msg,
         });
@@ -147,7 +151,8 @@ export function PaymentModal({
                   Send ETH
                 </h2>
                 <p className="text-xs text-white/50 mt-0.5">
-                  To {peerLabel ?? (toAddress ? shortAddress(toAddress) : "—")} on Base Sepolia
+                  To {peerLabel ?? (toAddress ? shortAddress(toAddress) : "—")}{" "}
+                  on Base
                 </p>
               </div>
               <button
@@ -196,8 +201,8 @@ export function PaymentModal({
             </div>
 
             <div className="mt-4 text-[11px] text-white/40 leading-relaxed">
-              You&apos;ll sign in your wallet and the recipient sees a payment card
-              in chat once the tx is mined.
+              Real ETH on Base mainnet. You sign in your wallet — the recipient
+              sees a payment card in chat once the tx is mined.
             </div>
 
             {errorMsg && (

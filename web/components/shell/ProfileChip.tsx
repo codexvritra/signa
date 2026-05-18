@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useBalance } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { useChat } from "@/context/ChatProvider";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
@@ -29,7 +29,7 @@ export function ProfileChip() {
 
   const { data: balance } = useBalance({
     address: ownAddress,
-    chainId: baseSepolia.id,
+    chainId: base.id,
     query: { enabled: !!ownAddress, refetchInterval: 20000 },
   });
 
@@ -71,7 +71,7 @@ export function ProfileChip() {
         <div className="text-[10px] font-mono text-white/40 truncate flex items-center gap-1.5">
           <span>{shortAddress(ownAddress, 6, 4)}</span>
           {balanceStr && (
-            <span className="text-white/55" title="Base Sepolia balance">
+            <span className="text-white/55" title="Base mainnet balance">
               · {balanceStr} ETH
             </span>
           )}
