@@ -7,9 +7,11 @@ import { useChat } from "@/context/ChatProvider";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
 import { shortAddress } from "@/lib/format";
+import { useDisplayName } from "@/hooks/useDisplayName";
 
 export function ProfileChip() {
   const { ownAddress } = useChat();
+  const [displayName] = useDisplayName();
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -32,7 +34,11 @@ export function ProfileChip() {
         <PeerAvatar address={ownAddress} size={28} />
         <div className="flex-1 min-w-0">
           <div className="text-xs font-medium text-white truncate">
-            <PeerName address={ownAddress} fallback={shortAddress(ownAddress)} />
+            {displayName ? (
+              displayName
+            ) : (
+              <PeerName address={ownAddress} fallback={shortAddress(ownAddress)} />
+            )}
           </div>
           <div className="text-[10px] font-mono text-white/40 truncate">
             {shortAddress(ownAddress, 6, 4)}

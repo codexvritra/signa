@@ -1,13 +1,14 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Github, ExternalLink, Trash2, LogOut, Volume2, BellRing } from "lucide-react";
+import { X, Github, ExternalLink, Trash2, LogOut, Volume2, BellRing, UserPen } from "lucide-react";
 import { useState } from "react";
 import { useDisconnect } from "wagmi";
 import { toast } from "sonner";
 import { useChat } from "@/context/ChatProvider";
 import { shortAddress } from "@/lib/format";
 import { ding, requestNotificationPermission } from "@/lib/notifications";
+import { useDisplayName } from "@/hooks/useDisplayName";
 
 export function SettingsPanel({
   open,
@@ -19,6 +20,8 @@ export function SettingsPanel({
   const { ownAddress, ownInboxId, client } = useChat();
   const { disconnect } = useDisconnect();
   const [clearingDb, setClearingDb] = useState(false);
+  const [displayName, setDisplayName] = useDisplayName();
+  const [draftName, setDraftName] = useState<string | null>(null);
 
   async function clearLocalDb() {
     if (clearingDb) return;
@@ -118,6 +121,40 @@ export function SettingsPanel({
                 <X className="size-4" />
               </button>
             </div>
+
+            <Section label="Profile">
+              <div className="px-3 py-2.5 flex items-center gap-2.5">
+                <UserPen className="size-3.5 text-white/50 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-white">Display name</div>
+                  <div className="text-[11px] text-white/40">
+                    Shown locally in your sidebar (not visible to others).
+                  </div>
+                </div>
+              </div>
+              <div className="px-3 pb-2.5 flex gap-1.5">
+                <input
+                  type="text"
+                  value={draftName ?? displayName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                  placeholder="e.g. me"
+                  className="flex-1 rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-xs text-white outline-none focus:border-white/25 transition-colors"
+                />
+                <button
+                  onClick={() => {
+                    if (draftName !== null) {
+                      setDisplayName(draftName);
+                      setDraftName(null);
+                      toast.success("Saved");
+                    }
+                  }}
+                  disabled={draftName === null || draftName === displayName}
+                  className="bg-white/10 hover:bg-white/15 disabled:opacity-40 text-white text-xs rounded-md px-2 py-1 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </Section>
 
             <Section label="Identity">
               <Row label="Wallet">

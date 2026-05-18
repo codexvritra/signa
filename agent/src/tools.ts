@@ -1,5 +1,13 @@
 import type Groq from "groq-sdk";
-import { getCode, getEthBalance, getNetworkStatus, getNonce } from "./chain.js";
+import {
+  addressForEns,
+  ensNameFor,
+  getCode,
+  getEthBalance,
+  getNetworkStatus,
+  getNonce,
+  getTransaction,
+} from "./chain.js";
 
 type ToolImpl = (args: Record<string, unknown>) => Promise<string>;
 
@@ -8,11 +16,6 @@ export type ToolBundle = {
   impls: Record<string, ToolImpl>;
 };
 
-/**
- * Build the set of tools the LLM can call on a per-conversation basis.
- * The peer's wallet address is bound in via closure so the LLM doesn't
- * need to know or pass it.
- */
 export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle {
   const tools: Groq.Chat.ChatCompletionTool[] = [
     {
@@ -29,7 +32,7 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
       function: {
         name: "get_user_tx_count",
         description:
-          "Get the total transaction count (nonce) of the user you're chatting with on Base Sepolia. Indicates how active they've been. No arguments.",
+          "Get the total transaction count (nonce) of the user you're chatting with on Base Sepolia. Indicates how active they've been.",
         parameters: { type: "object", properties: {}, required: [] },
       },
     },
@@ -38,7 +41,7 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
       function: {
         name: "get_user_account_type",
         description:
-          "Check whether the user's address is a smart contract or a regular EOA on Base Sepolia. No arguments.",
+          "Check whether the user's address is a smart contract or a regular EOA on Base Sepolia.",
         parameters: { type: "object", properties: {}, required: [] },
       },
     },
@@ -47,7 +50,7 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
       function: {
         name: "get_network_status",
         description:
-          "Get the current Base Sepolia network status: latest block number and gas price. No arguments.",
+          "Get the current Base Sepolia network status: latest block number and gas price.",
         parameters: { type: "object", properties: {}, required: [] },
       },
     },
@@ -66,6 +69,54 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
             },
           },
           required: ["address"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "lookup_transaction",
+        description:
+          "Look up a transaction on Base Sepolia by hash. Returns from, to, value, status, block, gas used.",
+        parameters: {
+          type: "object",
+          properties: {
+            hash: {
+              type: "string",
+              description: "Transaction hash starting with 0x, 64 hex chars.",
+            },
+          },
+          required: ["hash"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "ens_name_for_address",
+        description:
+          "Reverse-lookup an Ethereum address to its primary ENS name (queries Ethereum mainnet). Useful when the user mentions an address and you want to refer to it by name.",
+        parameters: {
+          type: "object",
+          properties: {
+            address: { type: "string", description: "0x address." },
+          },
+          required: ["address"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "address_for_ens_name",
+        description:
+          "Resolve an ENS name (e.g. vitalik.eth) to its Ethereum address (queries mainnet).",
+        parameters: {
+          type: "object",
+          properties: {
+            name: { type: "string", description: "ENS name, e.g. vitalik.eth." },
+          },
+          required: ["name"],
         },
       },
     },
@@ -134,6 +185,37 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
           address: addr.toLowerCase(),
           ...bal,
         });
+      } catch (e) {
+        return JSON.stringify({ error: e instanceof Error ? e.message : String(e) });
+      }
+    },
+    lookup_transaction: async (args) => {
+      const hash = typeof args.hash === "string" ? args.hash.trim() : "";
+      if (!/^0x[a-fA-F0-9]{64}$/.test(hash)) {
+        return JSON.stringify({ error: "Invalid transaction hash" });
+      }
+      try {
+        return JSON.stringify(await getTransaction(hash as `0x${string}`));
+      } catch (e) {
+        return JSON.stringify({ error: e instanceof Error ? e.message : String(e) });
+      }
+    },
+    ens_name_for_address: async (args) => {
+      const addr = typeof args.address === "string" ? args.address.trim() : "";
+      if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+        return JSON.stringify({ error: "Invalid address" });
+      }
+      try {
+        return JSON.stringify(await ensNameFor(addr as `0x${string}`));
+      } catch (e) {
+        return JSON.stringify({ error: e instanceof Error ? e.message : String(e) });
+      }
+    },
+    address_for_ens_name: async (args) => {
+      const name = typeof args.name === "string" ? args.name.trim() : "";
+      if (!name) return JSON.stringify({ error: "Provide an ENS name" });
+      try {
+        return JSON.stringify(await addressForEns(name));
       } catch (e) {
         return JSON.stringify({ error: e instanceof Error ? e.message : String(e) });
       }
