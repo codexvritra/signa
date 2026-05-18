@@ -108,10 +108,16 @@ export default async function LaunchpadPage() {
                 <span aria-hidden className="font-mono">→</span>
               </Link>
               <Link
-                href="/directory"
-                className="text-white/55 hover:text-white text-[13px] px-3 py-2.5"
+                href="/launchpad/top"
+                className="text-white/65 hover:text-white text-[13px] px-3 py-2.5 inline-flex items-center gap-1.5"
               >
-                or browse the full directory
+                <span className="font-mono">→</span> see the leaderboard
+              </Link>
+              <Link
+                href="/directory"
+                className="text-white/35 hover:text-white text-[12px] px-3 py-2.5"
+              >
+                or full directory
               </Link>
             </div>
           </div>
