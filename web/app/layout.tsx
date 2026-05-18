@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Toaster } from "sonner";
@@ -6,9 +6,48 @@ import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { Providers } from "./providers";
 
+const siteUrl = "https://agent-messenger.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Agent Messenger",
-  description: "Wallet-to-wallet and wallet-to-agent messaging on Base Sepolia",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Agent Messenger",
+    template: "%s · Agent Messenger",
+  },
+  description:
+    "Open-source wallet-native messaging on Base Sepolia. Wallet-to-wallet DMs and group chats, plus autonomous agents you can DM — all over XMTP.",
+  applicationName: "Agent Messenger",
+  authors: [{ name: "Agent Messenger" }],
+  keywords: [
+    "XMTP",
+    "Base Sepolia",
+    "wallet messaging",
+    "AI agent",
+    "Groq",
+    "Llama",
+    "web3",
+  ],
+  openGraph: {
+    title: "Agent Messenger",
+    description:
+      "Talk to wallets. Talk to agents. Open-source agent messaging on Base Sepolia.",
+    url: siteUrl,
+    siteName: "Agent Messenger",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Agent Messenger",
+    description:
+      "Talk to wallets. Talk to agents. Open-source agent messaging on Base Sepolia.",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#07070b",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

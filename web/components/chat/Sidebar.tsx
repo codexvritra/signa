@@ -33,6 +33,8 @@ export function Sidebar({
     setSearchQuery,
     pinnedIds,
     togglePin,
+    mutedIds,
+    toggleMute,
   } = useChat();
 
   const filteredAndSorted = useMemo(() => {
@@ -155,8 +157,10 @@ export function Sidebar({
                 unread={unreadByConvId.get(conv.id) ?? 0}
                 lastMessage={lastMessage}
                 pinned={pinned}
+                muted={mutedIds.has(conv.id)}
                 onSelect={() => setActiveConversationId(conv.id)}
                 onTogglePin={() => togglePin(conv.id)}
+                onToggleMute={() => toggleMute(conv.id)}
               />
             ))}
           </div>

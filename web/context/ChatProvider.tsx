@@ -70,6 +70,10 @@ type ChatContextValue = {
   pinnedIds: Set<string>;
   togglePin: (convId: string) => void;
 
+  // mutes
+  mutedIds: Set<string>;
+  toggleMute: (convId: string) => void;
+
   // actions
   openOrCreateDmWith: (address: string) => Promise<Dm | null>;
   createGroupWith: (
@@ -87,6 +91,29 @@ type ChatContextValue = {
 };
 
 const PINS_KEY = "agent-messenger:pinned";
+const MUTES_KEY = "agent-messenger:muted";
+
+function loadSet(key: string): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return new Set();
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed))
+      return new Set(parsed.filter((x): x is string => typeof x === "string"));
+    return new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSet(key: string, value: Set<string>) {
+  try {
+    localStorage.setItem(key, JSON.stringify(Array.from(value)));
+  } catch {
+    // ignore
+  }
+}
 
 const ChatContext = createContext<ChatContextValue | null>(null);
 
@@ -117,32 +144,33 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     new Map(),
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => {
-    if (typeof window === "undefined") return new Set();
-    try {
-      const raw = localStorage.getItem(PINS_KEY);
-      if (!raw) return new Set();
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) return new Set(parsed.filter((x): x is string => typeof x === "string"));
-      return new Set();
-    } catch {
-      return new Set();
-    }
-  });
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => loadSet(PINS_KEY));
+  const [mutedIds, setMutedIds] = useState<Set<string>>(() => loadSet(MUTES_KEY));
 
   const togglePin = useCallback((convId: string) => {
     setPinnedIds((prev) => {
       const next = new Set(prev);
       if (next.has(convId)) next.delete(convId);
       else next.add(convId);
-      try {
-        localStorage.setItem(PINS_KEY, JSON.stringify(Array.from(next)));
-      } catch {
-        // ignore
-      }
+      saveSet(PINS_KEY, next);
       return next;
     });
   }, []);
+
+  const toggleMute = useCallback((convId: string) => {
+    setMutedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(convId)) next.delete(convId);
+      else next.add(convId);
+      saveSet(MUTES_KEY, next);
+      return next;
+    });
+  }, []);
+
+  const mutedRef = useRef<Set<string>>(mutedIds);
+  useEffect(() => {
+    mutedRef.current = mutedIds;
+  }, [mutedIds]);
 
   const activeIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -301,16 +329,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                   next.set(convId, (prev.get(convId) ?? 0) + 1);
                   return next;
                 });
-                const peer = peerInfoByConvId.get(convId);
-                const title = peer?.address
-                  ? `${peer.address.slice(0, 6)}…${peer.address.slice(-4)}`
-                  : "New message";
-                const body =
-                  typeof msg.content === "string"
-                    ? msg.content.slice(0, 140)
+                // Skip notif + sound for muted conversations.
+                if (!mutedRef.current.has(convId)) {
+                  const peer = peerInfoByConvId.get(convId);
+                  const title = peer?.address
+                    ? `${peer.address.slice(0, 6)}…${peer.address.slice(-4)}`
                     : "New message";
-                notify(title, body);
-                ding();
+                  const body =
+                    typeof msg.content === "string"
+                      ? msg.content.slice(0, 140)
+                      : "New message";
+                  notify(title, body);
+                  ding();
+                }
               }
               void refreshConversations();
             }
@@ -668,6 +699,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     markRead,
     pinnedIds,
     togglePin,
+    mutedIds,
+    toggleMute,
     searchQuery,
     setSearchQuery,
   };

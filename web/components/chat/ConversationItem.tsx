@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Pin, PinOff } from "lucide-react";
+import { Users, Pin, PinOff, BellOff, Bell } from "lucide-react";
 import type { Conversation, DecodedMessage } from "@xmtp/browser-sdk";
 import { cn } from "@/lib/cn";
 import { formatRelative, nsToDate, shortAddress } from "@/lib/format";
@@ -20,8 +20,10 @@ export function ConversationItem({
   unread,
   lastMessage,
   pinned,
+  muted,
   onSelect,
   onTogglePin,
+  onToggleMute,
 }: {
   conversation: Conversation;
   peerInfo: PeerInfo | undefined;
@@ -29,8 +31,10 @@ export function ConversationItem({
   unread: number;
   lastMessage: DecodedMessage | undefined;
   pinned: boolean;
+  muted: boolean;
   onSelect: () => void;
   onTogglePin: () => void;
+  onToggleMute: () => void;
 }) {
   const peerAddress = peerInfo?.address ?? null;
   const isGroupConv = isGroup(conversation);
@@ -88,6 +92,7 @@ export function ConversationItem({
             {isAgent && <AgentBadge size="xs" />}
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
+            {muted && <BellOff className="size-2.5 text-white/40" />}
             {pinned && <Pin className="size-2.5 text-white/40 rotate-45" fill="currentColor" />}
             {lastAt && (
               <span className="text-[10px] text-white/30">
@@ -107,23 +112,42 @@ export function ConversationItem({
           )}
         </div>
       </div>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onTogglePin();
-        }}
-        className={cn(
-          "absolute right-1 top-1 size-6 rounded-md flex items-center justify-center transition-opacity",
-          pinned
-            ? "opacity-100 text-violet-300 hover:bg-white/10"
-            : "opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10",
-        )}
-        title={pinned ? "Unpin" : "Pin to top"}
-        aria-label={pinned ? "Unpin" : "Pin"}
-      >
-        {pinned ? <PinOff className="size-3" /> : <Pin className="size-3" />}
-      </button>
+      <div className="absolute right-1 top-1 flex items-center gap-0.5">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMute();
+          }}
+          className={cn(
+            "size-6 rounded-md flex items-center justify-center transition-opacity",
+            muted
+              ? "opacity-100 text-white/60 hover:bg-white/10"
+              : "opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10",
+          )}
+          title={muted ? "Unmute" : "Mute notifications"}
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? <Bell className="size-3" /> : <BellOff className="size-3" />}
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePin();
+          }}
+          className={cn(
+            "size-6 rounded-md flex items-center justify-center transition-opacity",
+            pinned
+              ? "opacity-100 text-violet-300 hover:bg-white/10"
+              : "opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10",
+          )}
+          title={pinned ? "Unpin" : "Pin to top"}
+          aria-label={pinned ? "Unpin" : "Pin"}
+        >
+          {pinned ? <PinOff className="size-3" /> : <Pin className="size-3" />}
+        </button>
+      </div>
     </motion.div>
   );
 }
