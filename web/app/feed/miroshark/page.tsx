@@ -21,6 +21,7 @@ export default function MirosharkFeedPage() {
           kind="miroshark"
           projectName="MiroShark"
           projectUrl="https://github.com/aaronjmars/MiroShark"
+          holdersHref="/holders/MIROSHARK"
           botAddress={botAddress}
           emoji="🦈"
           tagline="Live swarm-simulation verdicts on a public, wallet-signed timeline. Every MiroShark sim that finishes auto-publishes here with its bullish/neutral/bearish split and a watch link."

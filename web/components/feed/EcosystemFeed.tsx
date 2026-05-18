@@ -21,6 +21,8 @@ type EcosystemFeedProps = {
   setupHint: string;
   /** Optional emoji prefix for the H1 */
   emoji?: string;
+  /** Link to /holders/<TOKEN> for the ecosystem token, if any */
+  holdersHref?: string;
 };
 
 const ACCENT: Record<
@@ -84,6 +86,15 @@ export function EcosystemFeed(props: EcosystemFeedProps) {
               {props.projectName}
               <ArrowUpRight className="size-3" />
             </a>
+            {props.holdersHref && (
+              <Link
+                href={props.holdersHref}
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 border border-white/15 text-white/75 hover:bg-white/[0.04] transition"
+              >
+                holders
+                <ArrowUpRight className="size-3" />
+              </Link>
+            )}
             {props.botAddress && (
               <span className="text-white/35 font-mono">
                 bot: {props.botAddress.slice(0, 6)}…{props.botAddress.slice(-4)}

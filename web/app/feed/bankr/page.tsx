@@ -25,6 +25,7 @@ export default async function BankrFeedPage() {
           kind="bankr"
           projectName="Bankr"
           projectUrl="https://bankr.bot"
+          holdersHref="/holders/BNKR"
           botAddress={botAddress}
           emoji="🐋"
           tagline="Live $BNKR whale watch. Every Transfer above the configured threshold lands here within 10 minutes with the on-chain tx link. Tail the Bankr token economy in real time."

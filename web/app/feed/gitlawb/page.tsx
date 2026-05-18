@@ -23,6 +23,7 @@ export default async function GitlawbFeedPage() {
           kind="gitlawb"
           projectName="gitlawb"
           projectUrl="https://gitlawb.com"
+          holdersHref="/holders/GITLAWB"
           botAddress={botAddress}
           emoji="📦"
           tagline="Live timeline of gitlawb's decentralized git network. Every new repo that lands on their public node gets a wallet-signed cast here within 10 minutes."
