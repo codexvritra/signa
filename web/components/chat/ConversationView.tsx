@@ -14,6 +14,7 @@ import { TypingDots } from "./TypingDots";
 import { cn } from "@/lib/cn";
 import { shortAddress } from "@/lib/format";
 import { isGroup, getGroupName } from "@/lib/conversation";
+import { GroupInfoPanel } from "./GroupInfoPanel";
 
 export function ConversationView({ onBack }: { onBack: () => void }) {
   const {
@@ -24,12 +25,14 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
     expectingReplyByConvId,
     sendMessage,
     client,
+    ownInboxId,
   } = useChat();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [groupInfoOpen, setGroupInfoOpen] = useState(false);
 
   const messages = activeConversationId
     ? messagesByConvId.get(activeConversationId) ?? []
@@ -112,13 +115,23 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
           <ArrowLeft className="size-5" />
         </button>
         {isGroupConv ? (
-          <div className="size-9 rounded-full brand-gradient flex items-center justify-center flex-shrink-0">
+          <button
+            onClick={() => setGroupInfoOpen(true)}
+            className="size-9 rounded-full brand-gradient flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+            aria-label="Group info"
+          >
             <Users className="size-4 text-white" />
-          </div>
+          </button>
         ) : (
           <PeerAvatar address={peerAddress} size={36} />
         )}
-        <div className="flex-1 min-w-0">
+        <div
+          className={cn(
+            "flex-1 min-w-0",
+            isGroupConv && "cursor-pointer",
+          )}
+          onClick={isGroupConv ? () => setGroupInfoOpen(true) : undefined}
+        >
           <div className="text-sm font-medium text-white truncate">
             {isGroupConv ? (
               groupName ?? "Untitled group"
@@ -129,9 +142,9 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
             )}
           </div>
           {isGroupConv ? (
-            <div className="text-[11px] text-white/40">
+            <div className="text-[11px] text-white/40 hover:text-white/60 transition-colors">
               {memberCount != null
-                ? `${memberCount} ${memberCount === 1 ? "member" : "members"}`
+                ? `${memberCount} ${memberCount === 1 ? "member" : "members"} · tap for info`
                 : "loading members…"}
             </div>
           ) : (
@@ -199,6 +212,15 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
           onClearReply={() => setReplyTarget(null)}
         />
       </div>
+
+      {isGroupConv && (
+        <GroupInfoPanel
+          open={groupInfoOpen}
+          onClose={() => setGroupInfoOpen(false)}
+          group={activeConversation}
+          ownInboxId={ownInboxId}
+        />
+      )}
     </div>
   );
 }

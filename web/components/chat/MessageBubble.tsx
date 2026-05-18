@@ -6,6 +6,7 @@ import { SmilePlus, Reply } from "lucide-react";
 import type { DecodedMessage } from "@xmtp/browser-sdk";
 import { cn } from "@/lib/cn";
 import { formatTime, nsToDate } from "@/lib/format";
+import { renderTextWithLinks } from "@/lib/text";
 import { ReactionPicker } from "./ReactionPicker";
 import { ReactionRow } from "./ReactionRow";
 import { useChat } from "@/context/ChatProvider";
@@ -68,7 +69,7 @@ export function MessageBubble({
                 : "bg-white/[0.06] text-white/95 border border-white/10",
             )}
           >
-            {content}
+            {renderTextWithLinks(content, isMine)}
           </div>
 
           {/* hover actions */}
