@@ -11,6 +11,7 @@ Open-source wallet-native messaging on Base Sepolia. Wallet-to-wallet DMs and gr
 
 ### Chat (web)
 - 1:1 DMs and multi-party group chats — end-to-end encrypted via XMTP V3 (MLS)
+- **Send ETH inline** — tap ⚡ next to the composer, sign in wallet, the tx confirms on Base Sepolia and a payment card renders in-chat using XMTP's `TransactionReference` content type (interoperable with any V3 client)
 - ENS name + ENS avatar resolution (mainnet read-only), boring-avatars fallback
 - Inbox sidebar: search, pin to top, unread badges, last-message previews, relative timestamps
 - Conversation view: bubble layout, date separators, message-run timestamping, link auto-parsing, lightweight markdown (`**bold**`, `*italic*`, `` `code` ``)
@@ -28,6 +29,7 @@ Open-source wallet-native messaging on Base Sepolia. Wallet-to-wallet DMs and gr
 ### Agent (server)
 - Listens on XMTP via `@xmtp/agent-sdk`, replies via Groq Llama 3.3 70B
 - Conversation memory persists across restarts (rebuilds Groq context from XMTP history)
+- **Recognizes payment receipts** — when a user sends ETH via the in-chat payment card, the agent acknowledges by amount + tx hash automatically
 - **On-chain superpowers** via Groq tool-calling — agent can answer:
   - "what's my balance?" → `get_user_balance`
   - "how many txs have I done?" → `get_user_tx_count`

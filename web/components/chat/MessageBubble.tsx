@@ -10,6 +10,7 @@ import { renderTextWithLinks } from "@/lib/text";
 import { normalizeMessageContent } from "@/lib/message";
 import { ReactionPicker } from "./ReactionPicker";
 import { ReactionRow } from "./ReactionRow";
+import { PaymentCard } from "./PaymentCard";
 import { PeerName } from "@/components/ui/PeerName";
 import { useChat } from "@/context/ChatProvider";
 
@@ -31,8 +32,9 @@ export function MessageBubble({
   const { sendReaction, ownInboxId } = useChat();
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const { text, replyTo, isReply } = normalizeMessageContent(message);
-  if (!text) return null;
+  const { text, replyTo, isReply, isTransactionRef, transactionRef } =
+    normalizeMessageContent(message);
+  if (!text && !isTransactionRef) return null;
 
   const sentAt = (() => {
     try {
@@ -57,8 +59,12 @@ export function MessageBubble({
 
   async function copyText() {
     try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Copied");
+      const toCopy = isTransactionRef
+        ? transactionRef?.reference ?? ""
+        : text;
+      if (!toCopy) return;
+      await navigator.clipboard.writeText(toCopy);
+      toast.success(isTransactionRef ? "Tx hash copied" : "Copied");
     } catch {
       toast.error("Couldn't copy");
     }
@@ -84,29 +90,37 @@ export function MessageBubble({
           </span>
         )}
         <div className="relative">
-          <div
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-[14px] leading-[1.45] break-words",
-              isMine
-                ? "bg-white text-black"
-                : "bg-white/[0.04] text-white border border-white/[0.07]",
-            )}
-          >
-            {replyPreview && (
-              <div
-                className={cn(
-                  "rounded-md px-2 py-1 mb-1 flex items-start gap-1.5 text-[11.5px] leading-snug border-l-2",
-                  isMine
-                    ? "bg-black/5 border-black/30 text-black/60"
-                    : "bg-white/[0.03] border-[var(--accent)]/40 text-white/55",
-                )}
-              >
-                <CornerUpLeft className="size-3 mt-0.5 flex-shrink-0 opacity-60" />
-                <span className="truncate">{replyPreview}</span>
-              </div>
-            )}
-            <div>{renderTextWithLinks(text, isMine)}</div>
-          </div>
+          {isTransactionRef && transactionRef ? (
+            <PaymentCard
+              content={transactionRef}
+              isMine={isMine}
+              onChain
+            />
+          ) : (
+            <div
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-[14px] leading-[1.45] break-words",
+                isMine
+                  ? "bg-white text-black"
+                  : "bg-white/[0.04] text-white border border-white/[0.07]",
+              )}
+            >
+              {replyPreview && (
+                <div
+                  className={cn(
+                    "rounded-md px-2 py-1 mb-1 flex items-start gap-1.5 text-[11.5px] leading-snug border-l-2",
+                    isMine
+                      ? "bg-black/5 border-black/30 text-black/60"
+                      : "bg-white/[0.03] border-[var(--accent)]/40 text-white/55",
+                  )}
+                >
+                  <CornerUpLeft className="size-3 mt-0.5 flex-shrink-0 opacity-60" />
+                  <span className="truncate">{replyPreview}</span>
+                </div>
+              )}
+              <div>{renderTextWithLinks(text, isMine)}</div>
+            </div>
+          )}
 
           <div
             className={cn(

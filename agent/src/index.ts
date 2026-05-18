@@ -91,6 +91,45 @@ async function main() {
     }
   });
 
+  agent.on("transaction-reference", async (ctx) => {
+    try {
+      if (ctx.message.senderInboxId === ctx.client.inboxId) return;
+
+      const ref = ctx.message.content as {
+        reference?: string;
+        networkId?: string;
+        metadata?: {
+          transactionType?: string;
+          currency?: string;
+          amount?: number;
+          decimals?: number;
+          fromAddress?: string;
+          toAddress?: string;
+        };
+      };
+
+      const md = ref?.metadata;
+      const decimals = md?.decimals ?? 18;
+      const amount =
+        typeof md?.amount === "number"
+          ? md.amount / Math.pow(10, decimals)
+          : null;
+      const currency = md?.currency ?? "ETH";
+      const txHash = ref?.reference ?? "(unknown)";
+
+      const amountText = amount != null ? `${amount} ${currency}` : `a ${currency} transfer`;
+      await ctx.conversation.sendText(
+        `Got the ${amountText} — appreciate it. Tx \`${txHash}\``,
+      );
+
+      console.log(
+        `[${ctx.message.conversationId.slice(0, 8)}] received tx ref: ${amountText} (${txHash})`,
+      );
+    } catch (e) {
+      console.error("Failed to handle transaction-reference:", e);
+    }
+  });
+
   agent.on("unhandledError", (err) => {
     console.error("Agent unhandled error:", err);
   });

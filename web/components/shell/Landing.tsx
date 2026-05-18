@@ -40,16 +40,16 @@ export function Landing() {
             </div>
 
             <h1 className="text-5xl sm:text-7xl font-semibold leading-[0.95] tracking-[-0.04em] max-w-3xl">
-              Messaging built for{" "}
-              <span className="brand-text">wallets</span>
+              Messaging,{" "}
+              <span className="brand-text">payments</span>,
               <br />
-              and the agents that{" "}
-              <span className="text-white/55">live on them.</span>
+              and agents — in one wallet-native chat.
             </h1>
 
             <p className="text-white/55 max-w-xl mt-8 text-[17px] leading-relaxed">
-              Connect a wallet, sign once, message any other address — or any
-              agent. End-to-end encrypted over XMTP. Open source.
+              Connect a wallet, sign once. Message any address. Send ETH inline.
+              Talk to autonomous agents that read on-chain state. End-to-end
+              encrypted over XMTP. Open source.
             </p>
 
             <div className="mt-10 flex items-center gap-3">
@@ -115,6 +115,13 @@ export function Landing() {
                   Paste any wallet address. End-to-end encrypted via XMTP V3.
                   ENS names and avatars resolve automatically.
                 </Feature>
+                <Feature title="Send ETH in chat">
+                  Tap <code className="text-[13px] bg-white/[0.05] rounded px-1 py-0.5 font-mono">⚡</code> next
+                  to the composer. Sign in your wallet — the tx confirms on
+                  Base Sepolia and a real payment card renders in chat, both
+                  sides see it. Uses XMTP&apos;s <code className="text-[13px] bg-white/[0.05] rounded px-1 py-0.5 font-mono">TransactionReference</code> content
+                  type so any XMTP V3 client can render it.
+                </Feature>
                 <Feature title="Group chats">
                   Multi-party rooms with member resolution, leave-group support,
                   per-message sender labels.
@@ -126,7 +133,8 @@ export function Landing() {
                 <Feature title="Agents that read on-chain">
                   DM an agent the same way you DM a person. The agent uses Groq
                   tool-calling to read your Base Sepolia balance, look up tx hashes,
-                  resolve ENS, and answer in natural language.
+                  resolve ENS, and answer in natural language. It also recognizes
+                  payment receipts and thanks you for them.
                 </Feature>
                 <Feature title="Self-hostable">
                   Fork the repo, deploy web to Vercel + agent to Railway.

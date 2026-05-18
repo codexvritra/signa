@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, Check, Users, ArrowDown } from "lucide-react";
+import { ArrowLeft, Copy, Check, Users, ArrowDown, Zap } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
+import { PaymentModal } from "./PaymentModal";
 import type { DecodedMessage } from "@xmtp/browser-sdk";
 import { toast } from "sonner";
 import { useChat } from "@/context/ChatProvider";
@@ -38,6 +39,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [groupInfoOpen, setGroupInfoOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const [atBottom, setAtBottom] = useState(true);
   const [memberAddresses, setMemberAddresses] = useState<Map<string, string>>(
     new Map(),
@@ -325,7 +327,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.15 }}
-              className="absolute -top-12 right-4 size-9 rounded-full glass-strong shadow-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors z-10"
+              className="absolute -top-12 right-4 size-9 rounded-full card-raised flex items-center justify-center text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors z-10"
               aria-label="Scroll to bottom"
               title="Scroll to bottom"
             >
@@ -333,11 +335,25 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
             </motion.button>
           )}
         </AnimatePresence>
-        <MessageInput
-          onSend={sendMessage}
-          replyTarget={replyTarget}
-          onClearReply={() => setReplyTarget(null)}
-        />
+        <div className="flex items-end gap-2">
+          {!isGroupConv && peerAddress && (
+            <button
+              onClick={() => setPaymentOpen(true)}
+              className="size-9 flex-shrink-0 rounded-md border border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.06] text-white/60 hover:text-[var(--accent)] transition-colors flex items-center justify-center"
+              aria-label="Send ETH"
+              title="Send ETH on Base Sepolia"
+            >
+              <Zap className="size-4" />
+            </button>
+          )}
+          <div className="flex-1 min-w-0">
+            <MessageInput
+              onSend={sendMessage}
+              replyTarget={replyTarget}
+              onClearReply={() => setReplyTarget(null)}
+            />
+          </div>
+        </div>
       </div>
 
       {isGroupConv && (
@@ -346,6 +362,14 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
           onClose={() => setGroupInfoOpen(false)}
           group={activeConversation}
           ownInboxId={ownInboxId}
+        />
+      )}
+      {!isGroupConv && peerAddress && (
+        <PaymentModal
+          open={paymentOpen}
+          onClose={() => setPaymentOpen(false)}
+          toAddress={peerAddress}
+          peerLabel={knownAgent ? knownAgent.name : undefined}
         />
       )}
     </div>
