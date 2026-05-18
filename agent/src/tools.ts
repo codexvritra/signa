@@ -8,6 +8,8 @@ import {
   getNonce,
   getTransaction,
 } from "./chain.js";
+import { listRepos, repoInfo, listPrs, agentPage } from "./gitlawb.js";
+import { simulate as mirosharkSimulate } from "./miroshark.js";
 
 type ToolImpl = (args: Record<string, unknown>) => Promise<string>;
 
@@ -129,6 +131,97 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
         parameters: { type: "object", properties: {}, required: [] },
       },
     },
+    {
+      type: "function",
+      function: {
+        name: "gitlawb_list_repos",
+        description:
+          "Resolve a 'list repos on gitlawb' question to a live deeplink into gitlawb's public node browser. Returns a real URL the user can open to see the live repo list. Optional ownerDid filter narrows to repos owned by a specific DID. Always works — no auth required. Pass the deeplink back to the user verbatim along with a short summary of what they'll see.",
+        parameters: {
+          type: "object",
+          properties: {
+            ownerDid: {
+              type: "string",
+              description:
+                "Optional DID of the repo owner to filter by (e.g. did:key:z6Mk...).",
+            },
+          },
+          required: [],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "gitlawb_get_repo",
+        description:
+          "Resolve a 'show me this gitlawb repo' question to a live deeplink into gitlawb's public node browser, scoped to the given repo DID. The user opens the URL to see description, last activity, owner DID, and peer mirror CIDs (IPFS/Filecoin/Arweave). Always works — no auth required.",
+        parameters: {
+          type: "object",
+          properties: {
+            repoDid: {
+              type: "string",
+              description: "Repo DID, e.g. did:gitlawb:litcoin-submissions or did:key:z6Mk...",
+            },
+          },
+          required: ["repoDid"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "gitlawb_list_prs",
+        description:
+          "Resolve a 'show open PRs for this gitlawb repo' question to a live deeplink. The user opens the URL → 'PRs' tab to see open pull requests, authors (by DID), target branches, and review status. PRs on gitlawb are UCAN-capability-gated; write actions need a registered DID. Always works — no auth required.",
+        parameters: {
+          type: "object",
+          properties: {
+            repoDid: {
+              type: "string",
+              description: "Repo DID, e.g. did:gitlawb:...",
+            },
+          },
+          required: ["repoDid"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "gitlawb_agent_page",
+        description:
+          "Resolve a 'who is this DID on gitlawb' question to a live deeplink to that DID's agent profile on gitlawb. Shows repos owned, push count, trust level, recent peer activity. Useful when the user mentions a did:key:z6Mk... in conversation and wants to know what's there.",
+        parameters: {
+          type: "object",
+          properties: {
+            did: {
+              type: "string",
+              description: "Ed25519-encoded DID, e.g. did:key:z6Mk...",
+            },
+          },
+          required: ["did"],
+        },
+      },
+    },
+    {
+      type: "function",
+      function: {
+        name: "miroshark_simulate",
+        description:
+          "Spawn a MiroShark swarm-intelligence simulation about a topic. MiroShark spins up hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets. If the SIGNA agent has MIROSHARK_BASE_URL configured (a self-hosted MiroShark instance), this kicks off a real sim and returns the live watch + share deeplinks. If not configured, returns deploy-your-own instructions and the GitHub repo URL — never fabricates a result. Use when the user asks 'what would people think of X', 'simulate reaction to X', 'spawn a swarm sim about X', or similar speculation/prediction questions.",
+        parameters: {
+          type: "object",
+          properties: {
+            topic: {
+              type: "string",
+              description: "One-sentence topic or claim to simulate public reaction to.",
+            },
+          },
+          required: ["topic"],
+        },
+      },
+    },
   ];
 
   const impls: Record<string, ToolImpl> = {
@@ -236,6 +329,35 @@ export function buildToolsForPeer(peerAddress: `0x${string}` | null): ToolBundle
         unix: Math.floor(now.getTime() / 1000),
         utc: now.toUTCString(),
       });
+    },
+    gitlawb_list_repos: async (args) => {
+      const ownerDid = typeof args.ownerDid === "string" ? args.ownerDid : undefined;
+      return listRepos(ownerDid);
+    },
+    gitlawb_get_repo: async (args) => {
+      const repoDid = typeof args.repoDid === "string" ? args.repoDid : "";
+      if (!repoDid) {
+        return JSON.stringify({ error: "repoDid required" });
+      }
+      return repoInfo(repoDid);
+    },
+    gitlawb_list_prs: async (args) => {
+      const repoDid = typeof args.repoDid === "string" ? args.repoDid : "";
+      if (!repoDid) {
+        return JSON.stringify({ error: "repoDid required" });
+      }
+      return listPrs(repoDid);
+    },
+    gitlawb_agent_page: async (args) => {
+      const did = typeof args.did === "string" ? args.did : "";
+      if (!did) {
+        return JSON.stringify({ error: "did required" });
+      }
+      return agentPage(did);
+    },
+    miroshark_simulate: async (args) => {
+      const topic = typeof args.topic === "string" ? args.topic : "";
+      return mirosharkSimulate(topic);
     },
   };
 

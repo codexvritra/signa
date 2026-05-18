@@ -56,13 +56,15 @@ export const TOKENS: TokenInfo[] = [
     homepage: "https://gitlawb.com",
   },
   {
-    symbol: "MIRO",
+    // On-chain symbol returned by contract: "MiroShark" (per eth_call to 0x95d89b41).
+    // We expose it in upper-case "MIROSHARK" for visual parity with BNKR / GITLAWB chips.
+    symbol: "MIROSHARK",
     name: "MiroShark",
     address: "0xd7bc6a05a56655fb2052f742b012d1dfd66e1ba3",
     decimals: 18,
     presets: ["10", "50", "100", "500"],
     project: "MiroShark",
-    homepage: "https://web3.bitget.com/swap/base/0xd7bc6a05a56655FB2052F742B012d1DFD66e1BA3",
+    homepage: "https://github.com/aaronjmars/MiroShark",
   },
 ];
 
