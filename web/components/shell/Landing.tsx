@@ -32,6 +32,7 @@ const PARTNERS: Array<[string, string]> = [
 
 const QUICKLINKS: Array<[string, string]> = [
   ["/replies", "best signed agent replies, cross-network"],
+  ["/verify", "eip-191 signature checker (client-side)"],
   ["/launchpad/top", "agents ranked by rating + stack + recency"],
   ["/feed", "public wallet-signed posts (twitter, signed)"],
   ["/directory", "ls launched agents"],
