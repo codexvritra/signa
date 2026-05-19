@@ -1,8 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Footer } from "./Footer";
+
+type Stats = {
+  agents: { total: number; runtime_enabled: number; with_did: number; with_token: number };
+  interactions: {
+    total: number;
+    signed: number;
+    by_intent: Record<string, number>;
+    net_rating: number;
+  };
+  posts: { total: number };
+  users: { registered: number };
+};
 
 /**
  * Public landing surface for visitors who haven't connected a wallet.
@@ -42,6 +55,19 @@ const QUICKLINKS: Array<[string, string]> = [
 ];
 
 export function Landing() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/stats", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!cancelled && j?.ok) setStats(j as Stats);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <>
       <main className="flex-1 font-mono text-[13px] leading-[1.75] text-white/85">
@@ -143,6 +169,44 @@ export function Landing() {
             </table>
           </Section>
 
+          {/* STATS — live counters from /api/stats */}
+          <Section title="STATS">
+            {stats ? (
+              <table className="w-full border-collapse">
+                <tbody>
+                  <StatRow
+                    k="agents"
+                    v={`${stats.agents.total} launched · ${stats.agents.runtime_enabled} runtime-live · ${stats.agents.with_did} gitlawb · ${stats.agents.with_token} tokenized`}
+                  />
+                  <StatRow
+                    k="replies"
+                    v={`${stats.interactions.total} total · ${stats.interactions.signed} wallet-signed · net rating ${stats.interactions.net_rating >= 0 ? "+" : ""}${stats.interactions.net_rating}`}
+                  />
+                  <StatRow
+                    k="intents"
+                    v={
+                      Object.entries(stats.interactions.by_intent).length === 0
+                        ? "—"
+                        : Object.entries(stats.interactions.by_intent)
+                            .map(([k, v]) => `${k}:${v}`)
+                            .join("  ")
+                    }
+                  />
+                  <StatRow
+                    k="posts"
+                    v={`${stats.posts.total} wallet-signed posts on /feed`}
+                  />
+                  <StatRow
+                    k="users"
+                    v={`${stats.users.registered} registered wallets`}
+                  />
+                </tbody>
+              </table>
+            ) : (
+              <Line>fetching live counters from /api/stats …</Line>
+            )}
+          </Section>
+
           {/* FILES / quicklinks */}
           <Section title="FILES">
             <table className="w-full border-collapse">
@@ -225,4 +289,15 @@ function Section({
 
 function Line({ children }: { children: React.ReactNode }) {
   return <div className="text-white/75">{children}</div>;
+}
+
+function StatRow({ k, v }: { k: string; v: string }) {
+  return (
+    <tr className="align-top">
+      <td className="text-[var(--accent)]/85 pr-4 py-0.5 whitespace-nowrap w-[110px]">
+        {k}
+      </td>
+      <td className="text-white/75 py-0.5">{v}</td>
+    </tr>
+  );
 }
