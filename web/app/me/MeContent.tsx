@@ -20,6 +20,7 @@ import { getWatchlist } from "@/lib/watchlist";
 import { useChat } from "@/context/ChatProvider";
 import { isDm } from "@/lib/conversation";
 import { DigestToggle } from "./DigestToggle";
+import { BankrConnect } from "./BankrConnect";
 import type { Position, PortfolioSnapshot } from "@/lib/portfolio";
 
 /**
@@ -379,6 +380,8 @@ export function MeContent() {
           )}
         </div>
       </section>
+
+      <BankrConnect address={address} />
 
       <DigestToggle address={address} />
 

@@ -97,3 +97,37 @@ export function decryptAgentKey(stored: string): `0x${string}` {
 export function assertVaultConfigured(): void {
   getMasterKey();
 }
+
+/**
+ * Encrypt an arbitrary opaque string (e.g. a user's Bankr API key like
+ * "bk_…") for storage. Same AES-256-GCM + master key as the agent
+ * private-key flow — but doesn't enforce the 32-byte-hex shape, so it
+ * works for arbitrary token strings.
+ */
+export function encryptOpaque(plaintext: string): string {
+  if (!plaintext) throw new Error("encryptOpaque: empty plaintext");
+  const masterKey = getMasterKey();
+  const buf = Buffer.from(plaintext, "utf8");
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", masterKey, iv);
+  const ciphertext = Buffer.concat([cipher.update(buf), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, ciphertext]).toString("base64");
+}
+
+export function decryptOpaque(stored: string): string {
+  const masterKey = getMasterKey();
+  const blob = Buffer.from(stored, "base64");
+  if (blob.length < 12 + 16) {
+    throw new Error("opaque blob too short to be valid");
+  }
+  const iv = blob.subarray(0, 12);
+  const tag = blob.subarray(12, 28);
+  const ciphertext = blob.subarray(28);
+  const decipher = crypto.createDecipheriv("aes-256-gcm", masterKey, iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([
+    decipher.update(ciphertext),
+    decipher.final(),
+  ]).toString("utf8");
+}

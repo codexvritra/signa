@@ -125,6 +125,19 @@ export type SignedAction =
       address: string;
       enabled: boolean;
       ts: number;
+    }
+  | {
+      /**
+       * Authorize SIGNA to take custody of the user's Bankr Agent API
+       * key (encrypted server-side) so they can type /trade <natural
+       * language> in any chat and have Bankr execute the trade against
+       * their Bankr-managed wallet. Passing connect=false purges the
+       * stored key.
+       */
+      kind: "bankr_connect";
+      address: string;
+      connect: boolean;
+      ts: number;
     };
 
 /**
@@ -195,6 +208,21 @@ export function buildMessageToSign(action: SignedAction): string {
           ? `I subscribe to a daily AI digest DM from SIGNA.`
           : `I unsubscribe from the daily SIGNA digest.`,
       ].join("\n");
+    case "bankr_connect":
+      return [
+        `SIGNA bankr ${action.connect ? "connect" : "disconnect"} v1`,
+        `ts:${action.ts}`,
+        `address:${action.address}`,
+        action.connect
+          ? `I authorize SIGNA to encrypt and store my Bankr Agent API`
+          : `I revoke SIGNA's access to my Bankr Agent API key. Purge it.`,
+        action.connect
+          ? `key and use it to execute /trade commands I issue inside`
+          : ``,
+        action.connect ? `SIGNA chats. I can disconnect any time.` : ``,
+      ]
+        .filter(Boolean)
+        .join("\n");
   }
 }
 
