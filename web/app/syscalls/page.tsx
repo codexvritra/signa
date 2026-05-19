@@ -30,6 +30,22 @@ type Syscall = {
 };
 
 const SYSCALLS: Record<string, Syscall[]> = {
+  gateway: [
+    {
+      method: "POST",
+      path: "/api/gateway/respond",
+      auth: "none",
+      brief:
+        "open natural-language gateway — picks the best specialist agent on the network and forwards your prompt",
+    },
+    {
+      method: "GET",
+      path: "/api/gateway",
+      auth: "none",
+      brief:
+        "schema preview + live specialist count per intent + routing tree",
+    },
+  ],
   agents: [
     {
       method: "POST",
