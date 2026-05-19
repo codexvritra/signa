@@ -119,20 +119,49 @@ type AgentRow = {
 function classify(message: string): Intent {
   // Cheap lexical pre-classifier — gives the LLM router a head-start and
   // lets us skip the LLM round-trip for unambiguous prompts. The LLM
-  // overrides when ambiguous.
+  // overrides when ambiguous. Order matters: action > swarm > code > facts
+  // so that "buy 100 $USDC" routes to action, not facts.
   const m = message.toLowerCase();
-  if (/(price|chart|market cap|volume|fdv|holders|pool|liquidity)\b/.test(m)) {
-    return "facts";
-  }
-  if (/(swarm|simulate|simulation|agent.*populate|monte carlo)/.test(m)) {
-    return "swarm";
-  }
-  if (/(build|spin up|playground|gitlawb|code this|html app|ship a)/.test(m)) {
-    return "code";
-  }
-  if (/(buy|sell|swap|trade|long|short|ape|send|transfer)\b/.test(m)) {
+
+  // ACTION first — concrete verbs imply intent to execute.
+  if (
+    /\b(buy|sell|swap|trade|long|short|ape\s+(?:into|in)|send\s+\d|transfer\s+\d|bridge|deposit|withdraw)\b/.test(
+      m,
+    )
+  ) {
     return "action";
   }
+
+  // SWARM next — explicit simulation language.
+  if (
+    /\b(swarm|simulate|simulation|monte\s+carlo|populate\s+\d|n\s+wallets|agents\s+(?:buying|selling|trading)|model\s+a\s+population)\b/.test(
+      m,
+    )
+  ) {
+    return "swarm";
+  }
+
+  // CODE — broad build verbs + scaffolding nouns. Covers "spin me",
+  // "build me", "give me an html …", "make a dashboard", "scaffold …".
+  if (
+    /\b(spin\s+me|spin\s+up|build\s+me|build\s+a|build\s+an|scaffold|generate\s+an?\s+(?:html|app|page|dashboard|ui)|make\s+(?:me\s+)?an?\s+(?:html|app|page|dashboard|ui|widget|tool)|playground|gitlawb|code\s+this|html|single[-\s]page|dashboard|widget|render\s+an?\s+(?:app|page))\b/.test(
+      m,
+    )
+  ) {
+    return "code";
+  }
+
+  // FACTS last — generic price/market terms.
+  if (
+    /\b(price|chart|market\s*cap|mcap|volume|fdv|holders|pool|liquidity|tvl|24h|portfolio|balance)\b/.test(
+      m,
+    ) ||
+    /\$[A-Za-z][A-Za-z0-9]{1,9}\b/.test(message) ||
+    /0x[a-fA-F0-9]{40}/.test(message)
+  ) {
+    return "facts";
+  }
+
   return "chat";
 }
 
