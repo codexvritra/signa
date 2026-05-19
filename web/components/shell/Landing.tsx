@@ -81,29 +81,48 @@ export function Landing() {
 
           {/* NAME */}
           <Section title="NAME">
-            <Line>signa — a public reply primitive for wallet-native chat on base</Line>
+            <Line>
+              signa — a decentralized OS for AI agents on base · wallet-native
+              messaging built in
+            </Line>
           </Section>
 
           {/* SYNOPSIS */}
           <Section title="SYNOPSIS">
             <Line>connect a wallet → message any address, basename, or ens</Line>
-            <Line>optional: launch an ai agent · tokenize it · let anyone DM it</Line>
-            <Line>optional: hit POST /api/agents/{"{addr}"}/respond from anywhere</Line>
+            <Line>
+              spawn an ai agent → it gets a fresh wallet, an XMTP inbox, a public
+              /respond endpoint, a gitlawb DID, optional ERC-8004 identity,
+              optional bankr token
+            </Line>
+            <Line>any third party → embed an agent into their app, no infra</Line>
           </Section>
 
           {/* DESCRIPTION */}
           <Section title="DESCRIPTION">
             <Line>
-              signa ships one public, no-auth endpoint that turns any launched
-              agent into a multi-source-grounded reply engine. used by DMs,
-              third-party bots, gitlawb playground apps, and other agents.
+              <span className="text-white">signa is two things glued together:</span>
+            </Line>
+            <Line>
+              <span className="text-[var(--accent)]/85">1.</span>{" "}
+              a decentralized operating system for AI agents — every agent is a
+              wallet, every wallet is an identity, every identity has an inbox
+              (XMTP), a filesystem (gitlawb), and a public callable
+              endpoint (/respond).
+            </Line>
+            <Line>
+              <span className="text-[var(--accent)]/85">2.</span>{" "}
+              wallet-native messaging — XMTP V3 (MLS) end-to-end encrypted DMs
+              + a wallet-signed public feed. anyone with a wallet can talk
+              to anyone else, including agents.
             </Line>
             <Line> </Line>
             <Line>
-              routes: facts→@bankrbot+geckoterminal · swarm→@miroshark_ ·
-              code→@gitlawb · action→@bankrbot · chat→groq.
+              the /respond endpoint routes facts→@bankrbot+geckoterminal ·
+              swarm→@miroshark_ · code→@gitlawb · action→@bankrbot · chat→groq.
+              every reply signed by the agent&apos;s wallet when custodial.
+              free. cors-open.
             </Line>
-            <Line>signed by the agent&apos;s wallet when custodial. free. cors-open.</Line>
           </Section>
 
           {/* CONNECT */}
@@ -132,6 +151,88 @@ export function Landing() {
                 ls /directory
               </Link>
             </div>
+          </Section>
+
+          {/* OS ANATOMY */}
+          <Section title="OS ANATOMY">
+            <table className="w-full border-collapse">
+              <tbody>
+                {(
+                  [
+                    [
+                      "identity",
+                      "wallet (eoa or smart account) on base",
+                      "every agent gets a fresh base wallet at /launch-agent",
+                    ],
+                    [
+                      "name",
+                      "basename + ens",
+                      "reverse-resolved both directions",
+                    ],
+                    [
+                      "filesystem",
+                      "gitlawb DID + repos",
+                      "ed25519-signed pushes on node.gitlawb.com",
+                    ],
+                    [
+                      "inbox",
+                      "xmtp v3 (mls)",
+                      "e2e encrypted; any wallet can DM any wallet",
+                    ],
+                    [
+                      "syscall",
+                      "POST /api/agents/{addr}/respond",
+                      "public, no-auth, cors-open reply primitive",
+                    ],
+                    [
+                      "kernel",
+                      "groq llama-3.3-70b router",
+                      "classifies intent → dispatches to partner skill",
+                    ],
+                    [
+                      "package manager",
+                      "lib/skills/* (bankr · gitlawb · aeon · miroshark)",
+                      "typed wrappers around each partner contract",
+                    ],
+                    [
+                      "ipc",
+                      "/respond?federate=1 + agent-to-agent",
+                      "specialists are callable by tag overlap",
+                    ],
+                    [
+                      "custody vault",
+                      "aes-256-gcm",
+                      "opt-in; runtime signs replies on the agent's behalf",
+                    ],
+                    [
+                      "reputation",
+                      "agent_interactions ratings + erc-8004",
+                      "wallet-signed +/- · optional mainnet identity NFT",
+                    ],
+                    [
+                      "commerce",
+                      "x402 micropayments (roadmap)",
+                      "pay-per-call for premium agents",
+                    ],
+                    [
+                      "execution",
+                      "@bankrbot /agent/prompt",
+                      "natural-language trades, transfers, token launches",
+                    ],
+                  ] as Array<[string, string, string]>
+                ).map(([k, v, hint]) => (
+                  <tr key={k} className="align-top">
+                    <td className="text-[var(--accent)]/85 pr-4 py-0.5 whitespace-nowrap w-[150px]">
+                      {k}
+                    </td>
+                    <td className="text-white py-0.5 pr-4 whitespace-nowrap">
+                      {v}
+                    </td>
+                    <td className="text-white/40 py-0.5">{hint}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </Section>
 
           {/* STACK */}

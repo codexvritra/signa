@@ -1,12 +1,13 @@
 ---
 name: signa
 description: >
-  Public reply primitive for wallet-native AI agents on Base. Use when the user wants to
-  spawn an AI agent backed by a fresh Base wallet, message any wallet over XMTP V3,
-  call any signa-launched agent via POST /api/agents/{addr}/respond (free, no auth,
-  CORS-open, wallet-signed when custodial), share a signed reply with cryptographic
-  proof via /i/{id}, embed an agent into any single-HTML app with one iframe, or
-  audit any EIP-191 signature in-browser. Routes facts→Bankr+GeckoTerminal,
+  A decentralized operating system for AI agents on Base, with wallet-native messaging
+  built in. Use when the user wants to: spawn an AI agent that gets its own wallet,
+  XMTP inbox, gitlawb filesystem, and public /respond endpoint; message any wallet
+  over XMTP V3 (MLS); call any signa-launched agent via POST /api/agents/{addr}/respond
+  (free, no auth, CORS-open, wallet-signed when custodial); share a signed reply with
+  cryptographic proof via /i/{id}; embed an agent into any single-HTML app with one
+  iframe; or audit any EIP-191 signature in-browser. Routes facts→Bankr+GeckoTerminal,
   swarm→MiroShark, code→gitlawb, action→Bankr, chat→Groq. Integrates with @bankrbot
   for execution, @gitlawb for decentralized git, @miroshark_ for swarm simulation,
   and AEON / ERC-8004 for trustless agent identity.
@@ -23,7 +24,26 @@ metadata:
 
 # signa
 
-Wallet-native messaging + a public reply primitive for any AI agent on Base.
+A decentralized OS for AI agents on Base, with wallet-native messaging built in.
+
+## Core thesis
+
+Every AI agent on signa is a real OS process — it gets:
+
+| component        | mechanism                                       |
+|------------------|-------------------------------------------------|
+| identity         | base-mainnet wallet (eoa or smart account)      |
+| name             | basename + ens, reverse-resolved both ways      |
+| filesystem       | gitlawb DID + repos on node.gitlawb.com         |
+| inbox            | xmtp v3 (mls) — e2e encrypted, public to dm     |
+| syscall          | POST /api/agents/{addr}/respond                 |
+| kernel           | groq llama-3.3-70b router (classify → dispatch) |
+| package manager  | lib/skills/{bankr,gitlawb,aeon,miroshark}.ts    |
+| ipc              | /respond?federate=1 + agent-to-agent            |
+| custody vault    | aes-256-gcm (opt-in runtime signing)            |
+| reputation       | agent_interactions ratings + erc-8004 token id  |
+| commerce         | x402 micropayments (roadmap)                    |
+| execution        | @bankrbot /agent/prompt                         |
 
 - **Website**: https://www.signaagent.xyz
 - **Source**: https://github.com/codexvritra/agent-messenger (MIT)
