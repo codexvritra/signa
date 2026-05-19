@@ -2,35 +2,25 @@
 
 import Link from "next/link";
 import { useAccount } from "wagmi";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { Composer } from "@/components/feed/Composer";
 import { FeedTimeline } from "@/components/feed/FeedTimeline";
 import { useChat } from "@/context/ChatProvider";
 
-const ECOSYSTEM_FEEDS = [
-  {
-    name: "MiroShark",
-    href: "/feed/miroshark",
-    emoji: "🦈",
-    blurb: "swarm-sim verdicts, live",
-    dot: "bg-cyan-400",
-  },
-  {
-    name: "gitlawb",
-    href: "/feed/gitlawb",
-    emoji: "📦",
-    blurb: "new repos on the decentralized git net",
-    dot: "bg-emerald-400",
-  },
-  {
-    name: "Bankr",
-    href: "/feed/bankr",
-    emoji: "🐋",
-    blurb: "$BNKR whale alerts on Base",
-    dot: "bg-violet-400",
-  },
+/**
+ * /feed — public wallet-signed post stream.
+ *
+ * Rendered as a manpage-style index with three flat ecosystem-feed
+ * shortcuts (miroshark · gitlawb · bankr) followed by composer +
+ * timeline. No emoji-decorated cards, no display-font hero, no chip
+ * buttons — same aesthetic as /, /me, /launchpad/top.
+ */
+
+const ECOSYSTEM_FEEDS: Array<[string, string, string]> = [
+  ["/feed/miroshark", "miroshark", "swarm-sim verdicts, live"],
+  ["/feed/gitlawb", "gitlawb", "new repos on the decentralized git net"],
+  ["/feed/bankr", "bankr", "$BNKR whale alerts on base"],
 ];
 
 export default function FeedPage() {
@@ -41,74 +31,86 @@ export default function FeedPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
-      <main className="flex-1">
-        <section className="border-b border-white/[0.06]">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-10 pb-6">
-            <Link
-              href="/"
-              className="text-xs text-white/45 hover:text-white inline-flex items-center gap-1 mb-6"
-            >
-              <ArrowLeft className="size-3" />
+      <main className="flex-1 font-mono text-[13px] leading-[1.75] text-white/85">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-10 pb-14">
+          {/* Manpage header */}
+          <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
+            <span>SIGNA FEED</span>
+            <Link href="/" className="hover:text-white">
               ..
             </Link>
-            <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-              $ signa feed
+          </div>
+
+          {/* NAME */}
+          <section className="mb-6">
+            <h2 className="text-white tracking-[0.18em] text-[11px] mb-2">
+              NAME
+            </h2>
+            <div className="pl-4 border-l border-white/[0.06]">
+              signa-feed — wallet-signed posts on base
             </div>
-            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.035em] leading-tight">
-              What&apos;s happening on-chain.
-            </h1>
-            <p className="text-white/65 max-w-md mt-3 text-[14px] leading-relaxed">
-              Wallet-signed posts. Tag any SIGNA user with{" "}
-              <code className="text-[12px] bg-white/[0.05] rounded px-1 py-0.5 font-mono">
+          </section>
+
+          {/* DESCRIPTION */}
+          <section className="mb-6">
+            <h2 className="text-white tracking-[0.18em] text-[11px] mb-2">
+              DESCRIPTION
+            </h2>
+            <div className="pl-4 border-l border-white/[0.06] text-white/65">
+              every post here is signed by its author&apos;s wallet via{" "}
+              <code className="text-white bg-white/[0.05] rounded px-1">
+                personal_sign
+              </code>{" "}
+              and verifiable on the agent_interactions / posts tables.
+              tag any signa user with{" "}
+              <code className="text-white bg-white/[0.05] rounded px-1">
                 @
               </code>
               .
-            </p>
-          </div>
-        </section>
-
-        <section className="border-b border-white/[0.06]">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5">
-            <div className="text-[10px] uppercase tracking-wider text-white/40 mb-2.5 font-medium">
-              Ecosystem timelines
             </div>
-            <div className="grid sm:grid-cols-3 gap-2">
-              {ECOSYSTEM_FEEDS.map((f) => (
-                <Link
-                  key={f.href}
-                  href={f.href}
-                  className="card rounded-md p-3 hover:bg-white/[0.03] transition-colors group flex flex-col gap-1.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`inline-block size-1.5 rounded-full ${f.dot}`} />
-                      <span className="text-[13px] font-medium text-white">
-                        {f.emoji} {f.name}
-                      </span>
-                    </div>
-                    <ArrowUpRight className="size-3 text-white/30 group-hover:text-white" />
-                  </div>
-                  <span className="text-[11px] text-white/50 leading-snug">
-                    {f.blurb}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <section>
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-4">
-            {canPost ? (
-              <Composer />
-            ) : (
-              <div className="card rounded-md p-4 text-[13px] text-white/55 text-center">
-                Connect your wallet and enable messaging to post.
-              </div>
-            )}
-            <FeedTimeline />
-          </div>
-        </section>
+          {/* Ecosystem feeds */}
+          <section className="mb-8">
+            <h2 className="text-white tracking-[0.18em] text-[11px] mb-2">
+              ECOSYSTEM
+            </h2>
+            <table className="w-full border-collapse">
+              <tbody>
+                {ECOSYSTEM_FEEDS.map(([href, name, blurb]) => (
+                  <tr key={href} className="align-top">
+                    <td className="pr-4 py-0.5 whitespace-nowrap w-[140px]">
+                      <Link
+                        href={href}
+                        className="text-[var(--accent)]/85 hover:text-[var(--accent)] hover:underline underline-offset-4"
+                      >
+                        /feed/{name}
+                      </Link>
+                    </td>
+                    <td className="text-white/55 py-0.5">{blurb}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          {/* Composer + Timeline */}
+          <section>
+            <h2 className="text-white tracking-[0.18em] text-[11px] mb-3">
+              TIMELINE
+            </h2>
+            <div className="pl-4 border-l border-white/[0.06] flex flex-col gap-4">
+              {canPost ? (
+                <Composer />
+              ) : (
+                <div className="text-white/50">
+                  // connect your wallet and enable messaging to post.
+                </div>
+              )}
+              <FeedTimeline />
+            </div>
+          </section>
+        </div>
       </main>
       <Footer />
     </div>
