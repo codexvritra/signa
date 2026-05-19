@@ -294,23 +294,39 @@ export default async function AgentProfilePage({
             )}
 
             {/* Runtime status row */}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-4 font-mono text-[11px]">
               {agent.runtime_enabled ? (
                 <Link
                   href={`/agent/${agent.address}/runtime`}
-                  className="inline-flex items-center gap-1.5 border border-emerald-300/30 bg-emerald-300/[0.04] px-2 py-1 text-[11px] text-emerald-200 hover:bg-emerald-300/[0.08] transition rounded-sm"
+                  className="text-emerald-300/85 hover:text-emerald-300 hover:underline underline-offset-4"
                 >
-                  <span className="size-1 rounded-full bg-emerald-300 animate-pulse" />
-                  runtime live{agent.runtime_last_seen_at ? ` · last DM ${new Date(agent.runtime_last_seen_at).toISOString().slice(11, 16)} UTC` : ""}
+                  ● runtime live
+                  {agent.runtime_last_seen_at
+                    ? ` · last DM ${new Date(agent.runtime_last_seen_at).toISOString().slice(11, 16)} UTC`
+                    : ""}
                 </Link>
               ) : (
                 <Link
                   href={`/agent/${agent.address}/runtime`}
-                  className="inline-flex items-center gap-1.5 border border-white/15 px-2 py-1 text-[11px] text-white/55 hover:text-white hover:bg-white/[0.04] transition rounded-sm font-mono"
+                  className="text-white/55 hover:text-white hover:underline underline-offset-4"
                 >
                   $ signa runtime enable →
                 </Link>
               )}
+              <Link
+                href={`/agent/${agent.address}/replies`}
+                className="text-white/55 hover:text-white hover:underline underline-offset-4"
+              >
+                $ signa replies ls →
+              </Link>
+              <a
+                href={`/agent/${agent.address}/embed`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/45 hover:text-white hover:underline underline-offset-4"
+              >
+                $ embed iframe →
+              </a>
             </div>
           </div>
         </section>
