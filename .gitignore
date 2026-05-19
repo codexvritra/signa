@@ -4,10 +4,15 @@ node_modules/
 .pnp.js
 
 # next.js / build output
+# NOTE: only ignore root-level + tooling build dirs — we have an app
+# route at web/app/build which is the gitlawb-playground launcher and
+# must be committed.
 .next/
 out/
-build/
-dist/
+/build/
+/dist/
+**/build/lib/
+**/build/output/
 
 # env files — CRITICAL: never commit secrets
 .env

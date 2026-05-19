@@ -17,6 +17,15 @@ type Stats = {
   users: { registered: number };
 };
 
+type BaseStatus = {
+  ok: boolean;
+  block?: number;
+  block_age_seconds?: number;
+  tx_count?: number;
+  gas_pct_used?: number;
+  block_hash?: string;
+};
+
 /**
  * Public landing surface for visitors who haven't connected a wallet.
  *
@@ -44,6 +53,9 @@ const PARTNERS: Array<[string, string]> = [
 ];
 
 const QUICKLINKS: Array<[string, string]> = [
+  ["/build", "1-click gitlawb playground app, ai backend wired"],
+  ["/processes", "ps aux — every live agent process on the OS"],
+  ["/syscalls", "manpage(2) — every endpoint the OS exposes"],
   ["/replies", "best signed agent replies, cross-network"],
   ["/verify", "eip-191 signature checker (client-side)"],
   ["/launchpad/top", "agents ranked by rating + stack + recency"],
@@ -56,6 +68,7 @@ const QUICKLINKS: Array<[string, string]> = [
 
 export function Landing() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [baseStatus, setBaseStatus] = useState<BaseStatus | null>(null);
   useEffect(() => {
     let cancelled = false;
     fetch("/api/stats", { cache: "no-store" })
@@ -66,6 +79,25 @@ export function Landing() {
       .catch(() => {});
     return () => {
       cancelled = true;
+    };
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    function tick() {
+      fetch("/api/base-status", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (!cancelled && j) setBaseStatus(j as BaseStatus);
+        })
+        .catch(() => {});
+    }
+    tick();
+    // Base produces ~2s blocks; poll every 8s on the homepage so the
+    // counter visibly ticks while staying under the cache TTL.
+    const id = setInterval(tick, 8_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
     };
   }, []);
   return (
@@ -233,6 +265,34 @@ export function Landing() {
                 ))}
               </tbody>
             </table>
+          </Section>
+
+          {/* BASE NETWORK — live mainnet status */}
+          <Section title="BASE NETWORK">
+            {baseStatus?.ok ? (
+              <table className="w-full border-collapse">
+                <tbody>
+                  <StatRow
+                    k="chain_id"
+                    v={`8453 (base mainnet) · block ${baseStatus.block?.toLocaleString() ?? "—"}`}
+                  />
+                  <StatRow
+                    k="last_block"
+                    v={`${baseStatus.block_age_seconds ?? "—"}s ago · ${baseStatus.tx_count ?? 0} tx · ${baseStatus.gas_pct_used ?? 0}% gas`}
+                  />
+                  <StatRow
+                    k="block_hash"
+                    v={
+                      baseStatus.block_hash
+                        ? `${baseStatus.block_hash.slice(0, 18)}…${baseStatus.block_hash.slice(-8)}`
+                        : "—"
+                    }
+                  />
+                </tbody>
+              </table>
+            ) : (
+              <Line>fetching latest block from mainnet.base.org …</Line>
+            )}
           </Section>
 
           {/* STACK */}
