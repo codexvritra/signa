@@ -4,14 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import {
-  ArrowUpRight,
-  Bookmark,
-  MessageCircle,
-  Sparkles,
-  Plus,
-  Users,
-} from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { shortAddress } from "@/lib/format";
@@ -90,9 +82,9 @@ export function MeContent() {
                 <button
                   onClick={openConnectModal}
                   disabled={!mounted}
-                  className="bg-[var(--accent)] text-black font-semibold rounded-md px-5 py-2.5 text-sm uppercase tracking-wide hover:brightness-110 transition disabled:opacity-50"
+                  className="text-[var(--accent)] font-mono hover:underline underline-offset-4 disabled:opacity-50"
                 >
-                  Connect wallet
+                  [ connect wallet ]
                 </button>
               )}
             </ConnectButton.Custom>
@@ -145,31 +137,29 @@ export function MeContent() {
               </div>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-2 text-[12px]">
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] font-mono">
             <Link
               href="/tokens"
-              className="border border-white/15 text-white rounded-md px-3 py-1.5 hover:bg-white/[0.04] transition inline-flex items-center gap-1.5 font-mono"
+              className="text-[var(--accent)] hover:underline underline-offset-4"
             >
-              <Plus className="size-3" />
               find tokens
             </Link>
             <Link
               href="/launch-agent"
-              className="border border-white/15 text-white rounded-md px-3 py-1.5 hover:bg-white/[0.04] transition inline-flex items-center gap-1.5 font-mono"
+              className="text-[var(--accent)] hover:underline underline-offset-4"
             >
-              <Sparkles className="size-3" />
               spawn-agent
             </Link>
             <Link
               href={`/u/${address.toLowerCase()}`}
-              className="border border-white/15 text-white rounded-md px-3 py-1.5 hover:bg-white/[0.04] transition inline-flex items-center gap-1.5 font-mono"
+              className="text-[var(--accent)] hover:underline underline-offset-4"
             >
-              public profile →
+              public profile
             </Link>
             <button
               onClick={refresh}
               disabled={loading}
-              className="text-[11px] text-white/55 hover:text-white px-2 py-1.5 inline-flex items-center gap-1 font-mono"
+              className="text-white/45 hover:text-white"
             >
               {loading ? "refreshing…" : "↻ refresh"}
             </button>
@@ -220,9 +210,9 @@ export function MeContent() {
             <span>$ signa dms --recent</span>
             <Link
               href="/"
-              className="text-[10px] text-white/45 hover:text-white inline-flex items-center gap-1 normal-case tracking-normal"
+              className="text-[10px] text-white/45 hover:text-white normal-case tracking-normal"
             >
-              all DMs <ArrowUpRight className="size-2.5" />
+              all DMs →
             </Link>
           </div>
           {!client ? (
@@ -237,12 +227,12 @@ export function MeContent() {
               <button
                 onClick={initXmtp}
                 disabled={initStatus === "loading"}
-                className="bg-[var(--accent)] text-black font-semibold rounded-md px-3 py-1.5 text-[12px] uppercase tracking-wide disabled:opacity-50 hover:brightness-110 transition inline-flex items-center gap-1.5"
+                className="text-[var(--accent)] hover:underline underline-offset-4 disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 {initStatus === "loading" && (
-                  <Spinner size={10} className="text-black" />
+                  <Spinner size={10} className="text-[var(--accent)]" />
                 )}
-                {initStatus === "loading" ? "Signing…" : "Enable messaging"}
+                {initStatus === "loading" ? "[ signing… ]" : "[ enable messaging ]"}
               </button>
             </div>
           ) : conversations.length === 0 ? (
@@ -280,8 +270,8 @@ export function MeContent() {
                     className="border border-white/10 px-3 py-3 hover:bg-white/[0.03] transition group flex items-start gap-2.5"
                   >
                     {isGroup ? (
-                      <span className="size-8 rounded-full bg-gradient-to-br from-emerald-400/60 to-cyan-400/60 flex items-center justify-center flex-shrink-0">
-                        <Users className="size-4 text-black/70" />
+                      <span className="size-8 flex items-center justify-center flex-shrink-0 border border-white/15 text-white/55 font-mono text-[11px]">
+                        [G]
                       </span>
                     ) : (
                       <PeerAvatar address={peerAddr} size={32} />
@@ -297,7 +287,7 @@ export function MeContent() {
                             "unknown peer"
                           )}
                         </span>
-                        <ArrowUpRight className="size-3 text-white/30 group-hover:text-white flex-shrink-0" />
+                        <span className="text-white/30 group-hover:text-white flex-shrink-0 text-[12px]">↗</span>
                       </div>
                       <div className="text-[10px] text-white/40 font-mono truncate mt-0.5">
                         {peerAddr ? peerAddr : conv.id.slice(0, 24) + "…"}
@@ -334,7 +324,7 @@ export function MeContent() {
                       <span className="text-[14px] text-white font-medium truncate">
                         {a.name}
                       </span>
-                      <ArrowUpRight className="size-3 text-white/30 group-hover:text-white flex-shrink-0" />
+                      <span className="text-white/30 group-hover:text-white flex-shrink-0 text-[12px]">↗</span>
                     </div>
                     <div className="text-[10px] font-mono text-white/35 truncate">
                       {a.address.slice(0, 10)}…{a.address.slice(-4)}
@@ -367,9 +357,7 @@ export function MeContent() {
               >
                 /tokens
               </Link>
-              {" → pick any token → tap "}
-              <Bookmark className="size-3 inline" />
-              {" to track."}
+              {" → pick any token → tap [+] to track."}
             </div>
           ) : (
             <div className="font-mono text-[12px] text-white/70">
@@ -385,51 +373,46 @@ export function MeContent() {
 
       <DigestToggle address={address} />
 
-      {/* Quick links */}
+      {/* Quick links — manpage SEE ALSO style */}
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
             $ signa actions
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            <ActionTile
-              href="/feed"
-              title="Feed"
-              hint="post wallet-signed, watch ecosystem alerts"
-              dot="bg-[var(--accent)]"
-            />
-            <ActionTile
-              href="/launchpad"
-              title="Launchpad"
-              hint="spawn an AI agent · 60s · one tx"
-              dot="bg-violet-400"
-            />
-            <ActionTile
-              href="/launchpad/top"
-              title="Top agents"
-              hint="leaderboard by stack score"
-              dot="bg-amber-300"
-            />
-            <ActionTile
-              href="/tokens"
-              title="Tokens"
-              hint="trending + new launches on @base"
-              dot="bg-emerald-400"
-            />
-            <ActionTile
-              href="/holders/BNKR"
-              title="$BNKR community"
-              hint="every signa user holding $BNKR"
-              dot="bg-violet-400"
-            />
-            <ActionTile
-              href="/"
-              title="DMs"
-              hint="XMTP V3 encrypted by your wallet"
-              icon={<MessageCircle className="size-3" />}
-              dot="bg-[var(--accent)]"
-            />
-          </div>
+          <table className="font-mono text-[12px] w-full max-w-2xl border-collapse">
+            <tbody>
+              <ActionRow
+                href="/feed"
+                title="/feed"
+                hint="post wallet-signed; watch ecosystem alerts"
+              />
+              <ActionRow
+                href="/launchpad"
+                title="/launchpad"
+                hint="spawn an ai agent · 60s · one tx"
+              />
+              <ActionRow
+                href="/launchpad/top"
+                title="/launchpad/top"
+                hint="leaderboard by rating + stack depth"
+              />
+              <ActionRow
+                href="/tokens"
+                title="/tokens"
+                hint="trending + new launches on base"
+              />
+              <ActionRow
+                href="/holders/BNKR"
+                title="/holders/BNKR"
+                hint="every signa user holding $BNKR"
+              />
+              <ActionRow
+                href="/"
+                title="/ (dms)"
+                hint="xmtp v3 encrypted by your wallet"
+              />
+            </tbody>
+          </table>
         </div>
       </section>
     </>
@@ -469,7 +452,9 @@ function PositionRow({ pos }: { pos: Position }) {
             className="rounded-full flex-shrink-0"
           />
         ) : (
-          <span className="size-5 rounded-full bg-gradient-to-br from-violet-400/60 to-blue-400/60 flex-shrink-0" />
+          <span className="size-5 flex-shrink-0 border border-white/15 text-white/45 font-mono text-[10px] flex items-center justify-center">
+            $
+          </span>
         )}
         <div className="min-w-0">
           <div className="text-white truncate">
@@ -509,35 +494,26 @@ function PositionRow({ pos }: { pos: Position }) {
   return <div className={className}>{body}</div>;
 }
 
-function ActionTile({
+function ActionRow({
   href,
   title,
   hint,
-  dot,
-  icon,
 }: {
   href: string;
   title: string;
   hint: string;
-  dot: string;
-  icon?: React.ReactNode;
 }) {
   return (
-    <Link
-      href={href}
-      className="border border-white/10 px-3 py-3 hover:bg-white/[0.03] transition group flex items-start gap-2"
-    >
-      <span className={`size-1.5 rounded-full ${dot} mt-2 flex-shrink-0`} />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-[13px] text-white font-medium inline-flex items-center gap-1.5">
-            {icon}
-            {title}
-          </span>
-          <ArrowUpRight className="size-3 text-white/30 group-hover:text-white flex-shrink-0" />
-        </div>
-        <span className="text-[11px] text-white/45 leading-snug">{hint}</span>
-      </div>
-    </Link>
+    <tr className="align-top">
+      <td className="pr-4 py-0.5 whitespace-nowrap w-[150px]">
+        <Link
+          href={href}
+          className="text-[var(--accent)]/85 hover:text-[var(--accent)] hover:underline underline-offset-4"
+        >
+          {title}
+        </Link>
+      </td>
+      <td className="text-white/55 py-0.5">{hint}</td>
+    </tr>
   );
 }
