@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import Groq from "groq-sdk";
 import { serverClient } from "@/lib/supabase";
 import { botPost } from "@/lib/signa-bots";
 import { getPortfolio } from "@/lib/portfolio";
@@ -8,34 +9,34 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Daily AI digest cron.
+ * Daily AI digest cron — Groq-generated.
  *
- * For every user with daily_digest_enabled=true whose last_digest_at
- * is null OR older than 23h, generate a personalized summary and
- * post it to the SIGNA feed via the bankr.bot.signa bot (the most
- * generic "system" bot we already have keys for — v2 would mint a
- * dedicated digest.bot.signa via /generate-bot-keys).
+ * Real architecture:
+ *   1. Pull every user where daily_digest_enabled=true and last_digest_at
+ *      is null OR older than 23h.
+ *   2. Build a per-user data packet: portfolio (live balances + GeckoTerminal
+ *      prices), watchlist with current 24h changes, top mover.
+ *   3. Hand the packet to Groq (llama-3.3-70b-versatile) with a tight
+ *      system prompt that asks for a 3-line wallet-native digest.
+ *   4. Post the Groq-generated text as a wallet-signed feed post via
+ *      bankr.bot.signa (existing bot). The post is real, signed,
+ *      auditable. The text inside is real AI output.
+ *   5. Stamp users.last_digest_at = now() so the 23h floor holds.
  *
- * Content includes:
- *   - net worth + 24h change
- *   - top holding
- *   - watchlist's biggest mover
- *   - footer link back to /me
+ * If GROQ_API_KEY is missing, we fall back to a deterministic
+ * templated digest (still wallet-signed + posted, but without LLM
+ * voice). This means the cron never fails just because Groq is down.
  *
  * Caps:
- *   - 10 users per tick (Vercel function timeout safety)
- *   - 23h floor so a re-fire within 24h doesn't double-send
+ *   10 users per tick (Groq cost + Vercel function timeout safety)
+ *   23h floor (server-side dedup independent of cron jitter)
  *
  * Auth: CRON_SECRET via Bearer or ?key=
- *
- * Scheduling:
- *   - Don't ship in vercel.json (Hobby tier blocks 10-min crons).
- *   - GitHub Actions workflow OR cron-job.org hits this once per
- *     hour. The 23h floor handles dedup.
  */
 
 const MAX_USERS_PER_TICK = 10;
 const MIN_HOURS_BETWEEN = 23;
+const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
 function authorize(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;
@@ -48,6 +49,108 @@ function authorize(req: NextRequest): boolean {
 
 function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
+type DigestFacts = {
+  display: string;
+  net_worth_usd: number;
+  change_24h_pct: number;
+  change_24h_usd: number;
+  top_hold: { symbol: string; value_usd: number; change_24h_pct: number | null } | null;
+  watchlist_mover: { symbol: string; change_24h_pct: number } | null;
+  position_count: number;
+  watchlist_count: number;
+};
+
+async function gatherFacts(
+  address: string,
+  display: string,
+  watchlist: string[],
+): Promise<DigestFacts> {
+  const port = await getPortfolio(address, watchlist);
+  let mover: DigestFacts["watchlist_mover"] = null;
+  for (const addr of watchlist.slice(0, 10)) {
+    const t = await tokenOnBase(addr);
+    if (!t || t.change_24h_pct == null) continue;
+    if (!mover || Math.abs(t.change_24h_pct) > Math.abs(mover.change_24h_pct)) {
+      mover = { symbol: t.symbol, change_24h_pct: t.change_24h_pct };
+    }
+  }
+  return {
+    display,
+    net_worth_usd: port.total_usd,
+    change_24h_pct: port.change_24h_pct,
+    change_24h_usd: port.change_24h_usd,
+    top_hold: port.positions[0]
+      ? {
+          symbol: port.positions[0].symbol,
+          value_usd: port.positions[0].value_usd,
+          change_24h_pct: port.positions[0].change_24h_pct,
+        }
+      : null,
+    watchlist_mover: mover,
+    position_count: port.positions.length,
+    watchlist_count: watchlist.length,
+  };
+}
+
+async function groqDigest(facts: DigestFacts): Promise<string | null> {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return null;
+  try {
+    const client = new Groq({ apiKey: key });
+    const system =
+      "You write short daily digests for crypto wallets on Base. Tone: terse, factual, no hype, no emoji storms. Mono-space-friendly format. " +
+      "Output exactly 3 lines: line 1 the headline including net worth + 24h change, line 2 the top hold, line 3 the watchlist mover or a closing line. " +
+      "Use $X.XX for prices ≥$1, $0.0001 for fractions, +X.XX%/-X.XX% for change. Reference symbols with a leading $. " +
+      "Do not invent numbers — only use the facts provided. If a field is missing, omit that line.";
+    const user = JSON.stringify(facts, null, 2);
+    const res = await client.chat.completions.create({
+      model: GROQ_MODEL,
+      messages: [
+        { role: "system", content: system },
+        {
+          role: "user",
+          content: `Generate today's digest for ${facts.display}. Facts:\n${user}`,
+        },
+      ],
+      temperature: 0.4,
+      max_completion_tokens: 200,
+    });
+    const text = res.choices?.[0]?.message?.content?.trim();
+    return text || null;
+  } catch (e) {
+    console.error(
+      "[digest] groq failed:",
+      e instanceof Error ? e.message : e,
+    );
+    return null;
+  }
+}
+
+function templateDigest(facts: DigestFacts): string {
+  const lines: string[] = [];
+  lines.push(`📬 daily for ${facts.display}`);
+  lines.push(``);
+  lines.push(
+    `portfolio ${formatUsd(facts.net_worth_usd)} · ${
+      facts.change_24h_pct >= 0 ? "+" : ""
+    }${formatPct(facts.change_24h_pct)} 24h`,
+  );
+  if (facts.top_hold) {
+    lines.push(
+      `top hold $${facts.top_hold.symbol}: ${formatUsd(facts.top_hold.value_usd)} (${formatPct(
+        facts.top_hold.change_24h_pct,
+      )})`,
+    );
+  }
+  if (facts.watchlist_mover) {
+    const arrow = facts.watchlist_mover.change_24h_pct >= 0 ? "📈" : "📉";
+    lines.push(
+      `${arrow} watchlist mover $${facts.watchlist_mover.symbol}: ${formatPct(facts.watchlist_mover.change_24h_pct)}`,
+    );
+  }
+  return lines.join("\n");
 }
 
 export async function GET(req: NextRequest) {
@@ -78,7 +181,12 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const results: Array<{ address: string; ok: boolean; reason?: string }> = [];
+  const results: Array<{
+    address: string;
+    ok: boolean;
+    source?: "groq" | "template";
+    reason?: string;
+  }> = [];
 
   for (const u of users) {
     try {
@@ -88,48 +196,26 @@ export async function GET(req: NextRequest) {
         .eq("address", u.address);
       const watchlistAddrs = (wl ?? []).map((r) => r.token_address);
 
-      const port = await getPortfolio(u.address, watchlistAddrs);
+      const display =
+        u.basename ?? u.ens_name ?? shortAddr(u.address);
+      const facts = await gatherFacts(u.address, display, watchlistAddrs);
 
-      let topMover: {
-        symbol: string;
-        change: number;
-      } | null = null;
-      for (const addr of watchlistAddrs.slice(0, 10)) {
-        const t = await tokenOnBase(addr);
-        if (!t || t.change_24h_pct == null) continue;
-        if (
-          !topMover ||
-          Math.abs(t.change_24h_pct) > Math.abs(topMover.change)
-        ) {
-          topMover = { symbol: t.symbol, change: t.change_24h_pct };
-        }
+      // Skip empty wallets — no portfolio = no useful digest.
+      if (facts.position_count === 0 && facts.watchlist_count === 0) {
+        results.push({
+          address: u.address,
+          ok: false,
+          reason: "no positions, no watchlist — skipping",
+        });
+        continue;
       }
 
-      const display = u.basename ?? u.ens_name ?? shortAddr(u.address);
-      const lines: string[] = [];
-      lines.push(`📬 daily for ${display}`);
-      lines.push(``);
-      lines.push(
-        `portfolio ${formatUsd(port.total_usd)} · ${
-          port.change_24h_pct >= 0 ? "+" : ""
-        }${formatPct(port.change_24h_pct)} 24h`,
-      );
-      if (port.positions.length > 0) {
-        const top = port.positions[0];
-        lines.push(
-          `top hold $${top.symbol}: ${formatUsd(top.value_usd)} (${formatPct(top.change_24h_pct)})`,
-        );
-      }
-      if (topMover) {
-        const arrow = topMover.change >= 0 ? "📈" : "📉";
-        lines.push(
-          `${arrow} watchlist mover $${topMover.symbol}: ${formatPct(topMover.change)}`,
-        );
-      }
-      lines.push(``);
-      lines.push(`see /me · signaagent.xyz/me`);
+      // Real Groq generation first, fall back to deterministic template.
+      const groqText = await groqDigest(facts);
+      const content = groqText
+        ? `📬 daily for ${display}\n\n${groqText}\n\nsee /me · signaagent.xyz/me`
+        : `${templateDigest(facts)}\n\nsee /me · signaagent.xyz/me`;
 
-      const content = lines.join("\n");
       const post = await botPost("bankr", content);
       if (!post.ok) {
         results.push({ address: u.address, ok: false, reason: post.reason });
@@ -140,7 +226,11 @@ export async function GET(req: NextRequest) {
         .from("users")
         .update({ last_digest_at: new Date().toISOString() })
         .eq("address", u.address);
-      results.push({ address: u.address, ok: true });
+      results.push({
+        address: u.address,
+        ok: true,
+        source: groqText ? "groq" : "template",
+      });
     } catch (e) {
       results.push({
         address: u.address,
