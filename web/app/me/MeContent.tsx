@@ -10,12 +10,15 @@ import {
   MessageCircle,
   Sparkles,
   Plus,
+  Users,
 } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { shortAddress } from "@/lib/format";
 import { formatUsd, formatPct } from "@/lib/geckoterminal";
 import { getWatchlist } from "@/lib/watchlist";
+import { useChat } from "@/context/ChatProvider";
+import { isDm } from "@/lib/conversation";
 import type { Position, PortfolioSnapshot } from "@/lib/portfolio";
 
 /**
@@ -25,6 +28,8 @@ import type { Position, PortfolioSnapshot } from "@/lib/portfolio";
  */
 export function MeContent() {
   const { address, isConnected } = useAccount();
+  const { client, conversations, peerInfoByConvId, initStatus, initXmtp } =
+    useChat();
   const [portfolio, setPortfolio] = useState<PortfolioSnapshot | null>(null);
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [agents, setAgents] = useState<LaunchedAgent[]>([]);
@@ -201,6 +206,104 @@ export function MeContent() {
               {positions.map((p) => (
                 <PositionRow key={`${p.address}-${p.symbol}`} pos={p} />
               ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Recent DMs */}
+      <section className="border-b border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
+          <div className="font-mono text-[11px] text-[var(--accent)] mb-3 flex items-center justify-between gap-3">
+            <span>$ signa dms --recent</span>
+            <Link
+              href="/"
+              className="text-[10px] text-white/45 hover:text-white inline-flex items-center gap-1 normal-case tracking-normal"
+            >
+              all DMs <ArrowUpRight className="size-2.5" />
+            </Link>
+          </div>
+          {!client ? (
+            <div className="border border-dashed border-white/15 px-4 py-5 font-mono text-[12px] text-white/65">
+              <div className="text-white/85 mb-2">
+                {`>`} XMTP not enabled in this tab.
+              </div>
+              <div className="text-white/40 mb-3">
+                {`>`} one signature to derive your XMTP identity from your wallet
+                — no gas, no password, ~10-30s.
+              </div>
+              <button
+                onClick={initXmtp}
+                disabled={initStatus === "loading"}
+                className="bg-[var(--accent)] text-black font-semibold rounded-md px-3 py-1.5 text-[12px] uppercase tracking-wide disabled:opacity-50 hover:brightness-110 transition inline-flex items-center gap-1.5"
+              >
+                {initStatus === "loading" && (
+                  <Spinner size={10} className="text-black" />
+                )}
+                {initStatus === "loading" ? "Signing…" : "Enable messaging"}
+              </button>
+            </div>
+          ) : conversations.length === 0 ? (
+            <div className="border border-dashed border-white/15 px-4 py-5 font-mono text-[12px] text-white/55">
+              <div className="text-white/85 mb-2">{`>`} no conversations yet.</div>
+              <div className="text-white/40">
+                {`>`} DM anyone by basename / ENS / 0x at{" "}
+                <Link
+                  href="/directory"
+                  className="text-[var(--accent)] hover:brightness-125 underline underline-offset-4"
+                >
+                  /directory
+                </Link>
+                {" or "}
+                <Link
+                  href="/launchpad"
+                  className="text-[var(--accent)] hover:brightness-125 underline underline-offset-4"
+                >
+                  /launchpad
+                </Link>
+                .
+              </div>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-2">
+              {conversations.slice(0, 6).map((conv) => {
+                const peer = peerInfoByConvId.get(conv.id);
+                const peerAddr = peer?.address ?? null;
+                const isGroup = !isDm(conv);
+                const linkHref = peerAddr ? `/?to=${peerAddr}` : "/";
+                return (
+                  <Link
+                    key={conv.id}
+                    href={linkHref}
+                    className="border border-white/10 px-3 py-3 hover:bg-white/[0.03] transition group flex items-start gap-2.5"
+                  >
+                    {isGroup ? (
+                      <span className="size-8 rounded-full bg-gradient-to-br from-emerald-400/60 to-cyan-400/60 flex items-center justify-center flex-shrink-0">
+                        <Users className="size-4 text-black/70" />
+                      </span>
+                    ) : (
+                      <PeerAvatar address={peerAddr} size={32} />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[13px] text-white font-medium truncate">
+                          {isGroup ? (
+                            <>group · {conversations.length} members</>
+                          ) : peerAddr ? (
+                            shortAddress(peerAddr, 6, 4)
+                          ) : (
+                            "unknown peer"
+                          )}
+                        </span>
+                        <ArrowUpRight className="size-3 text-white/30 group-hover:text-white flex-shrink-0" />
+                      </div>
+                      <div className="text-[10px] text-white/40 font-mono truncate mt-0.5">
+                        {peerAddr ? peerAddr : conv.id.slice(0, 24) + "…"}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
