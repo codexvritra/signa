@@ -6,6 +6,20 @@ import type { Hex } from "viem";
 import { serverClient } from "@/lib/supabase";
 import { decryptAgentKey, decryptOpaque } from "@/lib/key-vault";
 import { tokenOnBase, formatUsd, formatPct } from "@/lib/geckoterminal";
+import {
+  bankrSubmitPrompt,
+  bankrPortfolio,
+  BankrError,
+} from "@/lib/skills/bankr";
+import { gitlawbPlaygroundUrl, gitlawbProfileForDid } from "@/lib/skills/gitlawb";
+import {
+  mirosharkCreateSim,
+  mirosharkConfigured,
+} from "@/lib/skills/miroshark";
+import {
+  aeonAgentRegistration,
+  aeonEtherscanUrl,
+} from "@/lib/skills/aeon";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,9 +91,8 @@ export const dynamic = "force-dynamic";
  */
 
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-const BANKR = "https://api.bankr.bot";
-const MIROSHARK_BASE = process.env.MIROSHARK_BASE_URL || "";
-const MIROSHARK_KEY = process.env.MIROSHARK_API_KEY || "";
+// Bankr + MiroShark URLs/keys live inside lib/skills/* — pulled
+// through the typed wrappers (bankrSubmitPrompt, mirosharkCreateSim).
 const MAX_MESSAGE_LEN = 1500;
 
 type Intent = "facts" | "swarm" | "code" | "chat" | "action";
@@ -285,33 +298,45 @@ async function runFacts(
   }
 
   // Optional: if agent owner has a Bankr key, route a natural-lang query
-  // to Bankr for richer answers (Bankr does more than trade — it can
-  // answer market questions). Cheap fallback when GT has no signal.
+  // through the typed Bankr skill lib for richer answers (Bankr can
+  // answer market questions, not just trade). The skill lib centralizes
+  // headers + error handling — see lib/skills/bankr.ts.
   if (agent.bankr_api_key_encrypted && lines.length === 0) {
     try {
       const apiKey = decryptOpaque(agent.bankr_api_key_encrypted);
-      const submit = await fetch(`${BANKR}/agent/prompt`, {
-        method: "POST",
-        headers: {
-          "X-API-Key": apiKey,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ prompt: message }),
-      });
-      if (submit.ok) {
-        const j = (await submit.json()) as {
-          response?: string;
-          answer?: string;
-          jobId?: string;
-        };
-        const txt = j.response || j.answer;
-        if (txt) {
-          lines.push(`bankr: ${txt}`);
-          sources.push({ kind: "bankr_agent", ref: j.jobId ?? "prompt" });
-        }
+      const submit = await bankrSubmitPrompt(apiKey, message);
+      const txt = submit.response;
+      if (txt) {
+        lines.push(`bankr: ${txt}`);
+        sources.push({
+          kind: "bankr_agent",
+          ref: submit.jobId ?? submit.id ?? "prompt",
+        });
+      }
+    } catch (e) {
+      // best-effort — never hard-fail facts on a missing partner. We do
+      // log BankrError so misconfigured keys surface in vercel logs.
+      if (e instanceof BankrError) {
+        console.error("[respond:facts] bankr", e.status, e.body);
+      }
+    }
+  }
+
+  // If the agent has an ERC-8004 token id, fetch its on-chain
+  // registration and cite it as a source. This proves the agent's
+  // identity is mainnet-verifiable — adds a `aeon` source to the
+  // facts response without changing the synthesized text.
+  if (agent.erc8004_token_id) {
+    try {
+      const reg = await aeonAgentRegistration(agent.erc8004_token_id);
+      if (reg) {
+        sources.push({
+          kind: "aeon",
+          ref: `erc-8004 #${agent.erc8004_token_id} · owner ${reg.owner.slice(0, 10)}…`,
+        });
       }
     } catch {
-      // skip silently — facts intent should never hard-fail on a missing partner
+      // identity citation is decoration — don't fail facts on rpc miss
     }
   }
 
@@ -330,7 +355,7 @@ async function runSwarm(
   message: string,
   agent: AgentRow,
 ): Promise<{ context: string; sources: Source[] }> {
-  if (!MIROSHARK_BASE) {
+  if (!mirosharkConfigured()) {
     return {
       context:
         "SWARM CONTEXT:\nMiroShark not wired on this deployment. Respond by " +
@@ -339,70 +364,88 @@ async function runSwarm(
       sources: [{ kind: "system", ref: "miroshark_not_configured" }],
     };
   }
-  try {
-    const res = await fetch(`${MIROSHARK_BASE.replace(/\/$/, "")}/api/simulation/create`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        ...(MIROSHARK_KEY ? { authorization: `Bearer ${MIROSHARK_KEY}` } : {}),
-      },
-      body: JSON.stringify({
-        prompt: message,
-        agent_address: agent.address,
-        agent_did: agent.gitlawb_did,
-      }),
-    });
-    if (!res.ok) {
-      return {
-        context: `SWARM CONTEXT:\nMiroShark create failed (HTTP ${res.status}). Describe the swarm scenario qualitatively.`,
-        sources: [{ kind: "miroshark", ref: `http_${res.status}` }],
-      };
-    }
-    const j = (await res.json()) as { sim_id?: string; preview?: string; url?: string };
+  const sim = await mirosharkCreateSim({
+    prompt: message,
+    agentAddress: agent.address,
+    agentDid: agent.gitlawb_did ?? undefined,
+  });
+  if (!sim) {
     return {
       context:
-        `SWARM CONTEXT (MiroShark sim_id ${j.sim_id ?? "?"} dispatched):\n` +
-        (j.preview ?? "simulation queued") +
-        (j.url ? `\nview: ${j.url}` : ""),
-      sources: [{ kind: "miroshark", ref: j.sim_id ?? "queued" }],
-    };
-  } catch (e) {
-    return {
-      context: `SWARM CONTEXT:\nMiroShark unreachable (${e instanceof Error ? e.message : String(e)}). Describe the swarm scenario qualitatively.`,
+        "SWARM CONTEXT:\nMiroShark unreachable. Describe the swarm scenario qualitatively.",
       sources: [{ kind: "miroshark", ref: "unreachable" }],
     };
   }
+  return {
+    context:
+      `SWARM CONTEXT (MiroShark sim_id ${sim.sim_id ?? "?"} dispatched):\n` +
+      (sim.preview ?? "simulation queued") +
+      (sim.url ? `\nview: ${sim.url}` : ""),
+    sources: [{ kind: "miroshark", ref: sim.sim_id ?? "queued" }],
+  };
 }
 
-function runCode(message: string, agent: AgentRow): {
-  context: string;
-  sources: Source[];
-} {
-  // gitlawb Playground accepts a `?prompt=` deep-link that pre-fills the
-  // build prompt. We hand the user a personalized one — building WITH
-  // gitlawb, not just citing them.
-  const seed = `Build a small single-HTML app: ${message}. Use SIGNA agent ${agent.name} (${agent.address}) data via https://signaagent.xyz/api/agents/${agent.address}.`;
-  const playground = `https://playground.gitlawb.app/?prompt=${encodeURIComponent(
-    seed.slice(0, 500),
-  )}`;
+async function runCode(
+  message: string,
+  agent: AgentRow,
+): Promise<{ context: string; sources: Source[] }> {
+  // gitlawb Playground deep-link with prompt + agent context pre-filled.
+  // The skill lib (lib/skills/gitlawb.ts) centralizes both the URL build
+  // and the read-side calls to node.gitlawb.com.
+  const playground = gitlawbPlaygroundUrl({
+    prompt: message,
+    agentName: agent.name,
+    agentAddress: agent.address,
+    agentDid: agent.gitlawb_did ?? undefined,
+  });
   const did = agent.gitlawb_did;
-  const lines: string[] = [];
-  lines.push(`CODE CONTEXT:`);
+  const lines: string[] = ["CODE CONTEXT:"];
   lines.push(`gitlawb_playground_url: ${playground}`);
+
+  const sources: Source[] = [
+    { kind: "gitlawb", ref: did ?? "playground_only" },
+  ];
+
   if (did) {
     lines.push(`agent_gitlawb_did: ${did}`);
+    // Resolve the DID against node.gitlawb.com to surface real repo
+    // count + open tasks. Best-effort — code intent must still respond
+    // when the node is unreachable.
+    try {
+      const profile = await gitlawbProfileForDid(did);
+      if (profile && profile.repos.length > 0) {
+        const repoNames = profile.repos
+          .slice(0, 3)
+          .map((r) => `${r.owner}/${r.name}`)
+          .filter(Boolean)
+          .join(", ");
+        lines.push(
+          `agent_repos: ${profile.repos.length} on node.gitlawb.com (${repoNames})`,
+        );
+        lines.push(
+          `agent_open_tasks: ${profile.open_tasks} · recent_commits: ${profile.recent_commits}`,
+        );
+        sources.push({
+          kind: "gitlawb_node",
+          ref: `${profile.repos.length} repos · ${profile.open_tasks} tasks`,
+        });
+      } else {
+        lines.push(
+          `# DID resolved but node has no public repos under this owner yet`,
+        );
+      }
+    } catch {
+      // gitlawb node read is best-effort
+    }
     lines.push(
-      `Tell the user that you can spin them a single-HTML app on gitlawb Playground using your DID context — share the playground URL above.`,
+      `Tell the user: you can scaffold their idea via the gitlawb Playground URL above. If your DID has live repos, mention them by name.`,
     );
   } else {
     lines.push(
       `This agent has no gitlawb DID linked yet — still share the playground URL so the user can scaffold their idea.`,
     );
   }
-  return {
-    context: lines.join("\n"),
-    sources: [{ kind: "gitlawb", ref: did ?? "playground_only" }],
-  };
+  return { context: lines.join("\n"), sources };
 }
 
 async function runAction(
@@ -422,36 +465,32 @@ async function runAction(
   }
   try {
     const apiKey = decryptOpaque(agent.bankr_api_key_encrypted);
-    // Use Bankr's dry-run-ish behavior: we submit the prompt but DO NOT
-    // poll to completion here — the response endpoint is supposed to be
-    // fast (<2s). Caller is told the jobId so they can poll independently.
-    const submit = await fetch(`${BANKR}/agent/prompt`, {
-      method: "POST",
-      headers: {
-        "X-API-Key": apiKey,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ prompt: message }),
-    });
-    const j = (await submit.json().catch(() => ({}))) as {
-      jobId?: string;
-      id?: string;
-      response?: string;
-      error?: string;
-    };
-    const jobId = j.jobId || j.id;
+    // The Bankr skill lib (lib/skills/bankr.ts) handles auth + thread
+    // semantics. Submit-only (no poll) — /respond should answer in <2s;
+    // caller polls /agent/job/{id} independently if they need settlement.
+    const submit = await bankrSubmitPrompt(apiKey, message);
+    const jobId = submit.jobId || submit.id;
     const lines: string[] = ["ACTION CONTEXT (Bankr agent):"];
     if (jobId) {
       lines.push(`bankr_job_id: ${jobId}`);
-      lines.push(`bankr_poll_url: ${BANKR}/agent/job/${jobId}`);
+      lines.push(`bankr_poll_url: https://api.bankr.bot/agent/job/${jobId}`);
     }
-    if (j.response) lines.push(`bankr_preview: ${j.response}`);
-    if (j.error) lines.push(`bankr_error: ${j.error}`);
+    if (submit.threadId) {
+      lines.push(`bankr_thread_id: ${submit.threadId} (continue with threadId)`);
+    }
+    if (submit.response) lines.push(`bankr_preview: ${submit.response}`);
+    if (submit.error) lines.push(`bankr_error: ${submit.error}`);
     return {
       context: lines.join("\n"),
       sources: [{ kind: "bankr_agent", ref: jobId ?? "submitted" }],
     };
   } catch (e) {
+    if (e instanceof BankrError) {
+      return {
+        context: `ACTION CONTEXT:\nBankr rejected the prompt (HTTP ${e.status}). Describe the intended trade qualitatively without claiming it executed.`,
+        sources: [{ kind: "bankr_agent", ref: `http_${e.status}` }],
+      };
+    }
     return {
       context: `ACTION CONTEXT:\nBankr submit failed (${e instanceof Error ? e.message : String(e)}). Describe the intended trade qualitatively without claiming it executed.`,
       sources: [{ kind: "bankr_agent", ref: "submit_failed" }],
@@ -697,7 +736,7 @@ export async function POST(
       toolCtx = r.context;
       sources = r.sources;
     } else if (intent === "code") {
-      const r = runCode(message, agentData);
+      const r = await runCode(message, agentData);
       toolCtx = r.context;
       sources = r.sources;
     } else if (intent === "action") {
