@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAccount, useSignMessage } from "wagmi";
 
 /**
  * Public "try this agent" surface — embedded on /agent/[address].
@@ -57,6 +58,44 @@ export function AgentRespondWidget({
   const [history, setHistory] = useState<
     Array<{ q: string; r: RespondJson; ms: number }>
   >([]);
+  const [rating, setRating] = useState<number | null>(null);
+  const [ratingBusy, setRatingBusy] = useState(false);
+  const { address: connectedAddress } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+
+  async function rate(value: -1 | 1) {
+    if (!reply?.interaction_id || ratingBusy) return;
+    if (!connectedAddress) return;
+    const next = rating === value ? 0 : value;
+    setRatingBusy(true);
+    try {
+      const ts = Date.now();
+      const messageToSign = [
+        "SIGNA rate v1",
+        `ts:${ts}`,
+        `interaction:${reply.interaction_id}`,
+        `rating:${next}`,
+      ].join("\n");
+      const signature = await signMessageAsync({ message: messageToSign });
+      const res = await fetch(`/api/interactions/${reply.interaction_id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          rating: next,
+          sender_address: connectedAddress.toLowerCase(),
+          ts,
+          signature,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error ?? "rate_failed");
+      setRating(next);
+    } catch (e) {
+      console.error("[respond-widget] rate failed:", e);
+    } finally {
+      setRatingBusy(false);
+    }
+  }
 
   async function ask(promptOverride?: string) {
     const m = (promptOverride ?? message).trim();
@@ -64,6 +103,7 @@ export function AgentRespondWidget({
     setBusy(true);
     setReply(null);
     setElapsedMs(null);
+    setRating(null);
     const t0 = performance.now();
     try {
       const res = await fetch(`/api/agents/${address.toLowerCase()}/respond`, {
@@ -200,6 +240,43 @@ export function AgentRespondWidget({
                 >
                   [ share on x ]
                 </a>
+
+                {/* Rating row — only visible to wallet-connected raters.
+                    Signed with a `SIGNA rate v1` envelope so anyone can
+                    audit the rater later (PATCH /api/interactions/:id). */}
+                {connectedAddress ? (
+                  <span className="ml-auto flex items-center gap-3">
+                    <span className="text-white/30">rate:</span>
+                    <button
+                      disabled={ratingBusy}
+                      onClick={() => rate(1)}
+                      className={
+                        rating === 1
+                          ? "text-emerald-300"
+                          : "text-white/55 hover:text-white"
+                      }
+                      title="thumbs up — signed by your wallet"
+                    >
+                      [ + ]
+                    </button>
+                    <button
+                      disabled={ratingBusy}
+                      onClick={() => rate(-1)}
+                      className={
+                        rating === -1
+                          ? "text-red-300"
+                          : "text-white/55 hover:text-white"
+                      }
+                      title="thumbs down — signed by your wallet"
+                    >
+                      [ − ]
+                    </button>
+                  </span>
+                ) : (
+                  <span className="ml-auto text-white/30">
+                    connect wallet to rate
+                  </span>
+                )}
               </div>
             )}
 
