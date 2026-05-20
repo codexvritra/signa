@@ -33,6 +33,13 @@ const SYSCALLS: Record<string, Syscall[]> = {
   starter_templates: [
     {
       method: "GET",
+      path: "/live",
+      auth: "none",
+      brief:
+        "real-time visual showcase — every reply on the network as it lands, with intent filter chips + ticker counters",
+    },
+    {
+      method: "GET",
       path: "/examples",
       auth: "none",
       brief:
