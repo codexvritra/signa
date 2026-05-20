@@ -30,6 +30,22 @@ type Syscall = {
 };
 
 const SYSCALLS: Record<string, Syscall[]> = {
+  starter_templates: [
+    {
+      method: "GET",
+      path: "/examples",
+      auth: "none",
+      brief:
+        "copy-paste starter templates — Discord bot, Telegram bot, single-HTML app. ship in 10 min.",
+    },
+    {
+      method: "GET",
+      path: "/signa.js",
+      auth: "none",
+      brief:
+        "CDN-hosted browser SDK — one <script> tag, exposes window.signa",
+    },
+  ],
   mcp_server: [
     {
       method: "POST",
