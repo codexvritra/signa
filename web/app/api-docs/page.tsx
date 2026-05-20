@@ -329,6 +329,12 @@ export default function ApiDocsPage() {
                 Download OpenAPI 3.1 spec
               </a>
               <Link
+                href="/examples"
+                className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-5 py-2.5 text-[14px] transition-colors"
+              >
+                Starter templates →
+              </Link>
+              <Link
                 href="/syscalls"
                 className="text-white/55 hover:text-white text-[14px] transition-colors"
               >
