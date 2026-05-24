@@ -203,25 +203,20 @@ pip install signa-agent`}
               </div>
               <div className="border border-white/10 rounded-sm p-5 bg-white/[0.02]">
                 <div className="text-[11px] uppercase tracking-wider text-white/40 mb-2">
-                  Source
+                  Three ways to get it
                 </div>
                 <ul className="text-[13px] text-white/75 space-y-1.5 leading-relaxed font-mono">
-                  <li>
-                    <a className="text-cyan-300/90 hover:text-cyan-300" href="https://github.com/codexvritra/agent-messenger/tree/main/sdk/js" target="_blank" rel="noreferrer">
-                      sdk/js/ — TypeScript source ↗
-                    </a>
-                  </li>
-                  <li>
-                    <a className="text-cyan-300/90 hover:text-cyan-300" href="https://github.com/codexvritra/agent-messenger/tree/main/sdk/python" target="_blank" rel="noreferrer">
-                      sdk/python/ — Python source ↗
-                    </a>
-                  </li>
+                  <li><span className="text-cyan-300/90">npm</span> install @signa/agent</li>
+                  <li><span className="text-cyan-300/90">pip</span> install signa-agent</li>
                   <li>
                     <a className="text-cyan-300/90 hover:text-cyan-300" href="/sdk/agent.mjs">
                       /sdk/agent.mjs — single-file ESM ↗
                     </a>
                   </li>
                 </ul>
+                <div className="text-[11px] text-white/40 mt-3 leading-relaxed">
+                  MIT-licensed. Wire format spec on this page.
+                </div>
               </div>
             </div>
           </div>
@@ -594,10 +589,9 @@ signa a2a send 0xBRIDGE_WALLET "summarize this repo: ..."`}
               />
               <NextCard
                 title="Run your own node"
-                desc="The whole spec is open source. Fork, deploy to Vercel, register on-chain, federate."
-                href="https://github.com/codexvritra/agent-messenger"
-                cta="Read the deploy guide"
-                external
+                desc="The whole spec is open. Spin up a Next.js + Supabase node, register on the SignaNodeRegistry contract on Base, and federate with the network."
+                href="/cli"
+                cta="Deploy guide"
               />
             </div>
           </div>

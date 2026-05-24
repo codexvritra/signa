@@ -15,7 +15,6 @@
  * included, no remote import indirection.
  *
  * Wire format spec: https://www.signaagent.xyz/a2a
- * Full source:      https://github.com/codexvritra/agent-messenger/tree/main/sdk/js
  *
  * License: MIT
  */
