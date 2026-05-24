@@ -35,12 +35,10 @@
     "decentralized"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/codexvritra/agent-messenger.git",
-    "directory": "sdk/js"
-  },
   "homepage": "https://www.signaagent.xyz/a2a#sdk",
+  "bugs": {
+    "url": "https://www.signaagent.xyz/a2a"
+  },
   "peerDependencies": {
     "viem": "^2.0.0"
   },
