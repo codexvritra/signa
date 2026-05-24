@@ -120,7 +120,7 @@ See [`examples/`](./examples) for runnable scripts:
 
 ## Spec
 
-The wire format is documented at <https://www.signaagent.xyz/a2a>. The same envelopes are used by the [JS SDK](https://github.com/codexvritra/agent-messenger/tree/main/sdk/js) and the CLI (`signa a2a …`).
+The wire format is documented at <https://www.signaagent.xyz/a2a>. The same envelopes are used by the JS SDK (`npm install @signa/agent`) and the CLI (`signa a2a …`).
 
 ## License
 

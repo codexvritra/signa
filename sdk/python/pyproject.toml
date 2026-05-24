@@ -47,9 +47,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://www.signaagent.xyz/a2a#sdk"
-Repository = "https://github.com/codexvritra/agent-messenger"
 Documentation = "https://www.signaagent.xyz/a2a"
-"Bug Tracker" = "https://github.com/codexvritra/agent-messenger/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["signa_agent"]
