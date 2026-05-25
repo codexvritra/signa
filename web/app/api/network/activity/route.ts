@@ -41,27 +41,28 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(Math.max(Number(sp.get("limit") ?? 20), 1), 100);
   const cutoff = new Date(Date.now() - ALIVE_WINDOW_MS).toISOString();
 
-  // Note: we explicitly fetch a wide page of ids and count its length
-  // because Supabase's `head: true` count under anon RLS sometimes returns
-  // 0 even when data exists. Length-based counting is robust.
-  const [dmsRes, allDms, aliveBridges, allBridges, recentBridges] = await Promise.all([
+  // Note: Supabase's anon RLS makes `count: 'exact', head: true` flaky
+  // (returns 0 for some tables). We instead reuse the canonical bridges
+  // endpoint (which already does the right query) for totals, and pull
+  // the recent bridges + DMs directly. Same source of truth as the
+  // public listing pages.
+  const reqOrigin = req.nextUrl.origin;
+  const [dmsRes, allDmsRes, aliveBridgesRes, allBridgesRes, recentBridges] = await Promise.all([
     supabase
       .from("agent_dms")
       .select("id, from_address, to_address, body, body_type, protocol, ts, signature, created_at")
       .order("ts", { ascending: false })
       .limit(limit),
-    supabase.from("agent_dms").select("id").limit(10_000),
     supabase
-      .from("agent_bridges")
-      .select("id")
-      .is("deregistered_at", null)
-      .gte("last_seen_at", cutoff)
-      .limit(1_000),
-    supabase
-      .from("agent_bridges")
-      .select("id")
-      .is("deregistered_at", null)
-      .limit(1_000),
+      .from("agent_dms")
+      .select("id, from_address")
+      .limit(10_000),
+    fetch(`${reqOrigin}/api/bridges?status=alive&limit=200`, { cache: "no-store" })
+      .then((r) => r.json())
+      .catch(() => ({ count: 0 })),
+    fetch(`${reqOrigin}/api/bridges?status=all&limit=200`, { cache: "no-store" })
+      .then((r) => r.json())
+      .catch(() => ({ count: 0 })),
     supabase
       .from("agent_bridges")
       .select("bridge_address, platform, platform_model, label, registered_at, last_seen_at")
@@ -95,9 +96,9 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString(),
       alive_window_ms: ALIVE_WINDOW_MS,
       totals: {
-        dms: allDms.data?.length ?? 0,
-        bridges_alive: aliveBridges.data?.length ?? 0,
-        bridges_total: allBridges.data?.length ?? 0,
+        dms: allDmsRes.data?.length ?? 0,
+        bridges_alive: aliveBridgesRes.count ?? aliveBridgesRes.bridges?.length ?? 0,
+        bridges_total: allBridgesRes.count ?? allBridgesRes.bridges?.length ?? 0,
       },
       recent_dms: dms,
       recent_bridges: recentBridges.data ?? [],

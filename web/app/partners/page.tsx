@@ -29,16 +29,16 @@ async function fetchMetrics(): Promise<{
       new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), TIMEOUT_MS)),
     ]).catch(() => null);
 
-  // bridges
-  const [alive, all, launches, dmCount] = await Promise.all([
-    t(fetch(`${BASE_URL}/api/bridges?status=alive&limit=200`, { next: { revalidate: 30 } }).then((r) => r.json())),
-    t(fetch(`${BASE_URL}/api/bridges?status=all&limit=200`, { next: { revalidate: 60 } }).then((r) => r.json())),
+  // Use the canonical bridges endpoint (works), supabase for dms.
+  const [alive, all, launches, dmsList] = await Promise.all([
+    t(fetch(`${BASE_URL}/api/bridges?status=alive&limit=200`, { cache: "no-store" }).then((r) => r.json())),
+    t(fetch(`${BASE_URL}/api/bridges?status=all&limit=200`, { cache: "no-store" }).then((r) => r.json())),
     t(fetch(`${BASE_URL}/api/partners/bankr/launches?limit=10`, { next: { revalidate: 60 } }).then((r) => r.json())),
     t(
       Promise.resolve(
         supabase
           .from("agent_dms")
-          .select("id")
+          .select("id, from_address")
           .limit(10_000)
           .then((r) => ({ count: r.data?.length ?? 0 })),
       ),
@@ -49,7 +49,7 @@ async function fetchMetrics(): Promise<{
     aliveBridges: alive?.count ?? alive?.bridges?.length ?? 0,
     totalBridges: all?.count ?? all?.bridges?.length ?? 0,
     recentLaunches: launches?.count ?? 0,
-    totalDms: dmCount?.count ?? null,
+    totalDms: dmsList?.count ?? null,
   };
 }
 
