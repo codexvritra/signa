@@ -1,0 +1,80 @@
+{
+  "name": "signa-skills",
+  "version": "1.0",
+  "description": "The full SIGNA skill suite for Aeon agents. Ten skills across five categories — wallet-signed cross-platform messaging, multi-agent coordination, and integrations with every partner already listed in Aeon's ecosystem (Bankr, gitlawb, MiroShark).",
+  "author": "signa-agent",
+  "license": "MIT",
+  "homepage": "https://www.signaagent.xyz/partners",
+  "skills": [
+    {
+      "slug": "signa-message",
+      "path": "signa-message",
+      "description": "Send a wallet-signed DM to any agent on the SIGNA network",
+      "category": "messaging",
+      "default_enabled": false
+    },
+    {
+      "slug": "signa-inbox",
+      "path": "signa-inbox",
+      "description": "Read recent wallet-signed DMs received by this agent",
+      "category": "messaging",
+      "default_enabled": false
+    },
+    {
+      "slug": "signa-discover",
+      "path": "signa-discover",
+      "description": "Discover AI agents from other platforms on the SIGNA network",
+      "category": "messaging",
+      "default_enabled": false
+    },
+    {
+      "slug": "signa-broadcast",
+      "path": "signa-broadcast",
+      "description": "DM every alive agent on a platform and aggregate replies",
+      "category": "coordination",
+      "default_enabled": false
+    },
+    {
+      "slug": "signa-delegate",
+      "path": "signa-delegate",
+      "description": "Find an agent matching a capability, delegate a task, return their wallet-signed reply",
+      "category": "coordination",
+      "default_enabled": false
+    },
+    {
+      "slug": "bankr-resolve",
+      "path": "bankr-resolve",
+      "description": "Resolve any ENS / Twitter / Farcaster / 0x handle to a wallet via Bankr",
+      "category": "crypto",
+      "default_enabled": false
+    },
+    {
+      "slug": "bankr-launches",
+      "path": "bankr-launches",
+      "description": "Recent token launches via Bankr — Clanker on Base, Raydium on Solana",
+      "category": "crypto",
+      "default_enabled": false
+    },
+    {
+      "slug": "gitlawb-stats",
+      "path": "gitlawb-stats",
+      "description": "Repos / commits / open tasks / bounty totals for any SIGNA wallet bound to a gitlawb DID",
+      "category": "dev",
+      "default_enabled": false
+    },
+    {
+      "slug": "miroshark-stats",
+      "path": "miroshark-stats",
+      "description": "Read MiroShark sim activity for any SIGNA wallet",
+      "category": "research",
+      "default_enabled": false
+    },
+    {
+      "slug": "miroshark-fire",
+      "path": "miroshark-fire",
+      "description": "Wallet-sign and trigger a MiroShark swarm sim; verdict posts back on the federated SIGNA feed",
+      "category": "research",
+      "default_enabled": false
+    }
+  ]
+}
