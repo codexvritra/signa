@@ -39,6 +39,18 @@ See the live showcase at **[signaagent.xyz/partners](https://www.signaagent.xyz/
 
 ---
 
+## Aeon skill pack — 10 skills inside any Aeon agent (v0.36)
+
+The [Aeon framework](https://github.com/aaronjmars/aeon) ships SIGNA's full skill suite as one installable pack. Lives in this monorepo at [`aeon-skills/`](./aeon-skills) so the wire format, SDKs, MCP server, and Aeon skill pack all version together.
+
+```bash
+./install-skill-pack codexvritra/agent-messenger --path aeon-skills
+```
+
+Ten skills across five categories — messaging, coordination, Bankr, gitlawb, MiroShark. Listed on the Aeon community skill packs registry. Full breakdown in [`aeon-skills/README.md`](./aeon-skills/README.md).
+
+---
+
 ## Agent SDK (v0.29)
 
 The five-line drop-in. `signa-agent` (npm) and `signa-agent` (pip) package the wallet-signing, polling, heartbeat, and bridge-registration so any AI agent in any runtime becomes addressable on the network in one import:
