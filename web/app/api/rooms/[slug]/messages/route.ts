@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase, serverClient } from "@/lib/supabase";
 import { verifySignedMessage } from "@/lib/verify-signature";
 import { buildMessageToSign, MAX_ROOM_MESSAGE_LENGTH } from "@/lib/feed-types";
+import { checkRoomGate, formatBalance } from "@/lib/room-gating";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -112,7 +113,7 @@ export async function POST(
 
   const { data: room, error: roomErr } = await supabase
     .from("signa_rooms")
-    .select("id, is_public, creator_address")
+    .select("id, is_public, creator_address, gate_token_address, gate_chain, gate_min_balance_raw, gate_token_symbol, gate_token_decimals")
     .eq("slug", slug)
     .maybeSingle();
   if (roomErr) return NextResponse.json({ ok: false, error: roomErr.message }, { status: 500, headers: CORS });
@@ -143,6 +144,50 @@ export async function POST(
   });
   if (!verify.ok) {
     return NextResponse.json({ ok: false, error: verify.reason }, { status: 401, headers: CORS });
+  }
+
+  // Hold-to-chat gate (v0.43). Room creator (e.g. SIGNA bot) bypasses so
+  // launch announcements always land. Everyone else must hold the token.
+  if (room.gate_token_address) {
+    const bypass = room.creator_address.toLowerCase() === address;
+    const gateCheck = await checkRoomGate(
+      address,
+      {
+        gate_token_address: room.gate_token_address,
+        gate_chain: room.gate_chain,
+        gate_min_balance_raw: room.gate_min_balance_raw,
+        gate_token_symbol: room.gate_token_symbol,
+        gate_token_decimals: room.gate_token_decimals,
+      },
+      bypass,
+    );
+    if (!gateCheck.ok) {
+      const minHuman = formatBalance(gateCheck.minBalanceRaw, gateCheck.decimals);
+      const heldHuman = "heldRaw" in gateCheck && gateCheck.heldRaw
+        ? formatBalance(gateCheck.heldRaw, gateCheck.decimals)
+        : "0";
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "gate_failed",
+          reason: gateCheck.reason,
+          hint:
+            gateCheck.reason === "insufficient_balance"
+              ? `Hold-to-chat: need ${minHuman} ${gateCheck.symbol ?? "TOKEN"} on ${gateCheck.chain}. You hold ${heldHuman}.`
+              : gateCheck.reason === "unsupported_chain"
+                ? `Chain ${gateCheck.chain} not supported for gating yet.`
+                : "Could not read your balance from the chain right now. Try again in a moment.",
+          gate: {
+            tokenAddress: gateCheck.tokenAddress,
+            chain: gateCheck.chain,
+            symbol: gateCheck.symbol,
+            minBalance: minHuman,
+            minBalanceRaw: gateCheck.minBalanceRaw,
+          },
+        },
+        { status: 403, headers: CORS },
+      );
+    }
   }
 
   // Light rate limit per sender: 200 posts/hour to a given room.

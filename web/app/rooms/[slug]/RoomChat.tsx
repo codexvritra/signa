@@ -22,6 +22,14 @@ interface RoomLink {
   description: string | null;
 }
 
+interface RoomGate {
+  tokenAddress: string;
+  chain: string;
+  symbol: string;
+  decimals: number;
+  minBalanceRaw: string;
+}
+
 interface RoomChatProps {
   slug: string;
   roomName: string;
@@ -29,9 +37,37 @@ interface RoomChatProps {
   roomCreator: string;
   roomCreatedAt: string;
   rooms: RoomLink[];
+  gate?: RoomGate | null;
 }
 
 const POLL_MS = 4_000;
+const GATE_RECHECK_MS = 30_000;
+
+function buyLinkFor(gate: RoomGate): string {
+  // Default to Aerodrome on Base for now (where Bankr tokens settle).
+  // Anyone on the chain can swap there. Future: per-chain router.
+  if (gate.chain.toLowerCase() === "base") {
+    return `https://aerodrome.finance/swap?to=${gate.tokenAddress}`;
+  }
+  if (gate.chain.toLowerCase() === "solana") {
+    return `https://jup.ag/swap/SOL-${gate.tokenAddress}`;
+  }
+  return `https://www.geckoterminal.com/${gate.chain.toLowerCase()}/pools/${gate.tokenAddress}`;
+}
+
+function fmtMin(raw: string, decimals: number): string {
+  try {
+    const r = BigInt(raw);
+    const base = 10n ** BigInt(decimals);
+    const whole = r / base;
+    const frac = r % base;
+    if (frac === 0n) return whole.toString();
+    const fracStr = frac.toString().padStart(decimals, "0").replace(/0+$/, "");
+    return `${whole}.${fracStr.slice(0, 4)}`;
+  } catch {
+    return raw;
+  }
+}
 
 // ───────────────────────── helpers ─────────────────────────
 
@@ -226,6 +262,7 @@ export function RoomChat({
   roomCreator,
   roomCreatedAt,
   rooms,
+  gate,
 }: RoomChatProps) {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -234,6 +271,11 @@ export function RoomChat({
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gateStatus, setGateStatus] = useState<{
+    checked: boolean;
+    eligible: boolean;
+    held: string | null;
+  }>({ checked: false, eligible: !gate, held: null });
   const lastTsRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -293,6 +335,40 @@ export function RoomChat({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages.length]);
+
+  // Gate preflight (v0.43). Re-runs whenever the connected wallet changes
+  // and every 30s after that so freshly-bought holders can post without
+  // refreshing the page.
+  useEffect(() => {
+    if (!gate || !address) {
+      setGateStatus({ checked: !gate, eligible: !gate, held: null });
+      return;
+    }
+    let cancelled = false;
+    async function checkGate() {
+      try {
+        const r = await fetch(
+          `/api/rooms/${slug}/gate-check?address=${address!.toLowerCase()}`,
+          { cache: "no-store" },
+        );
+        const d = await r.json().catch(() => ({}));
+        if (cancelled || !d?.ok) return;
+        setGateStatus({
+          checked: true,
+          eligible: !!d.eligible,
+          held: d.held ?? null,
+        });
+      } catch {
+        // leave previous state
+      }
+    }
+    checkGate();
+    const id = setInterval(checkGate, GATE_RECHECK_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [slug, address, gate]);
 
   async function sendMessage() {
     setError(null);
@@ -411,6 +487,14 @@ export function RoomChat({
         <header className="border-b border-white/[0.06] px-5 py-3 flex items-baseline gap-3">
           <div className="text-white/40 text-[16px]">#</div>
           <div className="font-display text-[19px] font-medium tracking-[-0.015em]">{roomName}</div>
+          {gate && (
+            <span
+              title={`Hold-to-chat · ${fmtMin(gate.minBalanceRaw, gate.decimals)} $${gate.symbol} on ${gate.chain}`}
+              className="text-[10px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-sm border border-[var(--accent)]/40 text-[var(--accent)] font-mono"
+            >
+              hold ${gate.symbol} to chat
+            </span>
+          )}
           {roomDescription && (
             <div className="text-[12.5px] text-white/45 truncate hidden md:block">
               {roomDescription}
@@ -459,6 +543,26 @@ export function RoomChat({
               </div>
               <ConnectButton showBalance={false} chainStatus="none" />
             </div>
+          ) : gate && gateStatus.checked && !gateStatus.eligible ? (
+            <div className="flex items-center justify-between gap-3 border border-[var(--accent)]/30 bg-[var(--accent)]/[0.04] rounded-sm px-3 py-2.5">
+              <div className="text-[12.5px] text-white/80 leading-relaxed">
+                <span className="text-[var(--accent)] font-semibold">hold-to-chat:</span>{" "}
+                this room requires at least{" "}
+                <span className="font-mono">
+                  {fmtMin(gate.minBalanceRaw, gate.decimals)} ${gate.symbol}
+                </span>{" "}
+                on {gate.chain} to post. you hold{" "}
+                <span className="font-mono">{gateStatus.held ?? "0"}</span>. reading stays open.
+              </div>
+              <a
+                href={buyLinkFor(gate)}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-[var(--accent)] text-black font-semibold rounded-sm px-3 py-1.5 text-[12px] hover:brightness-110 transition uppercase tracking-wide whitespace-nowrap"
+              >
+                buy ${gate.symbol} →
+              </a>
+            </div>
           ) : (
             <>
               <div className="flex gap-2">
@@ -485,7 +589,11 @@ export function RoomChat({
                 </button>
               </div>
               <div className="mt-1.5 text-[10.5px] text-white/30">
-                posting as {fmtAddr(address)} · wallet-signed end to end · / for slash commands
+                posting as {fmtAddr(address)} · wallet-signed end to end
+                {gate && gateStatus.eligible && gateStatus.held
+                  ? ` · holding ${gateStatus.held} $${gate.symbol}`
+                  : ""}
+                {" "}· / for slash commands
               </div>
             </>
           )}
@@ -504,6 +612,28 @@ export function RoomChat({
             <br />
             on {fmtDay(new Date(roomCreatedAt).getTime())}
           </div>
+          {gate && (
+            <div className="mt-3 pt-3 border-t border-white/[0.06]">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1.5">
+                hold-to-chat
+              </div>
+              <div className="text-[12px] text-white/80">
+                <span className="font-mono">{fmtMin(gate.minBalanceRaw, gate.decimals)} ${gate.symbol}</span>
+                <span className="text-white/45"> on {gate.chain}</span>
+              </div>
+              <div className="text-[10.5px] font-mono text-white/35 truncate mt-1">
+                {gate.tokenAddress.slice(0, 10)}…{gate.tokenAddress.slice(-6)}
+              </div>
+              <a
+                href={buyLinkFor(gate)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block mt-2 text-[11px] text-[var(--accent)] hover:brightness-110"
+              >
+                buy ${gate.symbol} →
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="p-4 border-t border-white/[0.06]">
