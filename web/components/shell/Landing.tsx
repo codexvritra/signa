@@ -13,6 +13,7 @@ import {
   type Variants,
 } from "framer-motion";
 import { Footer } from "./Footer";
+import { LiveReceiptsBanner } from "./LiveReceiptsBanner";
 
 /**
  * Public landing surface for visitors who haven't connected a wallet.
@@ -230,6 +231,9 @@ export function Landing() {
             </div>
           </div>
         </section>
+
+        {/* ============ LIVE RECEIPTS BANNER ============ */}
+        <LiveReceiptsBanner />
 
         {/* ============ LIVE STATS ============ */}
         <section className="border-b border-white/[0.06]">
