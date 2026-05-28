@@ -63,6 +63,9 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
           <NavLink href="/sims" active={pathname?.startsWith("/sims") ?? false}>
             Sims
           </NavLink>
+          <NavLink href="/receipts" active={pathname?.startsWith("/receipts") ?? false}>
+            Receipts
+          </NavLink>
         </nav>
       </div>
       <div className="flex items-center gap-1.5">
