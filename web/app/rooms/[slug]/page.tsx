@@ -44,7 +44,9 @@ export default async function RoomPage({
   const [{ data: room }, { data: allRoomsRaw }] = await Promise.all([
     supabase
       .from("signa_rooms")
-      .select("id, name, slug, description, creator_address, is_public, ts, created_at")
+      .select(
+        "id, name, slug, description, creator_address, is_public, ts, created_at, gate_token_address, gate_chain, gate_min_balance_raw, gate_token_symbol, gate_token_decimals",
+      )
       .eq("slug", slug)
       .maybeSingle(),
     supabase
@@ -59,6 +61,16 @@ export default async function RoomPage({
 
   const allRooms = (allRoomsRaw ?? []) as Array<Pick<RoomRow, "name" | "slug" | "description">>;
 
+  const gate = room.gate_token_address
+    ? {
+        tokenAddress: room.gate_token_address as string,
+        chain: (room.gate_chain ?? "base") as string,
+        symbol: (room.gate_token_symbol ?? "TOKEN") as string,
+        decimals: (room.gate_token_decimals ?? 18) as number,
+        minBalanceRaw: (room.gate_min_balance_raw ?? "0") as string,
+      }
+    : null;
+
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader />
@@ -71,6 +83,7 @@ export default async function RoomPage({
             roomCreator={room.creator_address}
             roomCreatedAt={room.created_at}
             rooms={allRooms}
+            gate={gate}
           />
         </div>
       </main>

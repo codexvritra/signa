@@ -32,7 +32,7 @@ export async function GET(
   const { data, error } = await supabase
     .from("signa_rooms")
     .select(
-      "id, name, slug, description, creator_address, is_public, ts, created_at, signature, signed_message",
+      "id, name, slug, description, creator_address, is_public, ts, created_at, signature, signed_message, gate_token_address, gate_chain, gate_min_balance_raw, gate_token_symbol, gate_token_decimals",
     )
     .eq("slug", slug)
     .maybeSingle();

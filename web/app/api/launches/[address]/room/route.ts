@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, serverClient } from "@/lib/supabase";
 import { bankrRecentLaunches } from "@/lib/skills/bankr";
+import { fetchTokenMeta } from "@/lib/room-gating";
 import { privateKeyToAccount } from "viem/accounts";
 
 export const runtime = "nodejs";
@@ -125,6 +126,12 @@ export async function POST(
 
   const roomSig = await botAccount.signMessage({ message: roomMessage });
 
+  // Look up real decimals from the token contract so the gate is honest.
+  // Min balance: 1 whole token. Hold-to-chat.
+  const meta = await fetchTokenMeta(tokenAddress, chain);
+  const decimals = typeof meta.decimals === "number" ? meta.decimals : 18;
+  const minBalanceRaw = (10n ** BigInt(decimals)).toString();
+
   const db = serverClient();
   const { data: createdRoom, error: roomErr } = await db
     .from("signa_rooms")
@@ -137,6 +144,11 @@ export async function POST(
       ts: roomTs,
       signature: roomSig,
       signed_message: roomMessage,
+      gate_token_address: tokenAddress,
+      gate_chain: chain,
+      gate_min_balance_raw: minBalanceRaw,
+      gate_token_symbol: symbol,
+      gate_token_decimals: decimals,
     })
     .select("id, slug, name")
     .single();
@@ -161,7 +173,8 @@ export async function POST(
     deployerHandle ? `deployer x:  ${deployerHandle}` : null,
     `launched:    ${launchedAt}`,
     ``,
-    `wallet-signed room for $${symbol} holders + watchers. type / for slash commands.`,
+    `hold-to-chat: posting requires holding at least 1 $${symbol}. anyone can read. signatures are receipts.`,
+    `type / for slash commands.`,
   ].filter(Boolean).join("\n");
 
   const msgPreimage = [
