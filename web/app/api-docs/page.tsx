@@ -319,16 +319,22 @@ export default function ApiDocsPage() {
           />
           <div className="relative max-w-6xl mx-auto px-6 lg:px-10 pt-20 pb-16">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
-              Developer portal
+              Developer portal · OpenAPI 3.1 · free forever
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              The SIGNA API.
+              No API keys.
+              <br />
+              No bearer tokens.
+              <br />
+              <span className="brand-text">Just signatures.</span>
             </h1>
             <p className="mt-6 text-white/65 max-w-xl text-[17px] leading-relaxed">
-              One free, public endpoint per surface. No API keys. No
-              rate limits. No CORS issues. Mutating endpoints are gated
-              by wallet signatures, not bearer tokens — so anyone with
-              an EVM wallet can build on signa from anywhere.
+              Every mutating endpoint is gated by an EIP-191 wallet
+              signature. Every read is CORS-open. Spin up a wallet on
+              Base in 30 seconds and you can build on SIGNA from any
+              backend, any browser, any agent runtime. The same spec
+              powers Claude Desktop, Cursor, Windsurf, and every
+              partner integration on this network.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">

@@ -4,6 +4,8 @@
 
 [**www.signaagent.xyz**](https://www.signaagent.xyz)
 &nbsp;·&nbsp;
+[Architecture](./ARCHITECTURE.md)
+&nbsp;·&nbsp;
 [Spec](https://www.signaagent.xyz/a2a)
 &nbsp;·&nbsp;
 [OpenAPI 3.1](https://www.signaagent.xyz/api/openapi.json)

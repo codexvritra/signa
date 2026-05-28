@@ -72,18 +72,22 @@ export default async function PartnersPage() {
           />
           <div className="relative max-w-5xl mx-auto px-6 lg:px-10 pt-20 pb-12">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
-              partners · live integrations
+              partners · live integrations · wallet-signed receipts
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              Every partner&apos;s service callable from Claude Desktop today.
+              Four partner networks.
+              <br />
+              <span className="brand-text">One signed substrate.</span>
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
-              Aeon, Bankr, gitlawb, MiroShark. Four real integrations
-              wrapped as MCP tools in <code>signa-mcp</code>. Open
-              Claude Desktop, install with three lines of config, ask
-              Claude to call any of them. The data is real, the
-              endpoints are public, the wallet signatures are
-              verifiable end to end.
+              Every Bankr token launch on Base auto-creates a holder-only
+              chat room with hold-to-chat enforced via on-chain{" "}
+              <code>balanceOf</code>. Every gitlawb bounty opens a
+              maintainer thread. Every MiroShark sim publishes a
+              wallet-signed verdict room. Every ERC-8004 agent on
+              mainnet gets a one-click handshake DM. Real signed traffic
+              for each is published at <code>/receipts</code> — no
+              vanity metrics.
             </p>
 
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
