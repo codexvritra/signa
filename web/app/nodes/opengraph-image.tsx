@@ -1,11 +1,22 @@
 import { ImageResponse } from "next/og";
 import { listFederatedNodes, SIGNA_NODE_REGISTRY } from "@/lib/onchain-nodes";
 
-export const runtime = "nodejs";
+// Edge runtime: opts out of static prerendering at build time so satori
+// doesn't trip on the multi-child container during `next build`. The
+// receipts OG card uses the same pattern and ships fine.
+export const runtime = "edge";
 export const alt = "signa · federated nodes";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+/**
+ * /nodes/opengraph-image
+ *
+ * Static OG card for /nodes. Built defensively for satori — every
+ * parent div has explicit display set, every text node is a single
+ * inline string (no JSX line breaks → multi-text-node hazard), and
+ * all data is pre-formatted into local consts before the JSX tree.
+ */
 export default async function Image() {
   let total = 0;
   let active = 0;
@@ -13,7 +24,13 @@ export default async function Image() {
     const data = await listFederatedNodes(true, 50);
     total = data.total;
     active = data.active;
-  } catch {}
+  } catch {
+    // ignore — fall through to zeroed display
+  }
+
+  const registryShort = `${SIGNA_NODE_REGISTRY.slice(0, 10)}…${SIGNA_NODE_REGISTRY.slice(-8)}`;
+  const headline = "SIGNA federates over an on-chain registry.";
+  const subhead = "Permissionless. Self-hostable. Every node is an on-chain record on Base. No central directory we control.";
 
   return new ImageResponse(
     (
@@ -44,12 +61,26 @@ export default async function Image() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <div style={{ color: "#fff", fontSize: 60, lineHeight: 1.05 }}>
-            SIGNA federates over an on-chain registry.
+          <div
+            style={{
+              display: "flex",
+              color: "#fff",
+              fontSize: 60,
+              lineHeight: 1.05,
+            }}
+          >
+            {headline}
           </div>
-          <div style={{ color: "#aaa", fontSize: 22, lineHeight: 1.4, maxWidth: 1000 }}>
-            Permissionless. Self-hostable. Every node is an on-chain
-            record on Base. No central directory we control.
+          <div
+            style={{
+              display: "flex",
+              color: "#aaa",
+              fontSize: 22,
+              lineHeight: 1.4,
+              maxWidth: 1000,
+            }}
+          >
+            {subhead}
           </div>
         </div>
 
@@ -63,21 +94,61 @@ export default async function Image() {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ color: "#86efac", fontSize: 56 }}>{active}</div>
-            <div style={{ color: "#5dd0c6", fontSize: 16, letterSpacing: 3 }}>ACTIVE</div>
+            <div style={{ display: "flex", color: "#86efac", fontSize: 56 }}>
+              {String(active)}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                color: "#5dd0c6",
+                fontSize: 16,
+                letterSpacing: 3,
+              }}
+            >
+              ACTIVE
+            </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ color: "#86efac", fontSize: 56 }}>{total}</div>
-            <div style={{ color: "#5dd0c6", fontSize: 16, letterSpacing: 3 }}>
+            <div style={{ display: "flex", color: "#86efac", fontSize: 56 }}>
+              {String(total)}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                color: "#5dd0c6",
+                fontSize: 16,
+                letterSpacing: 3,
+              }}
+            >
               TOTAL ON CHAIN
             </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-            <div style={{ color: "#888", fontSize: 14, letterSpacing: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                color: "#888",
+                fontSize: 14,
+                letterSpacing: 1,
+              }}
+            >
               registry
             </div>
-            <div style={{ color: "#ddd", fontSize: 14, fontFamily: "monospace", display: "flex" }}>
-              {`${SIGNA_NODE_REGISTRY.slice(0, 10)}…${SIGNA_NODE_REGISTRY.slice(-8)}`}
+            <div
+              style={{
+                display: "flex",
+                color: "#ddd",
+                fontSize: 14,
+                fontFamily: "monospace",
+              }}
+            >
+              {registryShort}
             </div>
           </div>
         </div>
