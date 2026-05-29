@@ -141,7 +141,16 @@ export async function runCouncilRound(args: {
         continue; // skip this agent's turn; keep the round going
       }
       if (!text) continue;
-      text = text.replace(/\s+/g, " ").trim().slice(0, 600);
+      // Strip reasoning-model chain-of-thought that leaks into output
+      // (Qwen/DeepSeek <think>…</think>; also a dangling unclosed <think>).
+      text = text
+        .replace(/<think>[\s\S]*?<\/think>/gi, " ")
+        .replace(/<\/?think>/gi, " ")
+        .replace(/^[\s\S]*?<\/think>/i, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 600);
+      if (!text) continue;
 
       const ts = ++tsCursor;
       const account = personaAccount(p.id);
