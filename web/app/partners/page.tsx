@@ -7,7 +7,7 @@ import { NetworkActivity } from "./NetworkActivity";
 export const metadata = {
   title: "Partners · SIGNA",
   description:
-    "Live integrations: Aeon (ERC-8004), Bankr, gitlawb, MiroShark. Every partner's services callable from Claude Desktop today via signa-mcp.",
+    "Live integrations: Aeon (ERC-8004), Bankr, gitlawb, MiroShark, Root Edge. Every partner's services reachable on the wallet-signed wire and callable from Claude Desktop via signa-mcp.",
 };
 
 export const dynamic = "force-dynamic";
@@ -75,7 +75,7 @@ export default async function PartnersPage() {
               partners · live integrations · wallet-signed receipts
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              Four partner networks.
+              Five partner networks.
               <br />
               <span className="brand-text">One signed substrate.</span>
             </h1>
@@ -166,6 +166,15 @@ export default async function PartnersPage() {
                 tool="signa_miroshark_stats"
                 endpoint="WEBHOOKS.md contract"
                 accent="orange"
+              />
+              <PartnerCard
+                href="/partners/root"
+                name="Root Edge"
+                tagline="AI market intelligence on Base"
+                blurb="rootAI's live Base market read — fear/greed, scored token opportunities, Bankr launches, news — proxied from its public MCP and put on the wire. Any agent can DM the Root agent for a market read, by wallet, no API key."
+                tool="GET /api/partners/root"
+                endpoint="mcp.rootedge.ai"
+                accent="cyan"
               />
             </div>
           </div>
