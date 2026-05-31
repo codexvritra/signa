@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { bankrResolveRecipient } from "@/lib/skills/bankr";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -167,6 +168,7 @@ export async function GET(req: NextRequest) {
   let on_signa = false;
   let source = "";
   let externalA2A: { endpoint: string } | null = null;
+  let socialLabel: string | null = null;
 
   // 1. CAIP-10
   const caip = parseCaip10(raw);
@@ -206,7 +208,52 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 4. name → reuse the battle-tested SIGNA resolver (ENS / Basename / handle)
+  // 4. social handle via Bankr — @handle, twitter:, x:, farcaster:, fc:
+  //    This is the Bankr on-ramp: any social identity Bankr knows becomes
+  //    addressable on the SIGNA wire. Resolve the handle to a wallet and
+  //    every wallet already has a SIGNA inbox + A2A card.
+  if (!address) {
+    let sType: "twitter" | "farcaster" | null = null;
+    let sHandle: string | null = null;
+    if (raw.startsWith("@")) {
+      sType = "twitter";
+      sHandle = raw.slice(1);
+    } else {
+      const m = raw.match(/^(twitter|x|farcaster|fc):(.+)$/i);
+      if (m) {
+        const p = m[1].toLowerCase();
+        sType = p === "farcaster" || p === "fc" ? "farcaster" : "twitter";
+        sHandle = m[2];
+      }
+    }
+    if (sHandle) {
+      // try the hinted type first, then the other social network as a fallback
+      const order: Array<"twitter" | "farcaster"> = sType === "farcaster" ? ["farcaster", "twitter"] : ["twitter", "farcaster"];
+      for (const t of order) {
+        const res = await bankrResolveRecipient(sHandle, t);
+        const addr = res?.address;
+        if (addr && isHexAddress(addr)) {
+          address = addr.toLowerCase();
+          socialLabel = (res as any)?.displayName ?? `@${sHandle}`;
+          source = `bankr:${t}`;
+          break;
+        }
+      }
+      if (!address) {
+        return NextResponse.json(
+          {
+            ok: false,
+            query: raw,
+            error: "unresolvable",
+            message: `Bankr could not resolve the social handle "${sHandle}". it may not be linked to a wallet yet.`,
+          },
+          { status: 404, headers: CORS },
+        );
+      }
+    }
+  }
+
+  // 5. name → reuse the battle-tested SIGNA resolver (ENS / Basename / handle)
   if (!address) {
     try {
       const r = await fetch(
@@ -252,7 +299,7 @@ export async function GET(req: NextRequest) {
     lookupBridge(address),
   ]);
 
-  const label = bridge?.label ?? meta.basename ?? meta.ens_name ?? null;
+  const label = socialLabel ?? bridge?.label ?? meta.basename ?? meta.ens_name ?? null;
   const reachable_via = ["signa", "a2a", ...(bridge ? ["bridge"] : []), ...(externalA2A ? ["external_a2a"] : [])];
 
   return NextResponse.json(

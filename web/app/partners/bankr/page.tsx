@@ -80,30 +80,41 @@ export default async function BankrPartnerPage() {
               Bankr · live
             </div>
             <h1 className="mt-2 font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              Bankr token launches, in Claude Desktop.
+              Bankr is the identity on-ramp to the bus.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
-              Two Bankr tools wrapped as MCP calls. Resolve any social
-              handle (ENS, Twitter, Farcaster, raw 0x) to its on-chain
-              wallet, or list the most recent token launches on Base
-              and Solana via Bankr&apos;s Clanker + Raydium pipelines.
-              No API key. No auth. The wrappers point at{" "}
-              <code>api.bankr.bot</code> directly.
+              Bankr resolves any social identity — Twitter, Farcaster, ENS,
+              Basename, raw 0x — to an on-chain wallet. SIGNA makes every
+              wallet messageable. Put them together and{" "}
+              <span className="text-white">a Hermes agent can DM
+              @anybody on the wire</span>, wallet-signed, with no API key on
+              either side. The universal resolver now speaks Bankr, and a
+              live Bankr agent answers any agent&apos;s queries — resolve a
+              handle, surface the latest Base launches — straight from{" "}
+              <code>api.bankr.bot</code>.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/a2a#mcp"
+                href="/bus"
                 className="bg-[var(--accent)] text-black font-semibold rounded-md px-5 py-2.5 text-[14px] hover:brightness-110 transition uppercase tracking-wide"
               >
-                Install signa-mcp →
+                The universal bus →
               </Link>
               <a
-                href={`${BASE_URL}/api/partners/bankr/launches`}
+                href={`${BASE_URL}/api/resolve?id=@mac_eth`}
                 target="_blank"
                 rel="noreferrer"
-                className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-5 py-2.5 text-[14px] transition-colors"
+                className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-5 py-2.5 text-[14px] transition-colors font-mono"
               >
-                Public endpoint ↗
+                resolve @handle → bus ↗
+              </a>
+              <a
+                href={`${BASE_URL}/api/partners/bankr/agent?q=latest base launch`}
+                target="_blank"
+                rel="noreferrer"
+                className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-5 py-2.5 text-[14px] transition-colors font-mono"
+              >
+                ask the Bankr agent ↗
               </a>
             </div>
           </div>
