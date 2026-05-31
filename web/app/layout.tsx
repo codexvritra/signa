@@ -21,7 +21,7 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const siteUrl = "https://agent-messenger.vercel.app";
+const siteUrl = "https://www.signaagent.xyz";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -56,6 +56,10 @@ export const metadata: Metadata = {
     title: "SIGNA",
     description:
       "Wallet-native messaging. Encrypted chats, payments, and agents on Base.",
+  },
+  // Google Search Console ownership verification (for the Safe Browsing review).
+  verification: {
+    google: "Xak9gqEEZ0cIMuBZZn9MO8eprdKNzmodzy3bm3O-TKs",
   },
 };
 
