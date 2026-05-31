@@ -32,6 +32,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Network",
     links: [
+      { href: "/passport", label: "Passport" },
       { href: "/feed", label: "Feed" },
       { href: "/rooms", label: "Rooms" },
       { href: "/launchpad", label: "Agents" },
