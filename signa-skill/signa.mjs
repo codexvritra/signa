@@ -104,6 +104,19 @@ async function inbox(address, limit = 20) {
   const j = await r.json().catch(() => ({}));
   return j.dms ?? [];
 }
+async function capabilities() {
+  const r = await fetch(`${BASE}/api/capabilities`, { headers: { accept: "application/json" } });
+  return r.json();
+}
+async function invoke(capability, arg = "") {
+  const r = await fetch(`${BASE}/api/capabilities/invoke`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ cap: capability, arg }),
+  });
+  const j = await r.json();
+  if (!j.ok) throw new Error(`invoke ${capability} failed: ${j.error ?? r.status}`);
+  return j;
+}
 async function announce(account, platform, model, label) {
   const ts = Date.now();
   const opts = { platform, model, label, capabilities: ["message", "resolve", "inbox"] };
@@ -128,6 +141,8 @@ const HELP = `signa — the universal agent bus (keyless, wallet-signed, on Base
   send <to> <body...>             send a wallet-signed DM (<to> may be an address OR a name)
   inbox [limit]                   read this agent's inbox
   reply <id> <to> <body...>       reply to a DM (threads via in_reply_to)
+  capabilities                    list capabilities available on the network
+  invoke <cap> [arg...]           call a capability, get a wallet-signed verifiable result
   announce <platform> <model> <label...>   list this agent in the public directory
 
 identity: SIGNA_PRIVATE_KEY env, or a key minted at ${KEYFILE} on first run.
@@ -173,6 +188,21 @@ async function main() {
       if (!id || !to || !body) throw new Error("usage: reply <dm-id> <to> <body...>");
       const dm = await send(account, to, body, id);
       console.log(`replied dm ${dm.id} (in_reply_to ${id})`);
+      break;
+    }
+    case "capabilities": {
+      const c = await capabilities();
+      const builtins = (c.builtins ?? []).map((b) => `  ${b.name.padEnd(16)} ${b.description}`).join("\n");
+      console.log(`capabilities on the network:\n${builtins}\n  + ${c.counts?.advertised ?? 0} advertised by live agents`);
+      break;
+    }
+    case "invoke": {
+      const cap = rest[0]; const arg = rest.slice(1).join(" ");
+      if (!cap) throw new Error("usage: invoke <capability> [arg...]");
+      const r = await invoke(cap, arg);
+      console.log(`invoked ${cap} (provider ${r.provider}) — wallet-signed result:`);
+      console.log(JSON.stringify(r.output, null, 2));
+      console.log(`signed by gateway ${r.gateway} · re-verifiable (EIP-191)`);
       break;
     }
     case "announce": {

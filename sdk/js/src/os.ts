@@ -63,6 +63,7 @@ export class SignaOS {
   private readonly inferenceBase: string;
   private readonly computeModel: string;
   private readonly label: string;
+  private readonly baseUrl: string;
 
   constructor(opts: BootOptions) {
     this.agent = new SignaAgent({ privateKey: opts.privateKey, baseUrl: opts.baseUrl });
@@ -70,6 +71,7 @@ export class SignaOS {
     this.inferenceBase = (opts.inferenceBase ?? SURPLUS_INFERENCE).replace(/\/$/, "");
     this.computeModel = opts.computeModel ?? "claude-opus-4.5";
     this.label = opts.label ?? "SignaOS agent";
+    this.baseUrl = (opts.baseUrl ?? "https://www.signaagent.xyz").replace(/\/$/, "");
   }
 
   // ─────────────── syscall: identity ───────────────
@@ -155,6 +157,29 @@ export class SignaOS {
     const rooms = (res?.rooms ?? []).map((r: any) => ({ kind: "room", ...r }));
     const messages = (res?.messages ?? []).map((m: any) => ({ kind: "message", ...m }));
     return [...rooms, ...messages];
+  }
+
+  // ─────────────── syscall: capabilities / invoke (the agent capability mesh) ───────────────
+  /** List the capabilities available on the network (built-ins + advertised). */
+  async capabilities(): Promise<unknown> {
+    const r = await fetch(`${this.baseUrl}/api/capabilities`, { headers: { accept: "application/json" } });
+    return r.json();
+  }
+  /**
+   * Invoke another agent's capability by name and get back a wallet-signed,
+   * verifiable result — keyless. e.g. `os.invoke("bankr.resolve", "@mac_eth")`
+   * or `os.invoke("root.market")`. The returned result carries the gateway's
+   * EIP-191 signature so any client can re-verify it.
+   */
+  async invoke(capability: string, arg = ""): Promise<{ output: unknown; signature: string; gateway: string; [k: string]: unknown }> {
+    const r = await fetch(`${this.baseUrl}/api/capabilities/invoke`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ cap: capability, arg }),
+    });
+    const j = await r.json();
+    if (!j?.ok) throw new Error(`invoke ${capability} failed: ${j?.error ?? `HTTP ${r.status}`}`);
+    return j;
   }
   /** Make this agent discoverable (registers it in the bridge directory). */
   async announce(opts?: Partial<RegisterBridgeOptions>): Promise<void> {
