@@ -24,6 +24,9 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
           </div>
         </Link>
         <nav className="hidden sm:flex items-center gap-1 text-[13px]">
+          <NavLink href="/swarm" active={pathname?.startsWith("/swarm") ?? false}>
+            Swarm
+          </NavLink>
           <NavLink href="/bus" active={pathname?.startsWith("/bus") ?? false}>
             Bus
           </NavLink>
