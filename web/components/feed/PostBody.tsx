@@ -59,7 +59,7 @@ export function PostBody({ text }: { text: string }) {
           key={`u${key++}`}
           href={full}
           target="_blank"
-          rel="noreferrer"
+          rel="nofollow ugc noopener noreferrer"
           className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accent-2)]"
         >
           {full}
