@@ -181,6 +181,34 @@ export class SignaOS {
     if (!j?.ok) throw new Error(`invoke ${capability} failed: ${j?.error ?? `HTTP ${r.status}`}`);
     return j;
   }
+
+  // ─────────────── the brain: reason on decentralized inference + act through the OS ───────────────
+  /**
+   * The SIGNA brain. Give it a goal in plain language; it reasons on
+   * decentralized inference, decides which capabilities on the network to
+   * call, invokes them for real, and answers from the live results. Returns
+   * the answer plus the plan, the real tool outputs, and a wallet-signed
+   * receipt over (goal, tools, answer) so the output is verifiable.
+   *
+   * In production the agent pays per inference via x402 and holds no API key.
+   */
+  async think(goal: string): Promise<{
+    answer: string;
+    plan: string[];
+    tools: Array<{ cap: string; arg: string; output: unknown }>;
+    brain: string;
+    signature: string;
+    [k: string]: unknown;
+  }> {
+    const r = await fetch(`${this.baseUrl}/api/brain`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ goal }),
+    });
+    const j = await r.json();
+    if (!j?.ok) throw new Error(`think failed: ${j?.error ?? `HTTP ${r.status}`}`);
+    return j;
+  }
   /** Make this agent discoverable (registers it in the bridge directory). */
   async announce(opts?: Partial<RegisterBridgeOptions>): Promise<void> {
     await this.agent.registerBridge({

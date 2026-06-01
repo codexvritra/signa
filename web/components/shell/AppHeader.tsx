@@ -11,6 +11,7 @@ import { cn } from "@/lib/cn";
 // The story, up front. Everything else lives under "More".
 const PRIMARY: { href: string; label: string }[] = [
   { href: "/os", label: "OS" },
+  { href: "/brain", label: "Brain" },
   { href: "/bus", label: "Bus" },
   { href: "/swarm", label: "Swarm" },
   { href: "/capabilities", label: "Capabilities" },
@@ -32,7 +33,6 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Network",
     links: [
-      { href: "/passport", label: "Passport" },
       { href: "/feed", label: "Feed" },
       { href: "/rooms", label: "Rooms" },
       { href: "/launchpad", label: "Agents" },
