@@ -33,6 +33,10 @@ export function OPTIONS() {
 }
 
 const brain = privateKeyToAccount(keccak256(toBytes("signa:brain:v1")));
+// the brain's signed memory log lives at a dedicated archive address (a
+// self-DM is rejected, so memory is addressed here — still wallet-signed by
+// the brain and re-verifiable by reading this inbox filtered by the brain).
+const MEMORY_ARCHIVE = privateKeyToAccount(keccak256(toBytes("signa:brain-memory:v1"))).address.toLowerCase();
 const ALLOWED = new Set(CAPABILITY_CATALOG.map((c) => c.name));
 
 async function reason(origin: string, prompt: string): Promise<string> {
@@ -120,7 +124,7 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
   // A full autonomous cycle: reason -> act -> remember -> message, all signed.
   const acts: { memory: string | null; report: { to: string; dm_id: string | null } | null } = { memory: null, report: null };
   if (opts.remember) {
-    acts.memory = await brainSend(origin, brain.address, `mem:${goal.slice(0, 80)}\t${answer}`);
+    acts.memory = await brainSend(origin, MEMORY_ARCHIVE, `mem:${goal.slice(0, 80)}\t${answer}`);
   }
   if (opts.reportTo) {
     const to = await resolveAddr(origin, opts.reportTo);
