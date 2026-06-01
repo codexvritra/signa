@@ -47,7 +47,7 @@ async function reason(origin: string, prompt: string): Promise<string> {
 
 const TOOLS_DOC = CAPABILITY_CATALOG.map((c) => `- ${c.name}(${c.input === "none" ? "" : "arg"}): ${c.description}`).join("\n");
 
-export async function run(goal: string, origin: string) {
+async function run(goal: string, origin: string) {
   // 1. PLAN — the brain decides which real capabilities to call
   const planPrompt =
     `You are the SIGNA Brain. You can call these capabilities to gather REAL live data before answering:\n${TOOLS_DOC}\n\n` +
