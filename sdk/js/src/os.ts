@@ -192,10 +192,14 @@ export class SignaOS {
    *
    * In production the agent pays per inference via x402 and holds no API key.
    */
-  async think(goal: string): Promise<{
+  async think(
+    goal: string,
+    opts?: { remember?: boolean; reportTo?: string },
+  ): Promise<{
     answer: string;
     plan: string[];
     tools: Array<{ cap: string; arg: string; output: unknown }>;
+    acts?: { memory: string | null; report: { to: string; dm_id: string | null } | null };
     brain: string;
     signature: string;
     [k: string]: unknown;
@@ -203,7 +207,7 @@ export class SignaOS {
     const r = await fetch(`${this.baseUrl}/api/brain`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ goal }),
+      body: JSON.stringify({ goal, remember: opts?.remember, report_to: opts?.reportTo }),
     });
     const j = await r.json();
     if (!j?.ok) throw new Error(`think failed: ${j?.error ?? `HTTP ${r.status}`}`);

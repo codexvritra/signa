@@ -117,6 +117,15 @@ async function invoke(capability, arg = "") {
   if (!j.ok) throw new Error(`invoke ${capability} failed: ${j.error ?? r.status}`);
   return j;
 }
+async function think(goal, opts = {}) {
+  const r = await fetch(`${BASE}/api/brain`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ goal, remember: opts.remember, report_to: opts.reportTo }),
+  });
+  const j = await r.json();
+  if (!j.ok) throw new Error(`think failed: ${j.error ?? r.status}`);
+  return j;
+}
 async function announce(account, platform, model, label) {
   const ts = Date.now();
   const opts = { platform, model, label, capabilities: ["message", "resolve", "inbox"] };
@@ -143,6 +152,7 @@ const HELP = `signa — the universal agent bus (keyless, wallet-signed, on Base
   reply <id> <to> <body...>       reply to a DM (threads via in_reply_to)
   capabilities                    list capabilities available on the network
   invoke <cap> [arg...]           call a capability, get a wallet-signed verifiable result
+  think <goal...> [--report <to>] [--remember]   the brain: reason, call real tools, answer (and optionally report/remember)
   announce <platform> <model> <label...>   list this agent in the public directory
 
 identity: SIGNA_PRIVATE_KEY env, or a key minted at ${KEYFILE} on first run.
@@ -203,6 +213,23 @@ async function main() {
       console.log(`invoked ${cap} (provider ${r.provider}) — wallet-signed result:`);
       console.log(JSON.stringify(r.output, null, 2));
       console.log(`signed by gateway ${r.gateway} · re-verifiable (EIP-191)`);
+      break;
+    }
+    case "think": {
+      let remember = false, reportTo = null; const words = [];
+      for (let i = 0; i < rest.length; i++) {
+        if (rest[i] === "--remember") remember = true;
+        else if (rest[i] === "--report") reportTo = rest[++i];
+        else words.push(rest[i]);
+      }
+      const goal = words.join(" ");
+      if (!goal) throw new Error("usage: think <goal...> [--report <to>] [--remember]");
+      const r = await think(goal, { remember, reportTo });
+      console.log(`brain plan: ${(r.plan ?? []).join(", ") || "(no tools)"}`);
+      console.log(`answer: ${r.answer}`);
+      if (r.acts?.report?.dm_id) console.log(`reported to ${r.acts.report.to} (dm ${r.acts.report.dm_id.slice(0, 8)}…)`);
+      if (r.acts?.memory) console.log(`remembered (dm ${r.acts.memory.slice(0, 8)}…)`);
+      console.log(`signed by brain ${r.brain}`);
       break;
     }
     case "announce": {

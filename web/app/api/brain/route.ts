@@ -45,9 +45,39 @@ async function reason(origin: string, prompt: string): Promise<string> {
   return (j?.response ?? "").toString().trim();
 }
 
+// the brain acts on the network with its own wallet — signed, keyless
+function dmPreimage(from: string, to: string, body: string, ts: number) {
+  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
+}
+async function brainSend(origin: string, to: string, body: string): Promise<string | null> {
+  const from = brain.address.toLowerCase();
+  const ts = Date.now();
+  const signature = await brain.signMessage({ message: dmPreimage(from, to, body.slice(0, 8000), ts) });
+  try {
+    const r = await fetch(`${origin}/api/agents/${from}/dm`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ from, to: to.toLowerCase(), body: body.slice(0, 8000), ts, signature }),
+    });
+    const j = await r.json().catch(() => ({}));
+    return j?.dm?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+async function resolveAddr(origin: string, id: string): Promise<string | null> {
+  if (/^0x[a-fA-F0-9]{40}$/.test(id)) return id.toLowerCase();
+  try {
+    const j = await (await fetch(`${origin}/api/resolve?id=${encodeURIComponent(id)}`)).json();
+    return j?.ok && j.address ? j.address : null;
+  } catch {
+    return null;
+  }
+}
+
 const TOOLS_DOC = CAPABILITY_CATALOG.map((c) => `- ${c.name}(${c.input === "none" ? "" : "arg"}): ${c.description}`).join("\n");
 
-async function run(goal: string, origin: string) {
+async function run(goal: string, origin: string, opts: { remember?: boolean; reportTo?: string } = {}) {
   // 1. PLAN — the brain decides which real capabilities to call
   const planPrompt =
     `You are the SIGNA Brain. You can call these capabilities to gather REAL live data before answering:\n${TOOLS_DOC}\n\n` +
@@ -86,37 +116,52 @@ async function run(goal: string, origin: string) {
   const preimage = ["SIGNA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:${tools.map((t) => t.cap).join(",")}`, `answer:${answerHash}`].join("\n");
   const signature = await brain.signMessage({ message: preimage });
 
+  // 5. ACT ON THE NETWORK — remember what it learned, report to another agent.
+  // A full autonomous cycle: reason -> act -> remember -> message, all signed.
+  const acts: { memory: string | null; report: { to: string; dm_id: string | null } | null } = { memory: null, report: null };
+  if (opts.remember) {
+    acts.memory = await brainSend(origin, brain.address, `mem:${goal.slice(0, 80)}\t${answer}`);
+  }
+  if (opts.reportTo) {
+    const to = await resolveAddr(origin, opts.reportTo);
+    if (to) acts.report = { to, dm_id: await brainSend(origin, to, `[brain report] ${answer}`) };
+  }
+
   return {
     ok: true,
     goal,
     plan: plan.map((p) => `${p.cap}(${p.arg ?? ""})`),
     tools,
     answer,
+    acts,
     ts,
     brain: brain.address.toLowerCase(),
     signature,
     verify: { scheme: "eip191", preimage, how: "sha256 the answer, rebuild the preimage, verifyMessage against `brain`" },
-    note: "The brain reasons on decentralized inference and acts through the SIGNA capability mesh. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.",
+    note: "The brain reasons on decentralized inference, acts through the SIGNA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.",
   };
 }
 
 export async function POST(req: NextRequest) {
-  let goal = "";
-  try { goal = (await req.json())?.goal ?? ""; } catch { /* */ }
+  let goal = "", remember = false, reportTo = "";
+  try { const b = await req.json(); goal = b?.goal ?? ""; remember = !!b?.remember; reportTo = b?.report_to ?? b?.reportTo ?? ""; } catch { /* */ }
   if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal" }, { status: 400, headers: CORS });
   if (goal.length > 600) return NextResponse.json({ ok: false, error: "goal_too_long" }, { status: 400, headers: CORS });
   try {
-    return NextResponse.json(await run(goal, req.nextUrl.origin), { headers: CORS });
+    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined }), { headers: CORS });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "brain error" }, { status: 502, headers: CORS });
   }
 }
 
 export async function GET(req: NextRequest) {
-  const goal = req.nextUrl.searchParams.get("goal") ?? "";
-  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing" }, { status: 400, headers: CORS });
+  const sp = req.nextUrl.searchParams;
+  const goal = sp.get("goal") ?? "";
+  const remember = sp.get("remember") === "1" || sp.get("remember") === "true";
+  const reportTo = sp.get("report_to") ?? "";
+  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing&report_to=@handle&remember=1" }, { status: 400, headers: CORS });
   try {
-    return NextResponse.json(await run(goal, req.nextUrl.origin), { headers: CORS });
+    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined }), { headers: CORS });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "brain error" }, { status: 502, headers: CORS });
   }
