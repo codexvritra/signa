@@ -61,15 +61,6 @@ function resultPreimage(cap, input, prov, ts, output) {
   const outHash = createHash("sha256").update(JSON.stringify(output)).digest("hex");
   return ["SIGNA capability result v1", `cap:${cap}`, `input:${input}`, `provider:${prov}`, `ts:${ts}`, `output:${outHash}`].join("\n");
 }
-// keccak of the seed string → deterministic key (mirror of the server's identities)
-function createHashKey(seed) {
-  // viem keccak256(toBytes(seed)) — but keep deps minimal: import lazily
-  // (we only need this for display; recompute exactly like the server)
-  return _kk(seed);
-}
-import { keccak256, toBytes } from "viem";
-function _kk(seed) { return keccak256(toBytes(seed)); }
-
 console.log(`the SIGNA marketplace — register → directory → invoke → brain (live on ${BASE})`);
 console.log(`  developer wallet (fresh, no account): ${short(provider)}`);
 console.log(`  publishing: ${NAME}  →  ${ENDPOINT}\n`);
