@@ -17,7 +17,8 @@ type Dir = {
   ok: boolean;
   builtins: Cap[];
   registered: Cap[];
-  counts: { builtin: number; registered: number; advertised: number };
+  onchain: Cap[];
+  counts: { builtin: number; registered: number; onchain: number; advertised: number };
 };
 
 const short = (a?: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a ?? "");
@@ -75,6 +76,20 @@ export function MarketplaceDirectory() {
 
   return (
     <div className="space-y-10">
+      {dir.onchain?.length ? (
+        <div>
+          <div className="flex items-baseline justify-between mb-4">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)]">
+              registered on Base · trustless tier · read straight from chain
+            </div>
+            <div className="text-[12px] font-mono text-white/45">{dir.counts?.onchain ?? 0} onchain</div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {dir.onchain.map((c) => <Row key={`oc-${c.name}`} c={c} />)}
+          </div>
+        </div>
+      ) : null}
+
       <div>
         <div className="flex items-baseline justify-between mb-4">
           <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)]">

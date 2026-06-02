@@ -5,6 +5,7 @@ libs = ["lib"]
 solc = "0.8.24"
 optimizer = true
 optimizer_runs = 2_000_000
+via_ir = true
 
 [rpc_endpoints]
 base = "https://mainnet.base.org"

@@ -77,6 +77,30 @@ export default function MarketplacePage() {
           </div>
         </section>
 
+        {/* two tiers */}
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-white/45 mb-6">two ways to register</div>
+            <div className="grid sm:grid-cols-2 gap-4 text-[13.5px] text-white/70 leading-relaxed">
+              <div className="border border-white/10 rounded-lg bg-white/[0.02] p-5">
+                <div className="text-white font-medium mb-1.5">Off-chain — one wallet signature</div>
+                Sign the register envelope and POST it. Live instantly, zero gas. The signature is the credential and is
+                re-verifiable by anyone. Fast path for shipping a capability in seconds.
+              </div>
+              <div className="border border-[var(--accent)]/25 rounded-lg bg-[var(--accent)]/[0.05] p-5">
+                <div className="text-white font-medium mb-1.5">On-chain — trustless on Base</div>
+                Call <span className="font-mono text-[12.5px]">register(...)</span> on the SignaCapabilityRegistry
+                contract. The full callable spec (endpoint, method, price, payout) lives on Base, so discovery reads
+                straight from chain — no trust in any index, this one included.
+              </div>
+            </div>
+            <p className="mt-5 text-[12.5px] text-white/45 leading-relaxed max-w-2xl">
+              Same capability shape either way; both show up in the directory and are callable by any agent and by the
+              brain. Pick the signature for speed, the contract for full trustlessness.
+            </p>
+          </div>
+        </section>
+
         {/* how it works */}
         <section className="border-b border-white/[0.06]">
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">

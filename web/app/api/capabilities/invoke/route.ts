@@ -4,6 +4,7 @@ import { keccak256, toBytes } from "viem";
 import { createHash } from "node:crypto";
 import { CAPABILITY_CATALOG, fulfillCapability } from "@/lib/capabilities";
 import { getRegistered, callRegistered, bumpCalls } from "@/lib/marketplace";
+import { getOnchainCapability } from "@/lib/onchain-capabilities";
 import {
   build402Challenge,
   decodePaymentHeader,
@@ -111,8 +112,10 @@ async function run(cap: string, arg: string, paymentHeader: string | null, resou
     return signedResult(cap, arg, meta.provider, meta.source, output, { kind: "builtin" });
   }
 
-  // 2. registered capability — published by a developer with one signature
-  const rec = await getRegistered(cap);
+  // 2. registered capability — off-chain (one signature) OR on-chain (trustless,
+  //    read straight from Base). Off-chain is checked first; on-chain is the
+  //    fallback so a capability registered only on Base is still callable here.
+  const rec = (await getRegistered(cap)) ?? (await getOnchainCapability(cap));
   if (rec) {
     // optional x402 pricing — non-custodial. SIGNA verifies, never settles.
     let payment: { payer: string; amount_raw: string; asset: string } | undefined;

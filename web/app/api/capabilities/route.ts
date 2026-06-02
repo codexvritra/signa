@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { CAPABILITY_CATALOG } from "@/lib/capabilities";
 import { listRegistered } from "@/lib/marketplace";
+import { listOnchainCapabilities, capabilityRegistryAddress } from "@/lib/onchain-capabilities";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,6 +56,26 @@ export async function GET(_req: NextRequest) {
     /* marketplace read best-effort */
   }
 
+  // the trustless tier — capabilities registered directly on Base (read from chain)
+  let onchain: Array<Record<string, unknown>> = [];
+  try {
+    const rows = await listOnchainCapabilities(100);
+    onchain = rows.map((r) => ({
+      name: r.name,
+      provider: r.provider_address,
+      source: (() => { try { return new URL(r.endpoint).host; } catch { return null; } })(),
+      input: r.input_hint ?? "arg",
+      description: r.description,
+      price_usdc: r.price_usdc,
+      pay_to: r.pay_to,
+      calls: r.calls,
+      kind: "onchain",
+      invoke: `/api/capabilities/invoke?cap=${encodeURIComponent(r.name)}`,
+    }));
+  } catch {
+    /* on-chain read best-effort */
+  }
+
   // capabilities advertised by live agents on the wire
   let advertised: Array<{ name: string; provider: string; agent: string; kind: string; alive: boolean }> = [];
   try {
@@ -81,10 +102,16 @@ export async function GET(_req: NextRequest) {
       ok: true,
       builtins,
       registered,
+      onchain,
       advertised,
-      counts: { builtin: builtins.length, registered: registered.length, advertised: advertised.length },
-      register: { endpoint: "/api/capabilities/register", how: "POST a wallet-signed envelope — one signature, no account, no API key" },
-      note: "Invoke any capability at /api/capabilities/invoke?cap=<name>&arg=<input>. Results are wallet-signed and re-verifiable against the gateway. Registration is permissionless; calls are gateway-mediated and SSRF-guarded.",
+      counts: { builtin: builtins.length, registered: registered.length, onchain: onchain.length, advertised: advertised.length },
+      register: {
+        offchain: { endpoint: "/api/capabilities/register", how: "POST a wallet-signed envelope — one signature, no account, no API key" },
+        onchain: capabilityRegistryAddress()
+          ? { contract: capabilityRegistryAddress(), how: "call register(name,endpoint,method,description,priceUsdc,payTo) on Base — discovery reads straight from chain, no trust in this index" }
+          : { contract: null, how: "on-chain registry not yet configured on this node" },
+      },
+      note: "Invoke any capability at /api/capabilities/invoke?cap=<name>&arg=<input>. Results are wallet-signed and re-verifiable against the gateway. Off-chain registration is permissionless; the on-chain tier is fully trustless (the callable spec lives on Base). Calls are gateway-mediated and SSRF-guarded.",
     },
     { headers: CORS },
   );
