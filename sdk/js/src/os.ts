@@ -244,6 +244,96 @@ export class SignaOS {
     return j;
   }
 
+  /**
+   * Invoke a PRICED capability and pay for it over x402 — agent-to-agent, on
+   * Base, keyless. Probes the capability; if it returns an HTTP 402 challenge,
+   * signs an EIP-3009 USDC `transferWithAuthorization` authorizing the asked
+   * amount to the provider, attaches it as the `X-PAYMENT` header, and retries.
+   * The provider settles the authorization out of band — SIGNA never custodies
+   * funds. Free capabilities just return immediately.
+   *
+   * `maxUsdc` is a safety ceiling: if the capability asks for more, this throws
+   * instead of paying. Requires the wallet to hold the USDC to make settlement
+   * real; signing the authorization itself costs nothing.
+   */
+  async invokePaid(
+    capability: string,
+    arg = "",
+    opts?: { maxUsdc?: number },
+  ): Promise<{ output: unknown; signature: string; gateway: string; payment?: unknown; [k: string]: unknown }> {
+    const url = `${this.baseUrl}/api/capabilities/invoke`;
+    const reqBody = JSON.stringify({ cap: capability, arg });
+    // 1. probe for the challenge (no payment attached)
+    const probe = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: reqBody });
+    if (probe.status !== 402) {
+      const j = await probe.json();
+      if (!j?.ok) throw new Error(`invoke ${capability} failed: ${j?.error ?? `HTTP ${probe.status}`}`);
+      return j; // free capability — no payment needed
+    }
+    const challenge = await probe.json();
+    const accept = challenge?.accepts?.[0];
+    if (!accept?.payTo || !accept?.maxAmountRequired || !accept?.asset) throw new Error("malformed x402 challenge");
+
+    const decimals = 6; // USDC
+    const askUsdc = Number(accept.maxAmountRequired) / 10 ** decimals;
+    if (opts?.maxUsdc != null && askUsdc > opts.maxUsdc) {
+      throw new Error(`capability asks ${askUsdc} USDC > maxUsdc ${opts.maxUsdc}; not paying`);
+    }
+
+    // 2. sign the EIP-3009 authorization to pay the provider
+    const account = (this.agent as any).account; // PrivateKeyAccount
+    const chainId = String(accept.network).endsWith("8453") ? 8453 : 84532;
+    const nowSec = Math.floor(Date.now() / 1000);
+    const authorization = {
+      from: this.agent.address as Hex,
+      to: String(accept.payTo).toLowerCase() as Hex,
+      value: BigInt(accept.maxAmountRequired),
+      validAfter: 0n,
+      validBefore: BigInt(nowSec + (Number(accept.maxTimeoutSeconds) || 300)),
+      nonce: this.randomNonce(),
+    };
+    const signature = await account.signTypedData({
+      domain: { name: accept.extra?.name ?? "USD Coin", version: accept.extra?.version ?? "2", chainId, verifyingContract: accept.asset as Hex },
+      types: {
+        TransferWithAuthorization: [
+          { name: "from", type: "address" },
+          { name: "to", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "validAfter", type: "uint256" },
+          { name: "validBefore", type: "uint256" },
+          { name: "nonce", type: "bytes32" },
+        ],
+      },
+      primaryType: "TransferWithAuthorization",
+      message: authorization,
+    });
+    const xPayment = Buffer.from(
+      JSON.stringify({
+        x402Version: 2,
+        scheme: "exact",
+        network: accept.network,
+        payload: {
+          signature,
+          authorization: {
+            from: authorization.from,
+            to: authorization.to,
+            value: authorization.value.toString(),
+            validAfter: authorization.validAfter.toString(),
+            validBefore: authorization.validBefore.toString(),
+            nonce: authorization.nonce,
+          },
+        },
+      }),
+      "utf8",
+    ).toString("base64");
+
+    // 3. retry with the payment attached
+    const paid = await fetch(url, { method: "POST", headers: { "content-type": "application/json", "x-payment": xPayment }, body: reqBody });
+    const j = await paid.json();
+    if (!j?.ok) throw new Error(`paid invoke ${capability} failed: ${j?.error ?? `HTTP ${paid.status}`}`);
+    return j;
+  }
+
   // ─────────────── the brain: reason on decentralized inference + act through the OS ───────────────
   /**
    * The SIGNA brain. Give it a goal in plain language; it reasons on
