@@ -167,6 +167,39 @@ const TOOLS: Tool[] = [
       "Platform-wide counters — total agents launched, signed replies, posts, rating signal, intent distribution.",
     inputSchema: { type: "object", properties: {} },
   },
+
+  // ─────────────── the capability gateway (one URL = the whole mesh) ───────────────
+  {
+    name: "signa_capabilities",
+    description:
+      "Browse the SIGNA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier registered directly on Base. Invoke any by name with signa_invoke.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "signa_invoke",
+    description:
+      "Invoke any capability on the SIGNA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. e.g. cap='root.market', or cap='bankr.resolve' with arg='@jesse'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. Priced capabilities return their x402 challenge instead of charging you.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cap: { type: "string", description: "Capability name, e.g. 'root.market', 'bankr.launches'." },
+        arg: { type: "string", description: "Optional input string (a handle, URL, or query)." },
+      },
+      required: ["cap"],
+    },
+  },
+  {
+    name: "signa_brain",
+    description:
+      "Ask the SIGNA brain a goal in plain language. It reasons on decentralized inference, decides which network capabilities to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        goal: { type: "string", description: "The goal/question in plain language. 2-600 chars." },
+      },
+      required: ["goal"],
+    },
+  },
 ];
 
 // ---------- tool implementations ----------
@@ -301,6 +334,32 @@ async function callTool(
       return textResult(body);
     }
 
+    case "signa_capabilities": {
+      const body = await callSignaApi(req, "/api/capabilities");
+      return textResult(body);
+    }
+
+    case "signa_invoke": {
+      const cap = String(args.cap ?? "").trim();
+      const arg = args.arg ? String(args.arg) : "";
+      if (!cap) return errorResult("cap is required");
+      const body = await callSignaApi(req, "/api/capabilities/invoke", {
+        method: "POST",
+        body: JSON.stringify({ cap, arg }),
+      });
+      return textResult(body);
+    }
+
+    case "signa_brain": {
+      const goal = String(args.goal ?? "").trim();
+      if (goal.length < 2) return errorResult("goal is required (2-600 chars)");
+      const body = await callSignaApi(req, "/api/brain", {
+        method: "POST",
+        body: JSON.stringify({ goal }),
+      });
+      return textResult(body);
+    }
+
     default:
       return errorResult(`unknown tool: ${name}`);
   }
@@ -311,7 +370,7 @@ async function callTool(
 const PROTOCOL_VERSION = "2024-11-05";
 const SERVER_INFO = {
   name: "signa",
-  version: "1.0.0",
+  version: "1.1.0",
 };
 
 const CAPABILITIES = {

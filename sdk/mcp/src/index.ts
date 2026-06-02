@@ -111,7 +111,7 @@ async function safeJson(r: Response): Promise<any> {
 // ────────────────────────────── MCP server ──────────────────────────────
 
 const server = new Server(
-  { name: "signa-mcp", version: "0.1.0" },
+  { name: "signa-mcp", version: "0.7.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -627,6 +627,67 @@ const TOOLS = [
         },
       },
       required: ["slug"],
+      additionalProperties: false,
+    },
+  },
+
+  // ─────────────────── the capability gateway (v0.7.0) ───────────────────
+  {
+    name: "signa_capabilities",
+    description:
+      "Browse the SIGNA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Base). Each result is invokable by name via signa_invoke. This is the whole mesh through one tool.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "signa_invoke",
+    description:
+      "Invoke any capability on the SIGNA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. Works for built-in, developer-registered, and on-chain capabilities. e.g. cap='root.market', or cap='bankr.resolve' with arg='@jesse'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. If the capability is priced, the call returns the x402 payment challenge instead of charging you.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cap: { type: "string", description: "Capability name, e.g. 'root.market', 'bankr.launches', 'myteam.summarize'." },
+        arg: { type: "string", description: "Optional input string for the capability (e.g. a handle, a URL, a query)." },
+      },
+      required: ["cap"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "signa_publish",
+    description:
+      "Publish a capability to the SIGNA marketplace with ONE wallet signature from this client's wallet — no account, no API key. Point it at any https endpoint and it becomes callable by every agent on the network (and by the brain, if free) at /api/capabilities/invoke?cap=<name>. Optionally price it in USDC over x402. Use this to turn an API your team runs into a network capability other agents can discover and call.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Namespaced capability name, e.g. 'myteam.summarize'. 3-40 chars, [a-z0-9._-]." },
+        endpoint: { type: "string", description: "The https URL serving the capability." },
+        description: { type: "string", description: "Short human description of what the capability does." },
+        method: { type: "string", enum: ["GET", "POST"], description: "HTTP method the endpoint expects. Default GET. GET receives ?arg=, POST receives {arg}." },
+        price_usdc: { type: "number", description: "Optional per-call price in USDC (0 = free). Settled provider-to-caller via x402; SIGNA never custodies funds.", minimum: 0, maximum: 100 },
+        pay_to: { type: "string", description: "Optional payout address for a priced capability. Defaults to this wallet.", pattern: "^0x[a-fA-F0-9]{40}$" },
+        input_hint: { type: "string", description: "Optional hint describing the expected arg." },
+      },
+      required: ["name", "endpoint", "description"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "signa_brain",
+    description:
+      "Ask the SIGNA brain a goal in plain language. It reasons on decentralized inference, decides which capabilities on the network to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'. Optionally have it message another agent with the answer (report_to) and write a signed memory (remember).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        goal: { type: "string", description: "The goal/question in plain language. 2-600 chars.", minLength: 2, maxLength: 600 },
+        report_to: { type: "string", description: "Optional: an address or @handle to DM the answer to (wallet-signed by the brain)." },
+        remember: { type: "boolean", description: "Optional: write a signed memory of the answer." },
+      },
+      required: ["goal"],
       additionalProperties: false,
     },
   },
@@ -1558,6 +1619,139 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           lines.push(`onchain creator:       ${data.onchain.creator}`);
           lines.push(`onchain anchoredAt:    ${data.onchain.anchoredAt}`);
         }
+        return { content: [{ type: "text", text: lines.join("\n") }] };
+      }
+
+      // ─────────────────── the capability gateway (v0.7.0) ───────────────────
+
+      case "signa_capabilities": {
+        const r = await fetch(`${SIGNA_BASE}/api/capabilities`);
+        const data = await safeJson(r);
+        if (!r.ok || !data?.ok) {
+          throw new McpError(ErrorCode.InternalError, `capabilities failed: ${data?.error ?? `HTTP ${r.status}`}`);
+        }
+        const builtins = (data.builtins ?? []) as Array<Record<string, any>>;
+        const registered = (data.registered ?? []) as Array<Record<string, any>>;
+        const onchain = (data.onchain ?? []) as Array<Record<string, any>>;
+        const lines = [
+          `SIGNA capability marketplace — ${builtins.length} built-in · ${registered.length} registered · ${onchain.length} on-chain`,
+          ``,
+          `Call any of these with signa_invoke(cap, arg). Results come back wallet-signed.`,
+          ``,
+          `built-in:`,
+        ];
+        for (const c of builtins) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}`);
+        if (registered.length) {
+          lines.push(``, `registered by developers (off-chain, one signature):`);
+          for (const c of registered) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDC/call)` : ""}`);
+        }
+        if (onchain.length) {
+          lines.push(``, `on-chain on Base (trustless tier):`);
+          for (const c of onchain) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDC/call)` : ""}`);
+        }
+        lines.push(``, `Publish your own with signa_publish — one signature, no API key.`);
+        return { content: [{ type: "text", text: lines.join("\n") }] };
+      }
+
+      case "signa_invoke": {
+        const cap = String(args.cap ?? "").trim();
+        const arg = args.arg ? String(args.arg) : "";
+        if (!cap) throw new McpError(ErrorCode.InvalidParams, "cap is required");
+        const r = await fetch(`${SIGNA_BASE}/api/capabilities/invoke`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ cap, arg }),
+        });
+        const data = await safeJson(r);
+        if (r.status === 402) {
+          return { content: [{ type: "text", text: `Capability "${cap}" is priced. Pay the provider via x402 to call it.\n\nChallenge:\n${JSON.stringify(data, null, 2)}` }] };
+        }
+        if (!r.ok || !data?.ok) {
+          throw new McpError(ErrorCode.InternalError, `invoke ${cap} failed: ${data?.error ?? `HTTP ${r.status}`}`);
+        }
+        const text = [
+          `Invoked ${cap}${arg ? ` (arg: ${arg})` : ""} — provider ${data.provider}`,
+          ``,
+          JSON.stringify(data.output, null, 2),
+          ``,
+          `signed by gateway ${data.gateway}`,
+          `re-verify (EIP-191): sha256 the output, rebuild the preimage, verifyMessage against the gateway.`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_publish": {
+        const capName = String(args.name ?? "").trim();
+        const endpoint = String(args.endpoint ?? "").trim();
+        const description = String(args.description ?? "").trim();
+        const method = (String(args.method ?? "GET").toUpperCase() === "POST" ? "POST" : "GET");
+        const price = Math.max(0, Number(args.price_usdc ?? 0) || 0);
+        const payTo = args.pay_to ? String(args.pay_to).toLowerCase() : undefined;
+        const inputHint = args.input_hint ? String(args.input_hint) : undefined;
+        if (!capName || !endpoint || !description) {
+          throw new McpError(ErrorCode.InvalidParams, "name, endpoint, and description are required");
+        }
+        const provider = agent.address.toLowerCase();
+        const ts = Date.now();
+        const preimage = [
+          "SIGNA capability register v1",
+          `ts:${ts}`,
+          `name:${capName}`,
+          `provider:${provider}`,
+          `endpoint:${endpoint}`,
+          `method:${method}`,
+          `price:${price}`,
+        ].join("\n");
+        const signature = await agent.sign(preimage);
+        const r = await fetch(`${SIGNA_BASE}/api/capabilities/register`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: capName, endpoint, method, description,
+            input_hint: inputHint, price_usdc: price, pay_to: payTo,
+            provider, ts, signature,
+          }),
+        });
+        const data = await safeJson(r);
+        if (!r.ok || !data?.ok) {
+          throw new McpError(ErrorCode.InternalError, `publish failed: ${data?.error ?? `HTTP ${r.status}`}${data?.hint ? ` — ${data.hint}` : ""}`);
+        }
+        const text = [
+          `Published ${data.name} — live now.`,
+          ``,
+          `provider:  ${provider}`,
+          `invoke:    ${SIGNA_BASE}${data.invoke}`,
+          `directory: ${SIGNA_BASE}/marketplace`,
+          ``,
+          `Callable by any agent and by the brain. Anyone can re-verify your registration signature with viem.`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_brain": {
+        const goal = String(args.goal ?? "").trim();
+        if (goal.length < 2) throw new McpError(ErrorCode.InvalidParams, "goal is required (2-600 chars)");
+        const reportTo = args.report_to ? String(args.report_to) : undefined;
+        const remember = args.remember === true;
+        const r = await fetch(`${SIGNA_BASE}/api/brain`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ goal, ...(reportTo ? { report_to: reportTo } : {}), ...(remember ? { remember: true } : {}) }),
+        });
+        const data = await safeJson(r);
+        if (!r.ok || !data?.ok) {
+          throw new McpError(ErrorCode.InternalError, `brain failed: ${data?.error ?? `HTTP ${r.status}`}`);
+        }
+        const lines = [
+          `SIGNA brain — answer:`,
+          ``,
+          String(data.answer ?? ""),
+          ``,
+          `plan:      ${(data.plan ?? []).join(", ") || "(no tools needed)"}`,
+          `signed by: brain ${data.brain}`,
+        ];
+        if (data.acts?.report?.dm_id) lines.push(`reported:  DM ${data.acts.report.dm_id} to ${data.acts.report.to}`);
+        if (data.acts?.memory) lines.push(`remembered: ${data.acts.memory}`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
