@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { CAPABILITY_CATALOG } from "@/lib/capabilities";
+import { listRegistered } from "@/lib/marketplace";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -8,10 +9,15 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/capabilities
  *
- * The capability directory. Returns the built-in capabilities SIGNA fulfils
- * for partner agents (Bankr, Root Edge), plus every capability advertised by
- * an agent on the network (from the wallet-signed bridge registry). This is
- * how any agent discovers what the network can do — keyless, no account.
+ * The capability directory. Returns three layers:
+ *  - built-ins SIGNA fulfils for partner agents (Bankr, Root Edge)
+ *  - registered: the open marketplace — any developer published these with one
+ *    wallet-signed call; each is callable now and (optionally) priced in USDC
+ *  - advertised: capabilities live agents announce via the bridge registry
+ *
+ * This is how any agent that speaks the SIGNA protocol discovers what the
+ * network can do — keyless, no account. Registration is permissionless (one
+ * signature); calls are gateway-mediated (SSRF-guarded, revocable).
  */
 const CORS = {
   "access-control-allow-origin": "*",
@@ -28,6 +34,26 @@ export function OPTIONS() {
 export async function GET(_req: NextRequest) {
   // built-ins fulfilled by the SIGNA capability gateway
   const builtins = CAPABILITY_CATALOG.map((c) => ({ ...c, kind: "builtin", invoke: `/api/capabilities/invoke?cap=${encodeURIComponent(c.name)}` }));
+
+  // the open marketplace — capabilities developers registered with one signature
+  let registered: Array<Record<string, unknown>> = [];
+  try {
+    const rows = await listRegistered(100);
+    registered = rows.map((r) => ({
+      name: r.name,
+      provider: r.provider_address,
+      source: (() => { try { return new URL(r.endpoint).host; } catch { return null; } })(),
+      input: r.input_hint ?? "arg",
+      description: r.description,
+      price_usdc: r.price_usdc,
+      pay_to: r.pay_to,
+      calls: r.calls,
+      kind: "registered",
+      invoke: `/api/capabilities/invoke?cap=${encodeURIComponent(r.name)}`,
+    }));
+  } catch {
+    /* marketplace read best-effort */
+  }
 
   // capabilities advertised by live agents on the wire
   let advertised: Array<{ name: string; provider: string; agent: string; kind: string; alive: boolean }> = [];
@@ -54,9 +80,11 @@ export async function GET(_req: NextRequest) {
     {
       ok: true,
       builtins,
+      registered,
       advertised,
-      counts: { builtin: builtins.length, advertised: advertised.length },
-      note: "Invoke a built-in at /api/capabilities/invoke?cap=<name>&arg=<input>. Results are wallet-signed and re-verifiable.",
+      counts: { builtin: builtins.length, registered: registered.length, advertised: advertised.length },
+      register: { endpoint: "/api/capabilities/register", how: "POST a wallet-signed envelope — one signature, no account, no API key" },
+      note: "Invoke any capability at /api/capabilities/invoke?cap=<name>&arg=<input>. Results are wallet-signed and re-verifiable against the gateway. Registration is permissionless; calls are gateway-mediated and SSRF-guarded.",
     },
     { headers: CORS },
   );

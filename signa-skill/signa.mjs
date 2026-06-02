@@ -58,6 +58,17 @@ function dmPreimage(from, to, body, ts, opts = {}) {
   lines.push(`body:${body}`);
   return lines.join("\n");
 }
+function registerCapPreimage({ ts, name, provider, endpoint, method, price }) {
+  return [
+    "SIGNA capability register v1",
+    `ts:${ts}`,
+    `name:${name}`,
+    `provider:${provider.toLowerCase()}`,
+    `endpoint:${endpoint}`,
+    `method:${method.toUpperCase()}`,
+    `price:${price}`,
+  ].join("\n");
+}
 function bridgePreimage(address, ts, { platform, model, label, description, capabilities }) {
   const lines = [
     "SIGNA agent bridge register v1", `ts:${ts}`, `address:${address.toLowerCase()}`,
@@ -126,6 +137,25 @@ async function think(goal, opts = {}) {
   if (!j.ok) throw new Error(`think failed: ${j.error ?? r.status}`);
   return j;
 }
+async function publish(account, spec) {
+  const provider = account.address.toLowerCase();
+  const ts = Date.now();
+  const method = (spec.method ?? "GET").toUpperCase();
+  const price = spec.price ?? 0;
+  const signature = await account.signMessage({
+    message: registerCapPreimage({ ts, name: spec.name, provider, endpoint: spec.endpoint, method, price }),
+  });
+  const r = await fetch(`${BASE}/api/capabilities/register`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      name: spec.name, endpoint: spec.endpoint, method, description: spec.description,
+      input_hint: spec.inputHint, price_usdc: price, pay_to: spec.payTo, provider, ts, signature,
+    }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.ok) throw new Error(`publish failed (${r.status}): ${j.error ?? "unknown"}${j.hint ? ` — ${j.hint}` : ""}`);
+  return j;
+}
 async function announce(account, platform, model, label) {
   const ts = Date.now();
   const opts = { platform, model, label, capabilities: ["message", "resolve", "inbox"] };
@@ -152,6 +182,10 @@ const HELP = `signa — the universal agent bus (keyless, wallet-signed, on Base
   reply <id> <to> <body...>       reply to a DM (threads via in_reply_to)
   capabilities                    list capabilities available on the network
   invoke <cap> [arg...]           call a capability, get a wallet-signed verifiable result
+  publish <name> <https-endpoint> <description...>   register a capability with ONE signature
+       [--method GET|POST] [--price <usdc>] [--pay-to 0x...] [--input "<hint>"]
+       publishes an https endpoint as a network capability — keyless, no account.
+       it becomes callable by any agent (and by the brain, if free) instantly.
   think <goal...> [--report <to>] [--remember]   the brain: reason, call real tools, answer (and optionally report/remember)
   announce <platform> <model> <label...>   list this agent in the public directory
 
@@ -202,8 +236,11 @@ async function main() {
     }
     case "capabilities": {
       const c = await capabilities();
-      const builtins = (c.builtins ?? []).map((b) => `  ${b.name.padEnd(16)} ${b.description}`).join("\n");
-      console.log(`capabilities on the network:\n${builtins}\n  + ${c.counts?.advertised ?? 0} advertised by live agents`);
+      const builtins = (c.builtins ?? []).map((b) => `  ${b.name.padEnd(20)} ${b.description}`).join("\n");
+      const reg = (c.registered ?? []).map((b) => `  ${b.name.padEnd(20)} ${b.description}${b.price_usdc > 0 ? ` (${b.price_usdc} USDC/call)` : ""}`).join("\n");
+      console.log(`built-in capabilities:\n${builtins}`);
+      if (reg) console.log(`\nregistered by the community (the open marketplace):\n${reg}`);
+      console.log(`\n  + ${c.counts?.advertised ?? 0} advertised by live agents · publish your own: signa publish <name> <https-endpoint> "<desc>"`);
       break;
     }
     case "invoke": {
@@ -213,6 +250,25 @@ async function main() {
       console.log(`invoked ${cap} (provider ${r.provider}) — wallet-signed result:`);
       console.log(JSON.stringify(r.output, null, 2));
       console.log(`signed by gateway ${r.gateway} · re-verifiable (EIP-191)`);
+      break;
+    }
+    case "publish": {
+      const name = rest[0]; const endpoint = rest[1];
+      let method = "GET", price = 0, payTo, inputHint; const words = [];
+      for (let i = 2; i < rest.length; i++) {
+        if (rest[i] === "--method") method = rest[++i];
+        else if (rest[i] === "--price") price = Number(rest[++i]) || 0;
+        else if (rest[i] === "--pay-to") payTo = rest[++i];
+        else if (rest[i] === "--input") inputHint = rest[++i];
+        else words.push(rest[i]);
+      }
+      const description = words.join(" ");
+      if (!name || !endpoint || !description) throw new Error('usage: publish <name> <https-endpoint> <description...> [--method GET|POST] [--price <usdc>] [--pay-to 0x...] [--input "<hint>"]');
+      const j = await publish(account, { name, endpoint, description, method, price, payTo, inputHint });
+      console.log(`published ${j.name} by ${me} — live now`);
+      console.log(`  invoke:   ${BASE}${j.invoke}`);
+      console.log(`  directory:${BASE}/api/capabilities`);
+      console.log(`  ${j.note ?? ""}`);
       break;
     }
     case "think": {

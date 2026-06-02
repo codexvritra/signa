@@ -182,6 +182,68 @@ export class SignaOS {
     return j;
   }
 
+  /**
+   * Publish a capability to the open marketplace with ONE wallet signature —
+   * no account, no API key. Once published it is listed in the directory,
+   * callable by any agent (and by the brain if it is free) at
+   * `/api/capabilities/invoke?cap=<name>`, and optionally priced in USDC over
+   * x402. The provider wallet is the only credential; anyone can re-verify the
+   * registration signature.
+   *
+   * ```ts
+   * await os.publish({
+   *   name: "myteam.summarize",
+   *   endpoint: "https://api.myteam.dev/summarize",
+   *   description: "summarize a URL or text",
+   *   method: "POST",
+   * });
+   * ```
+   */
+  async publish(spec: {
+    name: string;
+    endpoint: string;
+    description: string;
+    method?: "GET" | "POST";
+    inputHint?: string;
+    priceUsdc?: number;
+    payTo?: string;
+  }): Promise<{ name: string; invoke: string; [k: string]: unknown }> {
+    const account = (this.agent as any).account; // PrivateKeyAccount
+    const provider = this.agent.address.toLowerCase();
+    const ts = Date.now();
+    const method = (spec.method ?? "GET").toUpperCase();
+    const price = spec.priceUsdc ?? 0;
+    const preimage = [
+      "SIGNA capability register v1",
+      `ts:${ts}`,
+      `name:${spec.name}`,
+      `provider:${provider}`,
+      `endpoint:${spec.endpoint}`,
+      `method:${method}`,
+      `price:${price}`,
+    ].join("\n");
+    const signature = await account.signMessage({ message: preimage });
+    const r = await fetch(`${this.baseUrl}/api/capabilities/register`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: spec.name,
+        endpoint: spec.endpoint,
+        method,
+        description: spec.description,
+        input_hint: spec.inputHint,
+        price_usdc: price,
+        pay_to: spec.payTo,
+        provider,
+        ts,
+        signature,
+      }),
+    });
+    const j = await r.json();
+    if (!j?.ok) throw new Error(`publish failed: ${j?.error ?? `HTTP ${r.status}`}`);
+    return j;
+  }
+
   // ─────────────── the brain: reason on decentralized inference + act through the OS ───────────────
   /**
    * The SIGNA brain. Give it a goal in plain language; it reasons on

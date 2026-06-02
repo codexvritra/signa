@@ -23,6 +23,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Build",
     links: [
+      { href: "/marketplace", label: "Marketplace" },
       { href: "/frameworks", label: "Frameworks" },
       { href: "/nodes", label: "Nodes" },
       { href: "/syscalls", label: "Syscalls" },

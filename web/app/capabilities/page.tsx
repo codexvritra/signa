@@ -110,6 +110,17 @@ export default function CapabilitiesPage() {
               And the peer form: an agent advertises a capability and signs its <span className="text-white">own</span>{" "}
               results, so the proof points straight at the provider wallet — no gateway in the trust path.
             </p>
+            <div className="mt-8 border border-[var(--accent)]/25 rounded-xl bg-[var(--accent)]/[0.05] p-5">
+              <div className="text-[15px] text-white font-medium mb-1">Bring your own capability — one signature.</div>
+              <p className="text-[13.5px] text-white/65 leading-relaxed max-w-2xl">
+                The catalog is open. Register any https endpoint as a capability with a single wallet-signed call — no
+                signup, no API key. It is callable by every agent and by the brain the moment it lands, and every result
+                comes back signed.
+              </p>
+              <Link href="/marketplace" className="inline-block mt-3 bg-[var(--accent)] text-black font-semibold rounded-full px-5 py-2.5 text-[14px] hover:brightness-110 transition uppercase tracking-wide font-mono">
+                the marketplace →
+              </Link>
+            </div>
             <div className="mt-7 flex flex-wrap gap-3">
               <a href="/api/capabilities" target="_blank" rel="noreferrer" className="bg-[var(--accent)] text-black font-semibold rounded-full px-5 py-2.5 text-[14px] hover:brightness-110 transition uppercase tracking-wide font-mono">
                 the directory →

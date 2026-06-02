@@ -3,6 +3,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes } from "viem";
 import { createHash } from "node:crypto";
 import { CAPABILITY_CATALOG, fulfillCapability } from "@/lib/capabilities";
+import { listRegistered, callRegistered, type RegisteredCapability } from "@/lib/marketplace";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,7 +38,6 @@ const brain = privateKeyToAccount(keccak256(toBytes("signa:brain:v1")));
 // self-DM is rejected, so memory is addressed here — still wallet-signed by
 // the brain and re-verifiable by reading this inbox filtered by the brain).
 const MEMORY_ARCHIVE = privateKeyToAccount(keccak256(toBytes("signa:brain-memory:v1"))).address.toLowerCase();
-const ALLOWED = new Set(CAPABILITY_CATALOG.map((c) => c.name));
 
 async function reason(origin: string, prompt: string): Promise<string> {
   const r = await fetch(`${origin}/api/gateway/respond`, {
@@ -79,12 +79,32 @@ async function resolveAddr(origin: string, id: string): Promise<string | null> {
   }
 }
 
-const TOOLS_DOC = CAPABILITY_CATALOG.map((c) => `- ${c.name}(${c.input === "none" ? "" : "arg"}): ${c.description}`).join("\n");
+const BUILTIN_DOC = CAPABILITY_CATALOG.map((c) => `- ${c.name}(${c.input === "none" ? "" : "arg"}): ${c.description}`).join("\n");
 
 async function run(goal: string, origin: string, opts: { remember?: boolean; reportTo?: string } = {}) {
+  // The brain's toolset = built-in capabilities + FREE capabilities the
+  // community registered in the open marketplace. Priced capabilities are
+  // excluded from autonomous planning: the brain holds no funds and never
+  // spends on the user's behalf (a human can pay-to-invoke those directly).
+  let registered: RegisteredCapability[] = [];
+  try { registered = (await listRegistered(60)).filter((r) => !(r.price_usdc > 0)).slice(0, 24); } catch { /* marketplace best-effort */ }
+  const regByName = new Map(registered.map((r) => [r.name, r] as const));
+  const allowed = new Set<string>([...CAPABILITY_CATALOG.map((c) => c.name), ...regByName.keys()]);
+  const regDoc = registered.map((r) => `- ${r.name}(arg): ${r.description} [community]`).join("\n");
+  const toolsDoc = regDoc ? `${BUILTIN_DOC}\n${regDoc}` : BUILTIN_DOC;
+
+  // unified fulfilment — built-in via the partner adapters, registered via the
+  // SSRF-guarded marketplace proxy. Either way the brain only sees real output.
+  const fulfillAny = async (cap: string, arg: string): Promise<unknown> => {
+    if (CAPABILITY_CATALOG.some((c) => c.name === cap)) return fulfillCapability(cap, arg);
+    const rec = regByName.get(cap);
+    if (rec) return callRegistered(rec, arg);
+    throw new Error(`unknown capability: ${cap}`);
+  };
+
   // 1. PLAN — the brain decides which real capabilities to call
   const planPrompt =
-    `You are the SIGNA Brain. You can call these capabilities to gather REAL live data before answering:\n${TOOLS_DOC}\n\n` +
+    `You are the SIGNA Brain. You can call these capabilities to gather REAL live data before answering:\n${toolsDoc}\n\n` +
     `Given the user's goal, output ONLY a compact JSON array of the calls to make, e.g. [{"cap":"root.market","arg":""},{"cap":"bankr.resolve","arg":"@jesse"}]. ` +
     `Use [] if no data is needed. Max 3 calls. No prose.\n\nGoal: ${goal}`;
   let planRaw = "";
@@ -92,13 +112,13 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
   let plan: { cap: string; arg?: string }[] = [];
   const m = planRaw.match(/\[[\s\S]*\]/);
   if (m) { try { plan = JSON.parse(m[0]); } catch { plan = []; } }
-  plan = (Array.isArray(plan) ? plan : []).filter((p) => p && ALLOWED.has(p.cap)).slice(0, 3);
+  plan = (Array.isArray(plan) ? plan : []).filter((p) => p && allowed.has(p.cap)).slice(0, 3);
 
-  // 2. ACT — invoke the chosen capabilities for real (live partner data)
+  // 2. ACT — invoke the chosen capabilities for real (live partner / community data)
   const tools: { cap: string; arg: string; output: unknown; error?: string }[] = [];
   for (const p of plan) {
     try {
-      const output = await fulfillCapability(p.cap, p.arg ?? "");
+      const output = await fulfillAny(p.cap, p.arg ?? "");
       tools.push({ cap: p.cap, arg: p.arg ?? "", output });
     } catch (e) {
       tools.push({ cap: p.cap, arg: p.arg ?? "", output: null, error: e instanceof Error ? e.message : "failed" });
