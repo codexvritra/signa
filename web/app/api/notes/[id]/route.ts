@@ -30,7 +30,7 @@ export async function GET(
   }
   const { data, error } = await supabase
     .from("signed_notes")
-    .select("id, address, fid, username, body, ts, signature, signed_message, created_at")
+    .select("id, address, fid, username, to_label, body, ts, signature, signed_message, created_at")
     .eq("id", id)
     .maybeSingle();
   if (error) {

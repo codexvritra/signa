@@ -81,6 +81,9 @@ export default async function NotePage({
         </div>
 
         <div className="glass rounded-2xl p-5 mt-6">
+          {note.to_label ? (
+            <div className="text-[12px] text-[#a5c3ff] mb-2">→ to @{note.to_label}</div>
+          ) : null}
           <div className="text-[22px] leading-relaxed">{note.body}</div>
           <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-col gap-1.5 text-[12px] text-faint font-mono">
             <div>

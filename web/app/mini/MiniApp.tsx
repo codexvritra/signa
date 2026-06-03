@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { notePreimage, NOTE_MAX_BODY, shortAddr, type SignedNote } from "@/lib/note";
+import { notePreimage, NOTE_MAX_BODY, sanitizeTo, shortAddr, type SignedNote } from "@/lib/note";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -18,7 +18,15 @@ export function MiniApp() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SignedNote | null>(null);
   const [recent, setRecent] = useState<SignedNote[]>([]);
+  const [to, setTo] = useState<string | null>(null);
   const sdkRef = useRef<any>(null);
+
+  // Directed mode: /mini?to=<handle|address> => "send a signed message to X".
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = new URLSearchParams(window.location.search).get("to");
+    setTo(sanitizeTo(raw));
+  }, []);
 
   // Boot the Mini App SDK: call ready() to dismiss the splash, read the
   // Farcaster user context, and detect whether we're inside a Mini App host.
@@ -69,13 +77,16 @@ export function MiniApp() {
 
   const loadRecent = useCallback(async () => {
     try {
-      const res = await fetch("/api/notes?limit=8", { cache: "no-store" });
+      const url = to
+        ? `/api/notes?to=${encodeURIComponent(to)}&limit=8`
+        : "/api/notes?limit=8";
+      const res = await fetch(url, { cache: "no-store" });
       const j = await res.json();
       if (j?.ok) setRecent(j.notes ?? []);
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [to]);
 
   useEffect(() => {
     loadRecent();
@@ -120,7 +131,7 @@ export function MiniApp() {
         return;
       }
       const ts = Date.now();
-      const message = notePreimage({ address, ts, body: text });
+      const message = notePreimage({ address, ts, body: text, to });
       const signature: string = await provider.request({
         method: "personal_sign",
         params: [message, address],
@@ -136,6 +147,7 @@ export function MiniApp() {
           signature,
           fid: user?.fid ?? null,
           username: user?.username ?? null,
+          to,
         }),
       });
       const j = await res.json();
@@ -157,7 +169,9 @@ export function MiniApp() {
   async function share() {
     if (!result) return;
     const url = `${origin()}/n/${result.id}`;
-    const text = `${result.body}\n\nwallet-signed on Base · re-verifiable · sign your own 👇`;
+    const text = result.to_label
+      ? `just sent @${result.to_label} a wallet-signed message on Base 👇 send your own:`
+      : `${result.body}\n\nwallet-signed on Base · re-verifiable · sign your own 👇`;
     const sdk = sdkRef.current;
     if (inMini && sdk?.actions?.composeCast) {
       try {
@@ -180,6 +194,22 @@ export function MiniApp() {
     setBody("");
     setPhase("idle");
     setError(null);
+  }
+
+  function inboxHandle(): string {
+    return result?.username || result?.address || "";
+  }
+
+  async function copyInbox() {
+    const handle = inboxHandle();
+    if (!handle) return;
+    const link = `${origin()}/to/${handle}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setError("Inbox link copied — post it so people can sign you a message.");
+    } catch {
+      window.open(`/to/${handle}`, "_blank");
+    }
   }
 
   return (
@@ -210,18 +240,35 @@ export function MiniApp() {
         {phase !== "done" ? (
           <>
             <h1 className="font-display text-[26px] leading-tight font-bold mt-3">
-              Sign a message <span className="brand-text">on Base</span>
+              {to ? (
+                <>
+                  Send <span className="brand-text">@{to}</span> a signed message
+                </>
+              ) : (
+                <>
+                  Sign a message <span className="brand-text">on Base</span>
+                </>
+              )}
             </h1>
             <p className="text-muted text-[14px] mt-2 leading-relaxed">
-              One tap, no account. Your wallet signature is the proof — anyone can re-verify who
-              said it. This is the message layer, made simple.
+              {to ? (
+                <>
+                  One tap, no account. Your wallet signature proves it&apos;s really from you —
+                  @{to} and anyone else can re-verify it on Base.
+                </>
+              ) : (
+                <>
+                  One tap, no account. Your wallet signature is the proof — anyone can re-verify who
+                  said it. This is the message layer, made simple.
+                </>
+              )}
             </p>
 
             <div className="glass rounded-2xl p-4 mt-5">
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value.slice(0, NOTE_MAX_BODY + 20))}
-                placeholder="say something, signed…"
+                placeholder={to ? `write @${to} a signed message…` : "say something, signed…"}
                 rows={4}
                 disabled={phase === "signing"}
                 className="w-full bg-transparent outline-none resize-none text-[17px] leading-relaxed placeholder:text-white/25"
@@ -254,6 +301,9 @@ export function MiniApp() {
               ✓ SIGNED ON BASE
             </div>
             <div className="glass rounded-2xl p-4 mt-4">
+              {result?.to_label ? (
+                <div className="text-[12px] text-[#a5c3ff] mb-2">→ to @{result.to_label}</div>
+              ) : null}
               <div className="text-[18px] leading-relaxed">{result?.body}</div>
               <div className="mt-3 pt-3 border-t border-white/[0.06] text-[12px] text-faint font-mono">
                 {result ? shortAddr(result.address) : ""}
@@ -273,7 +323,27 @@ export function MiniApp() {
             >
               View receipt + verify
             </a>
-            <button onClick={reset} className="mt-3 text-[13px] text-faint hover:text-white/70">
+
+            {/* Turn the signer into a recipient: their own shareable inbox link. */}
+            <div className="mt-5 glass rounded-2xl p-4">
+              <div className="text-[13px] font-medium">Get signed messages sent to you</div>
+              <div className="text-[12px] text-muted mt-1 leading-relaxed">
+                Share your inbox link — anyone can send you a wallet-signed message on Base.
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <code className="flex-1 text-[12px] text-[#a5c3ff] font-mono truncate bg-black/30 rounded-lg px-3 py-2">
+                  /to/{inboxHandle()}
+                </code>
+                <button
+                  onClick={copyInbox}
+                  className="h-9 px-3 rounded-lg text-[13px] font-medium border border-white/12 hover:bg-white/[0.05]"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
+            <button onClick={reset} className="mt-4 text-[13px] text-faint hover:text-white/70">
               Sign another
             </button>
             {error ? <div className="mt-3 text-[13px] text-[#a5c3ff]">{error}</div> : null}
@@ -283,12 +353,16 @@ export function MiniApp() {
         {/* live wall */}
         <div className="mt-9">
           <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">
-            latest signed on Base
+            {to ? `@${to}'s signed inbox` : "latest signed on Base"}
           </div>
           <div className="flex flex-col gap-2">
             {recent.length === 0 ? (
               <div className="text-[13px] text-faint">
-                {ready ? "be the first to sign." : "loading…"}
+                {ready
+                  ? to
+                    ? `no signed messages to @${to} yet — be the first.`
+                    : "be the first to sign."
+                  : "loading…"}
               </div>
             ) : (
               recent.map((n) => (

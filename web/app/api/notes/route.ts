@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient, supabase } from "@/lib/supabase";
 import { verifySignedMessage } from "@/lib/verify-signature";
-import { notePreimage, NOTE_MAX_BODY } from "@/lib/note";
+import { notePreimage, NOTE_MAX_BODY, sanitizeTo } from "@/lib/note";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,14 +43,20 @@ function json(body: unknown, init?: ResponseInit) {
 }
 
 export async function GET(req: NextRequest) {
-  const limit = Math.min(Number(req.nextUrl.searchParams.get("limit") ?? 12), 50);
-  const { data, error } = await supabase
+  const sp = req.nextUrl.searchParams;
+  const limit = Math.min(Number(sp.get("limit") ?? 12), 50);
+  const to = sanitizeTo(sp.get("to"));
+  let q = supabase
     .from("signed_notes")
-    .select("id, address, fid, username, body, ts, signature, signed_message, created_at")
+    .select("id, address, fid, username, to_label, body, ts, signature, signed_message, created_at")
     .order("created_at", { ascending: false })
     .limit(limit);
+  // ?to=<handle> => a specific inbox; otherwise the public broadcast wall.
+  if (to) q = q.eq("to_label", to);
+  else q = q.is("to_label", null);
+  const { data, error } = await q;
   if (error) return json({ ok: false, error: error.message }, { status: 500 });
-  return json({ ok: true, count: data?.length ?? 0, notes: data ?? [] });
+  return json({ ok: true, count: data?.length ?? 0, to: to ?? null, notes: data ?? [] });
 }
 
 export async function POST(req: NextRequest) {
@@ -61,6 +67,7 @@ export async function POST(req: NextRequest) {
     signature?: string;
     fid?: number | null;
     username?: string | null;
+    to?: string | null;
   };
   try {
     body = await req.json();
@@ -72,6 +79,7 @@ export async function POST(req: NextRequest) {
   const content = (body.body ?? "").trim();
   const ts = Number(body.ts ?? 0);
   const signature = String(body.signature ?? "");
+  const toLabel = sanitizeTo(body.to ?? null);
   const fid =
     body.fid != null && Number.isFinite(Number(body.fid)) ? Number(body.fid) : null;
   const username =
@@ -90,7 +98,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Verify the wallet signature against the canonical preimage BEFORE persisting.
-  const message = notePreimage({ address, ts, body: content });
+  const message = notePreimage({ address, ts, body: content, to: toLabel });
   const verify = await verifySignedMessage({
     expectedAddress: address,
     message,
@@ -123,12 +131,13 @@ export async function POST(req: NextRequest) {
       address,
       fid,
       username,
+      to_label: toLabel,
       body: content,
       ts,
       signature,
       signed_message: message,
     })
-    .select("id, address, fid, username, body, ts, signature, signed_message, created_at")
+    .select("id, address, fid, username, to_label, body, ts, signature, signed_message, created_at")
     .single();
 
   if (insErr || !inserted) {

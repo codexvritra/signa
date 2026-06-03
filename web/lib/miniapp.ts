@@ -29,6 +29,11 @@ export function noteEmbedImage(id: string): string {
   return `${SITE}/api/og/note/${id}`;
 }
 
+/** The 3:2 embed image for a personal signed inbox. */
+export function inboxEmbedImage(handle: string): string {
+  return `${SITE}/api/og/inbox/${encodeURIComponent(handle)}`;
+}
+
 type Embed = {
   version: "1";
   imageUrl: string;
