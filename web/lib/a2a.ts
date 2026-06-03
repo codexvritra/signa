@@ -108,6 +108,8 @@ export function completedTask(args: {
   inbound?: A2AMessage;
   state?: A2ATaskState;
   nowIso: string;
+  /** Optional structured artifacts (e.g. a wallet-signed capability result). */
+  artifacts?: unknown[];
 }): A2ATask {
   const statusMsg = agentMessage(args.replyText, args.replyMessageId, args.contextId);
   return {
@@ -119,8 +121,21 @@ export function completedTask(args: {
       timestamp: args.nowIso,
       message: statusMsg,
     },
-    artifacts: [],
+    artifacts: args.artifacts ?? [],
     history: args.inbound ? [args.inbound, statusMsg] : [statusMsg],
+  };
+}
+
+/** Build an A2A data artifact carrying a structured (e.g. signed) payload. */
+export function dataArtifact(name: string, data: Record<string, unknown>, seed: string): {
+  artifactId: string;
+  name: string;
+  parts: A2APart[];
+} {
+  return {
+    artifactId: genId("artifact", name + seed),
+    name,
+    parts: [{ kind: "data", data }],
   };
 }
 

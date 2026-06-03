@@ -43,12 +43,30 @@ export async function GET() {
         tags: ["onchain", "base", "momentum"],
         examples: ["What's the momentum read on $MIROSHARK?"],
       },
+      {
+        id: "capabilities",
+        name: "invoke a capability on the network",
+        description:
+          "Call any capability in the SIGNA marketplace by name and get a wallet-signed, re-verifiable result — keyless. Built-in (Bankr, Root Edge), developer-registered, and on-chain capabilities are all reachable. Send 'invoke <name> [arg]' or a data part {cap, arg}. Browse the directory at /api/capabilities.",
+        tags: ["capabilities", "marketplace", "wallet-signed", "keyless", "base"],
+        examples: ["invoke root.market", "invoke bankr.resolve @jesse", "invoke root.feargreed"],
+      },
+      {
+        id: "brain",
+        name: "ask the SIGNA brain",
+        description:
+          "Give a goal in plain language; the brain reasons on decentralized inference, calls the capabilities it needs for real, answers from live data, and signs a verifiable receipt. Send 'brain: <goal>' or target this skill.",
+        tags: ["brain", "reasoning", "capabilities", "wallet-signed"],
+        examples: ["brain: what is the base market doing and name one opportunity"],
+      },
     ],
     metadata: {
       "signa.network": "base-mainnet",
       "signa.node_registry": "0x4316De3847629705C401F8FaF0cecdb40bd68E5A",
       "signa.transport": "wallet-signed (EIP-191), persisted + re-verifiable",
       "signa.extensions": ["x402", "erc-8004"],
+      "signa.capabilities": `${BASE_URL}/api/capabilities`,
+      "signa.marketplace": `${BASE_URL}/marketplace`,
       "signa.docs": `${BASE_URL}/a2a`,
       "signa.agent_card_template": `${BASE_URL}/agent/{address}/.well-known/agent-card.json`,
     },
