@@ -30,9 +30,29 @@ export const CAPABILITY_CATALOG: Capability[] = [
   { name: "bankr.launches", provider: "bankr", source: "api.bankr.bot", input: "none", description: "the latest token launches on Base" },
   { name: "root.market", provider: "root-edge", source: "mcp.rootedge.ai", input: "none", description: "current Base market read — sentiment + top opportunity" },
   { name: "root.feargreed", provider: "root-edge", source: "mcp.rootedge.ai", input: "none", description: "the crypto fear and greed index" },
+  // keyless, reliable reads — no API key, useful to any agent on day one
+  { name: "token.price", provider: "signa", source: "coins.llama.fi", input: "a coin id (e.g. ethereum, bitcoin) or chain:address (e.g. base:0x…)", description: "live token price in USD" },
+  { name: "base.gas", provider: "signa", source: "mainnet.base.org", input: "none", description: "current Base gas price in gwei" },
+  { name: "base.block", provider: "signa", source: "mainnet.base.org", input: "none", description: "the latest Base block number + timestamp" },
+  { name: "defi.tvl", provider: "signa", source: "api.llama.fi", input: "a protocol slug (e.g. aave, uniswap, aerodrome)", description: "total value locked for a DeFi protocol in USD" },
 ];
 
 const short = (a?: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a ?? "");
+
+/** Minimal keyless JSON-RPC call to the Base mainnet RPC. */
+async function baseRpc(method: string, params: unknown[]): Promise<any> {
+  const url = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!r.ok) throw new Error(`base rpc ${method} failed (${r.status})`);
+  const j = await r.json();
+  if (j?.error) throw new Error(`base rpc ${method}: ${j.error?.message ?? "error"}`);
+  return j?.result;
+}
 
 /** Fulfil a capability from its real source. Throws on unknown capability. */
 export async function fulfillCapability(name: string, arg?: string): Promise<unknown> {
@@ -67,6 +87,41 @@ export async function fulfillCapability(name: string, arg?: string): Promise<unk
       const fg = (await rootIntel("feargreed")) as any;
       return { score: fg?.score ?? null, label: fg?.label ?? null };
     }
+
+    // ─────── keyless built-in reads (no API key) ───────
+    case "token.price": {
+      const raw = (arg ?? "").trim();
+      // accept "ethereum" (coingecko id) or "chain:address" (e.g. base:0x…)
+      const coinId = raw ? (raw.includes(":") ? raw : `coingecko:${raw.toLowerCase()}`) : "coingecko:ethereum";
+      const r = await fetch(`https://coins.llama.fi/prices/current/${encodeURIComponent(coinId)}`, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(8000) });
+      if (!r.ok) throw new Error(`price lookup failed (${r.status})`);
+      const j = (await r.json()) as any;
+      const c = j?.coins?.[coinId];
+      if (!c || typeof c.price !== "number") throw new Error(`no price for "${raw || "ethereum"}"`);
+      return { id: coinId, symbol: c.symbol ?? null, price_usd: c.price, confidence: c.confidence ?? null, source: "DefiLlama" };
+    }
+    case "base.gas": {
+      const wei = await baseRpc("eth_gasPrice", []);
+      const gwei = Number(BigInt(wei)) / 1e9;
+      return { gas_price_wei: BigInt(wei).toString(), gas_price_gwei: Math.round(gwei * 1000) / 1000, chain: "base" };
+    }
+    case "base.block": {
+      const hex = await baseRpc("eth_blockNumber", []);
+      const number = Number(BigInt(hex));
+      const block = (await baseRpc("eth_getBlockByNumber", [hex, false])) as any;
+      const ts = block?.timestamp ? Number(BigInt(block.timestamp)) : null;
+      return { number, timestamp: ts, iso: ts ? new Date(ts * 1000).toISOString() : null, chain: "base" };
+    }
+    case "defi.tvl": {
+      const slug = (arg ?? "").trim().toLowerCase().replace(/\s+/g, "-");
+      if (!slug) throw new Error("defi.tvl needs a protocol slug (e.g. aave, aerodrome)");
+      const r = await fetch(`https://api.llama.fi/tvl/${encodeURIComponent(slug)}`, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(8000) });
+      if (!r.ok) throw new Error(`tvl lookup failed for "${slug}" (${r.status})`);
+      const tvl = await r.json();
+      if (typeof tvl !== "number") throw new Error(`no TVL for protocol "${slug}"`);
+      return { protocol: slug, tvl_usd: tvl, source: "DefiLlama" };
+    }
+
     default:
       throw new Error(`unknown capability: ${name}`);
   }
