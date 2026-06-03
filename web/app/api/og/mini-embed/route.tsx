@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
+import { LOGO } from "@/lib/miniapp";
 
 export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 /** Home Mini App embed card — 3:2 (1200x800) as the spec mandates for imageUrl. */
 export function GET() {
@@ -20,23 +22,9 @@ export function GET() {
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
-              color: "#fff",
-              fontSize: 42,
-              fontWeight: 800,
-            }}
-          >
-            S
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={LOGO} width={68} height={68} style={{ borderRadius: 999 }} alt="" />
           <div style={{ color: "#fff", fontSize: 34, fontWeight: 700, letterSpacing: -1 }}>
             SIGNA
           </div>

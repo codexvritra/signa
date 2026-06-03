@@ -70,9 +70,8 @@ export default async function NotePage({
       <div className="max-w-[600px] mx-auto px-5 py-7">
         <div className="flex items-center justify-between">
           <Link href="/mini" className="flex items-center gap-2.5">
-            <div className="size-7 rounded-lg flex items-center justify-center font-extrabold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]">
-              S
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/signa-logo.png" alt="SIGNA" className="size-8 rounded-full" />
             <div className="font-display font-semibold tracking-tight">SIGNA</div>
           </Link>
           <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">

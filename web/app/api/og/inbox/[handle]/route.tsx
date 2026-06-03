@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { sanitizeTo } from "@/lib/note";
+import { LOGO } from "@/lib/miniapp";
 
 export const runtime = "edge";
 
@@ -28,23 +29,9 @@ export async function GET(
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 14,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
-              color: "#fff",
-              fontSize: 36,
-              fontWeight: 800,
-            }}
-          >
-            S
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={LOGO} width={60} height={60} style={{ borderRadius: 999 }} alt="" />
           <div style={{ color: "#fff", fontSize: 30, fontWeight: 700 }}>SIGNA</div>
         </div>
 

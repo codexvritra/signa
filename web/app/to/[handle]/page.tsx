@@ -72,9 +72,8 @@ export default async function InboxPage({
     <div style={{ minHeight: "100dvh" }} className="bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[600px] mx-auto px-5 py-7">
         <Link href="/mini" className="flex items-center gap-2.5">
-          <div className="size-7 rounded-lg flex items-center justify-center font-extrabold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]">
-            S
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/signa-logo.png" alt="SIGNA" className="size-8 rounded-full" />
           <div className="font-display font-semibold tracking-tight">SIGNA</div>
         </Link>
 

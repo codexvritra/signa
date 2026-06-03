@@ -11,13 +11,16 @@
 
 export const SITE = "https://www.signaagent.xyz";
 
+/** The official SIGNA badge logo (square, opaque) — used as the app icon,
+ * splash, header mark, and on every embed card. */
+export const LOGO = `${SITE}/signa-logo.png`;
+
 export const MINIAPP = {
   name: "SIGNA",
-  // image dimensions are spec-mandated: icon 1024x1024 (no alpha),
-  // splash 200x200, embed image 3:2.
-  iconUrl: `${SITE}/api/og/icon`,
-  splashImageUrl: `${SITE}/api/og/splash`,
-  splashBackgroundColor: "#0a0a0f",
+  // spec dims: icon 1024x1024 (no alpha), splash 200x200, embed 3:2.
+  iconUrl: `${SITE}/signa-logo.png`,
+  splashImageUrl: `${SITE}/signa-logo-200.png`,
+  splashBackgroundColor: "#000000",
   homeUrl: `${SITE}/mini`,
 } as const;
 
