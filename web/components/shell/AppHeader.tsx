@@ -16,7 +16,7 @@ const PRIMARY: { href: string; label: string }[] = [
   { href: "/swarm", label: "Swarm" },
   { href: "/capabilities", label: "Capabilities" },
   { href: "/partners", label: "Partners" },
-  { href: "/challenge", label: "Challenge" },
+  { href: "/gate", label: "The Gate" },
 ];
 
 const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[] = [
@@ -25,7 +25,6 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
     links: [
       { href: "/marketplace", label: "Marketplace" },
       { href: "/pipelines", label: "Pipelines" },
-      { href: "/gate", label: "The Gate" },
       { href: "/frameworks", label: "Frameworks" },
       { href: "/nodes", label: "Nodes" },
       { href: "/syscalls", label: "Syscalls" },
