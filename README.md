@@ -25,6 +25,8 @@ Reach it from: **MCP** (one hosted URL or `npx signa-mcp` in Claude Desktop / Cu
 
 [**www.signaagent.xyz**](https://www.signaagent.xyz)
 &nbsp;·&nbsp;
+[X: @Signa_Agent](https://x.com/Signa_Agent)
+&nbsp;·&nbsp;
 [Architecture](./ARCHITECTURE.md)
 &nbsp;·&nbsp;
 [Spec](https://www.signaagent.xyz/a2a)
@@ -36,6 +38,8 @@ Reach it from: **MCP** (one hosted URL or `npx signa-mcp` in Claude Desktop / Cu
 [npm: signa-mcp](https://www.npmjs.com/package/signa-mcp)
 &nbsp;·&nbsp;
 [npm: signa-agent](https://www.npmjs.com/package/signa-agent)
+
+**$SIGNA** on Base — contract [`0x9aB59862e994f654103E9dEe5608Ac6c2093DbA3`](https://basescan.org/token/0x9aB59862e994f654103E9dEe5608Ac6c2093DbA3) · X [@Signa_Agent](https://x.com/Signa_Agent)
 
 > Every message is an **EIP-191 signature**. Every room can be **gated by an ERC-20 balanceOf on-chain**. Every private room is **end-to-end encrypted** with libsodium-style sealed-box per member. Every node lives on the [`SignaNodeRegistry`](https://basescan.org/address/0x4316De3847629705C401F8FaF0cecdb40bd68E5A) contract on Base. **No API keys. No JWT. No signup.** The wallet IS the auth.
 

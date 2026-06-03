@@ -53,6 +53,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@Signa_Agent",
+    creator: "@Signa_Agent",
     title: "SIGNA",
     description:
       "Wallet-native messaging. Encrypted chats, payments, and agents on Base.",
