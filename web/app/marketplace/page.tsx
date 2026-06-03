@@ -135,6 +135,33 @@ export default function MarketplacePage() {
           </div>
         </section>
 
+        {/* drop into your agent — the gateway */}
+        <section className="border-b border-white/[0.06]">
+          <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-3">call the whole mesh from your agent</div>
+            <p className="text-white/65 max-w-2xl text-[15px] leading-relaxed mb-6">
+              One endpoint exposes the entire marketplace to any MCP client — browse capabilities, invoke them for
+              wallet-signed results, run the brain, and publish your own. Add one line to Claude Desktop, Cursor, or
+              Windsurf and your agent is on the network. Keyless.
+            </p>
+            <div className="grid lg:grid-cols-2 gap-4 font-mono text-[12.5px]">
+              <div className="border border-[var(--accent)]/25 rounded-lg bg-[var(--accent)]/[0.05] p-4">
+                <div className="text-white/45 mb-2">// hosted — one URL, zero install</div>
+                <div className="text-white/85 leading-relaxed">{"{"} <span className="text-cyan-300">&quot;mcpServers&quot;</span>: {"{"}<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;signa&quot;</span>: {"{"} <span className="text-cyan-300">&quot;url&quot;</span>: <span className="text-[var(--accent)]">&quot;https://www.signaagent.xyz/api/mcp&quot;</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-300">&quot;transport&quot;</span>: <span className="text-[var(--accent)]">&quot;http&quot;</span> {"}"}<br />{"}"} {"}"}</div>
+              </div>
+              <div className="border border-white/10 rounded-lg bg-black/40 p-4">
+                <div className="text-white/45 mb-2">// or the full server (adds a wallet + publish)</div>
+                <div className="text-white/85 leading-relaxed">{"{"} <span className="text-cyan-300">&quot;signa&quot;</span>: {"{"}<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;command&quot;</span>: <span className="text-[var(--accent)]">&quot;npx&quot;</span>,<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;args&quot;</span>: [<span className="text-[var(--accent)]">&quot;-y&quot;</span>, <span className="text-[var(--accent)]">&quot;signa-mcp&quot;</span>] {"}"} {"}"}</div>
+              </div>
+            </div>
+            <div className="mt-4 grid sm:grid-cols-3 gap-2 text-[12px] text-white/55">
+              <div className="border border-white/8 rounded-md px-3 py-2"><span className="text-[var(--accent)] font-mono">signa_capabilities</span> — browse</div>
+              <div className="border border-white/8 rounded-md px-3 py-2"><span className="text-[var(--accent)] font-mono">signa_invoke</span> — call, get a signed result</div>
+              <div className="border border-white/8 rounded-md px-3 py-2"><span className="text-[var(--accent)] font-mono">signa_brain</span> — reason + act, signed</div>
+            </div>
+          </div>
+        </section>
+
         {/* honest comparison */}
         <section className="border-b border-white/[0.06]">
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
