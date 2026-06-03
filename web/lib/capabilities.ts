@@ -35,6 +35,7 @@ export const CAPABILITY_CATALOG: Capability[] = [
   { name: "base.gas", provider: "signa", source: "mainnet.base.org", input: "none", description: "current Base gas price in gwei" },
   { name: "base.block", provider: "signa", source: "mainnet.base.org", input: "none", description: "the latest Base block number + timestamp" },
   { name: "defi.tvl", provider: "signa", source: "api.llama.fi", input: "a protocol slug (e.g. aave, uniswap, aerodrome)", description: "total value locked for a DeFi protocol in USD" },
+  { name: "signa.reason", provider: "signa", source: "gateway", input: "a prompt", description: "reason over a prompt on the SIGNA gateway — composes earlier pipeline steps into an answer" },
 ];
 
 const short = (a?: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a ?? "");
@@ -120,6 +121,21 @@ export async function fulfillCapability(name: string, arg?: string): Promise<unk
       const tvl = await r.json();
       if (typeof tvl !== "number") throw new Error(`no TVL for protocol "${slug}"`);
       return { protocol: slug, tvl_usd: tvl, source: "DefiLlama" };
+    }
+    case "signa.reason": {
+      const prompt = (arg ?? "").trim();
+      if (!prompt) throw new Error("signa.reason needs a prompt");
+      const base = process.env.SIGNA_SELF_URL || "https://www.signaagent.xyz";
+      const r = await fetch(`${base}/api/gateway/respond`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: prompt.slice(0, 1500) }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const j = await r.json().catch(() => ({}));
+      const response = (j?.response ?? "").toString().trim();
+      if (!response) throw new Error("signa.reason returned empty");
+      return { response };
     }
 
     default:
