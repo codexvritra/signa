@@ -13,6 +13,19 @@
  * inject capabilities; the table is RLS-protected (public read only).
  */
 import { supabase, serverClient } from "@/lib/supabase";
+import { CAPABILITY_CATALOG } from "@/lib/capabilities";
+import { registerPreimage, isSafeEndpoint, validName as coreValidName, NAME_RE } from "@/lib/marketplace-core";
+
+// re-export the pure, unit-tested core (see marketplace-core.test.ts)
+export { registerPreimage, isSafeEndpoint, NAME_RE };
+
+/** Built-in capability names — reserved, may not be registered by anyone. */
+const RESERVED_NAMES = new Set(CAPABILITY_CATALOG.map((c) => c.name.toLowerCase()));
+
+/** Validate a capability name, excluding every built-in name (live source of truth). */
+export function validName(n: string): boolean {
+  return coreValidName(n, RESERVED_NAMES);
+}
 
 export type RegisteredCapability = {
   name: string;
@@ -26,46 +39,6 @@ export type RegisteredCapability = {
   ts: number;
   calls: number;
 };
-
-/** Canonical preimage a provider signs to register (bit-for-bit on both sides). */
-export function registerPreimage(a: {
-  ts: number; name: string; provider: string; endpoint: string; method: string; price: number | string;
-}): string {
-  return [
-    "SIGNA capability register v1",
-    `ts:${a.ts}`,
-    `name:${a.name}`,
-    `provider:${a.provider.toLowerCase()}`,
-    `endpoint:${a.endpoint}`,
-    `method:${a.method.toUpperCase()}`,
-    `price:${a.price}`,
-  ].join("\n");
-}
-
-const NAME_RE = /^[a-z0-9]([a-z0-9._-]{1,38}[a-z0-9])$/i;
-
-/** Validate a capability name (namespaced, e.g. "myteam.summarize"). */
-export function validName(n: string): boolean {
-  return NAME_RE.test(n) && !["bankr.resolve", "bankr.launches", "root.market", "root.feargreed"].includes(n.toLowerCase());
-}
-
-/** SSRF guard — only allow https public hosts; block private/loopback/metadata. */
-export function isSafeEndpoint(raw: string): boolean {
-  let u: URL;
-  try { u = new URL(raw); } catch { return false; }
-  if (u.protocol !== "https:") return false;
-  const h = u.hostname.toLowerCase();
-  if (h === "localhost" || h.endsWith(".local") || h.endsWith(".internal") || h === "metadata.google.internal") return false;
-  // raw IPv4 literal → block private + loopback + link-local ranges
-  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (m) {
-    const [a, b] = [Number(m[1]), Number(m[2])];
-    if (a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168)) return false;
-  }
-  if (h.includes(":")) return false; // raw IPv6 literal — block
-  if (!h.includes(".")) return false; // require a real domain
-  return true;
-}
 
 /** Proxy a call to a registered capability endpoint, guarded. Returns parsed output. */
 export async function callRegistered(cap: RegisteredCapability, arg: string): Promise<unknown> {
