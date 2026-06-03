@@ -132,8 +132,11 @@ export async function POST(req: NextRequest) {
 
   const inbound = body?.params?.message as A2AMessage | undefined;
   const text = extractText(inbound);
-  if (!text) {
-    return NextResponse.json(jsonRpcError(id, -32602, "no_text_part_in_message"), {
+  // route 1 can be carried by a structured data part with no text, so resolve
+  // the capability request first and only reject when there is nothing to act on.
+  const capReq = parseCapRequest(inbound, text);
+  if (!text && !capReq) {
+    return NextResponse.json(jsonRpcError(id, -32602, "no_text_or_capability_in_message"), {
       status: 200,
       headers: CORS,
     });
@@ -147,7 +150,6 @@ export async function POST(req: NextRequest) {
   let artifacts: unknown[] | undefined;
 
   // ── route 1: invoke a capability → wallet-signed result as a data artifact ──
-  const capReq = parseCapRequest(inbound, text);
   if (capReq) {
     try {
       const { status, body } = await invokeCapability(origin, capReq.cap, capReq.arg);

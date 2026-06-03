@@ -64,9 +64,9 @@ try {
 ok(invVerified, `VERIFY: the A2A capability result re-verifies against the gateway ${short(invArt?.gateway ?? "")} (EIP-191)`);
 
 // also prove the structured data-part form works (skill-targeted)
-const invTask2 = await send("", { parts: [{ kind: "data", data: { cap: "bankr.launches", arg: "" } }], metadata: { skillId: "capabilities" } });
+const invTask2 = await send("", { parts: [{ kind: "data", data: { cap: "root.market", arg: "" } }], metadata: { skillId: "capabilities" } });
 const invArt2 = artifactData(invTask2, "capability-result");
-ok(!!invArt2?.ok, `INVOKE: structured data part {cap:"bankr.launches"} also resolves to a signed result`);
+ok(!!invArt2?.ok, `INVOKE: structured data part {cap:"root.market"} also resolves to a signed result`);
 
 // ─────────────── 3. BRAIN over A2A ───────────────
 const brainTask = await send("brain: in one sentence, what is the base market doing right now");
