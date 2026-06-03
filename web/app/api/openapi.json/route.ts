@@ -34,6 +34,7 @@ const SERVERS = [
 
 const TAGS = [
   { name: "MCP", description: "Model Context Protocol server — install SIGNA as native tools in Claude Desktop, Cursor, Cline, or any MCP-aware client." },
+  { name: "Capabilities", description: "The open agent capability marketplace. Publish any https endpoint as a capability with one wallet signature; invoke any capability for a wallet-signed, re-verifiable result; the brain reasons over them. Keyless." },
   { name: "OpenAI-compat (v1)", description: "Drop-in replacement for the OpenAI SDK — point baseURL at /api/v1 and everything just works." },
   { name: "Gateway", description: "Open natural-language router across the agent network." },
   { name: "Agents", description: "Per-agent endpoints — directly call one signa-launched agent." },
@@ -200,6 +201,191 @@ const PATHS: Record<string, unknown> = {
         "200": { description: "JSON-RPC response or batch of responses" },
         "400": { description: "parse error (-32700)" },
       },
+    },
+  },
+  // ──────────────────────── v1.8+ — the capability marketplace ────────────────────────
+
+  "/api/capabilities": {
+    get: {
+      tags: ["Capabilities"],
+      summary: "The capability directory (built-in + registered + on-chain + advertised)",
+      description:
+        "Returns every capability discoverable on the network: built-ins SIGNA fulfils (Bankr, Root Edge, token.price, base.gas, base.block, defi.tvl), capabilities developers registered with one wallet signature, the trustless on-chain tier (SignaCapabilityRegistry on Base), and capabilities advertised by live agents. Each entry is invokable by name. CORS-open, keyless.",
+      responses: {
+        "200": {
+          description: "Directory of capabilities + counts + how to register",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ok: { type: "boolean" },
+                  builtins: { type: "array", items: { type: "object" } },
+                  registered: { type: "array", items: { type: "object" } },
+                  onchain: { type: "array", items: { type: "object" } },
+                  advertised: { type: "array", items: { type: "object" } },
+                  counts: { type: "object" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/api/capabilities/invoke": {
+    get: {
+      tags: ["Capabilities"],
+      summary: "Invoke a capability — wallet-signed result",
+      description:
+        "Call any capability by name and get back a result with the gateway's EIP-191 attestation over (cap, input, provider, sha256(output)). Re-verify with viem against `gateway`. Keyless. If a registered capability is priced, returns an x402 402 challenge instead of charging you.",
+      parameters: [
+        { name: "cap", in: "query", required: true, schema: { type: "string" }, description: "Capability name, e.g. token.price, root.market, myteam.summarize." },
+        { name: "arg", in: "query", required: false, schema: { type: "string" }, description: "Optional input (a handle, coin id, protocol slug, URL, …)." },
+      ],
+      responses: {
+        "200": {
+          description: "Wallet-signed capability result",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ok: { type: "boolean" },
+                  capability: { type: "string" },
+                  input: { type: "string" },
+                  provider: { type: "string" },
+                  output: { type: "object" },
+                  ts: { type: "integer" },
+                  gateway: { type: "string", pattern: "^0x[a-f0-9]{40}$" },
+                  signature: { type: "string" },
+                  verify: { type: "object" },
+                },
+              },
+            },
+          },
+        },
+        "402": { description: "payment_required — x402 challenge for a priced capability" },
+        "404": { description: "unknown_capability", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+        "502": { description: "fulfilment failed / provider endpoint failed", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+      },
+    },
+    post: {
+      tags: ["Capabilities"],
+      summary: "Invoke a capability (POST { cap, arg })",
+      description: "Same as GET but with a JSON body. Priced capabilities accept an x402 EIP-3009 authorization via the X-PAYMENT header; SIGNA verifies it and never settles.",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["cap"],
+              properties: { cap: { type: "string" }, arg: { type: "string" } },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Wallet-signed capability result" },
+        "402": { description: "payment_required — x402 challenge for a priced capability" },
+        "404": { description: "unknown_capability" },
+      },
+    },
+  },
+  "/api/capabilities/register": {
+    post: {
+      tags: ["Capabilities"],
+      summary: "Publish a capability with one wallet signature (keyless)",
+      description:
+        "Register any https endpoint as a network capability. No account, no API key. The signature is an EIP-191 personal_sign over the canonical preimage: 'SIGNA capability register v1\\nts:..\\nname:..\\nprovider:..(lower)\\nendpoint:..\\nmethod:..(UPPER)\\nprice:..'. The endpoint must be https and public (SSRF-guarded at register AND call time). Built-in names are reserved. Optionally price the capability in USDC (settled provider-to-caller via x402; SIGNA never custodies funds).",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["name", "endpoint", "description", "provider", "ts", "signature"],
+              properties: {
+                name: { type: "string", description: "Namespaced, 3-40 chars, e.g. myteam.summarize." },
+                endpoint: { type: "string", description: "https URL serving the capability." },
+                method: { type: "string", enum: ["GET", "POST"], default: "GET" },
+                description: { type: "string", maxLength: 300 },
+                input_hint: { type: "string" },
+                price_usdc: { type: "number", minimum: 0, maximum: 100, default: 0 },
+                pay_to: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
+                provider: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
+                ts: { type: "integer", description: "Unix ms. 10-minute replay window." },
+                signature: { type: "string", description: "EIP-191 sig over the register preimage." },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Registered — returns the invoke URL" },
+        "400": { description: "invalid_name | invalid_endpoint | invalid_method | invalid_provider | stale_ts | invalid_price", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+        "401": { description: "bad_signature" },
+        "409": { description: "name_taken_by_another_provider" },
+      },
+    },
+  },
+  "/api/brain": {
+    post: {
+      tags: ["Capabilities"],
+      summary: "The SIGNA brain — reason, call capabilities, answer, sign",
+      description:
+        "Give a goal in plain language. The brain reasons on decentralized inference, decides which capabilities on the network to call (built-in + free community + free on-chain), invokes them for real, answers from the live results, and signs a verifiable receipt over (goal, tools, answer). Optional: report_to (DM the answer to an address/@handle, wallet-signed by the brain) and remember (write a signed memory).",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["goal"],
+              properties: {
+                goal: { type: "string", minLength: 2, maxLength: 600 },
+                report_to: { type: "string", description: "0x address or @handle to DM the answer to." },
+                remember: { type: "boolean" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Answer + plan + real tool outputs + wallet-signed receipt",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  ok: { type: "boolean" },
+                  goal: { type: "string" },
+                  plan: { type: "array", items: { type: "string" } },
+                  tools: { type: "array", items: { type: "object" } },
+                  answer: { type: "string" },
+                  acts: { type: "object" },
+                  brain: { type: "string", pattern: "^0x[a-f0-9]{40}$" },
+                  signature: { type: "string" },
+                  verify: { type: "object" },
+                },
+              },
+            },
+          },
+        },
+        "400": { description: "missing_goal | goal_too_long", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+      },
+    },
+    get: {
+      tags: ["Capabilities"],
+      summary: "The brain via query (?goal=&report_to=&remember=1)",
+      parameters: [
+        { name: "goal", in: "query", required: true, schema: { type: "string" } },
+        { name: "report_to", in: "query", required: false, schema: { type: "string" } },
+        { name: "remember", in: "query", required: false, schema: { type: "string", enum: ["1", "true"] } },
+      ],
+      responses: { "200": { description: "Answer + signed receipt" }, "400": { description: "missing_goal" } },
     },
   },
   "/api/v1/chat/completions": {
