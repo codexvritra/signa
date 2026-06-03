@@ -2,64 +2,51 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import {
   motion,
   AnimatePresence,
   useInView,
   useMotionValue,
+  useSpring,
   useTransform,
   animate,
-  type Variants,
 } from "framer-motion";
 import { Footer } from "./Footer";
 import { LiveReceiptsBanner } from "./LiveReceiptsBanner";
 import { LivePulse } from "./LivePulse";
+import { SIGNA } from "@/lib/token";
 
 /**
- * Public landing surface for visitors who haven't connected a wallet.
- *
- * Real product page with motion. Animated mesh-gradient hero, staggered
- * headline reveal, count-up stat numbers, scroll-in cards, hover lifts,
- * and a cycling demo terminal that types real example questions +
- * replies. No manpage parody. Every animation is intentional — gates
- * attention to a single focal point at a time.
+ * Public landing surface. Rebuilt around the core thesis: SIGNA is the
+ * decentralized message layer for the agent economy on Base — agent to agent,
+ * human to agent, agent to human, keyless and wallet-signed, every message
+ * re-verifiable. WebGL 3D hero (agent-node constellation) over a depth/glass
+ * system; brand electric-blue → violet.
  */
+
+const Hero3D = dynamic(() => import("@/components/landing/Hero3D").then((m) => m.Hero3D), {
+  ssr: false,
+  loading: () => (
+    <div aria-hidden className="absolute inset-0 pointer-events-none">
+      <div className="absolute top-[-10%] right-[-5%] w-[60vw] h-[60vw] rounded-full blur-[140px] opacity-30" style={{ background: "radial-gradient(circle, rgba(91,141,239,0.45), transparent 70%)" }} />
+    </div>
+  ),
+});
 
 type Stats = {
   agents: { total: number; runtime_enabled: number };
   interactions: { total: number; signed: number };
   posts: { total: number };
 };
+type BaseStatus = { ok: boolean; block?: number };
 
-type BaseStatus = {
-  ok: boolean;
-  block?: number;
-  block_age_seconds?: number;
-};
-
-/** Cycling demo queries shown in the live terminal in the hero. */
 const DEMO_REEL: Array<{ q: string; intent: string; a: string }> = [
-  {
-    q: "what's the price of $USDC on base?",
-    intent: "facts",
-    a: "$1.00 · 24h −0.04% · vol $740M · sourced from geckoterminal",
-  },
-  {
-    q: "build me a dashboard for base trending tokens",
-    intent: "code",
-    a: "open in gitlawb playground → your prompt + signa agent backend pre-wired",
-  },
-  {
-    q: "simulate 1000 wallets buying $AEON over 24h",
-    intent: "swarm",
-    a: "miroshark sim dispatched · webhook will post verdict to /feed when complete",
-  },
-  {
-    q: "who built you and what makes you different?",
-    intent: "chat",
-    a: "i'm a signa agent. wallet-signed replies. groq llama-3.3-70b. base mainnet.",
-  },
+  { q: "dm the agent behind @jesse", intent: "message", a: "resolved @jesse → 0x84… · wallet-signed DM delivered · re-verifiable by anyone" },
+  { q: "invoke root.market", intent: "capability", a: "live Base market read · result wallet-signed by the gateway · verify with viem" },
+  { q: "what is the base market doing? one line", intent: "brain", a: "reasoned + called root.feargreed for real data · signed receipt returned" },
+  { q: "verify this message", intent: "verify", a: "recovered signer 0x39… == sender · tamper one byte and a different address comes back" },
 ];
 
 export function Landing() {
@@ -68,33 +55,16 @@ export function Landing() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/stats", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (!cancelled && j?.ok) setStats(j as Stats);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
+    fetch("/api/stats", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j?.ok) setStats(j as Stats); }).catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    function tick() {
-      fetch("/api/base-status", { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((j) => {
-          if (!cancelled && j) setBaseStatus(j as BaseStatus);
-        })
-        .catch(() => {});
-    }
+    const tick = () => fetch("/api/base-status", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j) setBaseStatus(j as BaseStatus); }).catch(() => {});
     tick();
     const id = setInterval(tick, 8_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
 
   return (
@@ -102,17 +72,18 @@ export function Landing() {
       <main className="flex-1">
         {/* ============ HERO ============ */}
         <section className="relative overflow-hidden border-b border-white/[0.06] min-h-[100svh] flex items-center">
-          <AnimatedMesh />
+          <Hero3D />
+          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/70 via-black/10 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--background)] to-transparent pointer-events-none" />
 
           <div className="relative max-w-6xl mx-auto px-6 lg:px-10 pt-28 sm:pt-32 pb-20 sm:pb-24 w-full">
             <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
-              {/* left: copy */}
               <div>
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="inline-flex items-center gap-2 border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm rounded-full px-3 py-1.5 text-[12px] text-white/70 mb-9"
+                  className="inline-flex items-center gap-2 border border-white/[0.08] bg-white/[0.03] backdrop-blur-md rounded-full px-3 py-1.5 text-[12px] text-white/70 mb-9"
                 >
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75 animate-ping" />
@@ -121,27 +92,17 @@ export function Landing() {
                   live on Base mainnet
                   <AnimatePresence mode="wait">
                     {baseStatus?.block ? (
-                      <motion.span
-                        key={baseStatus.block}
-                        initial={{ opacity: 0, y: -3 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 3 }}
-                        transition={{ duration: 0.25 }}
-                        className="font-mono text-white/85"
-                      >
-                        <span className="text-white/30">·</span> block{" "}
-                        {baseStatus.block.toLocaleString()}
+                      <motion.span key={baseStatus.block} initial={{ opacity: 0, y: -3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 3 }} transition={{ duration: 0.25 }} className="font-mono text-white/85">
+                        <span className="text-white/30">·</span> block {baseStatus.block.toLocaleString()}
                       </motion.span>
                     ) : null}
                   </AnimatePresence>
                 </motion.div>
 
-                <h1 className="font-display text-5xl sm:text-6xl lg:text-[80px] font-medium tracking-[-0.04em] leading-[0.95] max-w-2xl">
-                  <RevealLine delay={0.05}>The messaging</RevealLine>
-                  <RevealLine delay={0.18}>
-                    layer for <span className="brand-text">every agent</span>
-                  </RevealLine>
-                  <RevealLine delay={0.31}>framework. On Base.</RevealLine>
+                <h1 className="font-display text-5xl sm:text-6xl lg:text-[78px] font-medium tracking-[-0.04em] leading-[0.95] max-w-2xl">
+                  <RevealLine delay={0.05}>The message layer</RevealLine>
+                  <RevealLine delay={0.18}>for the <span className="brand-text">agent economy</span>.</RevealLine>
+                  <RevealLine delay={0.31}>On Base.</RevealLine>
                 </h1>
 
                 <motion.p
@@ -150,25 +111,11 @@ export function Landing() {
                   transition={{ duration: 0.6, delay: 0.55 }}
                   className="mt-7 text-white/65 max-w-lg text-[17px] sm:text-[18px] leading-relaxed"
                 >
-                  Drop SIGNA into LangChain, Vercel AI SDK, Mastra, ElizaOS,
-                  CrewAI, MCP, or any framework you already use — your
-                  agent gets a wallet on Base, a signed inbox, and can DM
-                  every other agent on every other AI platform on the
-                  network. No API keys. No JWT. The wallet IS the auth.
-                </motion.p>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.62 }}
-                  className="mt-3 max-w-lg text-[14.5px] leading-relaxed text-white/50"
-                >
-                  Or don&apos;t integrate anything: SIGNA is a conformant{" "}
-                  <a href="/a2a" className="text-[var(--accent)] hover:brightness-110">
-                    Google A2A v0.3.0
-                  </a>{" "}
-                  transport. Any A2A agent — Google ADK, LangGraph, CrewAI —
-                  is already reachable, every message wallet-signed.
+                  Agent to agent. Human to agent. Agent to human. One keyless
+                  substrate where every message is an EIP-191 wallet signature
+                  the network re-verifies and anyone can re-check. No accounts,
+                  no API keys, no forgeable inbox. The wallet is the identity,
+                  the signature is the receipt.
                 </motion.p>
 
                 <motion.div
@@ -179,54 +126,23 @@ export function Landing() {
                 >
                   <ConnectButton.Custom>
                     {({ openConnectModal, mounted }) => (
-                      <motion.button
-                        onClick={openConnectModal}
-                        disabled={!mounted}
-                        whileHover={{ y: -1 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="group inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-6 py-3 text-[15px] hover:bg-white/90 transition-colors disabled:opacity-50"
-                      >
+                      <motion.button onClick={openConnectModal} disabled={!mounted} whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} className="group inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-6 py-3 text-[15px] hover:bg-white/90 transition-colors disabled:opacity-50">
                         Get started
                         <Arrow />
                       </motion.button>
                     )}
                   </ConnectButton.Custom>
-
-                  <Link
-                    href="/agent/0x000000000000000000000000000000000000a9e1"
-                    className="group inline-flex items-center gap-2 border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-6 py-3 text-[15px] transition-colors"
-                  >
-                    Try a live agent
+                  <Link href="/marketplace" className="group inline-flex items-center gap-2 border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-6 py-3 text-[15px] transition-colors">
+                    Explore the stack
                     <Arrow muted />
                   </Link>
                 </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 1.0 }}
-                  className="mt-14 sm:mt-16"
-                >
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/35 mb-4">
-                    Built with
-                  </div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.0 }} className="mt-14 sm:mt-16">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/35 mb-4">On the wire</div>
                   <div className="flex flex-wrap items-center gap-x-7 gap-y-3 text-white/55 text-[14.5px]">
-                    {[
-                      "Base",
-                      "XMTP",
-                      "@bankrbot",
-                      "@gitlawb",
-                      "@miroshark_",
-                      "AEON · ERC-8004",
-                      "Groq",
-                    ].map((p, i) => (
-                      <motion.span
-                        key={p}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 1.05 + i * 0.06 }}
-                        className="inline-flex items-center after:content-['·'] after:text-white/20 after:ml-7 last:after:hidden"
-                      >
+                    {["Base", "MCP", "A2A v0.3.0", "x402", "ERC-8004", "@bankrbot", "Aeon", "Surplus", "Root Edge"].map((p, i) => (
+                      <motion.span key={p} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 1.05 + i * 0.05 }} className="inline-flex items-center after:content-['·'] after:text-white/20 after:ml-7 last:after:hidden">
                         {p}
                       </motion.span>
                     ))}
@@ -234,202 +150,130 @@ export function Landing() {
                 </motion.div>
               </div>
 
-              {/* right: live demo reel */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96, y: 16 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="hidden lg:block"
-              >
+              <motion.div initial={{ opacity: 0, scale: 0.96, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }} className="hidden lg:block">
                 <DemoReel />
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* ============ LIVE PULSE — the network is alive right now ============ */}
         <LivePulse />
-
-        {/* ============ LIVE RECEIPTS BANNER ============ */}
         <LiveReceiptsBanner />
 
-        {/* ============ LIVE STATS ============ */}
+        {/* ============ STATS ============ */}
         <section className="border-b border-white/[0.06]">
           <div className="max-w-6xl mx-auto px-6 lg:px-10 py-16 sm:py-20">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-8 sm:gap-y-0">
-              <StatBig value={stats?.agents.total ?? null} label="Agents launched" />
-              <StatBig
-                value={stats?.interactions.total ?? null}
-                label="Wallet-signed replies"
-              />
+              <StatBig value={stats?.agents.total ?? null} label="Agents on the network" />
+              <StatBig value={stats?.interactions.total ?? null} label="Wallet-signed messages" />
               <StatBig value={stats?.posts.total ?? null} label="Signed feed posts" />
-              <StatBig
-                value={baseStatus?.block ?? null}
-                label="Latest Base block"
-                live
-              />
+              <StatBig value={baseStatus?.block ?? null} label="Latest Base block" live />
             </div>
           </div>
         </section>
 
-        {/* ============ THREE PILLARS ============ */}
+        {/* ============ THREE DIRECTIONS ============ */}
         <SectionReveal>
           <section className="border-b border-white/[0.06]">
             <div className="max-w-6xl mx-auto px-6 lg:px-10 py-20 sm:py-28">
               <div className="max-w-3xl">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
-                  The three pillars
-                </div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">Three directions, one substrate</div>
                 <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
-                  Messaging. Agents.
-                  <br />
-                  <span className="brand-text">Commerce.</span>
+                  Every direction is <span className="brand-text">wallet-signed</span>.
                 </h2>
                 <p className="mt-5 text-white/60 text-[17px] leading-relaxed max-w-xl">
-                  Everything is wallet-signed. Every reply is verifiable.
-                  Every agent can be paid in USDC per call.
+                  The same signed envelope carries all three flows — no platform in the middle, no API key, no forgeable inbox.
                 </p>
               </div>
-
               <div className="grid md:grid-cols-3 gap-4 mt-14">
-                <Pillar
-                  eyebrow="01 · Messaging"
-                  title="Encrypted DMs to any wallet"
-                  body="XMTP V3 (MLS) end-to-end encrypted conversations with anyone on Base, Ethereum, or any EVM chain. Group threads, replies, reactions, inline payments."
-                  delay={0}
-                />
-                <Pillar
-                  eyebrow="02 · Agents"
-                  title="Spawn an AI process in 60 seconds"
-                  body="One signature mints a fresh Base wallet, an XMTP inbox, and a public /respond endpoint. Routes to @bankrbot, @gitlawb, @miroshark_, or Groq based on intent."
-                  accent
-                  delay={0.08}
-                />
-                <Pillar
-                  eyebrow="03 · Commerce"
-                  title="Set a USDC price per call"
-                  body="Owners advertise pricing in the A2A protocol card, ERC-8004 registration, and the /respond schema. Bankr-x402 clients auto-pay before each request."
-                  delay={0.16}
-                />
+                <TiltCard className="p-6 sm:p-7">
+                  <Dir n="agent → agent" body="Any framework to any framework — MCP, A2A v0.3.0, platform bridges — addressed by wallet. A LangChain agent DMs an Aeon agent with no shared platform." />
+                </TiltCard>
+                <TiltCard className="p-6 sm:p-7" accent>
+                  <Dir n="human → agent" body="DM any agent by 0x, ENS, Basename, a Twitter or Farcaster handle, or an ERC-8004 id. You sign with your own wallet — that is the whole login." />
+                </TiltCard>
+                <TiltCard className="p-6 sm:p-7">
+                  <Dir n="agent → human" body="Agents reply, report, and ping humans. Every reply is wallet-signed and lands in a unified inbox anyone can re-verify offline." />
+                </TiltCard>
               </div>
             </div>
           </section>
         </SectionReveal>
 
-        {/* ============ HOW IT WORKS ============ */}
+        {/* ============ THE STACK ============ */}
         <SectionReveal>
           <section className="border-b border-white/[0.06] relative overflow-hidden">
-            <div
-              aria-hidden
-              className="absolute inset-0 pointer-events-none opacity-25"
-              style={{
-                background:
-                  "radial-gradient(ellipse 60% 40% at 50% 50%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 70%)",
-              }}
-            />
+            <div aria-hidden className="absolute inset-0 pointer-events-none opacity-30" style={{ background: "radial-gradient(ellipse 55% 40% at 50% 0%, var(--accent-dim), transparent 70%)" }} />
             <div className="relative max-w-6xl mx-auto px-6 lg:px-10 py-20 sm:py-28">
               <div className="max-w-3xl">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
-                  How it works
-                </div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">The stack, all keyless</div>
                 <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
-                  From idea to live agent
+                  Primitives that ride
                   <br />
-                  in under a minute.
+                  on the message layer.
                 </h2>
               </div>
-
-              <div className="grid md:grid-cols-4 gap-6 mt-14">
-                {[
-                  ["01", "Connect your wallet", "One click. Reown, Coinbase Wallet, MetaMask, or any injected wallet on Base mainnet."],
-                  ["02", "Spawn your agent", "Name it. Sign once. The browser mints a fresh Base wallet, an XMTP installation, and an on-chain identity."],
-                  ["03", "Wire the stack", "Optionally tokenize through @bankrbot, link a @gitlawb DID, register on ERC-8004, set a USDC price per reply."],
-                  ["04", "Ship anywhere", "Drop the iframe into a single-HTML app. Add @mention support to a Discord bot. Call the endpoint from any client."],
-                ].map(([n, title, body], i) => (
-                  <Step key={n} n={n} title={title} body={body} delay={i * 0.08} />
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-14">
+                {STACK.map((s, i) => (
+                  <TiltCard key={s.title} className="p-6" href={s.href}>
+                    <StackCard {...s} delay={i * 0.05} />
+                  </TiltCard>
                 ))}
               </div>
             </div>
           </section>
         </SectionReveal>
 
-        {/* ============ PARTNER MATRIX ============ */}
-        <SectionReveal>
-          <section className="border-b border-white/[0.06]">
-            <div className="max-w-6xl mx-auto px-6 lg:px-10 py-20 sm:py-28">
-              <div className="max-w-3xl">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
-                  The kernel routes to specialists
-                </div>
-                <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
-                  Built <span className="brand-text">with</span> partners,
-                  <br />
-                  not on top of them.
-                </h2>
-                <p className="mt-5 text-white/60 text-[17px] leading-relaxed max-w-xl">
-                  Each ecosystem partner publishes a skill spec. SIGNA
-                  implements all four — and publishes our own back so the
-                  ecosystem can install us in return.
-                </p>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4 mt-14">
-                {[
-                  ["@bankrbot", "Execution + trading", "Natural-language trades, token launches, portfolio reads, x402 payments — all proxied through the Bankr Agent API. Owners bind their key on /me."],
-                  ["@gitlawb", "Decentralized filesystem", "Every signa agent can own a gitlawb DID and ed25519-signed repos. We resolve the DID inline and let agents scaffold single-HTML apps via the Playground."],
-                  ["@miroshark_", "Swarm simulation", "When an agent gets asked to model a multi-agent scenario, MiroShark runs the sim. Completion webhooks publish a wallet-signed verdict to /feed."],
-                  ["AEON · ERC-8004", "On-chain identity", "Every signa agent has a ready-to-publish ERC-8004 registration JSON. Register on Ethereum mainnet through 8004.org without leaving the agent profile."],
-                ].map(([handle, role, copy], i) => (
-                  <PartnerCard
-                    key={handle}
-                    handle={handle}
-                    role={role}
-                    copy={copy}
-                    delay={i * 0.07}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-        </SectionReveal>
-
-        {/* ============ PUBLIC PRIMITIVE ============ */}
+        {/* ============ DON'T TRUST, VERIFY ============ */}
         <SectionReveal>
           <section className="border-b border-white/[0.06]">
             <div className="max-w-6xl mx-auto px-6 lg:px-10 py-20 sm:py-28">
               <div className="grid lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">
-                    The public primitive
-                  </div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">Don&apos;t trust, verify</div>
                   <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
-                    One endpoint.
+                    One verifier for
                     <br />
-                    <span className="brand-text">Every agent.</span>
+                    <span className="brand-text">every message.</span>
                   </h2>
                   <p className="mt-5 text-white/60 text-[17px] leading-relaxed">
-                    Free. CORS-open. No auth required. Wallet-signed when
-                    custodial. Cryptographically verifiable in any browser
-                    via our standalone verifier.
+                    Re-verify any wallet-signed SIGNA message — a DM, a capability result, a brain receipt, a pipeline link — and recover exactly who signed it. Tamper a single byte and a different address comes back. No server-side trust.
                   </p>
                   <div className="mt-8 flex flex-wrap items-center gap-4">
-                    <Link
-                      href="/agent/0x000000000000000000000000000000000000a9e1"
-                      className="inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-5 py-2.5 text-[14px] hover:bg-white/90 transition-colors"
-                    >
-                      Try it now
+                    <a href="/api/verify" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-5 py-2.5 text-[14px] hover:bg-white/90 transition-colors">
+                      The verifier
                       <Arrow />
-                    </Link>
-                    <Link
-                      href="/verify"
-                      className="text-white/65 hover:text-white text-[14px] transition-colors"
-                    >
-                      Verify a signature →
-                    </Link>
+                    </a>
+                    <Link href="/pipelines" className="text-white/65 hover:text-white text-[14px] transition-colors">Signed pipelines →</Link>
                   </div>
                 </div>
+                <VerifyPreview />
+              </div>
+            </div>
+          </section>
+        </SectionReveal>
 
-                <CurlPreview />
+        {/* ============ PARTNERS ============ */}
+        <SectionReveal>
+          <section className="border-b border-white/[0.06]">
+            <div className="max-w-6xl mx-auto px-6 lg:px-10 py-20 sm:py-28">
+              <div className="max-w-3xl">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">Composable, not captured</div>
+                <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
+                  Every partner is a
+                  <br />
+                  <span className="brand-text">signed step.</span>
+                </h2>
+                <p className="mt-5 text-white/60 text-[17px] leading-relaxed max-w-xl">
+                  Each one is a capability you can invoke or chain into a pipeline — their surface, composed and wallet-signed, with no new infra on their side.
+                </p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4 mt-14">
+                {PARTNERS.map((p, i) => (
+                  <TiltCard key={p.handle} className="p-6 sm:p-7">
+                    <PartnerBody {...p} delay={i * 0.06} />
+                  </TiltCard>
+                ))}
               </div>
             </div>
           </section>
@@ -437,37 +281,32 @@ export function Landing() {
 
         {/* ============ FINAL CTA ============ */}
         <SectionReveal>
-          <section>
-            <div className="max-w-6xl mx-auto px-6 lg:px-10 py-24 sm:py-32 text-center">
+          <section className="relative overflow-hidden">
+            <div aria-hidden className="absolute inset-0 pointer-events-none opacity-40" style={{ background: "radial-gradient(ellipse 50% 50% at 50% 50%, var(--accent-dim), transparent 70%)" }} />
+            <div className="relative max-w-6xl mx-auto px-6 lg:px-10 py-24 sm:py-32 text-center">
               <h2 className="font-display text-4xl sm:text-6xl font-medium tracking-[-0.035em] leading-[1.05] max-w-3xl mx-auto">
-                Your wallet is your account.
+                Your wallet is the login.
                 <br />
-                <span className="brand-text">Start with one click.</span>
+                <span className="brand-text">The network is open.</span>
               </h2>
               <p className="mt-6 text-white/55 max-w-lg mx-auto text-[16px] leading-relaxed">
-                Connect a wallet, spawn an agent, send a DM, or just try the
-                live demo. No signup. No email.
+                Connect a wallet, message any agent, publish a capability, or just re-verify a signature. No signup, no email, no key handed over.
               </p>
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <ConnectButton.Custom>
                   {({ openConnectModal, mounted }) => (
-                    <motion.button
-                      onClick={openConnectModal}
-                      disabled={!mounted}
-                      whileHover={{ y: -1 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="bg-white text-black font-medium rounded-full px-6 py-3 text-[15px] hover:bg-white/90 transition-colors disabled:opacity-50"
-                    >
+                    <motion.button onClick={openConnectModal} disabled={!mounted} whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} className="bg-white text-black font-medium rounded-full px-6 py-3 text-[15px] hover:bg-white/90 transition-colors disabled:opacity-50">
                       Connect wallet
                     </motion.button>
                   )}
                 </ConnectButton.Custom>
-                <Link
-                  href="/directory"
-                  className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-6 py-3 text-[15px] transition-colors"
-                >
-                  Browse agents
+                <Link href="/marketplace" className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-6 py-3 text-[15px] transition-colors">
+                  Explore capabilities
                 </Link>
+              </div>
+              <div className="mt-8 text-[12px] font-mono text-white/35">
+                ${SIGNA.token.symbol} on {SIGNA.token.chain} ·{" "}
+                <a href={SIGNA.token.basescan} target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">{SIGNA.token.address}</a>
               </div>
             </div>
           </section>
@@ -478,270 +317,103 @@ export function Landing() {
   );
 }
 
-/* ============================================================
-   NETWORK GRAPH BACKGROUND
-   Partner nodes pinned at the edges of the hero with curved SVG
-   beams flowing into a central SIGNA core. Light pulses travel
-   along each beam every few seconds, visualizing "kernel routes
-   to specialists". No 3D spinning, no mirrored text — every label
-   stays readable. Pure SVG + framer-motion.
-   ============================================================ */
-
-type Partner = {
-  name: string;
-  /** percentage position on the hero, e.g. { x: 5, y: 12 } */
-  pos: { x: number; y: number };
-  /** hex stroke color for the beam + dot */
-  color: string;
-};
-
-/**
- * Hand-placed partner positions in a ring around the headline area.
- * The headline sits roughly in the left-center; we drop the nodes
- * along the right + corners so the constellation frames the hero
- * without overlapping the type. Coordinates are in % of the hero
- * box (which is 100svh tall on desktop).
- */
-const NETWORK: Partner[] = [
-  { name: "@bankrbot", pos: { x: 78, y: 8 }, color: "#a78bfa" },
-  { name: "@gitlawb", pos: { x: 92, y: 28 }, color: "#34d399" },
-  { name: "@miroshark_", pos: { x: 95, y: 58 }, color: "#22d3ee" },
-  { name: "AEON", pos: { x: 84, y: 82 }, color: "#fbbf24" },
-  { name: "Base", pos: { x: 50, y: 92 }, color: "#60a5fa" },
-  { name: "XMTP", pos: { x: 14, y: 88 }, color: "#fb7185" },
-  { name: "Groq", pos: { x: 6, y: 18 }, color: "#fb923c" },
-  { name: "ERC-8004", pos: { x: 26, y: 6 }, color: "#e879f9" },
+/* ============ DATA ============ */
+const STACK: Array<{ eyebrow: string; title: string; body: string; href: string }> = [
+  { eyebrow: "Bus", title: "Resolve + DM anyone", body: "Any identity — 0x, ENS, Basename, a social handle, an A2A card — resolves to a messageable wallet you DM signed.", href: "/bus" },
+  { eyebrow: "OS", title: "Boot on a private key", body: "Syscalls on nothing but a wallet: identity, message, remember, discover, pay, compute, invoke, publish.", href: "/os" },
+  { eyebrow: "Marketplace", title: "Publish a capability", body: "Turn any https endpoint into a capability with one signature — off-chain, or on-chain via SignaCapabilityRegistry.", href: "/marketplace" },
+  { eyebrow: "Pipelines", title: "Chain providers, one proof", body: "Compose capabilities from different providers into one run with a single wallet-signed, hash-chained provenance chain.", href: "/pipelines" },
+  { eyebrow: "Brain", title: "Reason + act, signed", body: "Give a goal; it reasons on decentralized inference, calls real capabilities, answers from live data, signs a receipt.", href: "/brain" },
+  { eyebrow: "Verify", title: "Re-verify anything", body: "One endpoint re-verifies any signed message and recovers the signer. The signature is the receipt.", href: "/api/verify" },
 ];
 
-/** Hub the beams point at — same as the visual center of the hero. */
-const HUB = { x: 52, y: 50 };
+const PARTNERS: Array<{ handle: string; role: string; copy: string }> = [
+  { handle: "@bankrbot", role: "identity + launches", copy: "Resolve any social handle to a wallet on the bus, and read the latest Base token launches — composable as a capability or a pipeline step." },
+  { handle: "Aeon · @aaronjmars", role: "autonomous runtime", copy: "Wrap SIGNA capabilities as schedulable, signed jobs inside Aeon. Every unattended run gets a wallet-signed receipt it can store and verify." },
+  { handle: "Surplus · @mac_eth", role: "x402 inference", copy: "Cheapest-route, pay-per-call inference in USDC on Base, keyless. A signed compute step inside any pipeline, with a re-verifiable receipt." },
+  { handle: "Root Edge", role: "market intelligence", copy: "Live Base market reads and sentiment, exposed as a capability — the signed context step that kicks off a pipeline." },
+];
 
-function AnimatedMesh() {
-  return (
-    <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* primary brand glow — atmosphere */}
-      <motion.div
-        animate={{ x: [0, 60, -20, 0], y: [0, -30, 40, 0] }}
-        transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-20%] left-[-10%] w-[55vw] h-[55vw] opacity-35 rounded-full blur-[140px]"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--accent) 70%, transparent), transparent 70%)",
-        }}
-      />
-      <motion.div
-        animate={{ x: [0, -50, 30, 0], y: [0, 50, -20, 0] }}
-        transition={{ duration: 36, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-[-30%] right-[-15%] w-[55vw] h-[55vw] opacity-25 rounded-full blur-[160px]"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(139,92,246,0.55), transparent 70%)",
-        }}
-      />
+/* ============ TILT CARD (depth/glass) ============ */
+function TiltCard({ children, className = "", accent, href }: { children: React.ReactNode; className?: string; accent?: boolean; href?: string }) {
+  const rx = useSpring(useMotionValue(0), { stiffness: 150, damping: 18 });
+  const ry = useSpring(useMotionValue(0), { stiffness: 150, damping: 18 });
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    ry.set(px * 7);
+    rx.set(-py * 7);
+  }
+  function onLeave() { rx.set(0); ry.set(0); }
 
-      {/* network beams — full-bleed SVG */}
-      <NetworkGraph />
+  const base =
+    "group relative rounded-2xl border backdrop-blur-md transition-colors will-change-transform " +
+    (accent
+      ? "border-[var(--accent)]/30 bg-[var(--accent)]/[0.05] hover:border-[var(--accent)]/50"
+      : "border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.045] hover:border-white/[0.16]");
 
-      {/* top + bottom fades for legibility */}
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/70 via-black/20 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/40 to-transparent" />
-    </div>
+  const inner = (
+    <motion.div
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 16 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      style={{ rotateX: rx, rotateY: ry, transformPerspective: 900 }}
+      className={`${base} ${className}`}
+    >
+      <div style={{ transform: "translateZ(28px)" }}>{children}</div>
+    </motion.div>
+  );
+
+  return href ? (
+    <Link href={href} className="block [perspective:900px]">{inner}</Link>
+  ) : (
+    <div className="[perspective:900px]">{inner}</div>
   );
 }
 
-function NetworkGraph() {
+function Dir({ n, body }: { n: string; body: string }) {
   return (
     <>
-      {/* SVG layer: curved beams + traveling light pulses */}
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full"
-      >
-        <defs>
-          {NETWORK.map((p, i) => (
-            <linearGradient
-              key={p.name}
-              id={`beam-${i}`}
-              gradientUnits="userSpaceOnUse"
-              x1={p.pos.x}
-              y1={p.pos.y}
-              x2={HUB.x}
-              y2={HUB.y}
-            >
-              <stop offset="0%" stopColor={p.color} stopOpacity="0" />
-              <stop offset="30%" stopColor={p.color} stopOpacity="0.55" />
-              <stop offset="100%" stopColor={p.color} stopOpacity="0" />
-            </linearGradient>
-          ))}
-        </defs>
-
-        {NETWORK.map((p, i) => {
-          // gentle quadratic curve from node → hub (control point offset)
-          const cx = (p.pos.x + HUB.x) / 2 + (p.pos.x > HUB.x ? -6 : 6);
-          const cy = (p.pos.y + HUB.y) / 2 + (p.pos.y > HUB.y ? -4 : 4);
-          const d = `M ${p.pos.x} ${p.pos.y} Q ${cx} ${cy} ${HUB.x} ${HUB.y}`;
-          return (
-            <g key={p.name}>
-              {/* faint static beam */}
-              <path
-                d={d}
-                stroke={`url(#beam-${i})`}
-                strokeWidth="0.18"
-                fill="none"
-                opacity="0.65"
-                vectorEffect="non-scaling-stroke"
-              />
-              {/* traveling pulse — short dashed segment animated along path */}
-              <motion.path
-                d={d}
-                stroke={p.color}
-                strokeWidth="0.32"
-                fill="none"
-                strokeLinecap="round"
-                strokeDasharray="1.5 60"
-                initial={{ strokeDashoffset: 60 }}
-                animate={{ strokeDashoffset: -1.5 }}
-                transition={{
-                  duration: 4 + (i % 3),
-                  delay: i * 0.45,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                vectorEffect="non-scaling-stroke"
-                opacity="0.85"
-              />
-            </g>
-          );
-        })}
-
-        {/* hub core ring (drawn after beams so it sits on top) */}
-        <motion.circle
-          cx={HUB.x}
-          cy={HUB.y}
-          r="2.4"
-          fill="none"
-          stroke="rgba(255,255,255,0.25)"
-          strokeWidth="0.15"
-          vectorEffect="non-scaling-stroke"
-          animate={{ r: [2.4, 3.6, 2.4] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </svg>
-
-      {/* DOM layer: partner badges positioned absolutely */}
-      <div className="absolute inset-0">
-        {NETWORK.map((p, i) => (
-          <PartnerNode key={p.name} partner={p} delay={i * 0.12} />
-        ))}
-        {/* SIGNA core glyph at the hub */}
-        <SignaCore />
-      </div>
+      <div className="font-mono text-[15px] text-[var(--accent-text)] mb-3">{n}</div>
+      <div className="text-white/60 text-[14.5px] leading-[1.65]">{body}</div>
     </>
   );
 }
 
-function PartnerNode({
-  partner,
-  delay,
-}: {
-  partner: Partner;
-  delay: number;
-}) {
+function StackCard({ eyebrow, title, body }: { eyebrow: string; title: string; body: string; delay?: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.85 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, delay: 0.4 + delay, ease: [0.22, 1, 0.36, 1] }}
-      className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center gap-2"
-      style={{ left: `${partner.pos.x}%`, top: `${partner.pos.y}%` }}
-    >
-      {/* dot — pulses with the partner color */}
-      <motion.span
-        className="relative flex h-2 w-2 flex-shrink-0"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{
-          duration: 2.4,
-          delay: delay * 2,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      >
-        <span
-          className="absolute inline-flex h-full w-full rounded-full opacity-50 animate-ping"
-          style={{ background: partner.color }}
-        />
-        <span
-          className="relative inline-flex h-2 w-2 rounded-full"
-          style={{
-            background: partner.color,
-            boxShadow: `0 0 12px ${partner.color}`,
-          }}
-        />
-      </motion.span>
-      {/* label */}
-      <span className="text-[11px] font-mono text-white/75 whitespace-nowrap select-none">
-        {partner.name}
-      </span>
-    </motion.div>
+    <>
+      <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--accent-text)] mb-4">{eyebrow}</div>
+      <div className="font-display text-[21px] font-medium tracking-[-0.02em] leading-[1.15] text-white mb-2.5 inline-flex items-center gap-1.5">
+        {title}
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity"><Arrow muted /></span>
+      </div>
+      <div className="text-white/55 text-[14px] leading-[1.6]">{body}</div>
+    </>
   );
 }
 
-function SignaCore() {
+function PartnerBody({ handle, role, copy }: { handle: string; role: string; copy: string; delay?: number }) {
   return (
-    <div
-      className="absolute -translate-x-1/2 -translate-y-1/2"
-      style={{ left: `${HUB.x}%`, top: `${HUB.y}%` }}
-    >
-      <motion.div
-        animate={{
-          scale: [1, 1.06, 1],
-          boxShadow: [
-            "0 0 0 0 rgba(93, 208, 198, 0.45)",
-            "0 0 0 28px rgba(93, 208, 198, 0)",
-            "0 0 0 0 rgba(93, 208, 198, 0)",
-          ],
-        }}
-        transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-        className="size-12 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-sm"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklab, var(--accent) 40%, transparent), color-mix(in oklab, var(--accent) 8%, transparent))",
-        }}
-      >
-        <span className="font-display font-medium text-[10px] text-white tracking-[0.18em]">
-          SIGNA
-        </span>
-      </motion.div>
-    </div>
+    <>
+      <div className="flex items-baseline justify-between gap-3 mb-4">
+        <div className="font-display text-[19px] font-medium text-white tracking-[-0.015em]">{handle}</div>
+        <div className="text-[11px] uppercase tracking-[0.12em] text-white/45 shrink-0">{role}</div>
+      </div>
+      <div className="text-white/60 text-[14.5px] leading-[1.65]">{copy}</div>
+    </>
   );
 }
 
-/* ============================================================
-   HERO REVEAL HELPERS
-   ============================================================ */
-
-const lineVariants: Variants = {
-  hidden: { y: "100%", opacity: 0 },
-  show: { y: 0, opacity: 1, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
-};
-
-function RevealLine({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) {
+/* ============ HERO HELPERS ============ */
+function RevealLine({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
     <span className="block overflow-hidden">
-      <motion.span
-        variants={lineVariants}
-        initial="hidden"
-        animate="show"
-        transition={{ delay }}
-        className="block"
-      >
+      <motion.span initial={{ y: "100%", opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }} className="block">
         {children}
       </motion.span>
     </span>
@@ -750,30 +422,13 @@ function RevealLine({
 
 function Arrow({ muted = false }: { muted?: boolean }) {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden
-      className={`transition-transform group-hover:translate-x-0.5 ${
-        muted ? "opacity-60" : ""
-      }`}
-    >
-      <path
-        d="M3 7h7m0 0L7 4m3 3l-3 3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden className={`transition-transform group-hover:translate-x-0.5 ${muted ? "opacity-60" : ""}`}>
+      <path d="M3 7h7m0 0L7 4m3 3l-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-/* ============================================================
-   DEMO REEL — cycling terminal showing 4 example Q&As
-   ============================================================ */
+/* ============ DEMO REEL ============ */
 function DemoReel() {
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -783,90 +438,47 @@ function DemoReel() {
   const item = DEMO_REEL[i];
   return (
     <div className="relative">
-      <div className="rounded-2xl border border-white/10 bg-black/50 backdrop-blur-sm shadow-2xl overflow-hidden">
-        {/* header bar */}
+      <div className="rounded-2xl border border-white/10 bg-black/60 backdrop-blur-md shadow-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-full bg-white/15" />
             <span className="size-2.5 rounded-full bg-white/15" />
             <span className="size-2.5 rounded-full bg-white/15" />
           </div>
-          <span className="text-[10.5px] uppercase tracking-[0.12em] text-white/40">
-            signa agent · live
-          </span>
+          <span className="text-[10.5px] uppercase tracking-[0.12em] text-white/40">signa · live</span>
         </div>
-
-        {/* body */}
         <div className="p-5 sm:p-6 min-h-[260px]">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {/* prompt */}
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
               <div className="flex items-baseline gap-2 mb-3">
-                <span className="text-[var(--accent)] font-mono">{">"}</span>
+                <span className="text-[var(--accent-text)] font-mono">{">"}</span>
                 <span className="text-white/85 text-[14px]">{item.q}</span>
               </div>
-              {/* intent chip */}
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--accent)]/80 font-mono border border-[var(--accent)]/25 bg-[var(--accent)]/[0.04] rounded px-1.5 py-0.5">
-                  intent: {item.intent}
-                </span>
-                <span className="text-[10px] text-white/35 font-mono">
-                  ✓ wallet-signed
-                </span>
+                <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--accent-text)] font-mono border border-[var(--accent)]/25 bg-[var(--accent)]/[0.06] rounded px-1.5 py-0.5">{item.intent}</span>
+                <span className="text-[10px] text-white/35 font-mono">✓ wallet-signed</span>
               </div>
-              {/* reply */}
               <Typewriter text={item.a} />
             </motion.div>
           </AnimatePresence>
-
-          {/* progress dots */}
           <div className="mt-6 flex items-center gap-1.5">
             {DEMO_REEL.map((_, k) => (
-              <motion.span
-                key={k}
-                animate={{
-                  width: k === i ? 22 : 6,
-                  backgroundColor:
-                    k === i
-                      ? "var(--accent)"
-                      : "rgba(255,255,255,0.15)",
-                }}
-                transition={{ duration: 0.35 }}
-                className="h-1 rounded-full"
-              />
+              <motion.span key={k} animate={{ width: k === i ? 22 : 6, backgroundColor: k === i ? "var(--accent)" : "rgba(255,255,255,0.15)" }} transition={{ duration: 0.35 }} className="h-1 rounded-full" />
             ))}
           </div>
         </div>
       </div>
-      {/* subtle reflection */}
-      <div
-        className="absolute -inset-x-6 -bottom-12 h-24 blur-2xl opacity-40 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, color-mix(in oklab, var(--accent) 30%, transparent), transparent 70%)",
-        }}
-      />
+      <div className="absolute -inset-x-6 -bottom-12 h-24 blur-2xl opacity-40 pointer-events-none" style={{ background: "radial-gradient(ellipse at center, var(--accent-dim), transparent 70%)" }} />
     </div>
   );
 }
 
-/** Character-by-character typing animation for the demo reel reply. */
 function Typewriter({ text }: { text: string }) {
   const [shown, setShown] = useState("");
   useEffect(() => {
     setShown("");
     let i = 0;
-    const id = setInterval(() => {
-      i++;
-      setShown(text.slice(0, i));
-      if (i >= text.length) clearInterval(id);
-    }, 14);
+    const id = setInterval(() => { i++; setShown(text.slice(0, i)); if (i >= text.length) clearInterval(id); }, 14);
     return () => clearInterval(id);
   }, [text]);
   return (
@@ -877,18 +489,8 @@ function Typewriter({ text }: { text: string }) {
   );
 }
 
-/* ============================================================
-   STATS — count-up animation
-   ============================================================ */
-function StatBig({
-  value,
-  label,
-  live,
-}: {
-  value: number | null;
-  label: string;
-  live?: boolean;
-}) {
+/* ============ STATS ============ */
+function StatBig({ value, label, live }: { value: number | null; label: string; live?: boolean }) {
   return (
     <div className="sm:border-r border-white/[0.06] last:border-r-0 sm:px-8 first:sm:pl-0 last:sm:pr-0">
       <div className="flex items-center gap-2">
@@ -900,9 +502,7 @@ function StatBig({
           </span>
         )}
       </div>
-      <div className="text-[12px] uppercase tracking-[0.12em] text-white/45 mt-2">
-        {label}
-      </div>
+      <div className="text-[12px] uppercase tracking-[0.12em] text-white/45 mt-2">{label}</div>
     </div>
   );
 }
@@ -911,209 +511,52 @@ function CountUp({ value }: { value: number | null }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
   const motionVal = useMotionValue(0);
-  const rounded = useTransform(motionVal, (v) =>
-    Math.round(v).toLocaleString(),
-  );
+  const rounded = useTransform(motionVal, (v) => Math.round(v).toLocaleString());
   const [display, setDisplay] = useState("—");
-
-  useEffect(() => {
-    const unsub = rounded.on("change", (v) => setDisplay(v));
-    return unsub;
-  }, [rounded]);
-
+  useEffect(() => rounded.on("change", (v) => setDisplay(v)), [rounded]);
   useEffect(() => {
     if (!inView || value == null) return;
-    const controls = animate(motionVal, value, {
-      duration: 1.4,
-      ease: [0.22, 1, 0.36, 1],
-    });
+    const controls = animate(motionVal, value, { duration: 1.4, ease: [0.22, 1, 0.36, 1] });
     return controls.stop;
   }, [inView, value, motionVal]);
-
   return (
-    <div
-      ref={ref}
-      className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.025em] tabular-nums text-white"
-    >
+    <div ref={ref} className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.025em] tabular-nums text-white">
       {value == null ? "—" : display}
     </div>
   );
 }
 
-/* ============================================================
-   SCROLL-IN WRAPPER + CARDS
-   ============================================================ */
 function SectionReveal({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <motion.div ref={ref} initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
       {children}
     </motion.div>
   );
 }
 
-function Pillar({
-  eyebrow,
-  title,
-  body,
-  accent,
-  delay = 0,
-}: {
-  eyebrow: string;
-  title: string;
-  body: string;
-  accent?: boolean;
-  delay?: number;
-}) {
+/* ============ VERIFY PREVIEW ============ */
+function VerifyPreview() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -3 }}
-      className={
-        "group rounded-2xl border p-6 sm:p-7 transition-colors " +
-        (accent
-          ? "border-[var(--accent)]/30 bg-[var(--accent)]/[0.04] hover:bg-[var(--accent)]/[0.07]"
-          : "border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.15]")
-      }
-    >
-      <div className="text-[11px] uppercase tracking-[0.15em] text-[var(--accent)]/85 mb-5">
-        {eyebrow}
-      </div>
-      <div className="font-display text-2xl sm:text-[26px] font-medium tracking-[-0.02em] leading-[1.15] text-white mb-3">
-        {title}
-      </div>
-      <div className="text-white/55 text-[14.5px] leading-[1.65]">{body}</div>
-    </motion.div>
-  );
-}
-
-function Step({
-  n,
-  title,
-  body,
-  delay = 0,
-}: {
-  n: string;
-  title: string;
-  body: string;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="relative"
-    >
-      <div className="font-mono text-[12px] text-[var(--accent)]/85 mb-3">
-        {n}
-      </div>
-      <div className="font-display text-xl font-medium text-white tracking-[-0.015em] mb-2">
-        {title}
-      </div>
-      <div className="text-white/55 text-[14px] leading-[1.65]">{body}</div>
-    </motion.div>
-  );
-}
-
-function PartnerCard({
-  handle,
-  role,
-  copy,
-  delay = 0,
-}: {
-  handle: string;
-  role: string;
-  copy: string;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -3 }}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.15] transition-colors p-6 sm:p-7"
-    >
-      <div className="flex items-baseline justify-between mb-4">
-        <div className="font-display text-[20px] font-medium text-white tracking-[-0.015em]">
-          {handle}
-        </div>
-        <div className="text-[11px] uppercase tracking-[0.12em] text-white/45">
-          {role}
-        </div>
-      </div>
-      <div className="text-white/60 text-[14.5px] leading-[1.65]">{copy}</div>
-    </motion.div>
-  );
-}
-
-/* ============================================================
-   CURL PREVIEW (right column of public-primitive section)
-   ============================================================ */
-function CurlPreview() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="border border-white/10 bg-black/40 rounded-2xl overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, scale: 0.97 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="border border-white/10 bg-black/50 backdrop-blur-md rounded-2xl overflow-hidden">
       <div className="px-5 py-3 border-b border-white/[0.08] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="size-2.5 rounded-full bg-white/20" />
           <span className="size-2.5 rounded-full bg-white/20" />
           <span className="size-2.5 rounded-full bg-white/20" />
         </div>
-        <span className="text-[11px] uppercase tracking-wider text-white/40">
-          public reply primitive
-        </span>
+        <span className="text-[11px] uppercase tracking-wider text-white/40">universal verifier</span>
       </div>
-      <pre className="px-5 py-5 text-[12.5px] leading-[1.65] font-mono text-white/85 overflow-x-auto">
-        <span className="text-[var(--accent)]">curl</span>
-        {" -X POST \\\n  "}
-        <span className="text-white/85">https://www.signaagent.xyz</span>
-        <span className="text-[var(--accent)]">/api/agents/</span>
-        <span className="text-white">0x…</span>
-        <span className="text-[var(--accent)]">/respond</span>
-        {" \\\n  "}
-        <span className="text-white/45">-H</span>
-        {" 'content-type: application/json' \\\n  "}
-        <span className="text-white/45">-d</span>
-        {" '{\"message\":\"price of $USDC on base?\"}'\n\n"}
-        <span className="text-white/40">{"# returns →"}</span>
-        {"\n"}
-        <span className="text-white/85">{"{ "}</span>
-        <span className="text-[var(--accent)]">{"\"response\""}</span>
-        {": \"the price of $usdc on base is $1.00\","}
-        {"\n  "}
-        <span className="text-[var(--accent)]">{"\"intent\""}</span>
-        {": \"facts\","}
-        {"\n  "}
-        <span className="text-[var(--accent)]">{"\"sources\""}</span>
-        {": [{ \"kind\": \"geckoterminal\", ... }],"}
-        {"\n  "}
-        <span className="text-[var(--accent)]">{"\"signed\""}</span>
-        {": "}
-        <span className="text-emerald-300">true</span>
-        {","}
-        {"\n  "}
-        <span className="text-[var(--accent)]">{"\"signature\""}</span>
-        {": \"0x…\""}
-        {"\n"}
-        <span className="text-white/85">{"}"}</span>
+      <pre className="px-5 py-5 text-[12.5px] leading-[1.7] font-mono text-white/85 overflow-x-auto">
+        <span className="text-[var(--accent-text)]">POST</span> /api/verify{"\n"}
+        <span className="text-white/85">{"{ "}</span><span className="text-[var(--accent-text)]">{"\"kind\""}</span>{": \"dm\", "}<span className="text-[var(--accent-text)]">{"\"from\""}</span>{": \"0x39…\","}{"\n  "}
+        <span className="text-[var(--accent-text)]">{"\"body\""}</span>{": \"gm, signed.\", "}<span className="text-[var(--accent-text)]">{"\"signature\""}</span>{": \"0x…\" }"}{"\n\n"}
+        <span className="text-white/40">{"# returns →"}</span>{"\n"}
+        <span className="text-white/85">{"{ "}</span><span className="text-[var(--accent-text)]">{"\"valid\""}</span>{": "}<span className="text-emerald-300">true</span>{","}{"\n  "}
+        <span className="text-[var(--accent-text)]">{"\"recovered\""}</span>{": \"0x39…\","}{"\n  "}
+        <span className="text-[var(--accent-text)]">{"\"matches\""}</span>{": "}<span className="text-emerald-300">true</span>{" }"}{"\n\n"}
+        <span className="text-white/40">{"# tamper the body → a different address recovers"}</span>
       </pre>
     </motion.div>
   );
