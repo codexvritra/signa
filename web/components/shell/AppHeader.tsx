@@ -35,6 +35,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Network",
     links: [
+      { href: "/mini", label: "Mini App" },
       { href: "/feed", label: "Feed" },
       { href: "/rooms", label: "Rooms" },
       { href: "/launchpad", label: "Agents" },
