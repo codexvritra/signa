@@ -1,0 +1,114 @@
+/**
+ * The universal verifier for the SIGNA message layer.
+ *
+ * Every message and proof in SIGNA — an agent↔agent DM, a human↔agent DM, a
+ * room message, a capability result, a brain receipt, a pipeline link — is an
+ * EIP-191 wallet signature over a canonical preimage. This module rebuilds the
+ * preimage for any artifact kind and RECOVERS the signer, so anyone can confirm
+ * who actually signed it without trusting SIGNA. Don't trust, verify.
+ *
+ * Pure except for viem's recoverMessageAddress + node:crypto hashing.
+ */
+import { recoverMessageAddress, keccak256, toBytes, type Hex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { createHash } from "node:crypto";
+
+const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+
+// deterministic SIGNA service identities (the expected signer for some kinds)
+const GATEWAY = privateKeyToAccount(keccak256(toBytes("signa:capability-gateway:v1"))).address.toLowerCase();
+const BRAIN = privateKeyToAccount(keccak256(toBytes("signa:brain:v1"))).address.toLowerCase();
+
+export type VerifyInput = Record<string, unknown> & { kind?: string; signature?: string };
+
+export type VerifyResult = {
+  ok: true;
+  kind: string;
+  valid: boolean;
+  recovered: string | null;
+  expected: string | null;
+  matches: boolean | null;
+  signer_role: string;
+  preimage: string;
+} | { ok: false; error: string; kinds?: string[] };
+
+const KINDS = ["dm", "room", "capability", "brain", "pipeline_link", "raw"];
+
+/** Rebuild the canonical preimage for an artifact, and who is expected to have signed it. */
+function buildPreimage(a: VerifyInput): { preimage: string; expected: string | null; role: string } | null {
+  const kind = String(a.kind ?? "").toLowerCase();
+  switch (kind) {
+    case "dm": {
+      const from = String(a.from ?? "").toLowerCase();
+      const lines = ["SIGNA agent dm v1", `ts:${a.ts}`, `from:${from}`, `to:${String(a.to ?? "").toLowerCase()}`];
+      if (a.body_type && a.body_type !== "text") lines.push(`body_type:${a.body_type}`);
+      if (a.protocol && a.protocol !== "signa.dm.v1") lines.push(`protocol:${a.protocol}`);
+      if (a.in_reply_to) lines.push(`in_reply_to:${a.in_reply_to}`);
+      lines.push(`body:${a.body ?? ""}`);
+      return { preimage: lines.join("\n"), expected: from || null, role: "sender wallet" };
+    }
+    case "room": {
+      const from = String(a.from ?? "").toLowerCase();
+      const lines = ["SIGNA room message v1", `ts:${a.ts}`, `from:${from}`, `room:${a.room ?? ""}`];
+      if (a.in_reply_to) lines.push(`in_reply_to:${a.in_reply_to}`);
+      lines.push(`body:${a.body ?? ""}`);
+      return { preimage: lines.join("\n"), expected: from || null, role: "sender wallet" };
+    }
+    case "capability": {
+      // accept raw output (we hash it) or a precomputed output_hash
+      const outHash = a.output_hash ? String(a.output_hash) : sha256(JSON.stringify(a.output ?? null));
+      const pre = ["SIGNA capability result v1", `cap:${a.cap ?? ""}`, `input:${a.input ?? ""}`, `provider:${a.provider ?? ""}`, `ts:${a.ts}`, `output:${outHash}`].join("\n");
+      return { preimage: pre, expected: GATEWAY, role: "SIGNA capability gateway" };
+    }
+    case "brain": {
+      const ansHash = a.answer_hash ? String(a.answer_hash) : sha256(String(a.answer ?? ""));
+      const tools = Array.isArray(a.tools) ? (a.tools as unknown[]).join(",") : String(a.tools ?? "");
+      const pre = ["SIGNA brain receipt v1", `ts:${a.ts}`, `goal:${a.goal ?? ""}`, `tools:${tools}`, `answer:${ansHash}`].join("\n");
+      return { preimage: pre, expected: BRAIN, role: "SIGNA brain" };
+    }
+    case "pipeline_link": {
+      const pre = ["SIGNA pipeline link v1", `run:${a.runId ?? a.run ?? ""}`, `step:${a.step}`, `cap:${a.cap ?? ""}`, `provider:${String(a.provider ?? "").toLowerCase()}`, `input:${a.input_hash ?? ""}`, `output:${a.output_hash ?? ""}`, `prev:${a.prev ?? ""}`, `ts:${a.ts}`].join("\n");
+      return { preimage: pre, expected: GATEWAY, role: "SIGNA capability gateway" };
+    }
+    case "raw": {
+      if (typeof a.preimage !== "string") return null;
+      return { preimage: a.preimage, expected: a.expected ? String(a.expected).toLowerCase() : null, role: "claimed signer" };
+    }
+    default:
+      return null;
+  }
+}
+
+export async function verifyArtifact(a: VerifyInput): Promise<VerifyResult> {
+  const kind = String(a.kind ?? "").toLowerCase();
+  if (!KINDS.includes(kind)) return { ok: false, error: "unknown_kind", kinds: KINDS };
+  const sig = String(a.signature ?? "");
+  if (!/^0x[0-9a-fA-F]+$/.test(sig)) return { ok: false, error: "missing_or_bad_signature" };
+
+  const built = buildPreimage(a);
+  if (!built) return { ok: false, error: kind === "raw" ? "raw_requires_preimage" : "could_not_build_preimage" };
+
+  let recovered: string | null = null;
+  try {
+    recovered = (await recoverMessageAddress({ message: built.preimage, signature: sig as Hex })).toLowerCase();
+  } catch {
+    recovered = null;
+  }
+  const expected = built.expected;
+  const matches = expected ? (recovered === expected) : null;
+  // "valid" means: signature recovers AND (if we know who should have signed) it's them
+  const valid = !!recovered && (expected ? recovered === expected : true);
+
+  return {
+    ok: true,
+    kind,
+    valid,
+    recovered,
+    expected,
+    matches,
+    signer_role: built.role,
+    preimage: built.preimage,
+  };
+}
+
+export const VERIFY_KINDS = KINDS;
