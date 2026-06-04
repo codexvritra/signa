@@ -301,6 +301,73 @@ export async function verifyExactPayment(args: {
   };
 }
 
+/**
+ * Verify a standalone EIP-3009 TransferWithAuthorization signature recovers to
+ * `from`, for a given asset + network. Used by x402 receipts (no inbox price).
+ * Mirrors the verification in verifyExactPayment.
+ */
+export async function verifyTransferAuthorization(args: {
+  from: string;
+  to: string;
+  value: string;
+  validAfter: string;
+  validBefore: string;
+  nonce: string;
+  signature: string;
+  asset: string;
+  network: string;
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const net = NETWORKS[args.network];
+  if (!net) return { ok: false, reason: "unsupported_network" };
+  const token = EIP3009_TOKENS[args.asset.toLowerCase()];
+  if (!token) return { ok: false, reason: "unknown_asset_no_eip712_domain" };
+  if (token.chainId !== net.chainId) return { ok: false, reason: "asset_chain_mismatch" };
+  if (!/^0x[a-f0-9]{40}$/i.test(args.from)) return { ok: false, reason: "invalid_from" };
+  if (!/^0x[a-f0-9]{64}$/i.test(args.nonce)) return { ok: false, reason: "invalid_nonce" };
+
+  const domain = {
+    name: token.name,
+    version: token.version,
+    chainId: net.chainId,
+    verifyingContract: args.asset as Hex,
+  } as const;
+
+  const types = {
+    TransferWithAuthorization: [
+      { name: "from", type: "address" },
+      { name: "to", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "validAfter", type: "uint256" },
+      { name: "validBefore", type: "uint256" },
+      { name: "nonce", type: "bytes32" },
+    ],
+  } as const;
+
+  const message = {
+    from: args.from as Hex,
+    to: args.to as Hex,
+    value: BigInt(args.value),
+    validAfter: BigInt(args.validAfter),
+    validBefore: BigInt(args.validBefore),
+    nonce: args.nonce as Hex,
+  };
+
+  let valid = false;
+  try {
+    valid = await verifyTypedData({
+      address: args.from as Hex,
+      domain,
+      types,
+      primaryType: "TransferWithAuthorization",
+      message,
+      signature: args.signature as Hex,
+    });
+  } catch (e) {
+    return { ok: false, reason: `sig_verify_threw:${e instanceof Error ? e.message : String(e)}` };
+  }
+  return valid ? { ok: true } : { ok: false, reason: "bad_authorization_signature" };
+}
+
 /** Human-readable price, e.g. "0.10 USDC". */
 export function humanizePrice(price: InboxPrice): string {
   try {

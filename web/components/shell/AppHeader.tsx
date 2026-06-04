@@ -15,6 +15,7 @@ const PRIMARY: { href: string; label: string }[] = [
   { href: "/bus", label: "Bus" },
   { href: "/swarm", label: "Swarm" },
   { href: "/capabilities", label: "Capabilities" },
+  { href: "/x402", label: "x402" },
   { href: "/partners", label: "Partners" },
   { href: "/gate", label: "The Gate" },
 ];
