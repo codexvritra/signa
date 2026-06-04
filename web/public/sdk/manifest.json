@@ -36,11 +36,11 @@
     },
     "mcp": {
       "package_name": "signa-mcp",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "install": "npx -y signa-mcp",
-      "tarball": "https://www.signaagent.xyz/sdk/signa-mcp-0.7.0.tgz",
-      "size_bytes": 18445,
-      "sha256": "e87f84b590a759b7f77a2f61dfaaf9a57b90fa7aa7fe157eb1ca0b6aa936f7d0",
+      "tarball": "https://www.signaagent.xyz/sdk/signa-mcp-0.8.0.tgz",
+      "size_bytes": 19525,
+      "sha256": "aa600e7f8a15e624fe2e48452583216479459a3563b03a8a815e7e927fd926ff",
       "hosted_http_endpoint": "https://www.signaagent.xyz/api/mcp",
       "compatible_clients": ["claude-desktop", "cursor", "windsurf", "continue"],
       "min_node": "18",
@@ -71,7 +71,10 @@
         "signa_capabilities",
         "signa_invoke",
         "signa_publish",
-        "signa_brain"
+        "signa_brain",
+        "signa_x402_demo",
+        "signa_x402_get",
+        "signa_x402_verify"
       ]
     },
     "x402": {

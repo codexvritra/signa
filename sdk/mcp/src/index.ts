@@ -111,7 +111,7 @@ async function safeJson(r: Response): Promise<any> {
 // ────────────────────────────── MCP server ──────────────────────────────
 
 const server = new Server(
-  { name: "signa-mcp", version: "0.7.0" },
+  { name: "signa-mcp", version: "0.8.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -691,6 +691,34 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "signa_x402_demo",
+    description:
+      "Run a live x402 receipt end-to-end on Base: a fresh buyer agent signs a real EIP-3009 USDC payment authorization, and SIGNA issues a wallet-signed receipt binding request -> terms -> payment -> delivery into one envelope. Nothing is broadcast and no funds move. Returns the receipt and its public, re-verifiable URL. Use this to show what a verifiable agentic-commerce receipt looks like. x402 moves the money; SIGNA proves the deal.",
+    inputSchema: { type: "object", properties: {}, required: [], additionalProperties: false },
+  },
+  {
+    name: "signa_x402_get",
+    description:
+      "Fetch a SIGNA x402 receipt by id. Returns the bound request, terms, the EIP-3009 payment authorization, the delivery, and the attestor signature.",
+    inputSchema: {
+      type: "object",
+      properties: { id: { type: "string", description: "the receipt UUID" } },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "signa_x402_verify",
+    description:
+      "Re-verify a SIGNA x402 receipt by id with no trust in SIGNA. Recovers the attestor signer over the canonical envelope via the universal verifier — the same check runs locally with viem.recoverMessageAddress. Returns valid / recovered / matches.",
+    inputSchema: {
+      type: "object",
+      properties: { id: { type: "string", description: "the receipt UUID" } },
+      required: ["id"],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -712,6 +740,91 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `Created: ${wallet.created_at}`,
           ``,
           `Anyone can verify your sent messages locally without trusting any SIGNA node — every DM you send is signed by this wallet's private key using EIP-191 personal_sign.`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_x402_demo": {
+        const r = await fetch(`${SIGNA_BASE}/api/x402/demo`, { method: "POST" });
+        const j = (await r.json()) as { ok?: boolean; error?: string; receipt?: Record<string, unknown> };
+        if (!j?.ok || !j.receipt) {
+          throw new McpError(ErrorCode.InternalError, `x402 demo failed: ${j?.error ?? r.status}`);
+        }
+        const rc = j.receipt as Record<string, any>;
+        const text = [
+          `x402 receipt issued on Base (demo — real EIP-3009 authorization, nothing broadcast).`,
+          ``,
+          `item:     ${rc.request?.item ?? "agent purchase"}`,
+          `amount:   ${(Number(BigInt(String(rc.amount))) / 1e6).toFixed(2)} USDC`,
+          `buyer:    ${rc.buyer}`,
+          `seller:   ${rc.seller}`,
+          `bound:    request + terms + payment + delivery`,
+          `attestor: ${rc.signer}`,
+          ``,
+          `Verifiable receipt: ${SIGNA_BASE}/x402/${rc.id}`,
+          `Re-verify: signa_x402_verify { "id": "${rc.id}" }`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_x402_get": {
+        const id = String(args.id ?? "");
+        const r = await fetch(`${SIGNA_BASE}/api/x402/receipt/${id}`);
+        const j = (await r.json()) as { ok?: boolean; error?: string; receipt?: Record<string, any> };
+        if (!j?.ok || !j.receipt) {
+          throw new McpError(ErrorCode.InvalidParams, j?.error ?? "receipt_not_found");
+        }
+        const rc = j.receipt;
+        const text = [
+          `x402 receipt ${rc.id}`,
+          ``,
+          `item:     ${rc.request?.item ?? "—"}`,
+          `amount:   ${(Number(BigInt(String(rc.amount))) / 1e6).toFixed(2)} USDC on ${rc.network}`,
+          `buyer:    ${rc.buyer}`,
+          `seller:   ${rc.seller}`,
+          `attestor: ${rc.signer}`,
+          `url:      ${SIGNA_BASE}/x402/${rc.id}`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_x402_verify": {
+        const id = String(args.id ?? "");
+        const gr = await fetch(`${SIGNA_BASE}/api/x402/receipt/${id}`);
+        const gj = (await gr.json()) as { ok?: boolean; error?: string; receipt?: Record<string, any> };
+        if (!gj?.ok || !gj.receipt) {
+          throw new McpError(ErrorCode.InvalidParams, gj?.error ?? "receipt_not_found");
+        }
+        const rc = gj.receipt;
+        const vr = await fetch(`${SIGNA_BASE}/api/verify`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            kind: "x402_receipt",
+            ts: rc.ts,
+            buyer: rc.buyer,
+            seller: rc.seller,
+            amount: rc.amount,
+            asset: rc.asset,
+            network: rc.network,
+            request_hash: rc.request_hash,
+            terms_hash: rc.terms_hash,
+            payment_hash: rc.payment_hash,
+            delivery_hash: rc.delivery_hash,
+            signature: rc.signature,
+          }),
+        });
+        const v = (await vr.json()) as Record<string, any>;
+        const text = [
+          v.valid
+            ? `✓ Receipt ${id} is VALID — signed by the SIGNA attestor.`
+            : `✗ Receipt ${id} did NOT verify.`,
+          ``,
+          `recovered: ${v.recovered ?? "—"}`,
+          `attestor:  ${v.expected ?? "—"}`,
+          `matches:   ${v.matches}`,
+          ``,
+          `Trustless: the same check runs locally with viem.recoverMessageAddress over the receipt's signed_message.`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
