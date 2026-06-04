@@ -1,0 +1,35 @@
+{
+  "name": "signa-x402",
+  "version": "0.1.0",
+  "description": "Add verifiable receipts to your x402 server in a few lines. SIGNA binds request → terms → the x402 payment authorization → delivery into one wallet-signed, re-verifiable receipt on Base. Zero dependencies. x402 moves the money, SIGNA proves the deal.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "signa",
+    "x402",
+    "agentic-commerce",
+    "agent-payments",
+    "receipts",
+    "eip-3009",
+    "base",
+    "ai-agent",
+    "verifiable",
+    "onchain"
+  ],
+  "license": "MIT",
+  "homepage": "https://www.signaagent.xyz/x402",
+  "sideEffects": false
+}

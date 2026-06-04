@@ -127,22 +127,35 @@ export default async function X402Page() {
 
         {/* developers */}
         <div className="mt-12">
-          <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">for developers</div>
+          <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">for builders</div>
           <p className="text-muted text-[14px] leading-relaxed">
-            Issue a receipt for any x402 payment, then let anyone re-verify it with no trust in SIGNA:
+            Add verifiable receipts to your own x402 server in a few lines. The{" "}
+            <span className="font-mono text-white/80">signa-x402</span> SDK is <b>zero-dependency</b> —
+            just <span className="font-mono text-white/80">fetch</span>.
           </p>
           <pre className="mt-3 glass rounded-xl p-4 text-[12px] font-mono text-white/80 overflow-x-auto leading-relaxed">
-{`# issue a receipt (after your x402 payment is authorized)
-POST ${SITE}/api/x402/receipt
-{ "request": {...}, "terms": { "amount","asset","network","payTo" },
-  "payment": { EIP-3009 auth + signature }, "output": {...} }
+{`npm install ${SITE.replace("https://", "")}/sdk/signa-x402-0.1.0.tgz
 
-# re-verify it — the same check runs locally with viem
-POST ${SITE}/api/verify
-{ "kind": "x402_receipt", "ts", "buyer", "seller", "amount", "asset",
-  "network", "request_hash", "terms_hash", "payment_hash",
-  "delivery_hash", "signature" }`}
+import { receiptFor } from "signa-x402";
+
+// after you verify the buyer's x402 payment + produce \`output\`:
+const { url, headers } = await receiptFor({ request, terms, payment, output });
+return new Response(JSON.stringify(output), { headers }); // x-signa-receipt: <url>`}
           </pre>
+
+          <p className="text-muted text-[13px] leading-relaxed mt-4">
+            Re-verify any receipt with no trust in SIGNA — the same check runs locally with viem:
+          </p>
+          <pre className="mt-2 glass rounded-xl p-4 text-[12px] font-mono text-white/70 overflow-x-auto leading-relaxed">
+{`import { getReceipt, verifyReceipt } from "signa-x402";
+const v = await verifyReceipt(await getReceipt(id));
+// { valid: true, recovered: "0x…", expected: "0x…attestor", matches: true }`}
+          </pre>
+          <div className="text-[12px] text-faint mt-3">
+            Raw HTTP: <span className="font-mono">POST /api/x402/receipt</span> ·{" "}
+            <span className="font-mono">POST /api/verify</span> (kind <span className="font-mono">x402_receipt</span>) ·{" "}
+            sha-256 in <span className="font-mono">/sdk/manifest.json</span>
+          </div>
         </div>
 
         {/* honest footer */}

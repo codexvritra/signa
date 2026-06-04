@@ -73,6 +73,26 @@
         "signa_publish",
         "signa_brain"
       ]
+    },
+    "x402": {
+      "package_name": "signa-x402",
+      "version": "0.1.0",
+      "install": "npm install https://www.signaagent.xyz/sdk/signa-x402-0.1.0.tgz",
+      "tarball": "https://www.signaagent.xyz/sdk/signa-x402-0.1.0.tgz",
+      "size_bytes": 5778,
+      "sha256": "061685e8ac7ccd1cb9cc32b5b346a515ff56adf22ccaa061273cab084041cd75",
+      "import": "import { receiptFor, verifyReceipt } from 'signa-x402';",
+      "min_node": "18",
+      "dependencies": "none",
+      "docs": "https://www.signaagent.xyz/x402",
+      "functions": [
+        "issueReceipt",
+        "receiptFor",
+        "getReceipt",
+        "verifyReceipt",
+        "receiptUrl",
+        "receiptHeaders"
+      ]
     }
   }
 }
