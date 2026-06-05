@@ -1,0 +1,20 @@
+import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
+import { execFileSync } from "node:child_process";
+const BASE = process.env.SIGNA_BASE_URL ?? "https://www.signaagent.xyz";
+const human = privateKeyToAccount(generatePrivateKey());
+const agentPk = generatePrivateKey();
+const agent = privateKeyToAccount(agentPk).address.toLowerCase();
+const grantor = human.address.toLowerCase();
+const USDC = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", NET = "eip155:8453";
+const limit = "100000", perTx = "40000", expiry = Math.floor(Date.now()/1000)+3600, memo = "verify";
+const ts = Date.now();
+const mp = ["SIGNA spend mandate v1",`ts:${ts}`,`grantor:${grantor}`,`agent:${agent}`,`asset:${USDC}`,`network:${NET}`,`limit:${limit}`,`per_tx:${perTx}`,`expiry:${expiry}`,`memo:${memo}`].join("\n");
+const sig = await human.signMessage({ message: mp });
+const m = await (await fetch(`${BASE}/api/mandates`, { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({ grantor, agent, asset:USDC, network:NET, limit, per_tx:perTx, expiry, memo, ts, signature:sig }) })).json();
+if (!m.ok) { console.log("grant failed:", m.error); process.exit(1); }
+console.log("human granted mandate", m.mandate.id.slice(0,8), "to agent", agent.slice(0,10));
+const run = (j) => execFileSync("node", ["signa-spend/run.mjs", j], { env: { ...process.env, SIGNA_PRIVATE_KEY: agentPk }, encoding: "utf8" }).trim();
+console.log("[spend] ", run(JSON.stringify({ action:"spend", mandate_id:m.mandate.id, usdc:"0.04", note:"data pull 1/3" })));
+console.log("[spend] ", run(JSON.stringify({ action:"spend", mandate_id:m.mandate.id, usdc:"0.04", note:"data pull 2/3" })));
+console.log("[spend] ", run(JSON.stringify({ action:"spend", mandate_id:m.mandate.id, usdc:"0.04", note:"data pull 3/3" })));
+console.log("[ask]   ", run(JSON.stringify({ action:"ask", grantor, usdc:"0.05", goal:"finish the briefing" })));

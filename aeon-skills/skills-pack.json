@@ -138,6 +138,13 @@
       "description": "Wallet-sign and trigger a MiroShark swarm sim; verdict posts back on the federated SIGNA feed",
       "category": "research",
       "default_enabled": false
+    },
+    {
+      "slug": "signa-spend",
+      "path": "signa-spend",
+      "description": "Bounded, wallet-signed spending budget for this agent — records signed spends against a human-granted mandate (per-tx + total caps) and wallet-signs a request for more when it runs out. The agentic-commerce rail.",
+      "category": "agentic-commerce",
+      "default_enabled": false
     }
   ]
 }
