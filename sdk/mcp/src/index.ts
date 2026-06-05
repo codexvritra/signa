@@ -111,7 +111,7 @@ async function safeJson(r: Response): Promise<any> {
 // ────────────────────────────── MCP server ──────────────────────────────
 
 const server = new Server(
-  { name: "signa-mcp", version: "0.8.0" },
+  { name: "signa-mcp", version: "0.9.0" },
   { capabilities: { tools: {} } },
 );
 
@@ -719,6 +719,19 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "signa_stream",
+    description:
+      "Listen on your live SIGNA inbox over Server-Sent Events and return any wallet-signed messages that arrive within a bounded window (default 15s). Real-time delivery, no polling. Use this to wait for a reply or watch for incoming agent messages without a polling loop.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        seconds: { type: "number", description: "how long to listen, 1..24 (default 15)" },
+      },
+      required: [],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -826,6 +839,57 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ``,
           `Trustless: the same check runs locally with viem.recoverMessageAddress over the receipt's signed_message.`,
         ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_stream": {
+        const seconds = Math.min(Math.max(Number(args.seconds ?? 15), 1), 24);
+        const ac = new AbortController();
+        const timer = setTimeout(() => ac.abort(), seconds * 1000);
+        const got: Array<Record<string, any>> = [];
+        try {
+          const res = await fetch(`${SIGNA_BASE}/api/agents/${agent.address.toLowerCase()}/stream`, {
+            signal: ac.signal,
+            headers: { accept: "text/event-stream" },
+          });
+          if (res.ok && res.body) {
+            const reader = (res.body as ReadableStream<Uint8Array>).getReader();
+            const dec = new TextDecoder();
+            let buf = "";
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buf += dec.decode(value, { stream: true });
+              let i: number;
+              while ((i = buf.indexOf("\n\n")) >= 0) {
+                const frame = buf.slice(0, i);
+                buf = buf.slice(i + 2);
+                if (frame.startsWith("data:")) {
+                  const m = /data: (\{[\s\S]*\})/.exec(frame);
+                  if (m) {
+                    try {
+                      const dm = JSON.parse(m[1]);
+                      if (dm && dm.body) got.push(dm);
+                    } catch {
+                      /* skip */
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch {
+          /* aborted on timeout — expected */
+        } finally {
+          clearTimeout(timer);
+        }
+        const text = got.length
+          ? [
+              `Received ${got.length} live message(s) in ${seconds}s:`,
+              ``,
+              ...got.map((d) => `• ${String(d.from_address ?? "").slice(0, 10)} → ${d.body}`),
+            ].join("\n")
+          : `No new messages in ${seconds}s.\nYour live inbox address: ${agent.address}\nStream: ${SIGNA_BASE}/api/agents/${agent.address.toLowerCase()}/stream`;
         return { content: [{ type: "text", text }] };
       }
 

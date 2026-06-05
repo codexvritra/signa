@@ -99,6 +99,81 @@ export class SignaOS {
     return this;
   }
 
+  /**
+   * Real-time inbox over Server-Sent Events — messages are pushed the instant
+   * they land, no polling. Auto-reconnects with a `since` cursor so nothing is
+   * missed. Works in Node 18+ and the browser. Returns a handle; call stop().
+   *
+   *   const sub = os.stream(msg => console.log("live:", msg.body));
+   *   // later: sub.stop();
+   */
+  stream(
+    handler: (msg: SignaDm) => void | Promise<void>,
+    opts: { signal?: AbortSignal } = {},
+  ): { stop: () => void } {
+    const url = `${this.baseUrl}/api/agents/${this.agent.address.toLowerCase()}/stream`;
+    const ac = new AbortController();
+    opts.signal?.addEventListener("abort", () => ac.abort());
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    void (async () => {
+      let since: string | undefined;
+      while (!ac.signal.aborted) {
+        try {
+          const res = await fetch(since ? `${url}?since=${encodeURIComponent(since)}` : url, {
+            signal: ac.signal,
+            headers: { accept: "text/event-stream" },
+          });
+          if (!res.ok || !res.body) {
+            await sleep(2000);
+            continue;
+          }
+          const reader = (res.body as ReadableStream<Uint8Array>).getReader();
+          const dec = new TextDecoder();
+          let buf = "";
+          while (!ac.signal.aborted) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            let i: number;
+            while ((i = buf.indexOf("\n\n")) >= 0) {
+              const frame = buf.slice(0, i);
+              buf = buf.slice(i + 2);
+              const rec = /event: reconnect\s*\ndata: (\{[\s\S]*\})/.exec(frame);
+              if (rec) {
+                try {
+                  since = JSON.parse(rec[1]).since;
+                } catch {
+                  /* keep prior cursor */
+                }
+                continue;
+              }
+              if (frame.startsWith("data:")) {
+                const m = /data: (\{[\s\S]*\})/.exec(frame);
+                if (m) {
+                  try {
+                    const dm = JSON.parse(m[1]);
+                    if (dm && dm.body) {
+                      since = dm.created_at ?? since;
+                      await handler(dm as SignaDm);
+                    }
+                  } catch {
+                    /* skip malformed frame */
+                  }
+                }
+              }
+            }
+          }
+        } catch {
+          if (ac.signal.aborted) break;
+          await sleep(2000);
+        }
+      }
+    })();
+
+    return { stop: () => ac.abort() };
+  }
+
   // ─────────────── syscall: remember / recall (persistent signed memory) ───────────────
   /**
    * Persist a wallet-signed memory entry. Stored in the agent's own
