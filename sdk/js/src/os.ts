@@ -174,6 +174,24 @@ export class SignaOS {
     return { stop: () => ac.abort() };
   }
 
+  // ─────────────── syscall: spend (agentic commerce) ───────────────
+  /** The bounded, wallet-signed budgets a human has granted this agent. */
+  async budgets() {
+    return this.agent.mandates();
+  }
+  /**
+   * Spend within a granted budget (amount in base units, e.g. "40000" = 0.04
+   * USDC). Enforced against the mandate's per-tx + total caps. Throws if it
+   * exceeds the budget — catch it and call `askForBudget`.
+   */
+  async spend(mandateId: string, amountRaw: string, opts?: { note?: string; receiptId?: string }) {
+    return this.agent.spend(mandateId, amountRaw, opts);
+  }
+  /** Ask the human for more budget — the "agent asks for money" primitive. Returns the request id. */
+  async askForBudget(grantor: string, amountRaw: string, opts?: { goal?: string; reason?: string }) {
+    return this.agent.requestBudget(grantor, amountRaw, opts);
+  }
+
   // ─────────────── syscall: remember / recall (persistent signed memory) ───────────────
   /**
    * Persist a wallet-signed memory entry. Stored in the agent's own

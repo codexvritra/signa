@@ -362,6 +362,93 @@ export class SignaAgent {
     return data;
   }
 
+  // ───────────────────────── agentic commerce ─────────────────────────
+
+  /** List the wallet-signed spend mandates a human has granted this agent. */
+  async mandates(): Promise<
+    Array<{
+      id: string;
+      grantor: string;
+      asset: string;
+      network: string;
+      limit_raw: string;
+      per_tx_raw: string;
+      expiry: number;
+    }>
+  > {
+    const r = await fetch(`${this.baseUrl}/api/mandates?agent=${this.address}`);
+    const data = await safeJson(r);
+    return data?.ok ? data.mandates : [];
+  }
+
+  /**
+   * Spend against a mandate (amount in base units, e.g. "40000" = 0.04 USDC).
+   * The agent wallet-signs the spend; the node enforces the per-tx + total
+   * caps. Throws if it exceeds the mandate — catch and call `requestBudget`.
+   * Optionally bind an x402 `receiptId`.
+   */
+  async spend(
+    mandateId: string,
+    amountRaw: string,
+    opts: { note?: string; receiptId?: string } = {},
+  ): Promise<{ spent_raw: string; remaining_raw: string }> {
+    const ts = Date.now();
+    const note = opts.note ?? "";
+    const message = [
+      "SIGNA spend v1",
+      `ts:${ts}`,
+      `mandate:${mandateId}`,
+      `agent:${this.address}`,
+      `amount:${amountRaw}`,
+      `note:${note}`,
+    ].join("\n");
+    const signature = await this.account.signMessage({ message });
+    const r = await fetch(`${this.baseUrl}/api/mandates/spend`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mandate_id: mandateId, agent: this.address, amount: amountRaw, note, receipt_id: opts.receiptId ?? null, ts, signature }),
+    });
+    const data = await safeJson(r);
+    if (!data?.ok) {
+      const extra = data?.remaining_raw ? ` (remaining ${data.remaining_raw})` : "";
+      throw new Error(`SignaAgent.spend: ${data?.error ?? `HTTP ${r.status}`}${extra}`);
+    }
+    return { spent_raw: data.spent_raw, remaining_raw: data.remaining_raw };
+  }
+
+  /**
+   * Ask the grantor for more budget — the "agent asks for money" primitive.
+   * Wallet-signed by the agent. Returns the request id.
+   */
+  async requestBudget(
+    grantor: string,
+    amountRaw: string,
+    opts: { goal?: string; reason?: string } = {},
+  ): Promise<string> {
+    const g = grantor.toLowerCase();
+    const ts = Date.now();
+    const goal = opts.goal ?? "";
+    const reason = opts.reason ?? "";
+    const message = [
+      "SIGNA budget request v1",
+      `ts:${ts}`,
+      `agent:${this.address}`,
+      `grantor:${g}`,
+      `amount:${amountRaw}`,
+      `goal:${goal}`,
+      `reason:${reason}`,
+    ].join("\n");
+    const signature = await this.account.signMessage({ message });
+    const r = await fetch(`${this.baseUrl}/api/requests`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ agent: this.address, grantor: g, amount: amountRaw, goal, reason, ts, signature }),
+    });
+    const data = await safeJson(r);
+    if (!data?.ok) throw new Error(`SignaAgent.requestBudget: ${data?.error ?? `HTTP ${r.status}`}`);
+    return data.request.id;
+  }
+
   /** Look up the price (if any) of another wallet's inbox. */
   async getInboxPrice(address: string): Promise<{
     priced: boolean;

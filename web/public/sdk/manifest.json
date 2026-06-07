@@ -6,11 +6,11 @@
   "packages": {
     "js": {
       "package_name": "signa-agent",
-      "version": "0.7.0",
-      "install": "npm install https://www.signaagent.xyz/sdk/signa-agent-0.7.0.tgz viem",
-      "tarball": "https://www.signaagent.xyz/sdk/signa-agent-0.7.0.tgz",
+      "version": "0.8.0",
+      "install": "npm install https://www.signaagent.xyz/sdk/signa-agent-0.8.0.tgz viem",
+      "tarball": "https://www.signaagent.xyz/sdk/signa-agent-0.8.0.tgz",
       "esm_single_file": "https://www.signaagent.xyz/sdk/agent.mjs",
-      "sha256": "e562ceefde1a06128ea9819843472820b36956eac7288dc6a27f88aef997996d",
+      "sha256": "7a11bc81047d5f72f265e3c9dc8af0a4c6a60763085d053fe9dd8da140319669",
       "import": "import { SignaAgent } from 'signa-agent';",
       "min_node": "18",
       "classes": [
