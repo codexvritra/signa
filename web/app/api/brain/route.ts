@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes } from "viem";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { CAPABILITY_CATALOG, fulfillCapability } from "@/lib/capabilities";
 import { listRegistered, callRegistered, type RegisteredCapability } from "@/lib/marketplace";
+import { spendPreimage, budgetRequestPreimage, USDC_BASE, NETWORK_BASE } from "@/lib/mandate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,9 +80,168 @@ async function resolveAddr(origin: string, id: string): Promise<string | null> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// METERED COMPUTE — the brain can spend, but only within a human's budget.
+//
+// The brain runs on paid, decentralized inference; it holds no funds of its own.
+// When a human grants it a bounded mandate (agent = the brain's address), the
+// brain pays per reasoning run for its own compute: it signs a REAL EIP-3009
+// USDC-on-Base authorization -> SIGNA issues a verifiable x402 receipt -> the
+// spend is recorded against the mandate, capped per-run and in total. When the
+// budget is exhausted the brain STOPS (it won't burn compute it can't pay for)
+// and wallet-signs a request for more. The model decides; SIGNA enforces the
+// cap and proves the spend. Nothing is broadcast.
+const COMPUTE = privateKeyToAccount(keccak256(toBytes("signa:inference:v1"))).address.toLowerCase();
+const INFERENCE_PRICE = "10000"; // 0.01 USDC per reasoning run
+const TW_TYPES = {
+  TransferWithAuthorization: [
+    { name: "from", type: "address" },
+    { name: "to", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "validAfter", type: "uint256" },
+    { name: "validBefore", type: "uint256" },
+    { name: "nonce", type: "bytes32" },
+  ],
+} as const;
+const usd = (raw: string) => {
+  try { return (Number(BigInt(raw)) / 1e6).toFixed(2); } catch { return raw; }
+};
+
+type MandateRow = { id: string; grantor: string; agent: string; limit_raw: string; per_tx_raw: string; expiry: number };
+
+async function lookupMandate(origin: string, mandateId: string): Promise<MandateRow | null> {
+  try {
+    const j = await (await fetch(`${origin}/api/mandates?agent=${brain.address.toLowerCase()}`)).json();
+    const list: MandateRow[] = j?.ok ? j.mandates : [];
+    return list.find((m) => m.id === mandateId) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// the brain signs a real EIP-3009 USDC auth for its compute -> x402 receipt
+async function mintComputeReceipt(origin: string, amount: string): Promise<string | null> {
+  try {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const auth = {
+      from: brain.address,
+      to: COMPUTE as `0x${string}`,
+      value: amount,
+      validAfter: String(nowSec - 60),
+      validBefore: String(nowSec + 3600),
+      nonce: ("0x" + randomBytes(32).toString("hex")) as `0x${string}`,
+    };
+    const signature = await brain.signTypedData({
+      domain: { name: "USD Coin", version: "2", chainId: 8453, verifyingContract: USDC_BASE as `0x${string}` },
+      types: TW_TYPES,
+      primaryType: "TransferWithAuthorization",
+      message: {
+        from: auth.from, to: auth.to, value: BigInt(auth.value),
+        validAfter: BigInt(auth.validAfter), validBefore: BigInt(auth.validBefore), nonce: auth.nonce,
+      },
+    });
+    const r = await (await fetch(`${origin}/api/x402/receipt`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        request: { item: "SIGNA brain inference", buyer_agent: brain.address.toLowerCase() },
+        terms: { amount, asset: USDC_BASE, network: NETWORK_BASE, payTo: COMPUTE },
+        payment: { ...auth, signature },
+        output: { delivered: true, item: "inference" },
+      }),
+    })).json();
+    return r?.ok ? r.receipt.id : null;
+  } catch {
+    return null;
+  }
+}
+
+// pay for one reasoning run within the mandate (x402 receipt + capped spend)
+async function payForCompute(origin: string, mandateId: string, amount: string, note: string) {
+  const receiptId = await mintComputeReceipt(origin, amount);
+  const ts = Date.now();
+  const signature = await brain.signMessage({
+    message: spendPreimage({ ts, mandateId, agent: brain.address.toLowerCase(), amount, note }),
+  });
+  const r = await (await fetch(`${origin}/api/mandates/spend`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ mandate_id: mandateId, agent: brain.address.toLowerCase(), amount, note, receipt_id: receiptId, ts, signature }),
+  })).json();
+  return { ...r, receiptId };
+}
+
+// the brain wallet-signs a request to its grantor for more inference budget
+async function askForBudget(origin: string, grantor: string, amount: string, goal: string): Promise<string | null> {
+  try {
+    const ts = Date.now();
+    const signature = await brain.signMessage({
+      message: budgetRequestPreimage({ ts, agent: brain.address.toLowerCase(), grantor, amount, goal, reason: "inference budget to keep reasoning" }),
+    });
+    const r = await (await fetch(`${origin}/api/requests`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ agent: brain.address.toLowerCase(), grantor, amount, goal, reason: "inference budget to keep reasoning", ts, signature }),
+    })).json();
+    return r?.ok ? r.request?.id ?? null : null;
+  } catch {
+    return null;
+  }
+}
+
 const BUILTIN_DOC = CAPABILITY_CATALOG.map((c) => `- ${c.name}(${c.input === "none" ? "" : "arg"}): ${c.description}`).join("\n");
 
-async function run(goal: string, origin: string, opts: { remember?: boolean; reportTo?: string } = {}) {
+async function run(goal: string, origin: string, opts: { remember?: boolean; reportTo?: string; mandateId?: string } = {}) {
+  // 0. METER — if a human granted the brain a mandate, the brain pays for its
+  // own inference before it reasons (pay-before-compute). If the budget is
+  // exhausted it does NOT burn compute it can't pay for: it stops and signs a
+  // request for more. No mandate => unmetered (the brain runs as before).
+  let spend:
+    | { ok: true; paid_raw: string; remaining_raw: string; receipt_id: string | null; receipt_url: string | null }
+    | { ok: false; error: string; budget_exhausted?: boolean; remaining_raw?: string; request_id?: string | null }
+    | null = null;
+  if (opts.mandateId) {
+    const mandate = await lookupMandate(origin, opts.mandateId);
+    if (!mandate) {
+      spend = { ok: false, error: "mandate_not_found_for_brain" };
+    } else if (Number(mandate.expiry) < Math.floor(Date.now() / 1000)) {
+      spend = { ok: false, error: "mandate_expired" };
+    } else {
+      const paid = await payForCompute(origin, opts.mandateId, INFERENCE_PRICE, `inference: ${goal.slice(0, 56)}`);
+      if (paid?.ok) {
+        spend = {
+          ok: true,
+          paid_raw: INFERENCE_PRICE,
+          remaining_raw: paid.remaining_raw ?? "0",
+          receipt_id: paid.receiptId ?? null,
+          receipt_url: paid.receiptId ? `/x402/${paid.receiptId}` : null,
+        };
+      } else {
+        // budget exhausted — stop, and wallet-sign a request for more.
+        const remaining = paid?.remaining_raw ?? "0";
+        const requestId = await askForBudget(origin, mandate.grantor, "50000", goal.slice(0, 80));
+        const ts = Date.now();
+        const answer =
+          `I've spent the budget you granted me — only ${usd(remaining)} USDC is left and each reasoning run costs ${usd(INFERENCE_PRICE)}. ` +
+          `I've wallet-signed a request for 0.05 USDC more so I can keep working. Approve it and I'll finish the job.`;
+        const answerHash = createHash("sha256").update(answer).digest("hex");
+        const preimage = ["SIGNA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:`, `answer:${answerHash}`].join("\n");
+        const signature = await brain.signMessage({ message: preimage });
+        return {
+          ok: true,
+          goal,
+          plan: [],
+          tools: [],
+          answer,
+          acts: { memory: null, report: null },
+          ts,
+          brain: brain.address.toLowerCase(),
+          signature,
+          verify: { scheme: "eip191", preimage, how: "sha256 the answer, rebuild the preimage, verifyMessage against `brain`" },
+          spend: { ok: false as const, error: paid?.error ?? "exceeds_mandate", budget_exhausted: true, remaining_raw: remaining, request_id: requestId },
+          note: "The brain runs on paid inference and holds no funds of its own. It stopped because the human-granted budget is exhausted, and wallet-signed a request for more. SIGNA enforces the cap; the model never spends past it.",
+        };
+      }
+    }
+  }
+
   // The brain's toolset = built-in capabilities + FREE capabilities the
   // community registered in the open marketplace. Priced capabilities are
   // excluded from autonomous planning: the brain holds no funds and never
@@ -151,6 +311,12 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
     if (to) acts.report = { to, dm_id: await brainSend(origin, to, `[brain report] ${answer}`) };
   }
 
+  const note = spend?.ok
+    ? `This run was paid from a bounded mandate: ${usd(INFERENCE_PRICE)} USDC for inference` +
+      `${spend.receipt_id ? ` (x402 receipt ${spend.receipt_id})` : ""}, ${usd(spend.remaining_raw)} USDC left. ` +
+      `The brain holds no funds of its own — a human granted the budget; SIGNA enforced the per-run cap and proved the spend. The model decides; it cannot spend past the cap.`
+    : "The brain reasons on decentralized inference, acts through the SIGNA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.";
+
   return {
     ok: true,
     goal,
@@ -162,17 +328,18 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
     brain: brain.address.toLowerCase(),
     signature,
     verify: { scheme: "eip191", preimage, how: "sha256 the answer, rebuild the preimage, verifyMessage against `brain`" },
-    note: "The brain reasons on decentralized inference, acts through the SIGNA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.",
+    spend,
+    note,
   };
 }
 
 export async function POST(req: NextRequest) {
-  let goal = "", remember = false, reportTo = "";
-  try { const b = await req.json(); goal = b?.goal ?? ""; remember = !!b?.remember; reportTo = b?.report_to ?? b?.reportTo ?? ""; } catch { /* */ }
+  let goal = "", remember = false, reportTo = "", mandateId = "";
+  try { const b = await req.json(); goal = b?.goal ?? ""; remember = !!b?.remember; reportTo = b?.report_to ?? b?.reportTo ?? ""; mandateId = b?.mandate_id ?? b?.mandateId ?? ""; } catch { /* */ }
   if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal" }, { status: 400, headers: CORS });
   if (goal.length > 600) return NextResponse.json({ ok: false, error: "goal_too_long" }, { status: 400, headers: CORS });
   try {
-    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined }), { headers: CORS });
+    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined }), { headers: CORS });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "brain error" }, { status: 502, headers: CORS });
   }
@@ -183,9 +350,10 @@ export async function GET(req: NextRequest) {
   const goal = sp.get("goal") ?? "";
   const remember = sp.get("remember") === "1" || sp.get("remember") === "true";
   const reportTo = sp.get("report_to") ?? "";
-  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing&report_to=@handle&remember=1" }, { status: 400, headers: CORS });
+  const mandateId = sp.get("mandate_id") ?? "";
+  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing&report_to=@handle&remember=1&mandate_id=<uuid>" }, { status: 400, headers: CORS });
   try {
-    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined }), { headers: CORS });
+    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined }), { headers: CORS });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "brain error" }, { status: 502, headers: CORS });
   }
