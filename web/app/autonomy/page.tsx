@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AutonomyDemo } from "./AutonomyDemo";
+import { BrainSpendDemo } from "./BrainSpendDemo";
 import { SITE } from "@/lib/miniapp";
 
 export const dynamic = "force-dynamic";
@@ -59,8 +60,11 @@ export default function AutonomyPage() {
           ))}
         </div>
 
-        <div className="mt-10">
+        <div className="mt-10 flex flex-col gap-4">
+          <div className="text-[12px] uppercase tracking-[0.16em] text-faint">an agent buys within a budget</div>
           <AutonomyDemo />
+          <div className="text-[12px] uppercase tracking-[0.16em] text-faint mt-4">a brain pays for its own thinking</div>
+          <BrainSpendDemo />
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/[0.06] text-[12px] text-faint leading-relaxed">
