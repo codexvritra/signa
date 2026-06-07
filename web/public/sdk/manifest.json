@@ -6,21 +6,23 @@
   "packages": {
     "js": {
       "package_name": "signa-agent",
-      "version": "0.8.0",
-      "install": "npm install https://www.signaagent.xyz/sdk/signa-agent-0.8.0.tgz viem",
-      "tarball": "https://www.signaagent.xyz/sdk/signa-agent-0.8.0.tgz",
+      "version": "0.9.0",
+      "install": "npm install https://www.signaagent.xyz/sdk/signa-agent-0.9.0.tgz viem",
+      "tarball": "https://www.signaagent.xyz/sdk/signa-agent-0.9.0.tgz",
       "esm_single_file": "https://www.signaagent.xyz/sdk/agent.mjs",
-      "sha256": "7a11bc81047d5f72f265e3c9dc8af0a4c6a60763085d053fe9dd8da140319669",
-      "import": "import { SignaAgent } from 'signa-agent';",
+      "sha256": "88a6ae202a6f6c27143d1c00f5f162869604779ed32676f91d91bc6494fa3ae0",
+      "import": "import { SignaAgent, SignaOS } from 'signa-agent';",
       "min_node": "18",
       "classes": [
         "SignaAgent",
+        "SignaOS",
         "Rooms",
         "Anchor",
         "Receipts",
         "Search",
         "Nodes"
-      ]
+      ],
+      "notes": "v0.9.0: os.think(goal, { mandateId }) — meter the brain within a human-granted budget; it pays per reasoning run (x402 receipt) and stops + asks when the budget is exhausted. os.budgets()/spend()/askForBudget() for the spend rail."
     },
     "python": {
       "package_name": "signa-agent",

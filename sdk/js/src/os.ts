@@ -436,10 +436,18 @@ export class SignaOS {
    * receipt over (goal, tools, answer) so the output is verifiable.
    *
    * In production the agent pays per inference via x402 and holds no API key.
+   *
+   * Pass `mandateId` to METER the brain: a human grants the brain a bounded
+   * budget (a mandate whose agent is the brain's address — see `budgets()`),
+   * and the brain pays per reasoning run for its own compute (real EIP-3009
+   * USDC auth -> x402 receipt -> a capped spend). When the budget is exhausted
+   * the brain stops and wallet-signs a request for more; the returned `spend`
+   * field carries {paid_raw, remaining_raw, receipt_id} or {budget_exhausted,
+   * request_id}. Omit it and the brain runs unmetered, as before.
    */
   async think(
     goal: string,
-    opts?: { remember?: boolean; reportTo?: string },
+    opts?: { remember?: boolean; reportTo?: string; mandateId?: string },
   ): Promise<{
     answer: string;
     plan: string[];
@@ -447,12 +455,16 @@ export class SignaOS {
     acts?: { memory: string | null; report: { to: string; dm_id: string | null } | null };
     brain: string;
     signature: string;
+    spend?:
+      | { ok: true; paid_raw: string; remaining_raw: string; receipt_id: string | null; receipt_url: string | null }
+      | { ok: false; error: string; budget_exhausted?: boolean; remaining_raw?: string; request_id?: string | null }
+      | null;
     [k: string]: unknown;
   }> {
     const r = await fetch(`${this.baseUrl}/api/brain`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ goal, remember: opts?.remember, report_to: opts?.reportTo }),
+      body: JSON.stringify({ goal, remember: opts?.remember, report_to: opts?.reportTo, mandate_id: opts?.mandateId }),
     });
     const j = await r.json();
     if (!j?.ok) throw new Error(`think failed: ${j?.error ?? `HTTP ${r.status}`}`);
