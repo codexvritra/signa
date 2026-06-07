@@ -23,10 +23,15 @@ Wire format spec: https://www.signaagent.xyz/a2a
 """
 
 from .agent import (
+    NETWORK_BASE,
+    USDC_BASE,
     SignaAgent,
     build_bridge_heartbeat_preimage,
     build_bridge_register_preimage,
+    build_budget_request_preimage,
     build_dm_preimage,
+    build_mandate_preimage,
+    build_spend_preimage,
 )
 from .rooms import (
     Anchor,
@@ -38,7 +43,7 @@ from .rooms import (
     build_room_message_preimage,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
     "SignaAgent",
     "Rooms",
@@ -46,9 +51,14 @@ __all__ = [
     "Receipts",
     "Anchor",
     "Nodes",
+    "USDC_BASE",
+    "NETWORK_BASE",
     "build_dm_preimage",
     "build_bridge_register_preimage",
     "build_bridge_heartbeat_preimage",
     "build_room_create_preimage",
     "build_room_message_preimage",
+    "build_mandate_preimage",
+    "build_spend_preimage",
+    "build_budget_request_preimage",
 ]

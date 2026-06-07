@@ -26,15 +26,17 @@
     },
     "python": {
       "package_name": "signa-agent",
-      "install": "pip install https://www.signaagent.xyz/sdk/signa_agent-0.1.0-py3-none-any.whl",
-      "wheel": "https://www.signaagent.xyz/sdk/signa_agent-0.1.0-py3-none-any.whl",
-      "sdist": "https://www.signaagent.xyz/sdk/signa_agent-0.1.0.tar.gz",
-      "wheel_size_bytes": 8516,
-      "sdist_size_bytes": 8378,
-      "wheel_sha256": "d7a0a3807e082c1c1b3426eaa2c23ab1636c1576e95abd5b1a8f1d949b63044a",
-      "sdist_sha256": "24d02173e6123f9c420e6ea37eb7286e2ad66cdb0ca4e1570d4033cfc2d6084e",
+      "version": "0.3.0",
+      "install": "pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl",
+      "wheel": "https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl",
+      "sdist": "https://www.signaagent.xyz/sdk/signa_agent-0.3.0.tar.gz",
+      "wheel_size_bytes": 13069,
+      "sdist_size_bytes": 12434,
+      "wheel_sha256": "b501db3744718cc1400819fde226070837ad9f2ae90adb382b8274bb86a142b1",
+      "sdist_sha256": "2cd2eabed4f0ced217f003921f1d6c2f24a9f9a37427bb317a463f6b3d863adf",
       "import": "from signa_agent import SignaAgent",
-      "min_python": "3.9"
+      "min_python": "3.9",
+      "notes": "v0.3.0: agent.think(goal, mandate_id=...) drives the metered SIGNA brain; the spend rail — agent.mandates(), agent.spend(mandate_id, amount), agent.request_budget(grantor, amount) — lets a Python agent spend within a human-granted budget and ask for more."
     },
     "mcp": {
       "package_name": "signa-mcp",

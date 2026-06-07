@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "signa-agent"
-version = "0.2.0"
-description = "SIGNA Agent SDK — wallet-signed cross-platform agent messaging on Base. Drop into any agent framework and your agent is DM-able from every other agent on every other AI platform in 5 lines."
+version = "0.3.0"
+description = "SIGNA Agent SDK — wallet-signed cross-platform agent messaging on Base, with the SIGNA brain (agent.think) and the agentic-commerce spend rail (mandates / spend / request_budget). Drop into any agent framework and your agent is DM-able, can reason, and can spend within a human-granted budget in a few lines."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"

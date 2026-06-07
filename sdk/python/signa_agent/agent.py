@@ -20,6 +20,10 @@ DEFAULT_BASE_URL = "https://www.signaagent.xyz"
 DEFAULT_POLL_INTERVAL_S = 5.0
 DEFAULT_HEARTBEAT_INTERVAL_S = 45.0
 
+# Agent spend mandates default to USDC on Base.
+USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+NETWORK_BASE = "eip155:8453"
+
 _ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 
 
@@ -96,6 +100,82 @@ def build_bridge_heartbeat_preimage(address: str, ts: int) -> str:
             "SIGNA agent bridge heartbeat v1",
             f"ts:{ts}",
             f"address:{address.lower()}",
+        ]
+    )
+
+
+# ─────── agentic-commerce preimages (mirror web/lib/mandate.ts) ───────
+
+
+def build_mandate_preimage(
+    *,
+    ts: int,
+    grantor: str,
+    agent: str,
+    asset: str,
+    network: str,
+    limit: str,
+    per_tx: str,
+    expiry: int,
+    memo: Optional[str] = None,
+) -> str:
+    """Canonical preimage for a spend mandate (a human funds an agent)."""
+    return "\n".join(
+        [
+            "SIGNA spend mandate v1",
+            f"ts:{ts}",
+            f"grantor:{grantor.lower()}",
+            f"agent:{agent.lower()}",
+            f"asset:{asset.lower()}",
+            f"network:{network}",
+            f"limit:{limit}",
+            f"per_tx:{per_tx}",
+            f"expiry:{expiry}",
+            f"memo:{memo or ''}",
+        ]
+    )
+
+
+def build_spend_preimage(
+    *,
+    ts: int,
+    mandate_id: str,
+    agent: str,
+    amount: str,
+    note: Optional[str] = None,
+) -> str:
+    """Canonical preimage for a spend recorded against a mandate."""
+    return "\n".join(
+        [
+            "SIGNA spend v1",
+            f"ts:{ts}",
+            f"mandate:{mandate_id}",
+            f"agent:{agent.lower()}",
+            f"amount:{amount}",
+            f"note:{note or ''}",
+        ]
+    )
+
+
+def build_budget_request_preimage(
+    *,
+    ts: int,
+    agent: str,
+    grantor: str,
+    amount: str,
+    goal: Optional[str] = None,
+    reason: Optional[str] = None,
+) -> str:
+    """Canonical preimage for an agent asking its grantor for more budget."""
+    return "\n".join(
+        [
+            "SIGNA budget request v1",
+            f"ts:{ts}",
+            f"agent:{agent.lower()}",
+            f"grantor:{grantor.lower()}",
+            f"amount:{amount}",
+            f"goal:{goal or ''}",
+            f"reason:{reason or ''}",
         ]
     )
 
@@ -348,6 +428,131 @@ class SignaAgent:
                 f"list_bridges failed: {data.get('error') or r.status_code}"
             )
         return data.get("bridges") or []
+
+    # ───────────────────── the brain (reason + spend) ─────────────────────
+
+    def think(
+        self,
+        goal: str,
+        *,
+        mandate_id: Optional[str] = None,
+        remember: bool = False,
+        report_to: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Ask the SIGNA brain a goal in plain language.
+
+        It reasons on decentralized inference, decides which capabilities on the
+        network to call, invokes them for real, and answers from the live
+        results — then signs a verifiable receipt over (goal, tools, answer).
+
+        Pass ``mandate_id`` to METER the brain: a human grants it a bounded
+        budget (a mandate whose agent is the brain's address) and the brain
+        pays per reasoning run for its own compute (real EIP-3009 USDC auth ->
+        x402 receipt -> a capped spend). When the budget is exhausted the brain
+        stops and wallet-signs a request for more; the returned ``spend`` field
+        carries ``{paid_raw, remaining_raw, receipt_id}`` or
+        ``{budget_exhausted, request_id}``. Omit it and the brain runs
+        unmetered. The brain holds no funds of its own; SIGNA enforces the cap.
+        """
+        payload: Dict[str, Any] = {"goal": goal}
+        if remember:
+            payload["remember"] = True
+        if report_to:
+            payload["report_to"] = report_to
+        if mandate_id:
+            payload["mandate_id"] = mandate_id
+        r = self._session.post(f"{self.base_url}/api/brain", json=payload, timeout=60)
+        data = _safe_json(r)
+        if not r.ok or not data.get("ok"):
+            raise RuntimeError(f"think failed: {data.get('error') or r.status_code}")
+        return data
+
+    # ─────────────────────── agentic commerce ───────────────────────
+
+    def mandates(self) -> List[Dict[str, Any]]:
+        """List the spend mandates a human has granted to this agent."""
+        r = self._session.get(
+            f"{self.base_url}/api/mandates",
+            params={"agent": self.address}, timeout=30,
+        )
+        data = _safe_json(r)
+        if not r.ok or not data.get("ok"):
+            raise RuntimeError(f"mandates failed: {data.get('error') or r.status_code}")
+        return data.get("mandates") or []
+
+    def spend(
+        self,
+        mandate_id: str,
+        amount: Any,
+        *,
+        note: str = "",
+        receipt_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Record a wallet-signed spend against a mandate (base units, e.g.
+        ``"40000"`` = 0.04 USDC). Raises if it exceeds the per-tx or total cap,
+        with the remaining budget in the error so you know to ask for more.
+        Returns ``{spend, spent_raw, remaining_raw}``.
+        """
+        amount = str(amount)
+        ts = int(time.time() * 1000)
+        message = build_spend_preimage(
+            ts=ts, mandate_id=mandate_id, agent=self.address, amount=amount, note=note,
+        )
+        signature = self._sign(message)
+        payload: Dict[str, Any] = {
+            "mandate_id": mandate_id,
+            "agent": self.address,
+            "amount": amount,
+            "note": note,
+            "ts": ts,
+            "signature": signature,
+        }
+        if receipt_id:
+            payload["receipt_id"] = receipt_id
+        r = self._session.post(
+            f"{self.base_url}/api/mandates/spend", json=payload, timeout=30,
+        )
+        data = _safe_json(r)
+        if not r.ok or not data.get("ok"):
+            remaining = data.get("remaining_raw")
+            extra = f" (remaining {remaining})" if remaining is not None else ""
+            raise RuntimeError(f"spend failed: {data.get('error') or r.status_code}{extra}")
+        return data
+
+    def request_budget(
+        self,
+        grantor: str,
+        amount: Any,
+        *,
+        goal: str = "",
+        reason: str = "",
+    ) -> str:
+        """Ask a grantor for more budget — the 'agent asks for money' primitive.
+        Wallet-signed. Returns the budget-request id.
+        """
+        amount = str(amount)
+        ts = int(time.time() * 1000)
+        message = build_budget_request_preimage(
+            ts=ts, agent=self.address, grantor=grantor, amount=amount, goal=goal, reason=reason,
+        )
+        signature = self._sign(message)
+        r = self._session.post(
+            f"{self.base_url}/api/requests",
+            json={
+                "agent": self.address,
+                "grantor": grantor.lower(),
+                "amount": amount,
+                "goal": goal,
+                "reason": reason,
+                "ts": ts,
+                "signature": signature,
+            },
+            timeout=30,
+        )
+        data = _safe_json(r)
+        if not r.ok or not data.get("ok"):
+            raise RuntimeError(f"request_budget failed: {data.get('error') or r.status_code}")
+        return (data.get("request") or {}).get("id")
 
     # ───────────────────────── lifecycle ─────────────────────────
 
