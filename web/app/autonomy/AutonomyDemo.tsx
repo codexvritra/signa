@@ -91,6 +91,16 @@ export function AutonomyDemo() {
                       </span>
                     </div>
                     <div className="text-[14px] mt-0.5 leading-snug">{s.text}</div>
+                    {s.link && (
+                      <a
+                        href={s.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-[#a5c3ff] hover:underline mt-1 inline-block"
+                      >
+                        view x402 receipt →
+                      </a>
+                    )}
                   </div>
                 </div>
               );
