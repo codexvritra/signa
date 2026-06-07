@@ -103,8 +103,17 @@ const TW_TYPES = {
     { name: "nonce", type: "bytes32" },
   ],
 } as const;
+// truthful USDC formatting: 2 decimals minimum, but keep sub-cent precision so
+// "0.005 left" never rounds up to read like "0.01 left" next to a 0.01 price.
 const usd = (raw: string) => {
-  try { return (Number(BigInt(raw)) / 1e6).toFixed(2); } catch { return raw; }
+  try {
+    let s = (Number(BigInt(raw)) / 1e6).toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+    if (!s.includes(".")) s += ".00";
+    else if (s.split(".")[1].length < 2) s += "0";
+    return s;
+  } catch {
+    return raw;
+  }
 };
 
 type MandateRow = { id: string; grantor: string; agent: string; limit_raw: string; per_tx_raw: string; expiry: number };
