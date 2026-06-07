@@ -679,13 +679,14 @@ const TOOLS = [
   {
     name: "signa_brain",
     description:
-      "Ask the SIGNA brain a goal in plain language. It reasons on decentralized inference, decides which capabilities on the network to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'. Optionally have it message another agent with the answer (report_to) and write a signed memory (remember).",
+      "Ask the SIGNA brain a goal in plain language. It reasons on decentralized inference, decides which capabilities on the network to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'. Optionally have it message another agent with the answer (report_to) and write a signed memory (remember). Pass mandate_id to METER the brain: a human grants it a bounded budget and it pays per reasoning run for its own compute (x402 receipt), stopping + signing a request for more when the budget is exhausted.",
     inputSchema: {
       type: "object",
       properties: {
         goal: { type: "string", description: "The goal/question in plain language. 2-600 chars.", minLength: 2, maxLength: 600 },
         report_to: { type: "string", description: "Optional: an address or @handle to DM the answer to (wallet-signed by the brain)." },
         remember: { type: "boolean", description: "Optional: write a signed memory of the answer." },
+        mandate_id: { type: "string", description: "Optional: a spend-mandate UUID granted to the brain's address. Meters the run — the brain pays for its own inference within this budget and stops if it runs out." },
       },
       required: ["goal"],
       additionalProperties: false,
@@ -1910,15 +1911,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (goal.length < 2) throw new McpError(ErrorCode.InvalidParams, "goal is required (2-600 chars)");
         const reportTo = args.report_to ? String(args.report_to) : undefined;
         const remember = args.remember === true;
+        const mandateId = args.mandate_id ? String(args.mandate_id) : undefined;
         const r = await fetch(`${SIGNA_BASE}/api/brain`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ goal, ...(reportTo ? { report_to: reportTo } : {}), ...(remember ? { remember: true } : {}) }),
+          body: JSON.stringify({ goal, ...(reportTo ? { report_to: reportTo } : {}), ...(remember ? { remember: true } : {}), ...(mandateId ? { mandate_id: mandateId } : {}) }),
         });
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
           throw new McpError(ErrorCode.InternalError, `brain failed: ${data?.error ?? `HTTP ${r.status}`}`);
         }
+        const usd6 = (v: unknown) => { try { return (Number(BigInt(String(v ?? "0"))) / 1e6).toFixed(3); } catch { return String(v); } };
         const lines = [
           `SIGNA brain — answer:`,
           ``,
@@ -1927,6 +1930,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `plan:      ${(data.plan ?? []).join(", ") || "(no tools needed)"}`,
           `signed by: brain ${data.brain}`,
         ];
+        if (data.spend?.ok) {
+          lines.push(`paid:      ${usd6(data.spend.paid_raw)} USDC for inference · ${usd6(data.spend.remaining_raw)} left${data.spend.receipt_id ? ` · x402 receipt ${data.spend.receipt_id}` : ""}`);
+        } else if (data.spend && data.spend.budget_exhausted) {
+          lines.push(`budget:    exhausted (${usd6(data.spend.remaining_raw)} left) — brain signed a request for more${data.spend.request_id ? ` (${data.spend.request_id})` : ""}`);
+        } else if (data.spend && data.spend.error) {
+          lines.push(`budget:    not metered (${data.spend.error})`);
+        }
         if (data.acts?.report?.dm_id) lines.push(`reported:  DM ${data.acts.report.dm_id} to ${data.acts.report.to}`);
         if (data.acts?.memory) lines.push(`remembered: ${data.acts.memory}`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
