@@ -223,7 +223,11 @@ async function askForBudget(origin: string, grantor: string, amount: string, goa
 
 const BUILTIN_DOC = CAPABILITY_CATALOG.map((c) => `- ${c.name}(${c.input === "none" ? "" : "arg"}): ${c.description}`).join("\n");
 
-async function run(goal: string, origin: string, opts: { remember?: boolean; reportTo?: string; mandateId?: string } = {}) {
+async function run(
+  goal: string,
+  origin: string,
+  opts: { remember?: boolean; reportTo?: string; mandateId?: string; use?: Array<string | { cap: string; arg?: string }> } = {},
+) {
   // 0. METER — if a human granted the brain a mandate, the brain pays for its
   // own inference before it reasons (pay-before-compute). If the budget is
   // exhausted it does NOT burn compute it can't pay for: it stops and signs a
@@ -339,7 +343,18 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
   let plan: { cap: string; arg?: string }[] = [];
   const m = planRaw.match(/\[[\s\S]*\]/);
   if (m) { try { plan = JSON.parse(m[0]); } catch { plan = []; } }
-  plan = (Array.isArray(plan) ? plan : []).filter((p) => p && allowed.has(p.cap)).slice(0, 3);
+  // Optional caller-directed capabilities — "cap" or "cap:arg" or {cap,arg}.
+  // These are prepended to (and override) the planner's choices, so a caller
+  // can deterministically tell the brain which capabilities to use (and pay
+  // for, if priced + funded). The model still synthesizes the final answer.
+  const forced: { cap: string; arg?: string }[] = (opts.use ?? [])
+    .map((u) => (typeof u === "string" ? { cap: u.split(":")[0], arg: u.includes(":") ? u.slice(u.indexOf(":") + 1) : "" } : u))
+    .filter((p): p is { cap: string; arg?: string } => !!p && typeof p.cap === "string");
+  const seen = new Set<string>();
+  plan = [...forced, ...(Array.isArray(plan) ? plan : [])]
+    .filter((p) => p && allowed.has(p.cap))
+    .filter((p) => { const k = `${p.cap}\t${p.arg ?? ""}`; if (seen.has(k)) return false; seen.add(k); return true; })
+    .slice(0, 3);
 
   // 2. ACT — invoke the chosen capabilities for real (live partner / community data)
   const tools: { cap: string; arg: string; output: unknown; error?: string }[] = [];
@@ -405,11 +420,12 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
 
 export async function POST(req: NextRequest) {
   let goal = "", remember = false, reportTo = "", mandateId = "";
-  try { const b = await req.json(); goal = b?.goal ?? ""; remember = !!b?.remember; reportTo = b?.report_to ?? b?.reportTo ?? ""; mandateId = b?.mandate_id ?? b?.mandateId ?? ""; } catch { /* */ }
+  let use: Array<string | { cap: string; arg?: string }> | undefined;
+  try { const b = await req.json(); goal = b?.goal ?? ""; remember = !!b?.remember; reportTo = b?.report_to ?? b?.reportTo ?? ""; mandateId = b?.mandate_id ?? b?.mandateId ?? ""; if (Array.isArray(b?.use)) use = b.use.slice(0, 3); } catch { /* */ }
   if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal" }, { status: 400, headers: CORS });
   if (goal.length > 600) return NextResponse.json({ ok: false, error: "goal_too_long" }, { status: 400, headers: CORS });
   try {
-    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined }), { headers: CORS });
+    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined, use }), { headers: CORS });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "brain error" }, { status: 502, headers: CORS });
   }
@@ -421,9 +437,10 @@ export async function GET(req: NextRequest) {
   const remember = sp.get("remember") === "1" || sp.get("remember") === "true";
   const reportTo = sp.get("report_to") ?? "";
   const mandateId = sp.get("mandate_id") ?? "";
-  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing&report_to=@handle&remember=1&mandate_id=<uuid>" }, { status: 400, headers: CORS });
+  const use = (sp.get("use") ?? "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 3);
+  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing&report_to=@handle&remember=1&mandate_id=<uuid>&use=demo.premium:base" }, { status: 400, headers: CORS });
   try {
-    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined }), { headers: CORS });
+    return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined, use: use.length ? use : undefined }), { headers: CORS });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "brain error" }, { status: 502, headers: CORS });
   }
