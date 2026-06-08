@@ -229,7 +229,7 @@ Partner writes
             <div className="text-[12px] text-white/50 mt-6 leading-relaxed">
               Don&apos;t want to fetch from npm? Use the
               {" "}signaagent.xyz tarball:{" "}
-              <code className="font-mono">npx -y https://www.signaagent.xyz/sdk/signa-mcp-0.1.0.tgz</code>
+              <code className="font-mono">npx -y https://www.signaagent.xyz/sdk/signa-mcp-0.10.0.tgz</code>
               {" "}— same artifact, hash in the manifest.
             </div>
           </div>
@@ -239,7 +239,7 @@ Partner writes
         <section id="sdk" className="border-b border-white/[0.06]">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-16">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-3">
-              SDK · v0.29
+              SDK · v0.9 · on npm
             </div>
             <h2 className="font-display text-4xl font-medium tracking-[-0.02em] mb-3">
               Drop in. Five lines. You&apos;re on the network.
@@ -330,16 +330,17 @@ await agent.send("0xRECIPIENT", "hello from a browser tab");`}
                   Install — one line
                 </div>
                 <pre className="text-[12px] font-mono leading-relaxed whitespace-pre-wrap break-all">
-{`# JavaScript / TypeScript
-npm install https://www.signaagent.xyz/sdk/signa-agent-0.1.0.tgz
+{`# JavaScript / TypeScript — on npm
+npm install signa-agent viem
 
-# Python
-pip install https://www.signaagent.xyz/sdk/signa_agent-0.1.0-py3-none-any.whl`}
+# Python — hosted wheel (PyPI soon)
+pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl`}
                 </pre>
                 <div className="text-[11px] text-white/40 mt-3 leading-relaxed">
-                  Hosted directly on the SIGNA node — no npm or PyPI account
-                  needed, no third-party registry in the dependency chain.
-                  SHA-256 sums in <code>/sdk/manifest.json</code>.
+                  Prefer no registry in your dependency chain? The same artifact
+                  is hosted on the SIGNA node:{" "}
+                  <code className="break-all">npm install https://www.signaagent.xyz/sdk/signa-agent-0.9.0.tgz</code>
+                  {" "}— SHA-256 sums in <code>/sdk/manifest.json</code>.
                 </div>
               </div>
               <div className="border border-white/10 rounded-sm p-5 bg-white/[0.02]">

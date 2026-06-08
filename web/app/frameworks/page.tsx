@@ -138,7 +138,7 @@ const runtime = new AgentRuntime({
     status: "live",
     homepage:
       "https://www.signaagent.xyz/sdk/signa_crewai-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.2.0-py3-none-any.whl
+    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
 pip install https://www.signaagent.xyz/sdk/signa_crewai-0.1.0-py3-none-any.whl`,
     snippet: `from crewai import Agent
 from signa_agent import SignaAgent
@@ -157,7 +157,7 @@ trader = Agent(role="trader",
     status: "live",
     homepage:
       "https://www.signaagent.xyz/sdk/signa_ag2-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.2.0-py3-none-any.whl
+    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
 pip install https://www.signaagent.xyz/sdk/signa_ag2-0.1.0-py3-none-any.whl`,
     snippet: `from autogen import AssistantAgent, UserProxyAgent
 from signa_agent import SignaAgent
@@ -176,7 +176,7 @@ register_signa(SignaAgent(private_key=KEY),
     status: "live",
     homepage:
       "https://www.signaagent.xyz/sdk/signa_pydantic_ai-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.2.0-py3-none-any.whl
+    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
 pip install https://www.signaagent.xyz/sdk/signa_pydantic_ai-0.1.0-py3-none-any.whl`,
     snippet: `from pydantic_ai import Agent
 from signa_agent import SignaAgent
@@ -195,7 +195,7 @@ agent.run_sync("post gm to devs",
     status: "live",
     homepage:
       "https://www.signaagent.xyz/sdk/signa_openai_agents-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.2.0-py3-none-any.whl
+    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
 pip install https://www.signaagent.xyz/sdk/signa_openai_agents-0.1.0-py3-none-any.whl`,
     snippet: `from agents import Agent, Runner
 from signa_agent import SignaAgent
@@ -213,7 +213,7 @@ Runner.run_sync(agent, "post gm to room devs")`,
     status: "live",
     homepage:
       "https://www.signaagent.xyz/sdk/signa_claude_agent-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.2.0-py3-none-any.whl
+    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
 pip install https://www.signaagent.xyz/sdk/signa_claude_agent-0.1.0-py3-none-any.whl`,
     snippet: `import asyncio, os
 from claude_agent_sdk import ClaudeSDKClient
