@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { privateKeyToAccount } from "viem/accounts";
-import { keccak256, toBytes } from "viem";
+import { keccak256, toBytes, getAddress } from "viem";
 import { createHash, randomBytes } from "node:crypto";
 import { CAPABILITY_CATALOG, fulfillCapability } from "@/lib/capabilities";
 import { listRegistered, callRegistered, type RegisteredCapability } from "@/lib/marketplace";
@@ -178,6 +178,32 @@ async function payForCompute(origin: string, mandateId: string, amount: string, 
   return { ...r, receiptId };
 }
 
+// build an x402 "exact" payment header: the brain signs an EIP-3009 USDC auth
+// to the provider so it can pay for a priced capability through the gateway.
+async function buildPaymentHeader(payTo: string, amount: string): Promise<string> {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const to = getAddress(payTo);
+  const auth = {
+    from: brain.address,
+    to,
+    value: amount,
+    validAfter: String(nowSec - 60),
+    validBefore: String(nowSec + 3600),
+    nonce: ("0x" + randomBytes(32).toString("hex")) as `0x${string}`,
+  };
+  const signature = await brain.signTypedData({
+    domain: { name: "USD Coin", version: "2", chainId: 8453, verifyingContract: USDC_BASE as `0x${string}` },
+    types: TW_TYPES,
+    primaryType: "TransferWithAuthorization",
+    message: {
+      from: auth.from, to: auth.to, value: BigInt(auth.value),
+      validAfter: BigInt(auth.validAfter), validBefore: BigInt(auth.validBefore), nonce: auth.nonce,
+    },
+  });
+  const payload = { x402Version: 2, scheme: "exact", network: NETWORK_BASE, payload: { signature, authorization: auth } };
+  return Buffer.from(JSON.stringify(payload)).toString("base64");
+}
+
 // the brain wallet-signs a request to its grantor for more inference budget
 async function askForBudget(origin: string, grantor: string, amount: string, goal: string): Promise<string | null> {
   try {
@@ -251,24 +277,56 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
     }
   }
 
-  // The brain's toolset = built-in capabilities + FREE capabilities the
-  // community registered in the open marketplace. Priced capabilities are
-  // excluded from autonomous planning: the brain holds no funds and never
-  // spends on the user's behalf (a human can pay-to-invoke those directly).
+  // The brain's toolset = built-in capabilities + community capabilities from
+  // the open marketplace. FREE caps are always available. PRICED caps are
+  // included ONLY when the brain is funded by a mandate this run — then it can
+  // pay for them within the budget (via the x402 gateway, capped + logged).
+  // Without a mandate the brain holds no funds, so priced caps stay excluded.
+  const funded = !!(spend && spend.ok);
+  const mandateId = opts.mandateId;
+  const paidCaps: Array<{ cap: string; paid_raw: string; pay_to: string; remaining_raw: string }> = [];
   let registered: RegisteredCapability[] = [];
-  try { registered = (await listRegistered(60)).filter((r) => !(r.price_usdc > 0)).slice(0, 24); } catch { /* marketplace best-effort */ }
+  try {
+    const all = await listRegistered(60);
+    registered = (funded ? all : all.filter((r) => !(r.price_usdc > 0))).slice(0, 24);
+  } catch { /* marketplace best-effort */ }
   const regByName = new Map(registered.map((r) => [r.name, r] as const));
   const allowed = new Set<string>([...CAPABILITY_CATALOG.map((c) => c.name), ...regByName.keys()]);
-  const regDoc = registered.map((r) => `- ${r.name}(arg): ${r.description} [community]`).join("\n");
+  const regDoc = registered
+    .map((r) => `- ${r.name}(arg): ${r.description} [community${r.price_usdc > 0 ? `, ${r.price_usdc} USDC` : ""}]`)
+    .join("\n");
   const toolsDoc = regDoc ? `${BUILTIN_DOC}\n${regDoc}` : BUILTIN_DOC;
 
-  // unified fulfilment — built-in via the partner adapters, registered via the
-  // SSRF-guarded marketplace proxy. Either way the brain only sees real output.
+  // record a capped spend against the brain's mandate (enforces the budget)
+  const spendFromMandate = async (amount: string, note: string) => {
+    const t = Date.now();
+    const s = await brain.signMessage({ message: spendPreimage({ ts: t, mandateId: mandateId!, agent: brain.address.toLowerCase(), amount, note }) });
+    return (await fetch(`${origin}/api/mandates/spend`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mandate_id: mandateId, agent: brain.address.toLowerCase(), amount, note, ts: t, signature: s }),
+    })).json();
+  };
+
+  // unified fulfilment — built-in via the partner adapters, FREE registered via
+  // the SSRF-guarded proxy, PRICED registered paid for within the mandate and
+  // fetched through the x402 gateway (so the brain never bypasses the price).
   const fulfillAny = async (cap: string, arg: string): Promise<unknown> => {
     if (CAPABILITY_CATALOG.some((c) => c.name === cap)) return fulfillCapability(cap, arg);
     const rec = regByName.get(cap);
-    if (rec) return callRegistered(rec, arg);
-    throw new Error(`unknown capability: ${cap}`);
+    if (!rec) throw new Error(`unknown capability: ${cap}`);
+    if (!(rec.price_usdc > 0)) return callRegistered(rec, arg);
+    // priced: pay within the mandate, then invoke through the gateway
+    if (!funded || !mandateId) throw new Error(`${cap} is priced; the brain needs a mandate to pay for it`);
+    const amount = BigInt(Math.round(rec.price_usdc * 1e6)).toString();
+    const payTo = (rec.pay_to ?? rec.provider_address).toLowerCase();
+    const sp = await spendFromMandate(amount, `cap:${cap}`);
+    if (!sp?.ok) throw new Error(`over budget for ${cap}: ${usd(sp?.remaining_raw ?? "0")} USDC left, needs ${usd(amount)}`);
+    const header = await buildPaymentHeader(payTo, amount);
+    const r = await fetch(`${origin}/api/capabilities/invoke?cap=${encodeURIComponent(cap)}&arg=${encodeURIComponent(arg)}`, { headers: { "x-payment": header } });
+    const j = await r.json();
+    if (!r.ok || !j?.ok) throw new Error(`paid invoke failed for ${cap}: ${j?.error ?? `HTTP ${r.status}`}`);
+    paidCaps.push({ cap, paid_raw: amount, pay_to: payTo, remaining_raw: sp.remaining_raw });
+    return j.output;
   };
 
   // 1. PLAN — the brain decides which real capabilities to call
@@ -320,10 +378,12 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
     if (to) acts.report = { to, dm_id: await brainSend(origin, to, `[brain report] ${answer}`) };
   }
 
+  const capsPaidRaw = paidCaps.reduce((s, c) => s + BigInt(c.paid_raw), 0n).toString();
   const note = spend?.ok
     ? `This run was paid from a bounded mandate: ${usd(INFERENCE_PRICE)} USDC for inference` +
-      `${spend.receipt_id ? ` (x402 receipt ${spend.receipt_id})` : ""}, ${usd(spend.remaining_raw)} USDC left. ` +
-      `The brain holds no funds of its own — a human granted the budget; SIGNA enforced the per-run cap and proved the spend. The model decides; it cannot spend past the cap.`
+      `${spend.receipt_id ? ` (x402 receipt ${spend.receipt_id})` : ""}` +
+      `${paidCaps.length ? ` + ${usd(capsPaidRaw)} USDC for ${paidCaps.length} priced capabilit${paidCaps.length === 1 ? "y" : "ies"} (${paidCaps.map((c) => c.cap).join(", ")})` : ""}. ` +
+      `The brain holds no funds of its own — a human granted the budget; SIGNA enforced the per-tx + total caps and proved every spend. The model decides; it cannot spend past the cap.`
     : "The brain reasons on decentralized inference, acts through the SIGNA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.";
 
   return {
@@ -338,6 +398,7 @@ async function run(goal: string, origin: string, opts: { remember?: boolean; rep
     signature,
     verify: { scheme: "eip191", preimage, how: "sha256 the answer, rebuild the preimage, verifyMessage against `brain`" },
     spend,
+    paid_caps: paidCaps,
     note,
   };
 }
