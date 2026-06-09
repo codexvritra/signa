@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 
 // The story, up front. Everything else lives under "More".
 const PRIMARY: { href: string; label: string }[] = [
+  { href: "/network", label: "Network" },
   { href: "/os", label: "OS" },
   { href: "/brain", label: "Brain" },
   { href: "/bus", label: "Bus" },
