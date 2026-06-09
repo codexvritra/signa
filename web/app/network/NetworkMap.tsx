@@ -47,7 +47,11 @@ export function NetworkMap() {
     // core / capability mesh
     reachable("/api/capabilities").then(async (r) => {
       let n: number | null = null;
-      try { const j = await r?.json(); n = Array.isArray(j) ? j.length : (j?.capabilities?.length ?? j?.count ?? null); } catch { /* */ }
+      try {
+        const j = await r?.json();
+        const arrs = [j?.builtins, j?.registered, j?.onchain, Array.isArray(j) ? j : null].filter(Array.isArray) as unknown[][];
+        n = arrs.length ? arrs.reduce((a, x) => a + x.length, 0) : (j?.count ?? null);
+      } catch { /* */ }
       setCaps(n);
       setSt((s) => ({ ...s, core: r ? "online" : "down" }));
     });
