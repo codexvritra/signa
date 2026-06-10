@@ -35,6 +35,7 @@ const SERVERS = [
 const TAGS = [
   { name: "MCP", description: "Model Context Protocol server — install SIGNA as native tools in Claude Desktop, Cursor, Cline, or any MCP-aware client." },
   { name: "Capabilities", description: "The open agent capability marketplace. Publish any https endpoint as a capability with one wallet signature; invoke any capability for a wallet-signed, re-verifiable result; the brain reasons over them. Keyless." },
+  { name: "Commerce", description: "The agentic-commerce trust rail: spend mandates (a human wallet-signs a bounded budget for an agent), capped signed spends, budget requests ('the agent asks for money'), and x402 receipts binding request → terms → EIP-3009 payment authorization → delivery into one re-verifiable envelope. SIGNA never custodies funds — provenance, not settlement." },
   { name: "OpenAI-compat (v1)", description: "Drop-in replacement for the OpenAI SDK — point baseURL at /api/v1 and everything just works." },
   { name: "Gateway", description: "Open natural-language router across the agent network." },
   { name: "Agents", description: "Per-agent endpoints — directly call one signa-launched agent." },
@@ -333,9 +334,9 @@ const PATHS: Record<string, unknown> = {
   "/api/brain": {
     post: {
       tags: ["Capabilities"],
-      summary: "The SIGNA brain — reason, call capabilities, answer, sign",
+      summary: "The SIGNA brain — reason, call capabilities, answer, sign (meterable)",
       description:
-        "Give a goal in plain language. The brain reasons on decentralized inference, decides which capabilities on the network to call (built-in + free community + free on-chain), invokes them for real, answers from the live results, and signs a verifiable receipt over (goal, tools, answer). Optional: report_to (DM the answer to an address/@handle, wallet-signed by the brain) and remember (write a signed memory).",
+        "Give a goal in plain language. The brain reasons on decentralized inference, decides which capabilities on the network to call (built-in + free community + free on-chain), invokes them for real, answers from the live results, and signs a verifiable receipt over (goal, tools, answer). Optional: report_to (DM the answer to an address/@handle, wallet-signed by the brain) and remember (write a signed memory). METERING: pass mandate_id (a spend mandate granted to the brain address 0x95fce75729690477e48820805c74602338e19303) and the brain pays per reasoning run for its own inference — real EIP-3009 USDC-on-Base authorization → x402 receipt → capped spend; when the budget is exhausted it STOPS and wallet-signs a budget request instead of overspending. When funded, PRICED marketplace capabilities join the toolset: the brain records a capped spend and pays the provider over x402 (response gains paid_caps[]). Optional use:[\"cap:arg\"] directs specific capabilities deterministically.",
       requestBody: {
         required: true,
         content: {
@@ -347,6 +348,8 @@ const PATHS: Record<string, unknown> = {
                 goal: { type: "string", minLength: 2, maxLength: 600 },
                 report_to: { type: "string", description: "0x address or @handle to DM the answer to." },
                 remember: { type: "boolean" },
+                mandate_id: { type: "string", description: "UUID of a spend mandate granted to the brain address. Meters the run: the brain pays for its own inference and may buy priced capabilities, all within the caps." },
+                use: { type: "array", maxItems: 3, items: { type: "string" }, description: "Directed capabilities, 'cap' or 'cap:arg' — prepended to the planner." },
               },
             },
           },
@@ -369,6 +372,8 @@ const PATHS: Record<string, unknown> = {
                   brain: { type: "string", pattern: "^0x[a-f0-9]{40}$" },
                   signature: { type: "string" },
                   verify: { type: "object" },
+                  spend: { type: "object", nullable: true, description: "Metered runs only: {ok,paid_raw,remaining_raw,receipt_id} or {ok:false,budget_exhausted,request_id}." },
+                  paid_caps: { type: "array", items: { type: "object" }, description: "Priced capabilities the brain bought this run: {cap,paid_raw,pay_to,remaining_raw}." },
                 },
               },
             },
@@ -379,13 +384,183 @@ const PATHS: Record<string, unknown> = {
     },
     get: {
       tags: ["Capabilities"],
-      summary: "The brain via query (?goal=&report_to=&remember=1)",
+      summary: "The brain via query (?goal=&report_to=&remember=1&mandate_id=&use=)",
       parameters: [
         { name: "goal", in: "query", required: true, schema: { type: "string" } },
         { name: "report_to", in: "query", required: false, schema: { type: "string" } },
         { name: "remember", in: "query", required: false, schema: { type: "string", enum: ["1", "true"] } },
+        { name: "mandate_id", in: "query", required: false, schema: { type: "string" }, description: "Spend-mandate UUID granted to the brain — meters the run." },
+        { name: "use", in: "query", required: false, schema: { type: "string" }, description: "Comma-separated directed capabilities, e.g. signa.brain:hello." },
       ],
       responses: { "200": { description: "Answer + signed receipt" }, "400": { description: "missing_goal" } },
+    },
+  },
+  "/api/brain/cap": {
+    get: {
+      tags: ["Commerce"],
+      summary: "signa.brain — the priced brain product (one signed reasoning run)",
+      description:
+        "The endpoint behind the signa.brain marketplace capability (0.01 USDC over x402). One fast reasoning run on decentralized inference; the answer is signed by the brain wallet itself (EIP-191 over 'SIGNA brain answer v1\\nts:..\\ngoal:..\\nanswer:<sha256>') — a portable attestation verifiable offline with viem. To PAY for it, call /api/capabilities/invoke?cap=signa.brain with an x402 X-PAYMENT header (the gateway verifies the EIP-3009 authorization to the brain wallet before proxying here). Calling this endpoint directly is unmetered and may be rate-limited.",
+      parameters: [{ name: "arg", in: "query", required: true, schema: { type: "string", minLength: 2, maxLength: 600 }, description: "Your question, plain language." }],
+      responses: {
+        "200": { description: "{ answer, ts, brain, signature, verify } — brain-signed attestation" },
+        "400": { description: "missing_arg | arg_too_long" },
+        "503": { description: "inference_unavailable — retry shortly" },
+      },
+    },
+  },
+  "/api/mandates": {
+    post: {
+      tags: ["Commerce"],
+      summary: "Grant a spend mandate — a human safely funds an agent (keyless)",
+      description:
+        "A human wallet-signs a bounded budget for an agent: total limit + per-purchase cap + expiry, USDC on Base by default. EIP-191 over 'SIGNA spend mandate v1\\nts:..\\ngrantor:..\\nagent:..\\nasset:..\\nnetwork:..\\nlimit:..\\nper_tx:..\\nexpiry:..\\nmemo:..'. The signature recovers to the grantor so the authority is provable. This is signed authorization, NOT custody — SIGNA never holds funds; settlement of each purchase is the x402 step.",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["grantor", "agent", "limit", "per_tx", "expiry", "ts", "signature"],
+              properties: {
+                grantor: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
+                agent: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$", description: "The funded agent (e.g. the brain: 0x95fce757…9303)." },
+                asset: { type: "string", description: "ERC-20 address; defaults to USDC on Base." },
+                network: { type: "string", description: "CAIP-2; defaults to eip155:8453." },
+                limit: { type: "string", description: "Total budget in base units (raw)." },
+                per_tx: { type: "string", description: "Max per purchase in base units (raw)." },
+                expiry: { type: "integer", description: "Unix seconds." },
+                memo: { type: "string", maxLength: 280 },
+                ts: { type: "integer" },
+                signature: { type: "string", description: "EIP-191 sig by the grantor over the mandate preimage." },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Mandate issued — { mandate: { id, … } }" },
+        "400": { description: "invalid_grantor | invalid_agent | bad_limits | expiry_in_past" },
+        "401": { description: "bad_signature" },
+      },
+    },
+    get: {
+      tags: ["Commerce"],
+      summary: "List recent mandates (?agent= to filter)",
+      parameters: [{ name: "agent", in: "query", required: false, schema: { type: "string" } }],
+      responses: { "200": { description: "{ mandates: [...] }" } },
+    },
+  },
+  "/api/mandates/spend": {
+    post: {
+      tags: ["Commerce"],
+      summary: "Record a wallet-signed spend against a mandate (capped, append-only)",
+      description:
+        "The agent signs 'SIGNA spend v1\\nts:..\\nmandate:..\\nagent:..\\namount:..\\nnote:..' (EIP-191). The server verifies the signature, the mandate's expiry, the per-purchase cap, and the total cap (spent = sum of the append-only ledger). Exceeding the budget returns 409 with remaining_raw + short_by_raw so the agent knows to ask for more. Optionally bind an x402 receipt via receipt_id.",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["mandate_id", "agent", "amount", "ts", "signature"],
+              properties: {
+                mandate_id: { type: "string" },
+                agent: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
+                amount: { type: "string", description: "Base units (raw)." },
+                note: { type: "string", maxLength: 280 },
+                receipt_id: { type: "string", description: "Optional x402 receipt UUID this spend pays for." },
+                ts: { type: "integer" },
+                signature: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "{ spend, spent_raw, remaining_raw }" },
+        "401": { description: "bad_signature" },
+        "403": { description: "agent_not_authorized_by_this_mandate | mandate_expired" },
+        "409": { description: "exceeds_per_tx_cap | exceeds_mandate (carries remaining_raw + short_by_raw)" },
+      },
+    },
+  },
+  "/api/requests": {
+    post: {
+      tags: ["Commerce"],
+      summary: "Budget request — the agent asks the human for money (wallet-signed)",
+      description:
+        "The missing agentic-commerce primitive: an agent wallet-signs 'SIGNA budget request v1\\nts:..\\nagent:..\\ngrantor:..\\namount:..\\ngoal:..\\nreason:..' to ask its grantor for more budget. The human answers by issuing a fresh mandate.",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["agent", "grantor", "amount", "ts", "signature"],
+              properties: {
+                agent: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
+                grantor: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
+                amount: { type: "string", description: "Base units (raw)." },
+                goal: { type: "string" },
+                reason: { type: "string" },
+                ts: { type: "integer" },
+                signature: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+      responses: { "200": { description: "{ request: { id, … } }" }, "401": { description: "bad_signature" } },
+    },
+    get: {
+      tags: ["Commerce"],
+      summary: "Budget-request inbox (?grantor= or ?agent=)",
+      parameters: [
+        { name: "grantor", in: "query", required: false, schema: { type: "string" } },
+        { name: "agent", in: "query", required: false, schema: { type: "string" } },
+      ],
+      responses: { "200": { description: "{ requests: [...] }" } },
+    },
+  },
+  "/api/x402/receipt": {
+    post: {
+      tags: ["Commerce"],
+      summary: "Issue an x402 receipt — bind request → terms → payment → delivery",
+      description:
+        "Submit the four parts of an agentic purchase: request (what was asked), terms (amount/asset/network/payTo), payment (a REAL EIP-3009 TransferWithAuthorization — the server verifies the typed-data signature recovers to `from` and matches the terms), and output (what was delivered). SIGNA hashes each part (sha256 over a stable stringify), signs the envelope with the attestor wallet (0x09460f21167e7e11c927b7e23ae8842918534a02), stores it, and returns the receipt + permalink. x402 moves the money; SIGNA proves the deal. Never settles, never custodies.",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["request", "terms", "payment", "output"],
+              properties: {
+                request: { type: "object", description: "What was asked (free-form JSON)." },
+                terms: { type: "object", description: "{ amount, asset, network, payTo }" },
+                payment: { type: "object", description: "EIP-3009 authorization { from,to,value,validAfter,validBefore,nonce,signature }" },
+                output: { type: "object", description: "What was delivered (free-form JSON)." },
+              },
+            },
+          },
+        },
+      },
+      responses: { "200": { description: "{ receipt: { id, … }, url } — re-verify at /api/verify (kind x402_receipt)" }, "400": { description: "invalid payment authorization or terms mismatch" } },
+    },
+    get: {
+      tags: ["Commerce"],
+      summary: "Fetch a receipt by id (?id=)",
+      parameters: [{ name: "id", in: "query", required: true, schema: { type: "string" } }],
+      responses: { "200": { description: "The receipt envelope + attestor signature" }, "404": { description: "not found" } },
+    },
+  },
+  "/api/x402/demo": {
+    post: {
+      tags: ["Commerce"],
+      summary: "Live x402 receipt demo — real EIP-3009 auth, nothing broadcast",
+      description: "Runs the full receipt flow with an ephemeral buyer: signs a real USDC-on-Base authorization, issues a receipt, returns the permalink. Safe: no funds move, nothing is broadcast.",
+      responses: { "200": { description: "{ receipt, url }" } },
     },
   },
   "/api/v1/chat/completions": {

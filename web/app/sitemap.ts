@@ -14,9 +14,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ({ url: `${base}${path}`, lastModified: now, changeFrequency, priority });
   return [
     page("/", 1, "weekly"),
+    page("/network", 0.95),
     page("/os", 0.95),
     page("/bus", 0.95),
     page("/a2a", 0.9),
+    page("/autonomy", 0.9),
+    page("/x402", 0.9),
+    page("/brain", 0.85),
+    page("/marketplace", 0.85),
+    page("/capabilities", 0.8),
+    page("/pipelines", 0.75),
+    page("/swarm", 0.75),
+    page("/realtime", 0.7),
     page("/partners", 0.85),
     page("/partners/bankr", 0.8),
     page("/partners/aeon", 0.8),
