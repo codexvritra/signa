@@ -40,7 +40,7 @@ const brain = privateKeyToAccount(keccak256(toBytes("signa:brain:v1")));
 // the brain and re-verifiable by reading this inbox filtered by the brain).
 const MEMORY_ARCHIVE = privateKeyToAccount(keccak256(toBytes("signa:brain-memory:v1"))).address.toLowerCase();
 
-async function reason(origin: string, prompt: string): Promise<string> {
+async function reasonOnce(origin: string, prompt: string): Promise<string> {
   const r = await fetch(`${origin}/api/gateway/respond`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -48,6 +48,16 @@ async function reason(origin: string, prompt: string): Promise<string> {
   });
   const j = await r.json().catch(() => ({}));
   return (j?.response ?? "").toString().trim();
+}
+
+// the gateway rides decentralized inference, which can hiccup — a metered run
+// is PAID, so it must not flake on a single transient failure. One retry.
+async function reason(origin: string, prompt: string): Promise<string> {
+  try {
+    const a = await reasonOnce(origin, prompt);
+    if (a) return a;
+  } catch { /* retry below */ }
+  return reasonOnce(origin, prompt);
 }
 
 // the brain acts on the network with its own wallet — signed, keyless
