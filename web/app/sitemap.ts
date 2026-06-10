@@ -14,6 +14,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ({ url: `${base}${path}`, lastModified: now, changeFrequency, priority });
   return [
     page("/", 1, "weekly"),
+    page("/docs", 0.95),
+    page("/docs/messaging", 0.85),
+    page("/docs/brain", 0.85),
+    page("/docs/budgets", 0.85),
+    page("/docs/x402", 0.85),
+    page("/docs/capabilities", 0.8),
+    page("/docs/sdks", 0.85),
+    page("/docs/verify", 0.8),
     page("/network", 0.95),
     page("/os", 0.95),
     page("/bus", 0.95),
