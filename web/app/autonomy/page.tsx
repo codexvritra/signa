@@ -63,7 +63,7 @@ export default function AutonomyPage() {
         <div className="mt-10 flex flex-col gap-4">
           <div className="text-[12px] uppercase tracking-[0.16em] text-faint">an agent buys within a budget</div>
           <AutonomyDemo />
-          <div className="text-[12px] uppercase tracking-[0.16em] text-faint mt-4">a brain pays for its own thinking</div>
+          <div className="text-[12px] uppercase tracking-[0.16em] text-faint mt-4">a brain pays for its compute + buys real services</div>
           <BrainSpendDemo />
         </div>
 

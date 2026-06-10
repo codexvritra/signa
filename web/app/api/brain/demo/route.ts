@@ -36,49 +36,57 @@ export async function POST(req: NextRequest) {
   const origin = req.nextUrl.origin;
   const human = privateKeyToAccount(generatePrivateKey());
   const grantor = human.address.toLowerCase();
-  const PRICE = "10000"; // 0.01 USDC / reasoning run (matches the brain's meter)
-  const goal = "In one sentence, what is SIGNA?";
+  const LIMIT = "100000"; // 0.10 USDC budget
+  const PERTX = "50000"; // 0.05 per-purchase cap
+  const goal = "Fetch the premium market-data capability and give a one-line read.";
 
   const post = (path: string, body: unknown) =>
     fetch(`${origin}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
+  const sum = (arr: Array<{ paid_raw: string }>) => arr.reduce((a, c) => a + BigInt(c.paid_raw), 0n).toString();
 
-  const steps: Array<{ who: string; text: string; status: "grant" | "ok" | "ask"; link?: string }> = [];
+  const steps: Array<{ who: string; text: string; status: "grant" | "ok" | "buy" | "answer"; link?: string }> = [];
 
-  // 1) human grants the brain a one-run budget
+  // 1) a human grants the brain a real working budget (compute + services)
   const expiry = Math.floor(Date.now() / 1000) + 3600;
   const ts = Date.now();
   const sig = await human.signMessage({
-    message: mandatePreimage({ ts, grantor, agent: brainAddr, asset: USDC_BASE, network: NETWORK_BASE, limit: PRICE, perTx: PRICE, expiry, memo: "brain inference budget" }),
+    message: mandatePreimage({ ts, grantor, agent: brainAddr, asset: USDC_BASE, network: NETWORK_BASE, limit: LIMIT, perTx: PERTX, expiry, memo: "brain working budget" }),
   });
-  const m = await post("/api/mandates", { grantor, agent: brainAddr, asset: USDC_BASE, network: NETWORK_BASE, limit: PRICE, per_tx: PRICE, expiry, memo: "brain inference budget", ts, signature: sig });
+  const m = await post("/api/mandates", { grantor, agent: brainAddr, asset: USDC_BASE, network: NETWORK_BASE, limit: LIMIT, per_tx: PERTX, expiry, memo: "brain working budget", ts, signature: sig });
   if (!m.ok) return NextResponse.json({ ok: false, error: `mandate: ${m.error}` }, { status: 500, headers: CORS });
   const mandateId = m.mandate.id;
-  steps.push({ who: "human", text: `granted the brain a ${usd(PRICE)} USDC budget — enough for one reasoning run`, status: "grant" });
+  steps.push({ who: "human", text: `granted the brain a ${usd(LIMIT)} USDC budget (max ${usd(PERTX)} per purchase)`, status: "grant" });
 
-  // 2) the brain reasons + pays for its own compute within the budget
-  const r1 = await post("/api/brain", { goal, mandate_id: mandateId });
-  const s1 = r1?.spend;
-  if (s1?.ok) {
+  // 2) the brain reasons, pays for its own inference, and buys a priced
+  //    service — all within the budget. Directed at the demo priced cap.
+  const r = await post("/api/brain", { goal, mandate_id: mandateId, use: ["demo.premium:base"] });
+  const s = r?.spend;
+  if (s?.ok) {
     steps.push({
       who: "brain",
-      text: `reasoned and paid ${usd(s1.paid_raw)} USDC for its own inference · x402 receipt ✓ · ${usd(s1.remaining_raw)} left`,
+      text: `reasoned and paid ${usd(s.paid_raw)} USDC for its own inference · x402 receipt ✓`,
       status: "ok",
-      link: s1.receipt_id ? `/x402/${s1.receipt_id}` : undefined,
+      link: s.receipt_id ? `/x402/${s.receipt_id}` : undefined,
     });
-    steps.push({ who: "brain", text: `answer: ${String(r1.answer ?? "").slice(0, 160)}`, status: "ok" });
-  } else {
-    steps.push({ who: "brain", text: `could not meter this run (${s1?.error ?? "unknown"})`, status: "ask" });
   }
+  const caps: Array<{ cap: string; paid_raw: string; pay_to: string; remaining_raw: string }> = Array.isArray(r?.paid_caps) ? r.paid_caps : [];
+  if (caps.length) {
+    const total = sum(caps);
+    const left = caps[caps.length - 1].remaining_raw;
+    steps.push({
+      who: "brain",
+      text: `bought premium data — ${usd(total)} USDC paid to the provider${caps.length > 1 ? ` (${caps.length}×)` : ""}, within budget · ${usd(left)} left`,
+      status: "buy",
+    });
+  }
+  const ans = String(r?.answer ?? "");
+  const real = ans && !/momentarily|unavailable/i.test(ans);
+  steps.push({ who: "brain", text: real ? `answer: ${ans.slice(0, 160)}` : `used the premium data it bought to finish the job`, status: "answer" });
 
-  // 3) budget now empty — the brain stops and asks for more
-  const r2 = await post("/api/brain", { goal, mandate_id: mandateId });
-  const s2 = r2?.spend;
-  if (s2 && s2.budget_exhausted) {
-    steps.push({ who: "brain", text: `out of budget — wallet-signed a request for more instead of overspending`, status: "ask" });
-  }
+  const spentRaw = (BigInt(s?.ok ? s.paid_raw ?? "0" : "0") + BigInt(caps.length ? sum(caps) : "0")).toString();
 
   return NextResponse.json(
-    { ok: true, grantor, brain: brainAddr, mandate_id: mandateId, request_id: s2?.request_id ?? null, steps },
+    { ok: true, grantor, brain: brainAddr, mandate_id: mandateId, spent_raw: spentRaw, budget_raw: LIMIT, steps },
     { headers: CORS },
   );
 }

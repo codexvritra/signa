@@ -8,6 +8,8 @@ const short = (a: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice
 const TONE: Record<string, { dot: string; label: string }> = {
   grant: { dot: "#8b5cf6", label: "GRANT" },
   ok: { dot: "#22c55e", label: "PAID" },
+  buy: { dot: "#22d3ee", label: "BOUGHT" },
+  answer: { dot: "#a78bfa", label: "ANSWER" },
   ask: { dot: "#5b8def", label: "ASKS FOR $" },
 };
 
@@ -43,10 +45,10 @@ export function BrainSpendDemo() {
     <div className="glass-strong rounded-2xl p-5 sm:p-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <div className="text-[15px] font-semibold">Run the metered brain</div>
+          <div className="text-[15px] font-semibold">A brain that spends on a budget</div>
           <div className="text-[13px] text-muted mt-0.5">
-            The brain holds no funds. Give it a budget and it pays for its <em>own thinking</em> —
-            real inference, a real x402 receipt — then stops and asks when it runs out.
+            The brain holds no funds. Give it a budget and it reasons, pays for its <em>own inference</em>,
+            and <em>buys a real priced service</em> — every spend capped, receipted, on Base.
           </div>
         </div>
         <button
@@ -102,8 +104,8 @@ export function BrainSpendDemo() {
           </div>
           {shown >= res.steps.length && (
             <div className="mt-4 text-[13px] text-[#a5c3ff]">
-              ✓ The brain paid for its own compute inside a signed budget and refused to overspend —
-              the model decides, the cap is enforced, every cent is on Base.
+              ✓ The brain paid for its own compute <em>and bought a real service</em> — all inside a signed
+              budget it can&apos;t exceed. The model decides; SIGNA enforces the cap and proves every cent on Base.
             </div>
           )}
         </>
