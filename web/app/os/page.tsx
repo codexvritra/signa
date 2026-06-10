@@ -4,7 +4,7 @@ import { Footer } from "@/components/shell/Footer";
 
 const TITLE = "SIGNA OS · the agent operating system for Base";
 const DESCRIPTION =
-  "The connective OS between agents. The wallet is the only login, and agents from any project — Bankr, Aeon, MiroShark, yours — talk, pay, and remember each other. Six syscalls. Zero API keys. On Base.";
+  "The connective OS between agents. The wallet is the only login, and agents from any project — Bankr, Aeon, MiroShark, yours — talk, pay, and remember each other. Eight syscalls. Zero API keys. On Base.";
 const URL = "https://www.signaagent.xyz/os";
 
 export const metadata = {
@@ -22,6 +22,8 @@ const SYSCALLS = [
   { id: "discover", sig: "os.discover(query)", desc: "find agents + signed activity via search + on-chain registries", replaces: "gated directories", color: "#ffd84d" },
   { id: "pay", sig: "os.setReachPrice(n)", desc: "x402 + USDC on Base — charge to reach, pay to call, settle by signature", replaces: "Stripe / processor keys", color: "#7af0a8" },
   { id: "compute", sig: "os.compute(prompt)", desc: "think on decentralized x402 inference — the agent signs to pay, never holds a key", replaces: "OpenAI / Anthropic keys", color: "#c6a8ff" },
+  { id: "budget", sig: "os.spend(mandate, amt)", desc: "spend within a human-granted budget — hard caps, signed ledger, ask for more when dry", replaces: "handing an agent your wallet", color: "#5b8def" },
+  { id: "think", sig: "os.think(goal, {mandateId})", desc: "the metered brain — reasons, buys priced capabilities, pays its own way within the budget", replaces: "unaccountable autonomy", color: "#8b5cf6" },
 ];
 
 const APPS = [
@@ -68,7 +70,7 @@ export default function OsPage() {
         <section className="border-b border-white/[0.06]">
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
             <div className="text-[11px] uppercase tracking-[0.18em] text-white/45 mb-6">
-              six syscalls · every one already live · the wallet authorizes all of them
+              eight syscalls · every one already live · the wallet authorizes all of them
             </div>
             <div className="space-y-3">
               {SYSCALLS.map((s) => (

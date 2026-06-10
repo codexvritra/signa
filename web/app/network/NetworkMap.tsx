@@ -12,12 +12,15 @@ type Status = "checking" | "online" | "down";
 
 const HUB = { x: 500, y: 330 };
 const NODES = [
-  { key: "aeon", label: "Aeon", sub: "registry · merged", x: 235, y: 150, group: "aeon" },
-  { key: "claude", label: "Claude Code", sub: "via MCP", x: 765, y: 150, group: "mcp" },
-  { key: "root", label: "Root", sub: "rootAI", x: 850, y: 330, group: "root" },
-  { key: "cursor", label: "Cursor", sub: "via MCP", x: 765, y: 510, group: "mcp" },
-  { key: "windsurf", label: "Windsurf", sub: "via MCP", x: 235, y: 510, group: "mcp" },
-  { key: "a2a", label: "Any A2A agent", sub: "A2A v0.3", x: 150, y: 330, group: "a2a" },
+  { key: "aeon", label: "Aeon", sub: "registry · merged", x: 300, y: 120, group: "aeon" },
+  { key: "claude", label: "Claude Code", sub: "via MCP", x: 700, y: 120, group: "mcp" },
+  { key: "bankr", label: "Bankr", sub: "identity rail", x: 880, y: 230, group: "bankr" },
+  { key: "root", label: "Root", sub: "rootAI", x: 880, y: 430, group: "root" },
+  { key: "cursor", label: "Cursor", sub: "via MCP", x: 700, y: 545, group: "mcp" },
+  { key: "windsurf", label: "Windsurf", sub: "via MCP", x: 300, y: 545, group: "mcp" },
+  { key: "gitlawb", label: "gitlawb", sub: "bounties", x: 120, y: 430, group: "gitlawb" },
+  { key: "miroshark", label: "MiroShark", sub: "sims", x: 120, y: 230, group: "miroshark" },
+  { key: "a2a", label: "Any A2A agent", sub: "A2A v0.3", x: 500, y: 600, group: "a2a" },
 ] as const;
 
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -36,9 +39,11 @@ async function reachable(url: string, timeoutMs = 6000): Promise<Response | null
 
 export function NetworkMap() {
   const [st, setSt] = useState<Record<string, Status>>({
-    core: "checking", aeon: "online", mcp: "checking", root: "checking", a2a: "checking",
+    core: "checking", aeon: "checking", mcp: "checking", root: "checking", a2a: "checking",
+    bankr: "checking", gitlawb: "checking", miroshark: "checking",
   });
   const [rootText, setRootText] = useState<string>("");
+  const [subText, setSubText] = useState<Record<string, string>>({});
   const [caps, setCaps] = useState<number | null>(null);
   const [stats, setStats] = useState<{ interactions: number; posts: number; agents: number; users: number } | null>(null);
   const [updated, setUpdated] = useState<string>("");
@@ -64,6 +69,45 @@ export function NetworkMap() {
       let ok = false;
       try { const j = await r?.json(); if (j?.ok && j?.output) { ok = true; setRootText(`${j.output.label} ${j.output.score}`); } } catch { /* */ }
       setSt((s) => ({ ...s, root: ok ? "online" : r ? "online" : "down" }));
+    });
+    // Bankr — a REAL identity resolve round-trip through api.bankr.bot
+    reachable("/api/capabilities/invoke?cap=bankr.resolve&arg=@jesse", 9000).then(async (r) => {
+      let ok = false;
+      try {
+        const j = await r?.json();
+        const addr = j?.output?.address ?? j?.output?.evmAddress;
+        if (j?.ok && addr) { ok = true; setSubText((t) => ({ ...t, bankr: `@jesse → ${String(addr).slice(0, 6)}…` })); }
+      } catch { /* */ }
+      setSt((s) => ({ ...s, bankr: ok ? "online" : "down" }));
+    });
+    // Aeon — the live ERC-8004 directory (the skill pack is merged in their registry)
+    reachable("/api/partners/aeon/directory", 9000).then(async (r) => {
+      let ok = false;
+      try {
+        const j = await r?.json();
+        const n = (j?.agents ?? []).length;
+        if (j?.ok !== false && n > 0) { ok = true; setSubText((t) => ({ ...t, aeon: `${n} agents · merged` })); }
+      } catch { /* */ }
+      setSt((s) => ({ ...s, aeon: ok ? "online" : r ? "online" : "down" }));
+    });
+    // gitlawb — live open-bounty read from node.gitlawb.com
+    reachable("/api/partners/gitlawb/bounties", 9000).then(async (r) => {
+      let ok = false;
+      try {
+        const j = await r?.json();
+        if (j?.ok) { ok = true; setSubText((t) => ({ ...t, gitlawb: `${j.count ?? 0} open bounties` })); }
+      } catch { /* */ }
+      setSt((s) => ({ ...s, gitlawb: ok ? "online" : "down" }));
+    });
+    // MiroShark — the signed-activity ledger for the sims integration
+    reachable("/api/receipts", 9000).then(async (r) => {
+      let ok = false;
+      try {
+        const j = await r?.json();
+        const p = (j?.partners ?? []).find((x: { partner: string }) => x.partner === "miroshark");
+        if (j?.ok && p) { ok = true; setSubText((t) => ({ ...t, miroshark: `${p.messages ?? 0} signed · sims` })); }
+      } catch { /* */ }
+      setSt((s) => ({ ...s, miroshark: ok ? "online" : "down" }));
     });
     // live counters
     reachable("/api/stats").then(async (r) => {
@@ -133,7 +177,7 @@ export function NetworkMap() {
         {NODES.map((n) => {
           const s = st[n.group];
           const c = color(s);
-          const sub = n.key === "root" && rootText ? rootText : n.sub;
+          const sub = n.key === "root" && rootText ? rootText : (subText[n.key] ?? n.sub);
           const label = s === "online" ? "LIVE" : s === "checking" ? "CHECKING" : "DOWN";
           return (
             <g key={n.key} transform={`translate(${n.x - 95}, ${n.y - 32})`}>
