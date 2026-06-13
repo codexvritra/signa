@@ -24,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/docs/verify", 0.8),
     page("/network", 0.95),
     page("/economy", 0.9),
+    page("/oracle", 0.9),
     page("/os", 0.95),
     page("/bus", 0.95),
     page("/a2a", 0.9),
