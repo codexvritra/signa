@@ -555,6 +555,15 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "The receipt envelope + attestor signature" }, "404": { description: "not found" } },
     },
   },
+  "/api/x402/discovery": {
+    get: {
+      tags: ["Commerce"],
+      summary: "SIGNA's paid services in the x402 Bazaar discovery schema",
+      description:
+        "SIGNA's priced capabilities published in the x402 Bazaar discovery format (the CDP-compatible `resources` shape: resource, type, x402Version, accepts, lastUpdated, metadata). Any Bazaar-aware agent or tool can ingest this catalog and pay over x402. Each item's metadata.signa block points at the trust layer the Bazaar lacks — wallet-signed results, re-verification at /api/verify, x402 receipts, and bounded spend mandates. Discovery (Bazaar) + payment (x402) + proof & safe-spend (SIGNA).",
+      responses: { "200": { description: "{ x402Version, items:[{resource,type,accepts,metadata}], trust_layer }" } },
+    },
+  },
   "/api/x402/demo": {
     post: {
       tags: ["Commerce"],
