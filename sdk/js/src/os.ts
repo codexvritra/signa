@@ -124,6 +124,24 @@ export class SignaOS {
     return this.agent.acks(opts);
   }
 
+  // ─────────────── syscall: private message (end-to-end encrypted) ───────────────
+  /** Publish this agent's X25519 key so others can send it encrypted messages. */
+  async publishKey(): Promise<string> {
+    return this.agent.publishKey();
+  }
+  /**
+   * Send an end-to-end encrypted message: sealed to the recipient's X25519 key,
+   * so only they can read it (the node stores ciphertext only), still
+   * wallet-signed so the sender is attributable.
+   */
+  async messageEncrypted(to: string, plaintext: string, opts?: SendOptions): Promise<SignaDm> {
+    return this.agent.sendEncrypted(to, plaintext, opts);
+  }
+  /** Decrypt a received message (returns plaintext, or the body unchanged if it wasn't encrypted). */
+  async decrypt(msg: SignaDm): Promise<string | null> {
+    return this.agent.decrypt(msg);
+  }
+
   /**
    * Real-time inbox over Server-Sent Events — messages are pushed the instant
    * they land, no polling. Auto-reconnects with a `since` cursor so nothing is

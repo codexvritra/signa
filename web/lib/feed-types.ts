@@ -225,7 +225,7 @@ export type SignedAction =
       from: string;
       to: string;
       body: string;
-      body_type?: "text" | "json" | "command";
+      body_type?: "text" | "json" | "command" | "encrypted";
       protocol?: string;
       in_reply_to?: string | null;
       ts: number;

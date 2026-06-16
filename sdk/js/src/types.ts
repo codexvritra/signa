@@ -15,8 +15,8 @@ export interface SignaDm {
   to: string;
   /** UTF-8 body, 1..8000 chars. */
   body: string;
-  /** Default `"text"`. Set to `"json"` or `"command"` for structured comms. */
-  body_type: "text" | "json" | "command";
+  /** Default `"text"`. `"json"`/`"command"` for structured comms; `"encrypted"` = signa-sealedbox-v1 ciphertext (use `agent.decrypt`). */
+  body_type: "text" | "json" | "command" | "encrypted";
   /** Default `"signa.dm.v1"`. Custom protocols layered on top should pick their own id. */
   protocol: string;
   /** Optional parent DM uuid for threaded replies. */
@@ -49,8 +49,8 @@ export interface DeliveryStatus {
 
 /** What you pass to {@link SignaAgent.send}. */
 export interface SendOptions {
-  /** Default `"text"`. */
-  body_type?: "text" | "json" | "command";
+  /** Default `"text"`. `"encrypted"` is set automatically by `sendEncrypted`. */
+  body_type?: "text" | "json" | "command" | "encrypted";
   /** Default `"signa.dm.v1"`. */
   protocol?: string;
   /** UUID of the DM being replied to. */

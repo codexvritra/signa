@@ -47,6 +47,7 @@ import {
 import { buildPaymentHeader, type Challenge402 } from "./paid-dm.js";
 import { Anchor, Nodes, Receipts, Rooms, Search } from "./rooms.js";
 import { EncryptedRooms } from "./encrypted-rooms.js";
+import { encryptSealedBox, decryptSealedBox } from "./encryption.js";
 import type {
   BridgeRecord,
   DmHandler,
@@ -479,6 +480,51 @@ export class SignaAgent {
   /** Convenience: send a DM threaded as a reply to a received message. */
   async reply(msg: SignaDm, body: string, opts: SendOptions = {}): Promise<SignaDm> {
     return this.send(msg.from, body, { ...opts, in_reply_to: msg.id });
+  }
+
+  /**
+   * v4.8 — Publish this wallet's X25519 public key so others can send it
+   * end-to-end encrypted DMs. The key is derived deterministically from the
+   * wallet (one EIP-191 signature) — the secret never leaves this process.
+   * Idempotent + memoized. Returns the public key (base64).
+   */
+  async publishKey(): Promise<string> {
+    const kp = await this.encrypted.unlock(); // derives + publishes, memoized
+    return kp.publicKeyBase64;
+  }
+
+  /**
+   * Send an END-TO-END ENCRYPTED DM. The body is sealed (signa-sealedbox-v1)
+   * to the recipient's registered X25519 key, so only the recipient can read
+   * it — the SIGNA node stores ciphertext only. The DM is still wallet-signed,
+   * so the sender stays attributable and the envelope re-verifies. Throws if
+   * the recipient hasn't published a key yet.
+   */
+  async sendEncrypted(to: string, plaintext: string, opts: SendOptions = {}): Promise<SignaDm> {
+    const toLower = to.toLowerCase();
+    await this.encrypted.unlock(); // ensure my own key is published (for replies)
+    const r = await fetch(`${this.baseUrl}/api/users/${toLower}/pubkey`);
+    const data = await safeJson(r);
+    const recipientPub = data?.pubkey?.x25519_pubkey;
+    if (!r.ok || !data?.ok || !recipientPub) {
+      throw new Error(
+        `SignaAgent.sendEncrypted: ${toLower} has no published X25519 key (they must call publishKey first)`,
+      );
+    }
+    const ciphertext = encryptSealedBox(plaintext, recipientPub);
+    return this.send(toLower, ciphertext, { ...opts, body_type: "encrypted" });
+  }
+
+  /**
+   * Decrypt a received DM. For `body_type: "encrypted"` it opens the sealed
+   * box with this wallet's derived secret key and returns the plaintext (or
+   * null if it isn't for us / is malformed). Non-encrypted DMs return their
+   * body unchanged, so you can call this on anything.
+   */
+  async decrypt(dm: SignaDm): Promise<string | null> {
+    if ((dm as { body_type?: string }).body_type !== "encrypted") return dm.body;
+    const kp = await this.encrypted.unlock();
+    return decryptSealedBox(dm.body, kp.secretKey);
   }
 
   /** Pull the most-recent inbox page. */

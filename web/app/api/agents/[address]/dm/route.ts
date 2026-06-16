@@ -174,14 +174,18 @@ export async function POST(
   if (
     rawBodyType !== "text" &&
     rawBodyType !== "json" &&
-    rawBodyType !== "command"
+    rawBodyType !== "command" &&
+    rawBodyType !== "encrypted"
   ) {
     return json(
-      { error: "invalid_body_type_must_be_text_json_or_command" },
+      { error: "invalid_body_type_must_be_text_json_command_or_encrypted" },
       { status: 400 },
     );
   }
-  const body_type = rawBodyType as "text" | "json" | "command";
+  // v4.8 — "encrypted" bodies are base64 signa-sealedbox-v1 ciphertext to the
+  // recipient's registered X25519 key. The server stores only ciphertext and
+  // never sees plaintext; the EIP-191 signature still binds the sender to it.
+  const body_type = rawBodyType as "text" | "json" | "command" | "encrypted";
   if (protocol.length === 0 || protocol.length > 100) {
     return json({ error: "invalid_protocol_id" }, { status: 400 });
   }
