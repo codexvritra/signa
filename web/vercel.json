@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/cron/log",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
