@@ -20,6 +20,7 @@ const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 const GATEWAY = privateKeyToAccount(keccak256(toBytes("signa:capability-gateway:v1"))).address.toLowerCase();
 const BRAIN = privateKeyToAccount(keccak256(toBytes("signa:brain:v1"))).address.toLowerCase();
 const X402_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1"))).address.toLowerCase();
+const LOG_SIGNER = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1"))).address.toLowerCase();
 
 export type VerifyInput = Record<string, unknown> & { kind?: string; signature?: string };
 
@@ -34,7 +35,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "pipeline_link", "x402_receipt", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "pipeline_link", "x402_receipt", "log_checkpoint", "raw"];
 
 /** Rebuild the canonical preimage for an artifact, and who is expected to have signed it. */
 function buildPreimage(a: VerifyInput): { preimage: string; expected: string | null; role: string } | null {
@@ -103,6 +104,19 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `delivery:${a.delivery_hash ?? ""}`,
       ].join("\n");
       return { preimage: pre, expected: X402_ATTESTOR, role: "SIGNA x402 receipt attestor" };
+    }
+    case "log_checkpoint": {
+      // v4.7 — the transparency-log signer signs each Merkle checkpoint over
+      // the message layer. Must match transparency.ts checkpointPreimage().
+      const pre = [
+        "SIGNA log checkpoint v1",
+        `seq:${a.seq}`,
+        `size:${a.size ?? a.tree_size ?? ""}`,
+        `prev:${a.prev ?? a.prev_root ?? ""}`,
+        `root:${a.root ?? ""}`,
+        `ts:${a.ts}`,
+      ].join("\n");
+      return { preimage: pre, expected: LOG_SIGNER, role: "SIGNA transparency-log signer" };
     }
     case "raw": {
       if (typeof a.preimage !== "string") return null;

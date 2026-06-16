@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/oracle",
       "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/log",
+      "schedule": "0 */6 * * *"
     }
   ]
 }

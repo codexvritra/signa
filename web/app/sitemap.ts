@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/docs/capabilities", 0.8),
     page("/docs/sdks", 0.85),
     page("/docs/verify", 0.8),
+    page("/docs/transparency", 0.85),
     page("/network", 0.95),
     page("/economy", 0.9),
     page("/oracle", 0.9),

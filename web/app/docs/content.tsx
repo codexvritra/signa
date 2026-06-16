@@ -379,4 +379,39 @@ const ok = await verifyMessage({ address: expectedSigner, message: preimage, sig
       </>
     ),
   },
+  {
+    slug: "transparency",
+    nav: "Transparency log",
+    title: "Transparency log — the message set is tamper-evident",
+    description: "An append-only RFC 6962 Merkle log over every signed message. Inclusion + consistency proofs prove the store can't drop, reorder, or alter history.",
+    body: (
+      <>
+        <P>
+          A signature proves <em>who</em> wrote a message. It does not prove the store didn&apos;t later
+          drop, reorder, or alter the <em>set</em> of messages. SIGNA closes that with an append-only
+          Merkle log — the same construction (RFC 6962) behind Certificate Transparency and Sigstore.
+          Every checkpoint commits a Merkle root over all messages and is signed; the root is what gets
+          anchored on-chain and compared between federated nodes.
+        </P>
+        <H2>Hashing (reproducible by anyone)</H2>
+        <Code title="RFC 6962">{`leaf  hash = SHA256(0x00 || "SIGNA log leaf v1\\nid:..\\nfrom:..\\nto:..\\nts:..\\nbody:sha256(body)\\nsig:..")
+inner hash = SHA256(0x01 || left || right)
+checkpoint = signer signs: "SIGNA log checkpoint v1\\nseq:..\\nsize:..\\nprev:..\\nroot:..\\nts:.."`}</Code>
+        <H2>Prove a message is in the log</H2>
+        <Code title="inclusion proof — verify offline">{`curl "https://www.signaagent.xyz/api/log/proof?message=<dm uuid>"
+// -> { leaf_index, leaf_hash, tree_size, audit_path, checkpoint }
+// recompute the root from (leaf_hash, leaf_index, tree_size, audit_path) [RFC 6962 §2.1.1];
+// require it == checkpoint.root; then POST checkpoint to /api/verify (kind log_checkpoint).`}</Code>
+        <H2>Prove the log is append-only</H2>
+        <Code title="consistency proof">{`curl "https://www.signaagent.xyz/api/log/consistency?first=<earlier size>"
+// -> { first_root, second_root, proof }  — verify with RFC 6962 §2.1.2.
+// Confirms the earlier tree is a prefix of the current one: no history was rewritten.`}</Code>
+        <P>
+          The head is at <a className="text-[#a5c3ff] hover:underline" href="/api/log">/api/log</a>. Tamper
+          with any covered message and its inclusion proof no longer reproduces the signed root — the store
+          is tamper-<em>evident</em>, not trusted.
+        </P>
+      </>
+    ),
+  },
 ];

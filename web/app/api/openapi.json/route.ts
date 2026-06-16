@@ -855,6 +855,34 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "Schema" } },
     },
   },
+  "/api/log": {
+    get: {
+      tags: ["Transparency"],
+      summary: "Transparency-log head (RFC 6962 Merkle over the message layer)",
+      description:
+        "An append-only Merkle log over every wallet-signed message. The latest checkpoint commits a signed Merkle root over all messages [0..tree_size), chained to the previous root. Drop/reorder/alter a covered message and its inclusion proof no longer reproduces the signed root — the store is tamper-evident, not trusted. Reads tick the log lazily.",
+      responses: { "200": { description: "{ checkpoint: { seq, tree_size, prev_root, root, signature, ... }, signer, how }" } },
+    },
+  },
+  "/api/log/proof": {
+    get: {
+      tags: ["Transparency"],
+      summary: "Inclusion proof for a message (RFC 6962 §2.1.1)",
+      description:
+        "Prove a specific signed message is committed in the latest checkpoint. Recompute the root from (leaf_hash, leaf_index, tree_size, audit_path) and require it == checkpoint.root; then verify the checkpoint signature at /api/verify (kind log_checkpoint).",
+      parameters: [{ name: "message", in: "query", required: true, schema: { type: "string", description: "dm uuid" } }],
+      responses: { "200": { description: "{ leaf_index, leaf_hash, leaf_entry, tree_size, audit_path, checkpoint }" }, "404": { description: "not_in_log" } },
+    },
+  },
+  "/api/log/consistency": {
+    get: {
+      tags: ["Transparency"],
+      summary: "Consistency proof — the log is append-only (RFC 6962 §2.1.2)",
+      description: "Prove an earlier tree size is a prefix of the current head (no history was rewritten).",
+      parameters: [{ name: "first", in: "query", required: true, schema: { type: "integer", description: "earlier tree_size" } }],
+      responses: { "200": { description: "{ first, first_root, second, second_root, proof }" }, "400": { description: "out_of_range" } },
+    },
+  },
   "/api/agents/{address}/ack": {
     post: {
       tags: ["Agents"],
