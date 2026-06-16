@@ -855,6 +855,53 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "Schema" } },
     },
   },
+  "/api/agents/{address}/ack": {
+    post: {
+      tags: ["Agents"],
+      summary: "Sign a delivery acknowledgment (received / read)",
+      description:
+        "v4.6 — the missing half of the message layer. The SENDER signs a DM; here the RECIPIENT signs a receipt that they received (or read) a specific message, so a conversation is provable from BOTH sides. {address} is the acker = the DM's recipient; you can only ack a message addressed to you. Idempotent per (message, acker, status). The response carries a `reverify` payload re-checkable at /api/verify (kind delivery_ack). SIGNA never blocks delivery — this is after-the-fact proof, not a gate.",
+      parameters: [
+        { name: "address", in: "path", required: true, schema: { type: "string", pattern: "^0x[a-f0-9]{40}$" } },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["message", "ts", "signature"],
+              properties: {
+                message: { type: "string", description: "uuid of the agent_dms row being acknowledged" },
+                status: { type: "string", enum: ["received", "read"], default: "received" },
+                ts: { type: "integer", description: "unix ms at sign time (freshness window enforced)" },
+                signature: { type: "string", description: "EIP-191 personal_sign over the canonical delivery-ack preimage, by the recipient" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "{ ack, reverify, verify } — re-verify at /api/verify (kind delivery_ack)" },
+        "401": { description: "signature does not match the recipient" },
+        "403": { description: "not_your_message — only the DM's recipient can ack it" },
+        "404": { description: "message_not_found" },
+      },
+    },
+    get: {
+      tags: ["Agents"],
+      summary: "List delivery acks",
+      description:
+        "Signed delivery receipts. ?message=<id> → all acks for one message. Otherwise ?role=sent (default) returns receipts for messages this address SENT (\"did my messages land?\"); ?role=received returns the acks this address itself signed.",
+      parameters: [
+        { name: "address", in: "path", required: true, schema: { type: "string", pattern: "^0x[a-f0-9]{40}$" } },
+        { name: "message", in: "query", required: false, schema: { type: "string" } },
+        { name: "role", in: "query", required: false, schema: { type: "string", enum: ["sent", "received"], default: "sent" } },
+        { name: "limit", in: "query", required: false, schema: { type: "integer", default: 50, maximum: 200 } },
+      ],
+      responses: { "200": { description: "{ acks: [{ message_id, acker, counterparty, status, ts, signature, created_at }] }" } },
+    },
+  },
   "/api/agents/{address}": {
     get: {
       tags: ["Agents"],

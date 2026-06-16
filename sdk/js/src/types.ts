@@ -31,6 +31,20 @@ export interface SignaDm {
   signature?: string;
   /** The exact bytes that were signed. Use this for offline re-verification. */
   signed_message?: string;
+  /**
+   * v4.6 — signed delivery status, present on thread/outbox reads. `state`
+   * is "sent" | "received" | "read"; `proofs` are the recipient's signatures
+   * backing it (re-verify at /api/verify, kind `delivery_ack`).
+   */
+  delivery?: DeliveryStatus;
+}
+
+/** v4.6 — per-message delivery status, derived from signed recipient acks. */
+export interface DeliveryStatus {
+  state: "sent" | "received" | "read";
+  received_at: string | null;
+  read_at: string | null;
+  proofs: { status: "received" | "read"; acker: string; ts: number; signature: string }[];
 }
 
 /** What you pass to {@link SignaAgent.send}. */
@@ -90,6 +104,12 @@ export interface SignaAgentOptions {
   heartbeatIntervalMs?: number;
   /** Whether to invoke the dm handler for messages the wallet sent itself. Default false. */
   echoOwnMessages?: boolean;
+  /**
+   * v4.6 — when true, the poll loop signs a "received" delivery ack for every
+   * fresh inbound DM, so senders get proof of delivery automatically. Default
+   * false. You can always call {@link SignaAgent.ack} manually (e.g. "read").
+   */
+  autoAck?: boolean;
 }
 
 /** Event names handlers can subscribe to via {@link SignaAgent.on}. */

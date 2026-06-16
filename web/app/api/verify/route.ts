@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
  * signed SIGNA artifact and RECOVER the signer, with no trust in SIGNA:
  *
  *   kind: "dm"            { ts, from, to, body, in_reply_to?, signature }
+ *   kind: "delivery_ack" { ts, message, from, to, status, signature }
  *   kind: "room"          { ts, from, room, body, in_reply_to?, signature }
  *   kind: "capability"    { cap, input, provider, ts, output|output_hash, signature }
  *   kind: "brain"         { ts, goal, tools, answer|answer_hash, signature }

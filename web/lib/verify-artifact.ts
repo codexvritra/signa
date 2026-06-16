@@ -2,7 +2,8 @@
  * The universal verifier for the SIGNA message layer.
  *
  * Every message and proof in SIGNA — an agent↔agent DM, a human↔agent DM, a
- * room message, a capability result, a brain receipt, a pipeline link — is an
+ * room message, a delivery ack, a capability result, a brain receipt, a
+ * pipeline link — is an
  * EIP-191 wallet signature over a canonical preimage. This module rebuilds the
  * preimage for any artifact kind and RECOVERS the signer, so anyone can confirm
  * who actually signed it without trusting SIGNA. Don't trust, verify.
@@ -33,7 +34,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "room", "capability", "brain", "pipeline_link", "x402_receipt", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "pipeline_link", "x402_receipt", "raw"];
 
 /** Rebuild the canonical preimage for an artifact, and who is expected to have signed it. */
 function buildPreimage(a: VerifyInput): { preimage: string; expected: string | null; role: string } | null {
@@ -54,6 +55,21 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       if (a.in_reply_to) lines.push(`in_reply_to:${a.in_reply_to}`);
       lines.push(`body:${a.body ?? ""}`);
       return { preimage: lines.join("\n"), expected: from || null, role: "sender wallet" };
+    }
+    case "delivery_ack": {
+      // v4.6 — the recipient's signed receipt for a DM. `from` is the acker
+      // (the DM's recipient, who signs), `to` is the original sender. Must
+      // match buildMessageToSign({ kind: "agent_dm_ack" }) byte-for-byte.
+      const from = String(a.from ?? "").toLowerCase();
+      const pre = [
+        "SIGNA delivery ack v1",
+        `ts:${a.ts}`,
+        `message:${a.message ?? ""}`,
+        `from:${from}`,
+        `to:${String(a.to ?? "").toLowerCase()}`,
+        `status:${a.status ?? ""}`,
+      ].join("\n");
+      return { preimage: pre, expected: from || null, role: "recipient wallet (delivery ack)" };
     }
     case "capability": {
       // accept raw output (we hash it) or a precomputed output_hash

@@ -38,6 +38,7 @@
 import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 
 import {
+  buildAckPreimage,
   buildBridgeHeartbeatPreimage,
   buildBridgeRegisterPreimage,
   buildDmPreimage,
@@ -60,6 +61,7 @@ import type {
 export * from "./types.js";
 export {
   buildDmPreimage,
+  buildAckPreimage,
   buildBridgeRegisterPreimage,
   buildBridgeHeartbeatPreimage,
 } from "./envelope.js";
@@ -158,6 +160,7 @@ export class SignaAgent {
   private readonly pollIntervalMs: number;
   private readonly heartbeatIntervalMs: number;
   private readonly echoOwnMessages: boolean;
+  private readonly autoAck: boolean;
   private readonly dmHandlers: DmHandler[] = [];
   private readonly errorHandlers: ErrorHandler[] = [];
   private readonly seen = new Set<string>();
@@ -184,6 +187,9 @@ export class SignaAgent {
     this.heartbeatIntervalMs =
       opts.heartbeatIntervalMs ?? DEFAULT_HEARTBEAT_INTERVAL_MS;
     this.echoOwnMessages = opts.echoOwnMessages ?? false;
+    // v4.6 — when true, the poll loop signs a "received" delivery ack for
+    // every fresh inbound DM, so senders get proof of delivery automatically.
+    this.autoAck = opts.autoAck ?? false;
   }
 
   // ────────────────────────────── events ──────────────────────────────
@@ -522,6 +528,74 @@ export class SignaAgent {
     return ((data.dms ?? []) as any[]).map(normalizeDm);
   }
 
+  /**
+   * v4.6 — sign a delivery acknowledgment for a DM you received. The SENDER
+   * signs the message; this is how YOU (the recipient) sign a receipt that
+   * you got it. "Delivered" becomes a wallet signature anyone can re-verify
+   * at /api/verify (kind `delivery_ack`), not a server flag.
+   *
+   * Pass a DM object (from inbox/stream) or a raw message id. `status` is
+   * "received" (default) or "read". Idempotent per (message, you, status).
+   * Returns the stored ack record.
+   */
+  async ack(
+    message: string | SignaDm,
+    status: "received" | "read" = "received",
+  ): Promise<any> {
+    const dm = typeof message === "string" ? null : message;
+    const messageId = typeof message === "string" ? message : message.id;
+    // The original sender is the "to" of the ack. If we only got an id, the
+    // server already knows the counterparty — but the preimage needs it, so
+    // resolve it from the DM object when present, else look it up.
+    let counterparty = dm?.from?.toLowerCase() ?? "";
+    if (!counterparty) {
+      const acks = await this.acks({ message: messageId, limit: 1 }).catch(() => []);
+      counterparty = (acks[0]?.counterparty as string)?.toLowerCase() ?? "";
+      if (!counterparty) {
+        // last resort: walk our inbox for this id
+        const inbox = await this.inbox({ limit: 100 }).catch(() => []);
+        counterparty = inbox.find((m) => m.id === messageId)?.from?.toLowerCase() ?? "";
+      }
+    }
+    if (!counterparty) {
+      throw new Error("SignaAgent.ack: could not resolve the original sender for this message");
+    }
+    const ts = Date.now();
+    const preimage = buildAckPreimage(messageId, this.address, counterparty, status, ts);
+    const signature = await this.account.signMessage({ message: preimage });
+    const r = await fetch(`${this.baseUrl}/api/agents/${this.address}/ack`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: messageId, status, ts, signature }),
+    });
+    const data = await safeJson(r);
+    if (!r.ok || !data?.ok) {
+      throw new Error(`SignaAgent.ack failed: ${data?.error ?? `HTTP ${r.status}`}`);
+    }
+    return data.ack;
+  }
+
+  /**
+   * List delivery acks. With no args, returns the delivery receipts for the
+   * messages THIS wallet sent ("did my messages land?"). Pass
+   * `{ role: "received" }` for the acks this wallet itself signed, or
+   * `{ message }` for all acks on one message.
+   */
+  async acks(
+    opts: { message?: string; role?: "sent" | "received"; limit?: number } = {},
+  ): Promise<any[]> {
+    const url = new URL(`${this.baseUrl}/api/agents/${this.address}/ack`);
+    if (opts.message) url.searchParams.set("message", opts.message);
+    if (opts.role) url.searchParams.set("role", opts.role);
+    url.searchParams.set("limit", String(opts.limit ?? 50));
+    const r = await fetch(url);
+    const data = await safeJson(r);
+    if (!r.ok || !data?.ok) {
+      throw new Error(`SignaAgent.acks failed: ${data?.error ?? `HTTP ${r.status}`}`);
+    }
+    return (data.acks ?? []) as any[];
+  }
+
   // ─────────────────────────── bridge directory ───────────────────────────
 
   /**
@@ -617,6 +691,11 @@ export class SignaAgent {
           .reverse();
         for (const dm of fresh) {
           this.seen.add(dm.id);
+          // v4.6 — auto-sign a delivery receipt so the sender gets proof of
+          // delivery. Best-effort: a failed ack never blocks message handling.
+          if (this.autoAck && dm.from.toLowerCase() !== this.address) {
+            this.ack(dm, "received").catch((e) => this.emitError(e));
+          }
           for (const h of this.dmHandlers) {
             try {
               await h(dm);

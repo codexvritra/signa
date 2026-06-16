@@ -33,6 +33,29 @@ export function buildDmPreimage(
   ].join("\n");
 }
 
+/**
+ * v4.6 — delivery acknowledgment preimage. The recipient of a DM signs this
+ * to prove they received (or read) a specific message. `from` is the acker
+ * (the DM's recipient), `to` is the original sender. Must match the server's
+ * buildMessageToSign({ kind: "agent_dm_ack" }) byte-for-byte.
+ */
+export function buildAckPreimage(
+  message: string,
+  from: string,
+  to: string,
+  status: "received" | "read",
+  ts: number,
+): string {
+  return [
+    "SIGNA delivery ack v1",
+    `ts:${ts}`,
+    `message:${message}`,
+    `from:${from.toLowerCase()}`,
+    `to:${to.toLowerCase()}`,
+    `status:${status}`,
+  ].join("\n");
+}
+
 export function buildBridgeRegisterPreimage(
   address: string,
   ts: number,

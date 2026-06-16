@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { attachDelivery } from "@/lib/delivery-acks";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -76,13 +77,18 @@ export async function GET(req: NextRequest) {
   const [low, high] = a < b ? [a, b] : [b, a];
   const thread_id = `${low}_${high}`;
 
+  // v4.6 — fold in signed delivery acks so each message carries a
+  // `delivery` field (sent / received / read) backed by the recipient's
+  // wallet signature, re-verifiable at /api/verify (kind delivery_ack).
+  const dms = await attachDelivery(supabase, data ?? []);
+
   return NextResponse.json(
     {
       ok: true,
       thread_id,
       participants: [a, b],
-      count: data?.length ?? 0,
-      dms: data ?? [],
+      count: dms.length,
+      dms,
     },
     { status: 200, headers: CORS },
   );

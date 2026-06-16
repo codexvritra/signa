@@ -43,6 +43,12 @@ export interface BootOptions {
   inferenceBase?: string;
   /** Default model for the compute syscall. */
   computeModel?: string;
+  /**
+   * v4.6 — auto-sign a "received" delivery ack for every inbound message the
+   * receive loop delivers, so senders get proof of delivery for free. Default
+   * false. You can always call {@link SignaOS.ack} manually (e.g. "read").
+   */
+  autoAck?: boolean;
 }
 
 export interface MemoryEntry {
@@ -66,7 +72,7 @@ export class SignaOS {
   private readonly baseUrl: string;
 
   constructor(opts: BootOptions) {
-    this.agent = new SignaAgent({ privateKey: opts.privateKey, baseUrl: opts.baseUrl });
+    this.agent = new SignaAgent({ privateKey: opts.privateKey, baseUrl: opts.baseUrl, autoAck: opts.autoAck });
     this.memSlug = `mem-${this.agent.address.slice(2, 12)}`;
     this.inferenceBase = (opts.inferenceBase ?? SURPLUS_INFERENCE).replace(/\/$/, "");
     this.computeModel = opts.computeModel ?? "claude-opus-4.5";
@@ -97,6 +103,25 @@ export class SignaOS {
   onMessage(handler: (msg: SignaDm) => void | Promise<void>): this {
     this.agent.on("dm", handler);
     return this;
+  }
+
+  // ─────────────── syscall: ack (signed delivery receipt) ───────────────
+  /**
+   * Sign a delivery receipt for a message you received — "received" (default)
+   * or "read". The sender signs the message; this is how YOU prove you got it.
+   * "Delivered" becomes a wallet signature anyone can re-verify (/api/verify,
+   * kind `delivery_ack`), not a server flag. Pass a message object or its id.
+   */
+  async ack(message: string | SignaDm, status: "received" | "read" = "received"): Promise<unknown> {
+    return this.agent.ack(message, status);
+  }
+  /**
+   * Delivery receipts for the messages THIS agent sent ("did my messages
+   * land?"). Pass `{ role: "received" }` for the acks it signed, or
+   * `{ message }` for all acks on one message.
+   */
+  async acks(opts?: { message?: string; role?: "sent" | "received"; limit?: number }): Promise<unknown[]> {
+    return this.agent.acks(opts);
   }
 
   /**

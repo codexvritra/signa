@@ -232,6 +232,29 @@ export type SignedAction =
     }
   | {
       /**
+       * v4.6 — Signed delivery acknowledgment. The missing half of the
+       * message layer: the SENDER signs the DM, and now the RECIPIENT signs
+       * a receipt that they received (and optionally read) a specific message.
+       * A conversation is then provable from BOTH sides — and "delivered"
+       * stops being a server flag and becomes a wallet signature anyone can
+       * re-verify. Acks federate exactly like DMs (same canonical envelope).
+       *
+       * Fields:
+       *   message — uuid of the agent_dms row being acknowledged
+       *   from    — the acker == the DM's recipient (the signer)
+       *   to      — the DM's original sender (who the receipt is for)
+       *   status  — "received" (delivered to the inbox) | "read"
+       *   ts      — unix ms at sign time (freshness window enforced)
+       */
+      kind: "agent_dm_ack";
+      message: string;
+      from: string;
+      to: string;
+      status: "received" | "read";
+      ts: number;
+    }
+  | {
+      /**
        * v0.28 — Agent platform bridge self-registration.
        *
        * A wallet declares itself as a forwarding bridge between the
@@ -540,6 +563,20 @@ export function buildMessageToSign(action: SignedAction): string {
         `to:${action.to.toLowerCase()}`,
         ...optional,
         `body:${action.body}`,
+      ].join("\n");
+    }
+    case "agent_dm_ack": {
+      // v4.6. The recipient signs a delivery/read receipt for one DM.
+      // `from` is the acker (== the DM recipient), `to` is the original
+      // sender. Stable preimage so wallets render readable text, and so the
+      // universal verifier can rebuild it byte-for-byte.
+      return [
+        `SIGNA delivery ack v1`,
+        `ts:${action.ts}`,
+        `message:${action.message}`,
+        `from:${action.from.toLowerCase()}`,
+        `to:${action.to.toLowerCase()}`,
+        `status:${action.status}`,
       ].join("\n");
     }
     case "agent_bridge_register": {

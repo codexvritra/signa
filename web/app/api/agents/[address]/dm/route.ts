@@ -6,6 +6,7 @@ import {
   DEFAULT_DM_PROTOCOL,
   MAX_DM_BODY_LENGTH,
 } from "@/lib/feed-types";
+import { attachDelivery } from "@/lib/delivery-acks";
 import {
   decodePaymentHeader,
   humanizePrice,
@@ -93,12 +94,15 @@ export async function GET(
   if (error) {
     return json({ error: error.message }, { status: 500 });
   }
+  // v4.6 — attach signed delivery acks so the sender can see which of their
+  // messages were received / read (each backed by the recipient's signature).
+  const dms = await attachDelivery(supabase, data ?? []);
   return json({
     ok: true,
     address: addr,
     direction: "outbox",
-    count: data?.length ?? 0,
-    dms: data ?? [],
+    count: dms.length,
+    dms,
   });
 }
 
