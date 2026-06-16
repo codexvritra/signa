@@ -20,6 +20,7 @@ const PRIMARY: { href: string; label: string }[] = [
   { href: "/x402", label: "x402" },
   { href: "/autonomy", label: "Budgets" },
   { href: "/economy", label: "Economy" },
+  { href: "/reputation", label: "Reputation" },
   { href: "/oracle", label: "Oracle" },
   { href: "/partners", label: "Partners" },
   { href: "/gate", label: "The Gate" },
