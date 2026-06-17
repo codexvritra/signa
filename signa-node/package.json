@@ -1,0 +1,13 @@
+{
+  "name": "signa-node",
+  "version": "0.1.0",
+  "description": "A self-hostable, trustless SIGNA federation node — mirrors a peer's signed message feed, re-verifies every signature locally, and re-serves its own feed.",
+  "type": "module",
+  "bin": { "signa-node": "node.mjs" },
+  "main": "node.mjs",
+  "scripts": { "start": "node node.mjs" },
+  "license": "MIT",
+  "dependencies": {
+    "viem": "^2.21.0"
+  }
+}

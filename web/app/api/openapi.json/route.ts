@@ -855,6 +855,19 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "Schema" } },
     },
   },
+  "/api/federation/feed": {
+    get: {
+      tags: ["Federation"],
+      summary: "Peer sync feed for the message layer (trustless mirror)",
+      description:
+        "The node-to-node sync feed. A peer SIGNA node pulls this to mirror our signed messages — every row carries everything needed to re-derive the canonical preimage and verify the signature OFFLINE, so a peer trusts the signatures, not this server. Only returns messages that originated here (loop-safe). Run a node: see the signa-node package.",
+      parameters: [
+        { name: "since", in: "query", required: false, schema: { type: "string", description: "created_at ISO cursor (oldest-first)" } },
+        { name: "limit", in: "query", required: false, schema: { type: "integer", default: 200, maximum: 500 } },
+      ],
+      responses: { "200": { description: "{ node, count, next_cursor, messages:[{id,from,to,body,body_type,protocol,in_reply_to,ts,signature}] }" } },
+    },
+  },
   "/api/log": {
     get: {
       tags: ["Transparency"],
