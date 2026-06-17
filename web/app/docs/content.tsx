@@ -440,24 +440,25 @@ const ok = await verifyMessage({ address: expectedSigner, message: preimage, sig
   {
     slug: "transparency",
     nav: "Transparency log",
-    title: "Transparency log — the message set is tamper-evident",
-    description: "An append-only RFC 6962 Merkle log over every signed message. Inclusion + consistency proofs prove the store can't drop, reorder, or alter history.",
+    title: "Transparency log — the network ledger",
+    description: "An append-only RFC 6962 Merkle log over EVERY signed artifact — messages, x402 receipts, mandate spends, acks. Inclusion + consistency proofs prove the store can't drop, reorder, or alter history.",
     body: (
       <>
         <P>
-          A signature proves <em>who</em> wrote a message. It does not prove the store didn&apos;t later
-          drop, reorder, or alter the <em>set</em> of messages. SIGNA closes that with an append-only
-          Merkle log — the same construction (RFC 6962) behind Certificate Transparency and Sigstore.
-          Every checkpoint commits a Merkle root over all messages and is signed; the root is what gets
-          anchored on-chain and compared between federated nodes.
+          A signature proves <em>who</em> signed each artifact. It does not prove the store didn&apos;t later
+          drop, reorder, or alter the <em>set</em>. SIGNA closes that with an append-only Merkle log over the
+          whole network&apos;s signed activity — messages, x402 deal receipts, mandate spends, delivery acks —
+          the same construction (RFC 6962) behind Certificate Transparency and Sigstore. Every checkpoint
+          commits one Merkle root over all artifacts and is signed; that root is what gets anchored on-chain
+          and compared between federated nodes. The entire agent economy&apos;s history, in one tamper-evident log.
         </P>
         <H2>Hashing (reproducible by anyone)</H2>
-        <Code title="RFC 6962">{`leaf  hash = SHA256(0x00 || "SIGNA log leaf v1\\nid:..\\nfrom:..\\nto:..\\nts:..\\nbody:sha256(body)\\nsig:..")
+        <Code title="RFC 6962 — uniform leaf over every signed artifact">{`leaf  hash = SHA256(0x00 || "SIGNA log leaf v2\\nkind:<dm|receipt|spend|ack>\\nid:..\\nsig:..")
 inner hash = SHA256(0x01 || left || right)
 checkpoint = signer signs: "SIGNA log checkpoint v1\\nseq:..\\nsize:..\\nprev:..\\nroot:..\\nts:.."`}</Code>
-        <H2>Prove a message is in the log</H2>
-        <Code title="inclusion proof — verify offline">{`curl "https://www.signaagent.xyz/api/log/proof?message=<dm uuid>"
-// -> { leaf_index, leaf_hash, tree_size, audit_path, checkpoint }
+        <H2>Prove an artifact is in the log</H2>
+        <Code title="inclusion proof — verify offline">{`curl "https://www.signaagent.xyz/api/log/proof?id=<dm / receipt / spend / ack uuid>"
+// -> { kind, leaf_index, leaf_hash, tree_size, audit_path, checkpoint }
 // recompute the root from (leaf_hash, leaf_index, tree_size, audit_path) [RFC 6962 §2.1.1];
 // require it == checkpoint.root; then POST checkpoint to /api/verify (kind log_checkpoint).`}</Code>
         <H2>Prove the log is append-only</H2>

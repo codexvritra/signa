@@ -871,20 +871,20 @@ const PATHS: Record<string, unknown> = {
   "/api/log": {
     get: {
       tags: ["Transparency"],
-      summary: "Transparency-log head (RFC 6962 Merkle over the message layer)",
+      summary: "Transparency-log head — the network ledger (RFC 6962 Merkle)",
       description:
-        "An append-only Merkle log over every wallet-signed message. The latest checkpoint commits a signed Merkle root over all messages [0..tree_size), chained to the previous root. Drop/reorder/alter a covered message and its inclusion proof no longer reproduces the signed root — the store is tamper-evident, not trusted. Reads tick the log lazily.",
-      responses: { "200": { description: "{ checkpoint: { seq, tree_size, prev_root, root, signature, ... }, signer, how }" } },
+        "An append-only Merkle log over EVERY signed artifact on the network — messages, x402 deal receipts, mandate spends, delivery acks. The latest checkpoint commits one signed Merkle root over all artifacts [0..tree_size), chained to the previous root. Drop/reorder/alter a covered artifact and its inclusion proof no longer reproduces the signed root — the whole agent economy's history is tamper-evident, not trusted. Reads tick the log lazily.",
+      responses: { "200": { description: "{ checkpoint, ledger:{dm,receipt,spend,ack}, covers, signer, anchor, how }" } },
     },
   },
   "/api/log/proof": {
     get: {
       tags: ["Transparency"],
-      summary: "Inclusion proof for a message (RFC 6962 §2.1.1)",
+      summary: "Inclusion proof for any signed artifact (RFC 6962 §2.1.1)",
       description:
-        "Prove a specific signed message is committed in the latest checkpoint. Recompute the root from (leaf_hash, leaf_index, tree_size, audit_path) and require it == checkpoint.root; then verify the checkpoint signature at /api/verify (kind log_checkpoint).",
-      parameters: [{ name: "message", in: "query", required: true, schema: { type: "string", description: "dm uuid" } }],
-      responses: { "200": { description: "{ leaf_index, leaf_hash, leaf_entry, tree_size, audit_path, checkpoint }" }, "404": { description: "not_in_log" } },
+        "Prove a specific signed artifact (message / x402 receipt / mandate spend / delivery ack) is committed in the latest checkpoint. Recompute the root from (leaf_hash, leaf_index, tree_size, audit_path) and require it == checkpoint.root; then verify the checkpoint signature at /api/verify (kind log_checkpoint).",
+      parameters: [{ name: "id", in: "query", required: true, schema: { type: "string", description: "artifact uuid (dm / receipt / spend / ack); ?message= is an alias" } }],
+      responses: { "200": { description: "{ kind, leaf_index, leaf_hash, leaf_entry, tree_size, audit_path, checkpoint }" }, "404": { description: "not_in_log" } },
     },
   },
   "/api/log/anchor": {

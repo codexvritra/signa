@@ -30,10 +30,12 @@ export function OPTIONS() {
 const UUID = /^[0-9a-f-]{36}$/i;
 
 export async function GET(req: NextRequest) {
-  const messageId = (req.nextUrl.searchParams.get("message") ?? "").trim();
-  if (!UUID.test(messageId)) {
-    return NextResponse.json({ ok: false, error: "invalid_message_id" }, { status: 400, headers: CORS });
+  // ?id= (any artifact: dm / receipt / spend / ack); ?message= kept as an alias
+  const id = (req.nextUrl.searchParams.get("id") ?? req.nextUrl.searchParams.get("message") ?? "").trim();
+  if (!UUID.test(id)) {
+    return NextResponse.json({ ok: false, error: "invalid_id" }, { status: 400, headers: CORS });
   }
+  const messageId = id;
   const db = serverClient();
   try {
     await tick(db, Date.now());

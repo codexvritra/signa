@@ -1,12 +1,15 @@
 /**
- * The SIGNA transparency log — an append-only, tamper-evident Merkle log over
- * the signed message layer (agent_dms), RFC 6962 style.
+ * The SIGNA transparency log — an append-only, tamper-evident RFC 6962 Merkle
+ * log over the WHOLE network's signed activity: messages (agent_dms), x402
+ * deal receipts, mandate spends, and delivery acks. One root commits to the
+ * entire agent economy's history.
  *
- * Signatures already prove who wrote each message. This adds the missing
- * guarantee: the central store cannot silently drop, reorder, or alter
- * messages without breaking a published, signed (and on-chain anchorable)
- * Merkle root. Anyone can fetch the ordered entries, rebuild the tree, and
- * re-verify every checkpoint, inclusion proof, and consistency proof offline.
+ * Each artifact is independently wallet-signed (verify any one at /api/verify).
+ * This log adds the SET guarantee: the central store cannot silently drop,
+ * reorder, or alter the set of signed actions without breaking a published,
+ * signed (and on-chain anchorable) Merkle root. Anyone can fetch the ordered
+ * entries, rebuild the tree, and re-verify every checkpoint, inclusion proof,
+ * and consistency proof offline.
  *
  * Checkpoints are signed by the transparency-log signer
  * (keccak256("signa:transparency-log:v1")), the same deterministic
@@ -23,15 +26,15 @@ const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 export const LOG_SIGNER_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1")));
 export const LOG_SIGNER = LOG_SIGNER_ACCOUNT.address.toLowerCase();
 
-export type LogMessage = {
+/** One signed artifact in the network ledger. */
+export type LedgerEntry = {
+  kind: "dm" | "receipt" | "spend" | "ack";
   id: string;
-  from_address: string;
-  to_address: string;
-  ts: number;
-  body: string;
   signature: string | null;
   created_at: string;
 };
+
+export const LEDGER_KINDS = ["dm", "receipt", "spend", "ack"] as const;
 
 export type Checkpoint = {
   seq: number;
@@ -48,20 +51,13 @@ export type Checkpoint = {
 };
 
 /**
- * Canonical leaf entry for one message. Binds identity + content digest +
- * the author's signature, so the leaf changes if ANY of them is altered.
- * sha256(body) keeps leaves bounded and avoids embedding large bodies.
+ * Canonical, uniform leaf for any signed artifact: binds its kind, id, and the
+ * signature that authenticates its content. The artifact's own signature
+ * guarantees its content; the log commits to the SET of (kind, id, signature).
+ * Reproducible by anyone from the public rows.
  */
-export function leafEntry(m: LogMessage): string {
-  return [
-    "SIGNA log leaf v1",
-    `id:${m.id}`,
-    `from:${(m.from_address || "").toLowerCase()}`,
-    `to:${(m.to_address || "").toLowerCase()}`,
-    `ts:${m.ts}`,
-    `body:${sha256(m.body ?? "")}`,
-    `sig:${m.signature ?? ""}`,
-  ].join("\n");
+export function leafEntry(e: LedgerEntry): string {
+  return ["SIGNA log leaf v2", `kind:${e.kind}`, `id:${e.id}`, `sig:${e.signature ?? ""}`].join("\n");
 }
 
 /** The canonical checkpoint preimage the log signer signs. */
@@ -76,27 +72,48 @@ export function checkpointPreimage(c: { seq: number; tree_size: number; prev_roo
   ].join("\n");
 }
 
+async function readTable(
+  db: SupabaseClient,
+  table: string,
+  kind: LedgerEntry["kind"],
+  filterDeleted: boolean,
+): Promise<LedgerEntry[]> {
+  let q = db.from(table).select("id, signature, created_at").limit(5000);
+  if (filterDeleted) q = q.is("deleted_at", null);
+  const { data, error } = await q;
+  if (error) throw new Error(`${table}: ${error.message}`);
+  return (data ?? []).map((r: { id: string; signature: string | null; created_at: string }) => ({
+    kind,
+    id: r.id,
+    signature: r.signature,
+    created_at: r.created_at,
+  }));
+}
+
 /**
- * Read the full ordered message log. Deterministic order — (created_at, id) —
- * so the tree is reproducible by anyone. Paginated to cover the whole table.
+ * The full ordered network ledger — every signed artifact, deterministically
+ * ordered by (created_at, kind, id) so the tree is reproducible by anyone.
  */
-export async function readLog(db: SupabaseClient): Promise<LogMessage[]> {
-  const out: LogMessage[] = [];
-  const PAGE = 1000;
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await db
-      .from("agent_dms")
-      .select("id, from_address, to_address, ts, body, signature, created_at")
-      .is("deleted_at", null)
-      .order("created_at", { ascending: true })
-      .order("id", { ascending: true })
-      .range(from, from + PAGE - 1);
-    if (error) throw new Error(error.message);
-    const rows = (data ?? []) as LogMessage[];
-    out.push(...rows);
-    if (rows.length < PAGE) break;
-  }
-  return out;
+export async function readLedger(db: SupabaseClient): Promise<LedgerEntry[]> {
+  const [dms, receipts, spends, acks] = await Promise.all([
+    readTable(db, "agent_dms", "dm", true),
+    readTable(db, "x402_receipts", "receipt", false),
+    readTable(db, "mandate_spends", "spend", false),
+    readTable(db, "agent_dm_acks", "ack", false),
+  ]);
+  const all = [...dms, ...receipts, ...spends, ...acks];
+  all.sort((a, b) => {
+    if (a.created_at !== b.created_at) return a.created_at < b.created_at ? -1 : 1;
+    if (a.kind !== b.kind) return a.kind < b.kind ? -1 : 1;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+  return all;
+}
+
+export function ledgerCounts(entries: LedgerEntry[]): Record<string, number> {
+  const c: Record<string, number> = { dm: 0, receipt: 0, spend: 0, ack: 0 };
+  for (const e of entries) c[e.kind] = (c[e.kind] ?? 0) + 1;
+  return c;
 }
 
 export async function latestCheckpoint(db: SupabaseClient): Promise<Checkpoint | null> {
@@ -109,22 +126,20 @@ export async function latestCheckpoint(db: SupabaseClient): Promise<Checkpoint |
   return (data as Checkpoint) ?? null;
 }
 
-const EMPTY_ROOT = sha256(""); // not used as a leaf; readable genesis marker
-
 /**
- * Advance the log: if new messages exist since the last checkpoint, compute a
+ * Advance the log: if new artifacts exist since the last checkpoint, compute a
  * fresh Merkle root over ALL leaves, sign it, and append a checkpoint. Returns
  * the latest checkpoint (new or existing). Idempotent — a no-op when nothing
  * was added. Guarded against the seq primary-key race by ignoring conflicts.
  */
 export async function tick(db: SupabaseClient, nowMs: number): Promise<Checkpoint | null> {
-  const msgs = await readLog(db);
-  const size = msgs.length;
+  const entries = await readLedger(db);
+  const size = entries.length;
   const prev = await latestCheckpoint(db);
   if (prev && prev.tree_size === size) return prev; // nothing new
   if (size === 0) return prev;
 
-  const leaves = msgs.map((m) => leafHash(leafEntry(m)));
+  const leaves = entries.map((e) => leafHash(leafEntry(e)));
   const root = merkleRoot(leaves);
   const seq = prev ? prev.seq + 1 : 0;
   const prevRoot = prev ? prev.root : ""; // genesis prev is empty string
@@ -137,7 +152,7 @@ export async function tick(db: SupabaseClient, nowMs: number): Promise<Checkpoin
     prev_root: prevRoot,
     root,
     count_added: size - (prev ? prev.tree_size : 0),
-    range_to: msgs[size - 1]?.created_at ?? null,
+    range_to: entries[size - 1]?.created_at ?? null,
     ts: nowMs,
     signature,
     signed_message: pre,
@@ -145,23 +160,23 @@ export async function tick(db: SupabaseClient, nowMs: number): Promise<Checkpoin
   };
   const { error } = await db.from("signa_log_checkpoints").insert(row);
   if (error) {
-    // lost a race for this seq — return whatever is now latest
     return (await latestCheckpoint(db)) ?? row;
   }
   return row;
 }
 
 /**
- * Build an inclusion proof for a message id against the latest checkpoint.
- * Returns null if the message isn't in the log yet (e.g. arrived after the
- * last checkpoint — caller can tick() then retry).
+ * Inclusion proof for any signed artifact (by id) against the latest
+ * checkpoint. Returns null if it isn't covered yet (arrived after the last
+ * checkpoint — tick() then retry).
  */
 export async function inclusionFor(
   db: SupabaseClient,
-  messageId: string,
+  id: string,
 ): Promise<
   | {
       message_id: string;
+      kind: string;
       leaf_index: number;
       leaf_hash: string;
       leaf_entry: string;
@@ -173,18 +188,17 @@ export async function inclusionFor(
 > {
   const cp = await latestCheckpoint(db);
   if (!cp) return null;
-  const msgs = await readLog(db);
-  const leavesAll = msgs.map((m) => leafEntry(m));
-  // proof must be against the checkpoint's tree_size, not the live size
-  const covered = msgs.slice(0, cp.tree_size);
-  const idx = covered.findIndex((m) => m.id === messageId);
+  const entries = await readLedger(db);
+  const covered = entries.slice(0, cp.tree_size);
+  const idx = covered.findIndex((e) => e.id === id);
   if (idx < 0) return null;
-  const leafHashes = covered.map((m) => leafHash(leafEntry(m)));
+  const leafHashes = covered.map((e) => leafHash(leafEntry(e)));
   return {
-    message_id: messageId,
+    message_id: id,
+    kind: covered[idx].kind,
     leaf_index: idx,
     leaf_hash: leafHashes[idx],
-    leaf_entry: leavesAll[idx],
+    leaf_entry: leafEntry(covered[idx]),
     tree_size: cp.tree_size,
     audit_path: inclusionPath(idx, leafHashes),
     checkpoint: cp,
@@ -192,8 +206,8 @@ export async function inclusionFor(
 }
 
 /**
- * Consistency proof between an older checkpoint (size `first`) and the latest
- * checkpoint, proving the log is append-only between them.
+ * Consistency proof between an older size `first` and the latest checkpoint,
+ * proving the log is append-only between them.
  */
 export async function consistencyFor(
   db: SupabaseClient,
@@ -202,8 +216,8 @@ export async function consistencyFor(
   const cp = await latestCheckpoint(db);
   if (!cp) return null;
   if (first <= 0 || first > cp.tree_size) return null;
-  const msgs = await readLog(db);
-  const leafHashes = msgs.slice(0, cp.tree_size).map((m) => leafHash(leafEntry(m)));
+  const entries = await readLedger(db);
+  const leafHashes = entries.slice(0, cp.tree_size).map((e) => leafHash(leafEntry(e)));
   const olderRoot = merkleRoot(leafHashes.slice(0, first));
   const { data: firstCp } = await db
     .from("signa_log_checkpoints")
@@ -220,5 +234,3 @@ export async function consistencyFor(
     proof: consistencyProof(first, leafHashes),
   };
 }
-
-export { EMPTY_ROOT };
