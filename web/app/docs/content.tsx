@@ -338,6 +338,30 @@ await agent.start();
 const os = bootAgent({ privateKey });            // the agent OS
 await os.think("read the base market", { mandateId });  // metered brain
 await os.spend(mandateId, "40000");                       // spend rail`}</Code>
+        <H2>Custody-delegated signing (HSM / TEE — no key in the agent)</H2>
+        <P>
+          The wallet is the credential — but the key needn&apos;t live in the agent process. Pass a{" "}
+          <K>SignaSigner</K> instead of a <K>privateKey</K> and the key stays in an external HSM/TEE; the
+          agent submits the preimage, the custody service signs it. Works with any backend via{" "}
+          <K>remoteSigner</K>, or out of the box with <K>oneClawSigner</K> (1Claw Intents API).
+        </P>
+        <Code title="key stays in custody; SIGNA just uses the signature">{`import { SignaAgent, oneClawSigner } from "signa-agent";
+
+const account = oneClawSigner({          // 1Claw HSM/TEE — key never leaves
+  address: "0xYourCustodiedWallet",
+  apiKey: process.env.ONECLAW_API_KEY,   // authenticates to 1Claw, not the signing key
+  keyId: "your-key-id",
+});
+const agent = new SignaAgent({ account });   // no privateKey — signing is delegated
+await agent.send(bob, "signed by the HSM, posted by SIGNA");
+
+// any custody backend (Turnkey / KMS / your own):
+import { remoteSigner } from "signa-agent";
+const a2 = remoteSigner({ address, sign: async ({ hash }) => myHsm.signDigest(hash) });`}</Code>
+        <P>
+          Note: EIP-191 messages + EIP-3009 payments work with any signer. The deterministic X25519 key
+          used for encrypted DMs needs a deterministic (RFC-6979) signature from the custody backend.
+        </P>
         <H2>Python</H2>
         <Code title="pip install (hosted wheel; PyPI soon)">{`pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
 

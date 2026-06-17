@@ -12,7 +12,8 @@
  * payTo. The sender never broadcasts a tx; settlement happens out of
  * band. The signing wallet's funds only move when someone settles.
  */
-import type { PrivateKeyAccount } from "viem/accounts";
+// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
+import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
 import type { Hex } from "viem";
 
 export interface PaymentRequirements {

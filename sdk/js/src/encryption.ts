@@ -18,7 +18,8 @@
  * the secret key.
  */
 import nacl from "tweetnacl";
-import type { PrivateKeyAccount } from "viem/accounts";
+// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
+import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
 
 export const SEALEDBOX_VERSION = "signa-sealedbox-v1";
 export const X25519_DERIVE_PREIMAGE = "SIGNA encryption key v1";

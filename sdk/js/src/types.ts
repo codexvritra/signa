@@ -92,10 +92,17 @@ export interface RegisterBridgeOptions {
   capabilities?: string[];
 }
 
-/** Constructor options. */
+/** Constructor options. Provide exactly one of `privateKey` or `account`. */
 export interface SignaAgentOptions {
-  /** 0x-prefixed hex private key (or 64-char hex without prefix). */
-  privateKey: string;
+  /** 0x-prefixed hex private key (or 64-char hex without prefix). Omit if you pass `account`. */
+  privateKey?: string;
+  /**
+   * v4.9 — a custody-delegated signer instead of a local key: the private key
+   * lives in an HSM/TEE (1Claw, Turnkey, KMS, …) and the agent only submits
+   * preimages to be signed. Build one with `oneClawSigner(...)` or
+   * `remoteSigner(...)`. The raw key never enters this process.
+   */
+  account?: import("./signer.js").SignaSigner;
   /** Defaults to `https://www.signaagent.xyz`. Point to your own SIGNA node to federate. */
   baseUrl?: string;
   /** Inbox poll interval. Default 5000 ms. */

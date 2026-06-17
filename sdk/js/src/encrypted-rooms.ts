@@ -9,7 +9,8 @@
  *
  * Plaintext, secret keys, ephemeral keys never leave this process.
  */
-import type { PrivateKeyAccount } from "viem/accounts";
+// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
+import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
 
 import {
   buildAddMemberPreimage,

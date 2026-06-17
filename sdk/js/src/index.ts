@@ -35,7 +35,8 @@
  * ```
  */
 
-import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
+import { privateKeyToAccount } from "viem/accounts";
+import type { SignaSigner } from "./signer.js";
 
 import {
   buildAckPreimage,
@@ -60,6 +61,7 @@ import type {
 } from "./types.js";
 
 export * from "./types.js";
+export { remoteSigner, oneClawSigner, type SignaSigner } from "./signer.js";
 export {
   buildDmPreimage,
   buildAckPreimage,
@@ -157,7 +159,7 @@ export class SignaAgent {
   /** v0.80 — end-to-end encrypted private rooms (signa-sealedbox-v1 per member). */
   readonly encrypted: EncryptedRooms;
 
-  private readonly account: PrivateKeyAccount;
+  private readonly account: SignaSigner;
   private readonly pollIntervalMs: number;
   private readonly heartbeatIntervalMs: number;
   private readonly echoOwnMessages: boolean;
@@ -170,11 +172,18 @@ export class SignaAgent {
   private running = false;
 
   constructor(opts: SignaAgentOptions) {
-    if (!opts.privateKey) throw new Error("SignaAgent: privateKey is required");
-    const pk = opts.privateKey.startsWith("0x")
-      ? (opts.privateKey as `0x${string}`)
-      : (`0x${opts.privateKey}` as `0x${string}`);
-    this.account = privateKeyToAccount(pk);
+    // v4.9 — sign with a local key OR delegate to a custody signer (1Claw /
+    // any HSM/TEE) via `account`. The agent never needs the raw key.
+    if (opts.account) {
+      this.account = opts.account;
+    } else if (opts.privateKey) {
+      const pk = opts.privateKey.startsWith("0x")
+        ? (opts.privateKey as `0x${string}`)
+        : (`0x${opts.privateKey}` as `0x${string}`);
+      this.account = privateKeyToAccount(pk);
+    } else {
+      throw new Error("SignaAgent: provide `privateKey` or `account` (a SignaSigner, e.g. oneClawSigner)");
+    }
     this.address = this.account.address.toLowerCase();
     this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
     const subClientOpts = { baseUrl: this.baseUrl, account: this.account };

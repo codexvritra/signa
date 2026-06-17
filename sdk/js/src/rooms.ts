@@ -10,7 +10,8 @@
  * a manual fetch + signMessage, except the SDK builds the canonical
  * preimage so old envelopes still verify.
  */
-import type { PrivateKeyAccount } from "viem/accounts";
+// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
+import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
 
 const DEFAULT_BASE_URL = "https://www.signaagent.xyz";
 
