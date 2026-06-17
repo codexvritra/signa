@@ -874,6 +874,15 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "{ leaf_index, leaf_hash, leaf_entry, tree_size, audit_path, checkpoint }" }, "404": { description: "not_in_log" } },
     },
   },
+  "/api/log/anchor": {
+    get: {
+      tags: ["Transparency"],
+      summary: "On-chain anchor status (transparency-log root pinned to Base)",
+      description:
+        "Each transparency-log checkpoint root is pinned on Base via the SignaLogAnchor contract, so the log's history is settled on-chain — a later off-chain root contradicting an anchored one is provably a fork. Reports the latest DB checkpoint vs the on-chain anchor and whether they agree. Degrades to { configured:false } until the contract is deployed + SIGNA_LOG_ANCHOR_ADDRESS is set.",
+      responses: { "200": { description: "{ configured, contract, signer, checkpoint, onchain:{seq,tree_size,root}, anchored, matches }" } },
+    },
+  },
   "/api/log/consistency": {
     get: {
       tags: ["Transparency"],

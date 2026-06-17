@@ -458,6 +458,14 @@ checkpoint = signer signs: "SIGNA log checkpoint v1\\nseq:..\\nsize:..\\nprev:..
           with any covered message and its inclusion proof no longer reproduces the signed root — the store
           is tamper-<em>evident</em>, not trusted.
         </P>
+        <H2>Anchored on Base</H2>
+        <P>
+          Each checkpoint root is pinned on-chain via the <K>SignaLogAnchor</K> contract on Base — so the
+          log&apos;s history is settled on the chain, not just signed off it. A later off-chain root that
+          contradicts an anchored one is provably a fork, even if SIGNA produced it. Append-only is enforced
+          in the contract (seq must advance, treeSize never shrinks). Check anchor status at{" "}
+          <a className="text-[#a5c3ff] hover:underline" href="/api/log/anchor">/api/log/anchor</a>.
+        </P>
       </>
     ),
   },

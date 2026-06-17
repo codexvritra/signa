@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
 import { tick, latestCheckpoint, LOG_SIGNER } from "@/lib/transparency";
+import { readOnchainAnchor, logAnchorAddress } from "@/lib/log-anchor";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,12 +39,19 @@ export async function GET(req: NextRequest) {
     cp = await latestCheckpoint(db).catch(() => null);
   }
   const origin = req.nextUrl.origin;
+  const onchain = await readOnchainAnchor().catch(() => null);
   return NextResponse.json(
     {
       ok: true,
       log: "SIGNA transparency log (RFC 6962 Merkle, over the signed message layer)",
       signer: LOG_SIGNER,
       checkpoint: cp,
+      anchor: {
+        chain: "base",
+        configured: !!logAnchorAddress(),
+        onchain, // { seq, tree_size, root, anchored_at } once anchored on Base
+        status: `${origin}/api/log/anchor`,
+      },
       how: {
         inclusion: `${origin}/api/log/proof?message=<dm uuid>`,
         consistency: `${origin}/api/log/consistency?first=<earlier tree_size>`,
