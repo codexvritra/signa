@@ -35,7 +35,17 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "pipeline_link", "x402_receipt", "log_checkpoint", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "pipeline_link", "x402_receipt", "log_checkpoint", "trigger", "raw"];
+
+/** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
+function canonObj(obj: unknown): string {
+  if (!obj || typeof obj !== "object") return "";
+  const o = obj as Record<string, unknown>;
+  return Object.keys(o)
+    .sort()
+    .map((k) => `${k}=${typeof o[k] === "string" ? o[k] : JSON.stringify(o[k])}`)
+    .join(";");
+}
 
 /** Rebuild the canonical preimage for an artifact, and who is expected to have signed it. */
 function buildPreimage(a: VerifyInput): { preimage: string; expected: string | null; role: string } | null {
@@ -117,6 +127,20 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `ts:${a.ts}`,
       ].join("\n");
       return { preimage: pre, expected: LOG_SIGNER, role: "SIGNA transparency-log signer" };
+    }
+    case "trigger": {
+      // v6.0 — the owner signs a conditional automation rule. Must match
+      // triggers.ts triggerPreimage().
+      const owner = String(a.owner ?? "").toLowerCase();
+      const pre = [
+        "SIGNA trigger v1",
+        `ts:${a.ts}`,
+        `owner:${owner}`,
+        `when:${a.when_type ?? ""}:${canonObj(a.trigger)}`,
+        `do:${a.do_type ?? ""}:${canonObj(a.action)}`,
+        `expiry:${a.expiry ?? ""}`,
+      ].join("\n");
+      return { preimage: pre, expected: owner || null, role: "trigger owner wallet" };
     }
     case "raw": {
       if (typeof a.preimage !== "string") return null;

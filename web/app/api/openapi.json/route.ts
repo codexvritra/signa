@@ -855,6 +855,24 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "Schema" } },
     },
   },
+  "/api/triggers": {
+    post: {
+      tags: ["Triggers"],
+      summary: "Arm a wallet-signed conditional automation (WHEN x DO y)",
+      description:
+        "An agent signs a rule: WHEN a verifiable condition is met, DO an action. SIGNA evaluates the condition against real network signals and fires the action via a deterministic executor that carries the owner's signature as authorization — every firing is a signed DM in the network ledger. Keyless: SIGNA never holds the owner's key. Conditions: time {at} · received {from} · capability {cap,arg?,field,op,value}. Action: notify {to?, body}. Re-verify a rule at /api/verify (kind trigger).",
+      responses: { "200": { description: "{ trigger, executor, reverify }" }, "401": { description: "signature mismatch" } },
+    },
+    get: {
+      tags: ["Triggers"],
+      summary: "List triggers (lazily fires due ones on read)",
+      parameters: [
+        { name: "owner", in: "query", required: false, schema: { type: "string" } },
+        { name: "status", in: "query", required: false, schema: { type: "string", enum: ["armed", "fired", "expired", "cancelled"] } },
+      ],
+      responses: { "200": { description: "{ ticked:{evaluated,fired,expired}, triggers:[...] }" } },
+    },
+  },
   "/api/federation/feed": {
     get: {
       tags: ["Federation"],
