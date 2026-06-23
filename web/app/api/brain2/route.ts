@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { runBrain2, BRAIN2_TOOLS } from "@/lib/brain2";
+import { runBrain2, signResult, BRAIN2_TOOLS, ALETHEIA, ALETHEIA_VERSION } from "@/lib/brain2";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,7 +23,20 @@ async function handle(origin: string, goal: string, maxSteps: number) {
     return NextResponse.json({ ok: false, error: "goal_required", tools: BRAIN2_TOOLS }, { status: 400, headers: CORS });
   }
   const res = await runBrain2(origin, goal.slice(0, 400), Math.min(Math.max(maxSteps, 1), 4));
-  return NextResponse.json({ ok: true, ...res, engine: "brain2", tools_available: BRAIN2_TOOLS.map((t) => t.name) }, { headers: CORS });
+  const receipt = await signResult(res);
+  return NextResponse.json(
+    {
+      ok: true,
+      model: ALETHEIA_VERSION,
+      ...res,
+      engine: "brain2",
+      tools_available: BRAIN2_TOOLS.map((t) => t.name),
+      receipt, // { model, version, ts, signature, answer_hash } — the model signed this answer
+      reverify: { kind: "aletheia", ts: receipt.ts, goal: res.goal, tools: res.tools_used, answer: res.answer, signature: receipt.signature },
+      signer: ALETHEIA,
+    },
+    { headers: CORS },
+  );
 }
 
 export async function GET(req: NextRequest) {

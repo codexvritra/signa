@@ -12,9 +12,39 @@
  * signer so the final answer is wallet-signed and re-verifiable.
  */
 import { createHash } from "node:crypto";
+import { privateKeyToAccount } from "viem/accounts";
+import { keccak256, toBytes } from "viem";
 import { fulfillCapability } from "./capabilities";
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+
+/**
+ * ALETHEIA — SIGNA's verifiable reasoning model (the intelligence powering
+ * Brain 2.0 and VERA). Its differentiator isn't raw scale; it's PROOF: every
+ * answer is grounded in live tool data and wallet-signed by the model key, so
+ * anyone can re-verify it at /api/verify (kind "aletheia"). Trust-but-verify AI.
+ */
+export const ALETHEIA_VERSION = "Aletheia 1.0";
+export const ALETHEIA_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1")));
+export const ALETHEIA = ALETHEIA_ACCOUNT.address.toLowerCase();
+
+export function aletheiaPreimage(a: { ts: number; goal: string; tools: string[]; answer: string }): string {
+  return [
+    "SIGNA Aletheia answer v1",
+    `ts:${a.ts}`,
+    `goal:${a.goal}`,
+    `tools:${a.tools.join(",")}`,
+    `answer:${sha256(a.answer)}`,
+  ].join("\n");
+}
+
+/** Sign a Brain 2.0 result with the ALETHEIA model key → a re-verifiable receipt. */
+export async function signResult(r: Brain2Result): Promise<{ model: string; version: string; ts: number; signature: string; preimage: string; answer_hash: string }> {
+  const ts = Date.now();
+  const preimage = aletheiaPreimage({ ts, goal: r.goal, tools: r.tools_used, answer: r.answer });
+  const signature = await ALETHEIA_ACCOUNT.signMessage({ message: preimage });
+  return { model: ALETHEIA, version: ALETHEIA_VERSION, ts, signature, preimage, answer_hash: sha256(r.answer) };
+}
 
 /** The tools Brain 2.0 can use — reliable, keyless reads from the mesh. */
 export const BRAIN2_TOOLS: { name: string; arg: string; about: string }[] = [

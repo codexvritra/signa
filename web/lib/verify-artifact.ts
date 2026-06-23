@@ -21,6 +21,7 @@ const GATEWAY = privateKeyToAccount(keccak256(toBytes("signa:capability-gateway:
 const BRAIN = privateKeyToAccount(keccak256(toBytes("signa:brain:v1"))).address.toLowerCase();
 const X402_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1"))).address.toLowerCase();
 const LOG_SIGNER = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1"))).address.toLowerCase();
+const ALETHEIA = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1"))).address.toLowerCase();
 
 export type VerifyInput = Record<string, unknown> & { kind?: string; signature?: string };
 
@@ -35,7 +36,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "pipeline_link", "x402_receipt", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -127,6 +128,14 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `ts:${a.ts}`,
       ].join("\n");
       return { preimage: pre, expected: LOG_SIGNER, role: "SIGNA transparency-log signer" };
+    }
+    case "aletheia": {
+      // v8.0 — SIGNA's verifiable reasoning model signs every answer. Must
+      // match brain2.ts aletheiaPreimage().
+      const ansHash = a.answer_hash ? String(a.answer_hash) : sha256(String(a.answer ?? ""));
+      const tools = Array.isArray(a.tools) ? (a.tools as unknown[]).join(",") : String(a.tools ?? "");
+      const pre = ["SIGNA Aletheia answer v1", `ts:${a.ts}`, `goal:${a.goal ?? ""}`, `tools:${tools}`, `answer:${ansHash}`].join("\n");
+      return { preimage: pre, expected: ALETHEIA, role: "SIGNA Aletheia model" };
     }
     case "trigger": {
       // v6.0 — the owner signs a conditional automation rule. Must match
