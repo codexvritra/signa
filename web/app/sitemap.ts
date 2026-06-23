@@ -28,6 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/oracle", 0.9),
     page("/reputation", 0.9),
     page("/verified", 0.92),
+    page("/vera", 0.97),
     page("/os", 0.95),
     page("/bus", 0.95),
     page("/a2a", 0.9),
