@@ -37,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -152,6 +152,23 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `note:${noteHash}`,
       ].join("\n");
       return { preimage: pre, expected: from || null, role: "payer wallet (b20 money-note)" };
+    }
+    case "b20_reserves": {
+      // v8.x — a B20 stablecoin issuer signs a timestamped reserve attestation
+      // ("backed by X of asset Y, as of T"). Must match lib/b20.ts b20ReservesPreimage().
+      // expected = the issuer wallet. Provenance of the claim, not a third-party audit.
+      const issuer = String(a.issuer ?? "").toLowerCase();
+      const stmtHash = a.statement_hash ? String(a.statement_hash) : sha256(String(a.statement ?? ""));
+      const pre = [
+        "SIGNA b20 reserves v1",
+        `ts:${a.ts}`,
+        `token:${String(a.token ?? "").toLowerCase()}`,
+        `issuer:${issuer}`,
+        `reserve:${a.reserve_amount ?? ""} ${a.reserve_asset ?? ""}`,
+        `as_of:${a.as_of ?? ""}`,
+        `statement:${stmtHash}`,
+      ].join("\n");
+      return { preimage: pre, expected: issuer || null, role: "stablecoin issuer wallet (reserve attestation)" };
     }
     case "log_checkpoint": {
       // v4.7 — the transparency-log signer signs each Merkle checkpoint over

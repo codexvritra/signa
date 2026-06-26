@@ -272,3 +272,33 @@ export function buildB20Note(a: B20NoteFields): { preimage: string; memo: Hex; n
     reverify: { kind: "b20_memo", ts: a.ts, from: a.from.toLowerCase(), to: a.to.toLowerCase(), token: a.token.toLowerCase(), amount: a.amount, note_hash },
   };
 }
+
+// ── verifiable stablecoins: the issuer signs a re-checkable reserve attestation ─
+// B20 ships a native STABLECOIN variant. SIGNA lets the issuer publish a timestamped,
+// wallet-signed reserve statement — "this stablecoin is backed by X of asset Y, as of T" —
+// that anyone can re-verify (kind b20_reserves), recovering the issuer. This is provenance
+// of the issuer's claim (who attested, what, and when), not a third-party audit. Honest by design.
+export type B20ReservesFields = { ts: number; token: string; issuer: string; reserve_amount: string; reserve_asset: string; statement: string; as_of: number };
+
+/** Canonical preimage for a B20 reserve attestation — MUST match the b20_reserves case in verify-artifact.ts. */
+export function b20ReservesPreimage(a: B20ReservesFields): string {
+  return [
+    "SIGNA b20 reserves v1",
+    `ts:${a.ts}`,
+    `token:${a.token.toLowerCase()}`,
+    `issuer:${a.issuer.toLowerCase()}`,
+    `reserve:${a.reserve_amount} ${a.reserve_asset}`,
+    `as_of:${a.as_of}`,
+    `statement:${sha256(a.statement)}`,
+  ].join("\n");
+}
+
+/** Build an unsigned reserve attestation: the preimage the ISSUER signs + the reverify payload. */
+export function buildB20Reserves(a: B20ReservesFields): { preimage: string; statement_hash: string; reverify: Record<string, unknown> } {
+  const preimage = b20ReservesPreimage(a);
+  const statement_hash = sha256(a.statement);
+  return {
+    preimage, statement_hash,
+    reverify: { kind: "b20_reserves", ts: a.ts, token: a.token.toLowerCase(), issuer: a.issuer.toLowerCase(), reserve_amount: a.reserve_amount, reserve_asset: a.reserve_asset, as_of: a.as_of, statement_hash },
+  };
+}
