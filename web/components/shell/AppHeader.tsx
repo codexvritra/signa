@@ -20,6 +20,7 @@ const PRIMARY: { href: string; label: string }[] = [
   { href: "/swarm", label: "Swarm" },
   { href: "/capabilities", label: "Capabilities" },
   { href: "/x402", label: "x402" },
+  { href: "/b20", label: "B20" },
   { href: "/autonomy", label: "Budgets" },
   { href: "/economy", label: "Economy" },
   { href: "/verified", label: "Verified" },

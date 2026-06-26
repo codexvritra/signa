@@ -15,6 +15,7 @@
  */
 import { bankrResolveRecipient, bankrRecentLaunches } from "@/lib/skills/bankr";
 import { rootIntel, rootMarketSummary } from "@/lib/root";
+import { b20Info } from "@/lib/b20";
 
 export type Capability = {
   name: string;
@@ -35,6 +36,7 @@ export const CAPABILITY_CATALOG: Capability[] = [
   { name: "base.gas", provider: "signa", source: "mainnet.base.org", input: "none", description: "current Base gas price in gwei" },
   { name: "base.block", provider: "signa", source: "mainnet.base.org", input: "none", description: "the latest Base block number + timestamp" },
   { name: "defi.tvl", provider: "signa", source: "api.llama.fi", input: "a protocol slug (e.g. aave, uniswap, aerodrome)", description: "total value locked for a DeFi protocol in USD" },
+  { name: "b20.info", provider: "signa", source: "Base B20 factory", input: "a B20/ERC-20 token address (0x…)", description: "B20 token metadata on Base — name, symbol, supply, and on-chain isB20 check" },
   { name: "signa.reason", provider: "signa", source: "gateway", input: "a prompt", description: "reason over a prompt on the SIGNA gateway — composes earlier pipeline steps into an answer" },
 ];
 
@@ -121,6 +123,11 @@ export async function fulfillCapability(name: string, arg?: string): Promise<unk
       const tvl = await r.json();
       if (typeof tvl !== "number") throw new Error(`no TVL for protocol "${slug}"`);
       return { protocol: slug, tvl_usd: tvl, source: "DefiLlama" };
+    }
+    case "b20.info": {
+      const addr = (arg ?? "").trim();
+      if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) throw new Error("b20.info needs a token address (0x…40)");
+      return await b20Info(addr);
     }
     case "signa.reason": {
       const prompt = (arg ?? "").trim();

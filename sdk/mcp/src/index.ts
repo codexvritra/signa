@@ -733,6 +733,38 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "signa_b20_info",
+    description:
+      "Look up a B20 token on Base (Base's native token standard from the Beryl upgrade). Returns name, symbol, decimals, total supply, and an on-chain isB20 check. Works for any ERC-20 too.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        address: { type: "string", description: "the B20/ERC-20 token address (0x…40hex)" },
+        holder: { type: "string", description: "optional wallet to also return its balance" },
+      },
+      required: ["address"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "signa_b20_launch",
+    description:
+      "Prepare a verifiable B20 token launch on Base. Returns the exact createB20 calldata your own wallet broadcasts (SIGNA never custodies funds), the predicted deterministic token address, and a wallet-signed SIGNA launch receipt re-verifiable by anyone (kind b20_launch). x402 moved the money, B20 mints the token, SIGNA proves who launched what.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "token name" },
+        symbol: { type: "string", description: "token symbol (≤16 chars)" },
+        creator: { type: "string", description: "the wallet that will broadcast + own the token (0x…40hex)" },
+        variant: { type: "string", enum: ["ASSET", "STABLECOIN"], description: "ASSET (default) or STABLECOIN" },
+        decimals: { type: "integer", minimum: 6, maximum: 18, description: "ASSET decimals (6..18, default 18)" },
+        currency: { type: "string", description: "STABLECOIN ISO currency code (e.g. USD)" },
+      },
+      required: ["name", "symbol", "creator"],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -777,6 +809,61 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ``,
           `Verifiable receipt: ${SIGNA_BASE}/x402/${rc.id}`,
           `Re-verify: signa_x402_verify { "id": "${rc.id}" }`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_b20_info": {
+        const address = String(args.address ?? "").toLowerCase();
+        if (!/^0x[a-f0-9]{40}$/.test(address)) throw new McpError(ErrorCode.InvalidParams, "address must be 0x…40hex");
+        const qs = new URLSearchParams({ address });
+        if (args.holder) qs.set("holder", String(args.holder));
+        const r = await fetch(`${SIGNA_BASE}/api/b20?${qs.toString()}`);
+        const j = (await r.json()) as Record<string, any>;
+        if (!j?.ok) throw new McpError(ErrorCode.InvalidParams, j?.error ?? "lookup_failed");
+        const text = [
+          `B20 token ${j.address}`,
+          `name:     ${j.name ?? "—"}  (${j.symbol ?? "—"})`,
+          `decimals: ${j.decimals ?? "—"}`,
+          `supply:   ${j.total_supply_raw ?? "—"}`,
+          `is B20:   ${j.is_b20_confirmed_onchain === true ? "yes (on-chain)" : j.is_b20 ? "likely (by prefix)" : "no"}`,
+          j.balance_raw != null ? `balance:  ${j.balance_raw} (holder ${j.holder})` : ``,
+          `network:  ${j.network}`,
+        ].filter(Boolean).join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_b20_launch": {
+        const creator = String(args.creator ?? "").toLowerCase();
+        if (!/^0x[a-f0-9]{40}$/.test(creator)) throw new McpError(ErrorCode.InvalidParams, "creator must be 0x…40hex");
+        const r = await fetch(`${SIGNA_BASE}/api/b20`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            variant: args.variant ?? "ASSET",
+            name: args.name, symbol: args.symbol, creator,
+            decimals: args.decimals, currency: args.currency,
+          }),
+        });
+        const j = (await r.json()) as Record<string, any>;
+        if (!j?.ok) throw new McpError(ErrorCode.InvalidParams, j?.error ?? "launch_prepare_failed");
+        const rc = j.receipt ?? {};
+        const text = [
+          `B20 launch prepared — ${rc.name} (${rc.symbol}), variant ${rc.variant}`,
+          ``,
+          `predicted address: ${j.predicted_address ?? "(needs a Beryl-aware RPC; bound on broadcast)"}`,
+          `factory:           ${j.factory}`,
+          ``,
+          `Broadcast from your wallet:`,
+          `  to:    ${j.tx?.to}`,
+          `  data:  ${String(j.tx?.data ?? "").slice(0, 42)}…`,
+          `  value: ${j.tx?.value}`,
+          ``,
+          `Signed launch receipt (re-verifiable, kind b20_launch):`,
+          `  signer:    ${rc.signer}`,
+          `  signature: ${String(rc.signature ?? "").slice(0, 22)}…`,
+          ``,
+          `SIGNA never custodies funds — your wallet mints; SIGNA proves the launch.`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }

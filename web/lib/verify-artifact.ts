@@ -22,6 +22,7 @@ const BRAIN = privateKeyToAccount(keccak256(toBytes("signa:brain:v1"))).address.
 const X402_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1"))).address.toLowerCase();
 const LOG_SIGNER = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1"))).address.toLowerCase();
 const ALETHEIA = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1"))).address.toLowerCase();
+const B20_LAUNCH = privateKeyToAccount(keccak256(toBytes("signa:b20-launch:v1"))).address.toLowerCase();
 
 export type VerifyInput = Record<string, unknown> & { kind?: string; signature?: string };
 
@@ -36,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -115,6 +116,25 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `delivery:${a.delivery_hash ?? ""}`,
       ].join("\n");
       return { preimage: pre, expected: X402_ATTESTOR, role: "SIGNA x402 receipt attestor" };
+    }
+    case "b20_launch": {
+      // v8.x — the SIGNA B20 attestor witnesses a B20 token launch (creator +
+      // variant + terms + salt + params + predicted address). Must match
+      // lib/b20.ts b20LaunchPreimage() byte-for-byte.
+      const pre = [
+        "SIGNA b20 launch v1",
+        `ts:${a.ts}`,
+        `creator:${String(a.creator ?? "").toLowerCase()}`,
+        `variant:${a.variant ?? ""}`,
+        `name:${a.name ?? ""}`,
+        `symbol:${a.symbol ?? ""}`,
+        `decimals:${a.decimals ?? ""}`,
+        `currency:${a.currency ?? ""}`,
+        `salt:${a.salt ?? ""}`,
+        `params:${a.params_hash ?? ""}`,
+        `address:${String(a.address ?? "").toLowerCase()}`,
+      ].join("\n");
+      return { preimage: pre, expected: B20_LAUNCH, role: "SIGNA B20 launch attestor" };
     }
     case "log_checkpoint": {
       // v4.7 — the transparency-log signer signs each Merkle checkpoint over
