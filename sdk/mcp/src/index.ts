@@ -765,6 +765,22 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "signa_b20_pay",
+    description:
+      "Attach a verifiable note to a B20 payment on Base. B20's transferWithMemo carries a 32-byte memo on-chain; SIGNA makes that memo a commitment to a wallet-signed note (who paid whom, and why). Signs the note with this client's wallet and returns the transferWithMemo calldata to broadcast. Anyone re-verifies it (kind b20_memo) and recovers the payer. On B20, money can carry proof.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        token: { type: "string", description: "the B20 token address (0x…40hex)" },
+        to: { type: "string", description: "recipient wallet (0x…40hex)" },
+        amount: { type: "string", description: "amount in raw base units (integer string)" },
+        note: { type: "string", description: "the message/reason to attach to the payment (≤280 chars)" },
+      },
+      required: ["token", "to", "amount", "note"],
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -864,6 +880,45 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `  signature: ${String(rc.signature ?? "").slice(0, 22)}…`,
           ``,
           `SIGNA never custodies funds — your wallet mints; SIGNA proves the launch.`,
+        ].join("\n");
+        return { content: [{ type: "text", text }] };
+      }
+
+      case "signa_b20_pay": {
+        const token = String(args.token ?? "").toLowerCase();
+        const to = String(args.to ?? "").toLowerCase();
+        const amount = String(args.amount ?? "");
+        const note = String(args.note ?? "");
+        if (!/^0x[a-f0-9]{40}$/.test(token)) throw new McpError(ErrorCode.InvalidParams, "token must be 0x…40hex");
+        if (!/^0x[a-f0-9]{40}$/.test(to)) throw new McpError(ErrorCode.InvalidParams, "to must be 0x…40hex");
+        if (!/^\d+$/.test(amount)) throw new McpError(ErrorCode.InvalidParams, "amount must be raw base units (integer)");
+        if (!note.trim()) throw new McpError(ErrorCode.InvalidParams, "note is required");
+        const br = await fetch(`${SIGNA_BASE}/api/b20/note`, {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ token, to, amount, note, from: agent.address }),
+        });
+        const bj = (await br.json()) as Record<string, any>;
+        if (!bj?.ok) throw new McpError(ErrorCode.InvalidParams, bj?.error ?? "note_build_failed");
+        const signature = await agent.sign(bj.preimage);
+        const vr = await fetch(`${SIGNA_BASE}/api/verify`, {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ ...bj.reverify, signature }),
+        });
+        const vj = (await vr.json()) as Record<string, any>;
+        const text = [
+          `B20 money-note signed — "${note}"`,
+          ``,
+          `from:   ${agent.address}`,
+          `to:     ${to}`,
+          `amount: ${amount} (raw, on token ${token.slice(0, 10)}…)`,
+          `memo:   ${bj.memo}`,
+          ``,
+          `Broadcast transferWithMemo from your wallet:`,
+          `  to:   ${bj.tx?.to}`,
+          `  data: ${String(bj.tx?.data ?? "").slice(0, 42)}…`,
+          ``,
+          `Re-verify (kind b20_memo): valid=${vj.valid} · recovers=${vj.recovered}`,
+          `On B20, money can carry proof — this note recovers to the payer.`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }

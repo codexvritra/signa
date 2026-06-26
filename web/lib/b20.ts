@@ -218,3 +218,57 @@ export async function issueB20LaunchReceipt(spec: B20LaunchSpec, predicted: stri
     reverify: { kind: "b20_launch", ...fields, signature },
   };
 }
+
+// ── verifiable money-messages: B20 transferWithMemo carries a wallet-signed note ─
+// B20's transferWithMemo(to, amount, bytes32 memo) lets a transfer carry a 32-byte
+// memo on-chain. We turn that memo into a commitment to a wallet-signed note:
+// memo = keccak256(canonical note preimage). The transfer commits on-chain to a note
+// that the PAYER signed; anyone recovers the payer and reads the proven note, bound to
+// the transfer by the on-chain Memo event. "On B20, money can talk — SIGNA proves it."
+export const B20_MEMO_ABI = [
+  { type: "function", name: "transferWithMemo", stateMutability: "nonpayable",
+    inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }, { name: "memo", type: "bytes32" }],
+    outputs: [{ name: "", type: "bool" }] },
+  { type: "event", name: "Memo", inputs: [{ name: "caller", type: "address", indexed: true }, { name: "memo", type: "bytes32", indexed: true }] },
+] as const;
+
+export type B20NoteFields = { ts: number; from: string; to: string; token: string; amount: string; note: string };
+
+/** Canonical preimage for a B20 money-note — MUST match the b20_memo case in verify-artifact.ts. */
+export function b20NotePreimage(a: B20NoteFields): string {
+  return [
+    "SIGNA b20 memo v1",
+    `ts:${a.ts}`,
+    `from:${a.from.toLowerCase()}`,
+    `to:${a.to.toLowerCase()}`,
+    `token:${a.token.toLowerCase()}`,
+    `amount:${a.amount}`,
+    `note:${sha256(a.note)}`,
+  ].join("\n");
+}
+
+/** The on-chain memo (bytes32) that commits to the signed note: keccak256(preimage). */
+export function b20MemoHash(preimage: string): Hex {
+  return keccak256(toBytes(preimage));
+}
+
+/** Build the transferWithMemo tx the payer's wallet broadcasts (memo = note commitment). */
+export function buildTransferWithMemoTx(token: string, to: string, amount: string, memo: Hex): { to: Address; data: Hex; value: string } {
+  const data = encodeFunctionData({ abi: B20_MEMO_ABI, functionName: "transferWithMemo", args: [to as Address, BigInt(amount), memo] });
+  return { to: token as Address, data, value: "0" };
+}
+
+/** Build an unsigned B20 money-note: the preimage the PAYER signs, the on-chain memo, and the
+ *  transferWithMemo calldata. SIGNA holds no key here — the payer's wallet (or agent key) signs the
+ *  note and broadcasts the transfer; verification recovers the payer. */
+export function buildB20Note(a: B20NoteFields): { preimage: string; memo: Hex; note_hash: string; tx: { to: Address; data: Hex; value: string }; reverify: Record<string, unknown> } {
+  const preimage = b20NotePreimage(a);
+  const memo = b20MemoHash(preimage);
+  const note_hash = sha256(a.note);
+  return {
+    preimage, memo, note_hash,
+    tx: buildTransferWithMemoTx(a.token, a.to, a.amount, memo),
+    // caller fills `signature` after the payer signs `preimage`, then POSTs to /api/verify
+    reverify: { kind: "b20_memo", ts: a.ts, from: a.from.toLowerCase(), to: a.to.toLowerCase(), token: a.token.toLowerCase(), amount: a.amount, note_hash },
+  };
+}

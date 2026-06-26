@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useSendTransaction } from "wagmi";
+import { useAccount, useSendTransaction, useSignMessage } from "wagmi";
 
 type LaunchResp = {
   ok: boolean; error?: string;
@@ -21,6 +21,17 @@ const short = (s?: string | null, n = 10) => (s ? (s.length > 2 * n ? `${s.slice
 export default function B20Page() {
   const { address } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
+  const { signMessageAsync } = useSignMessage();
+
+  // money-note (transferWithMemo) state
+  const [pToken, setPToken] = useState("");
+  const [pTo, setPTo] = useState("");
+  const [pAmount, setPAmount] = useState("1000000");
+  const [pNote, setPNote] = useState("thanks for the data pull 🫡");
+  const [pBusy, setPBusy] = useState(false);
+  const [pRes, setPRes] = useState<any>(null);
+  const [pVerify, setPVerify] = useState<{ valid: boolean; recovered: string } | null>(null);
+  const [pSent, setPSent] = useState<string | null>(null);
 
   const [variant, setVariant] = useState<"ASSET" | "STABLECOIN">("ASSET");
   const [name, setName] = useState("Signa Agent Token");
@@ -77,6 +88,35 @@ export default function B20Page() {
     setLookBusy(true); setLook(null);
     try { setLook(await (await fetch(`/api/b20?address=${a}`)).json()); } catch (e) { setLook({ error: e instanceof Error ? e.message : "failed" }); }
     setLookBusy(false);
+  }
+
+  async function payBuildSign() {
+    if (pBusy) return;
+    const from = (address || "").toLowerCase();
+    if (!/^0x[a-f0-9]{40}$/.test(from)) { setPRes({ ok: false, error: "Connect your wallet to sign the note." }); return; }
+    if (!/^0x[a-f0-9]{40}$/.test(pToken.trim().toLowerCase())) { setPRes({ ok: false, error: "Enter a B20 token address." }); return; }
+    if (!/^0x[a-f0-9]{40}$/.test(pTo.trim().toLowerCase())) { setPRes({ ok: false, error: "Enter a recipient address." }); return; }
+    setPBusy(true); setPRes(null); setPVerify(null); setPSent(null);
+    try {
+      const r = await fetch("/api/b20/note", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: pToken.trim(), to: pTo.trim(), amount: pAmount.trim(), note: pNote.trim(), from }) });
+      const j = await r.json();
+      if (!j?.ok) { setPRes(j); setPBusy(false); return; }
+      // the payer signs the note
+      const signature = await signMessageAsync({ message: j.preimage });
+      setPRes({ ...j, signature });
+      // re-verify (recovers the payer)
+      const v = await fetch("/api/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...j.reverify, signature }) });
+      const vj = await v.json();
+      setPVerify({ valid: !!vj.valid, recovered: vj.recovered });
+    } catch (e) { setPRes({ ok: false, error: e instanceof Error ? e.message.slice(0, 80) : "failed" }); }
+    setPBusy(false);
+  }
+  async function paySend() {
+    if (!pRes?.tx) return;
+    try {
+      const hash = await sendTransactionAsync({ to: pRes.tx.to as `0x${string}`, data: pRes.tx.data as `0x${string}`, value: BigInt(pRes.tx.value || "0") });
+      setPSent(hash);
+    } catch (e) { setPSent(`error: ${e instanceof Error ? e.message.slice(0, 80) : "rejected"}`); }
   }
 
   return (
@@ -148,6 +188,42 @@ export default function B20Page() {
                 </div>
                 {minted && <div className="text-[11px] text-faint mt-2 font-mono break-all">{minted.startsWith("error") ? minted : `broadcast tx ${minted}`}</div>}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* money-note (transferWithMemo) */}
+        <div className="mt-6 glass-strong rounded-2xl p-5 sm:p-6">
+          <div className="text-[12px] uppercase tracking-wider text-[#a5c3ff] font-semibold mb-1">Pay with a verifiable note <span className="text-[#5ee68f]">· new</span></div>
+          <p className="text-[12.5px] text-faint mb-3">B20&apos;s <span className="font-mono">transferWithMemo</span> carries a 32-byte memo on-chain. SIGNA makes it a commitment to a note <span className="text-white">you sign</span> — so the money proves who paid, and why. On B20, money can talk.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="text-[12px] text-faint sm:col-span-2">B20 token address
+              <input value={pToken} onChange={(e) => setPToken(e.target.value)} placeholder="0x… B20 token" className="mt-1 w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] font-mono text-white outline-none focus:border-[#6ea2ff]/60" />
+            </label>
+            <label className="text-[12px] text-faint">Pay to
+              <input value={pTo} onChange={(e) => setPTo(e.target.value)} placeholder="0x… recipient" className="mt-1 w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] font-mono text-white outline-none focus:border-[#6ea2ff]/60" />
+            </label>
+            <label className="text-[12px] text-faint">Amount (raw base units)
+              <input value={pAmount} onChange={(e) => setPAmount(e.target.value)} className="mt-1 w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] text-white outline-none focus:border-[#6ea2ff]/60" />
+            </label>
+            <label className="text-[12px] text-faint sm:col-span-2">Note (travels with the money, signed by you)
+              <input value={pNote} onChange={(e) => setPNote(e.target.value)} maxLength={280} className="mt-1 w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] text-white outline-none focus:border-[#6ea2ff]/60" />
+            </label>
+          </div>
+          <button onClick={payBuildSign} disabled={pBusy} className="mt-4 px-5 py-2.5 rounded-xl font-semibold text-[15px] bg-gradient-to-r from-[#3b6fe0] to-[#8b5cf6] text-white disabled:opacity-60 hover:brightness-110 transition">
+            {pBusy ? "Signing note…" : "Sign the note →"}
+          </button>
+          {pRes && !pRes.ok && <div className="mt-3 text-[13px] text-[#ff8f8f]">{pRes.error}</div>}
+          {pRes?.ok && (
+            <div className="mt-4 border border-[#5ee68f]/30 bg-[#22c98a]/[0.08] rounded-lg p-4">
+              <div className="text-[11px] uppercase tracking-wider text-[#5ee68f] font-semibold mb-1">Signed money-note</div>
+              <div className="text-[13px] text-muted">&ldquo;{pRes.note}&rdquo;</div>
+              <div className="text-[11px] text-faint mt-2 font-mono break-all">memo {short(pRes.memo, 14)} · sig {short(pRes.signature, 18)}</div>
+              <div className="mt-3 flex items-center gap-3 flex-wrap">
+                <button onClick={paySend} className="text-[12px] px-3 py-1 rounded bg-white/[0.06] text-[#5ee68f] hover:bg-white/[0.12]">Send transferWithMemo</button>
+                {pVerify && <span className={`text-[12px] ${pVerify.valid ? "text-[#5ee68f]" : "text-[#ff8f8f]"}`}>{pVerify.valid ? `✓ note recovers to you — ${short(pVerify.recovered, 8)}` : "✗ invalid"}</span>}
+              </div>
+              {pSent && <div className="text-[11px] text-faint mt-2 font-mono break-all">{pSent.startsWith("error") ? pSent : `broadcast tx ${pSent}`}</div>}
             </div>
           )}
         </div>

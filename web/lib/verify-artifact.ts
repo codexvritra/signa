@@ -37,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -135,6 +135,23 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `address:${String(a.address ?? "").toLowerCase()}`,
       ].join("\n");
       return { preimage: pre, expected: B20_LAUNCH, role: "SIGNA B20 launch attestor" };
+    }
+    case "b20_memo": {
+      // v8.x — a B20 transferWithMemo money-note: the PAYER signs a note bound to the
+      // transfer; the on-chain memo = keccak256(this preimage). Must match lib/b20.ts
+      // b20NotePreimage() byte-for-byte. expected = the payer wallet (`from`).
+      const from = String(a.from ?? "").toLowerCase();
+      const noteHash = a.note_hash ? String(a.note_hash) : sha256(String(a.note ?? ""));
+      const pre = [
+        "SIGNA b20 memo v1",
+        `ts:${a.ts}`,
+        `from:${from}`,
+        `to:${String(a.to ?? "").toLowerCase()}`,
+        `token:${String(a.token ?? "").toLowerCase()}`,
+        `amount:${a.amount ?? ""}`,
+        `note:${noteHash}`,
+      ].join("\n");
+      return { preimage: pre, expected: from || null, role: "payer wallet (b20 money-note)" };
     }
     case "log_checkpoint": {
       // v4.7 — the transparency-log signer signs each Merkle checkpoint over
