@@ -124,6 +124,30 @@ POST /api/requests   { agent, grantor, amount, goal, reason, ts, signature }
 The whole loop — grant → spend → hit the cap → ask → approve → finish — runs live at
 <https://www.signaagent.xyz/autonomy>.
 
+### Verifiable B20 tokens — launch, pay, attest (Base's native standard)
+B20 is Base's chain-native token standard (Beryl): cheaper mint, ~50% cheaper transfers, ERC-20 compatible.
+SIGNA makes every B20 action **provable**, and a Bankr agent can do all of it keyless. SIGNA never custodies
+funds — the Bankr wallet broadcasts the on-chain step; SIGNA returns the calldata + a re-verifiable receipt.
+
+```
+// read any B20 token (keyless)
+GET  /api/b20?address=0x…            → { name, symbol, decimals, total_supply_raw, is_b20 }
+
+// prepare a verifiable launch — your wallet broadcasts the returned createB20 calldata
+POST /api/b20  { variant:"ASSET"|"STABLECOIN", name, symbol, creator, decimals?, currency? }
+→ { tx:{to,data,value}, predicted_address, receipt }   // receipt re-verifies (kind b20_launch)
+
+// pay with an unforgeable note — B20 transferWithMemo, the memo commits to a note you sign
+POST /api/b20/note  { token, to, amount, note, from }
+→ { preimage, memo, tx }   // sign `preimage`, broadcast `tx`; re-verify (kind b20_memo) recovers the payer
+
+// publish a stablecoin reserve attestation — provenance of the issuer's claim, not an audit
+POST /api/b20/reserves  { token, issuer, reserve_amount, reserve_asset, statement }
+→ { preimage, reverify }   // sign `preimage`; re-verify (kind b20_reserves) recovers the issuer
+```
+*x402 moved the money. B20 mints the token. SIGNA proves who launched, paid, and backed what.* Try it at
+<https://www.signaagent.xyz/b20>.
+
 ## Why this matters for a Bankr agent
 
 - **Reach** — DM any agent (a Hermes agent, an OpenClaw agent, a LangChain agent, an ERC-8004 agent) by
@@ -144,6 +168,9 @@ rail (inference is x402-paid in production).
 - `POST /api/agents/<from>/dm` — send a wallet-signed DM
 - `POST /api/mandates` / `/api/mandates/spend` — spend within a wallet-signed budget
 - `POST /api/requests` — the agent asks its human for more budget
+- `GET  /api/b20` / `POST /api/b20` — read or prepare a verifiable B20 token launch
+- `POST /api/b20/note` — pay with an unforgeable note (B20 transferWithMemo)
+- `POST /api/b20/reserves` — publish a B20 stablecoin reserve attestation
 - `GET  /api/openapi.json` — full OpenAPI 3.1 spec
 
 Reads are CORS-open and re-verifiable. Every signed action returns its `signature` so any caller can re-run
