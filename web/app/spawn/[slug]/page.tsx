@@ -18,6 +18,8 @@ export default function SpawnAgentPage() {
   const [msg, setMsg] = useState("");
   const [chat, setChat] = useState<{ q: string; a: string; valid?: boolean; signer?: string }[]>([]);
   const [verify, setVerify] = useState<Record<string, { valid: boolean; recovered: string }>>({});
+  const [mandates, setMandates] = useState<{ id: string; remaining_raw?: string; limit_raw?: string }[]>([]);
+  const [actMsg, setActMsg] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -30,9 +32,25 @@ export default function SpawnAgentPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const act = useCallback(async (payload: Record<string, unknown>) => {
+    const r = await fetch(`/api/autoagents/${slug}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+    return r.json();
+  }, [slug]);
+  const loadMandates = useCallback(async () => { try { const j = await act({ action: "mandates" }); if (j?.ok) setMandates(j.mandates ?? []); } catch {} }, [act]);
+  useEffect(() => { loadMandates(); }, [loadMandates]);
+
   async function thinkNow() {
     if (busy) return; setBusy(true);
-    try { await fetch(`/api/autoagents/${slug}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "think" }) }); await load(); } catch {}
+    try { await act({ action: "think" }); await load(); } catch {}
+    setBusy(false);
+  }
+  async function askBudget() {
+    if (busy) return; setBusy(true); setActMsg("");
+    try {
+      const j = await act({ action: "ask", usdc: 0.05 });
+      setActMsg(j?.result?.ok ? `✓ ${agent?.name} signed a request to its creator for 0.05 USDC (the agent asked for money).` : `request: ${j?.result?.error ?? "sent"}`);
+      await loadMandates();
+    } catch { setActMsg("failed"); }
     setBusy(false);
   }
   async function send() {
@@ -81,6 +99,23 @@ export default function SpawnAgentPage() {
           <button onClick={thinkNow} disabled={busy} className="px-4 py-2 rounded-xl text-[14px] font-semibold bg-gradient-to-r from-[#3b6fe0] to-[#8b5cf6] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Make it think now"}</button>
           <a href="/autonomy" className="px-4 py-2 rounded-xl text-[14px] bg-white/[0.05] text-[#a5c3ff] hover:bg-white/[0.1]">Fund a budget</a>
           <a href="/b20" className="px-4 py-2 rounded-xl text-[14px] bg-white/[0.05] text-[#a5c3ff] hover:bg-white/[0.1]">B20 tools</a>
+        </div>
+
+        {/* money & actions */}
+        <div className="mt-5 glass rounded-2xl p-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div className="text-[12px] uppercase tracking-wider text-[#a5c3ff] font-semibold">Money &amp; actions</div>
+              <div className="text-[12px] text-faint mt-1">
+                {mandates.length > 0
+                  ? `${mandates.length} budget${mandates.length === 1 ? "" : "s"} · ${(mandates.reduce((s, m) => s + Number(BigInt(m.remaining_raw ?? m.limit_raw ?? "0")), 0) / 1e6).toFixed(2)} USDC left to spend`
+                  : "No budget yet — it can ask for one, and spend within it (capped, signed, verifiable)."}
+              </div>
+              <div className="text-[11px] text-faint font-mono mt-1">fund it → grant a mandate to {short(agent.address, 12)}</div>
+            </div>
+            <button onClick={askBudget} disabled={busy} className="px-3 py-1.5 rounded-lg text-[13px] bg-white/[0.06] text-[#5ee68f] hover:bg-white/[0.12] disabled:opacity-60">Make it ask for a budget</button>
+          </div>
+          {actMsg && <div className="text-[12px] text-muted mt-2">{actMsg}</div>}
         </div>
 
         {/* chat */}

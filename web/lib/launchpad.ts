@@ -15,6 +15,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes } from "viem";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { runBrain2 } from "./brain2";
+import { buildB20Note } from "./b20";
 
 /** Deterministic, keyless wallet for an agent — derived from its slug. */
 export function agentAccount(slug: string) {
@@ -135,4 +136,44 @@ export async function agentChat(db: SupabaseClient, origin: string, agent: Launc
   const preimage = dmPreimage(agent.address, agent.address, answer, ts); // self-signed reply, re-verifiable as a dm
   const signature = await account.signMessage({ message: preimage });
   return { answer, signature, signer: agent.address, reverify: { kind: "dm", ts, from: agent.address, to: agent.address, body: answer, signature } };
+}
+
+// ── the agent ACTS (not just thinks) — every action self-signed + verifiable ──
+const usdcRaw = (usdc: number | string) => String(Math.round(Number(usdc) * 1e6));
+
+/** The agent wallet-signs a request for a starter budget from a human ("agent asks for money"). */
+export async function agentAskBudget(origin: string, agent: LaunchAgent, grantor: string, usdc: number, goal: string, reason = ""): Promise<Record<string, unknown>> {
+  const account = agentAccount(agent.slug);
+  const ts = Date.now();
+  const amount = usdcRaw(usdc);
+  const pre = ["SIGNA budget request v1", `ts:${ts}`, `agent:${agent.address}`, `grantor:${grantor.toLowerCase()}`, `amount:${amount}`, `goal:${goal}`, `reason:${reason}`].join("\n");
+  const signature = await account.signMessage({ message: pre });
+  const r = await fetch(`${origin}/api/requests`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agent: agent.address, grantor: grantor.toLowerCase(), amount, goal, reason, ts, signature }) }).then((x) => x.json()).catch(() => ({ ok: false }));
+  return { ...r, amount, grantor: grantor.toLowerCase() };
+}
+
+/** The agent records a signed spend against a human-granted mandate (capped; refused if over). */
+export async function agentSpend(origin: string, agent: LaunchAgent, mandateId: string, usdc: number, note = ""): Promise<Record<string, unknown>> {
+  const account = agentAccount(agent.slug);
+  const ts = Date.now();
+  const amount = usdcRaw(usdc);
+  const pre = ["SIGNA spend v1", `ts:${ts}`, `mandate:${mandateId}`, `agent:${agent.address}`, `amount:${amount}`, `note:${note}`].join("\n");
+  const signature = await account.signMessage({ message: pre });
+  return await fetch(`${origin}/api/mandates/spend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ mandate_id: mandateId, agent: agent.address, amount, note, ts, signature }) }).then((x) => x.json()).catch(() => ({ ok: false }));
+}
+
+/** The agent autonomously pays with a verifiable B20 money-note (it's the payer; signs the note). */
+export async function agentPayB20(agent: LaunchAgent, args: { token: string; to: string; amount: string; note: string }): Promise<Record<string, unknown>> {
+  const account = agentAccount(agent.slug);
+  const built = buildB20Note({ ts: Date.now(), from: agent.address, to: args.to, token: args.token, amount: String(args.amount), note: args.note });
+  const signature = await account.signMessage({ message: built.preimage });
+  return { memo: built.memo, tx: built.tx, signature, reverify: { ...built.reverify, signature } };
+}
+
+/** The agent's budgets (granted mandates), for the page + autonomous spend checks. */
+export async function agentMandates(origin: string, agent: LaunchAgent): Promise<unknown[]> {
+  try {
+    const r = await fetch(`${origin}/api/mandates?agent=${agent.address}`).then((x) => x.json());
+    return r?.mandates ?? [];
+  } catch { return []; }
 }
