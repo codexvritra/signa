@@ -50,6 +50,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
     title: "Network",
     links: [
       { href: "/realtime", label: "Real-time" },
+      { href: "/telegram", label: "Telegram Bot" },
       { href: "/mini", label: "Mini App" },
       { href: "/feed", label: "Feed" },
       { href: "/rooms", label: "Rooms" },
