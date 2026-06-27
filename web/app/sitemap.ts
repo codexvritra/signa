@@ -37,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/autonomy", 0.9),
     page("/x402", 0.9),
     page("/b20", 0.92),
+    page("/b20live", 0.9),
     page("/brain", 0.85),
     page("/marketplace", 0.85),
     page("/capabilities", 0.8),

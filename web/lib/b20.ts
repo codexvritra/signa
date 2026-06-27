@@ -302,3 +302,26 @@ export function buildB20Reserves(a: B20ReservesFields): { preimage: string; stat
     reverify: { kind: "b20_reserves", ts: a.ts, token: a.token.toLowerCase(), issuer: a.issuer.toLowerCase(), reserve_amount: a.reserve_amount, reserve_asset: a.reserve_asset, as_of: a.as_of, statement_hash },
   };
 }
+
+// ── live activation tracker: is B20 actually mintable on Base mainnet yet? ──────
+const PROBE = "0x95fce75729690477e48820805c74602338e19303" as Address;
+
+/** Probe the real on-chain state of B20: do reads respond, and is createB20 callable yet?
+ *  Pure read (eth_call) — no gas, no broadcast. The honest "is B20 live?" check. */
+export async function b20Status(): Promise<{ reads_live: boolean; create_live: boolean; factory: string; network: string; checked_at: number; detail: string }> {
+  const salt = keccak256(toBytes("signa:b20:livecheck:v1"));
+  let reads_live = false, create_live = false, detail = "";
+  try {
+    await client().readContract({ address: B20_FACTORY, abi: B20_FACTORY_ABI, functionName: "getB20Address", args: [B20_VARIANT.ASSET, PROBE, salt] });
+    reads_live = true;
+  } catch { detail = "address-derivation read unavailable"; }
+  try {
+    const params = encodeB20Params({ variant: "ASSET", name: "Live Check", symbol: "LIVECHK", creator: PROBE, decimals: 18, ts: 1 });
+    const data = encodeFunctionData({ abi: B20_FACTORY_ABI, functionName: "createB20", args: [B20_VARIANT.ASSET, salt, params, []] });
+    await client().call({ to: B20_FACTORY, data, account: PROBE });
+    create_live = true; detail = "createB20 is callable — B20 launches are LIVE";
+  } catch {
+    create_live = false; detail = reads_live ? "createB20 reverts — token creation not activated yet" : detail;
+  }
+  return { reads_live, create_live, factory: B20_FACTORY, network: B20_NETWORK, checked_at: Date.now(), detail };
+}
