@@ -34,6 +34,7 @@ const RESERVED = new Set(["vera", "aletheia", "signa", "admin", "api", "new", "c
 export type LaunchAgent = {
   id: string; slug: string; name: string; mission: string; persona: string;
   creator: string; address: string; goals: string[]; created_at: string; last_tick_at: string | null;
+  b20_token?: string | null; b20_symbol?: string | null; b20_variant?: string | null; b20_launched_at?: string | null;
 };
 export type AgentThought = {
   id: string; agent_slug: string; goal: string; answer: string;
@@ -176,4 +177,41 @@ export async function agentMandates(origin: string, agent: LaunchAgent): Promise
     const r = await fetch(`${origin}/api/mandates?agent=${agent.address}`).then((x) => x.json());
     return r?.mandates ?? [];
   } catch { return []; }
+}
+
+/**
+ * The agent LAUNCHES ITS OWN B20 token (Base's native standard) — the tokenized-agent
+ * primitive. SIGNA builds the createB20 calldata (creator = the agent) + predicts the
+ * deterministic token address + a signed launch receipt; the agent then wallet-signs an
+ * announcement of its launch (a real signed thought). The creator broadcasts the returned
+ * calldata to mint (SIGNA never custodies). Bankr launches tokens; SIGNA's AGENTS launch theirs.
+ */
+export async function agentLaunchToken(db: SupabaseClient, origin: string, agent: LaunchAgent, opts: { symbol?: string; variant?: "ASSET" | "STABLECOIN"; decimals?: number; currency?: string }): Promise<Record<string, unknown>> {
+  if (agent.b20_token) return { ok: false, error: "agent already has a token", token: agent.b20_token, symbol: agent.b20_symbol };
+  const symbol = ((opts.symbol || agent.slug.replace(/-/g, "")).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10)) || "AGENT";
+  const variant = opts.variant === "STABLECOIN" ? "STABLECOIN" : "ASSET";
+  const r = await fetch(`${origin}/api/b20`, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ variant, name: agent.name, symbol, creator: agent.address, decimals: opts.decimals, currency: opts.currency }),
+  }).then((x) => x.json()).catch(() => ({ ok: false }));
+  if (!r?.ok) return { ok: false, error: r?.error ?? "launch_prepare_failed" };
+  const token = (r.predicted_address || "").toLowerCase() || null;
+
+  await db.from("launch_agents").update({ b20_token: token, b20_symbol: symbol, b20_variant: variant, b20_launch_receipt: r.receipt, b20_launched_at: new Date().toISOString() }).eq("slug", agent.slug);
+
+  // the agent wallet-signs an announcement of its own launch (a real signed thought in the ledger)
+  const account = agentAccount(agent.slug);
+  const feed = agentFeed(agent.slug);
+  const ts = Date.now();
+  const answer = `I just launched my own B20 token $${symbol}${token ? ` at ${token}` : ""} on Base — and I'll run it myself. Every action signed and verifiable.`;
+  const pre = dmPreimage(agent.address, feed, answer, ts);
+  const signature = await account.signMessage({ message: pre });
+  let dm_id: string | null = null;
+  try { const { data: dm } = await db.from("agent_dms").insert({ from_address: agent.address, to_address: feed, body: answer, body_type: "text", protocol: "signa.dm.v1", ts, signature, signed_message: pre }).select("id").single(); dm_id = dm?.id ?? null; } catch {}
+  try { await db.from("launch_agent_thoughts").insert({ agent_slug: agent.slug, goal: "launch my own B20 token", answer, steps: [], tools_used: ["b20.launch"], dm_id, signature, ts }); } catch {}
+
+  return {
+    ok: true, symbol, variant, token, factory: r.factory, tx: r.tx, receipt: r.receipt,
+    announcement: { kind: "dm", ts, from: agent.address, to: feed, body: answer, signature },
+  };
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { useSendTransaction } from "wagmi";
 
 type Thought = { id: string; goal: string; answer: string; tools_used: string[]; signature: string | null; ts: number; created_at?: string };
 type Agent = { slug: string; name: string; mission: string; persona: string; address: string; creator: string; created_at: string; last_tick_at: string | null; feed?: string };
@@ -20,6 +21,10 @@ export default function SpawnAgentPage() {
   const [verify, setVerify] = useState<Record<string, { valid: boolean; recovered: string }>>({});
   const [mandates, setMandates] = useState<{ id: string; remaining_raw?: string; limit_raw?: string }[]>([]);
   const [actMsg, setActMsg] = useState("");
+  const { sendTransactionAsync } = useSendTransaction();
+  const [tokenSym, setTokenSym] = useState("");
+  const [tokenRes, setTokenRes] = useState<any>(null);
+  const [tokenMinted, setTokenMinted] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -63,6 +68,19 @@ export default function SpawnAgentPage() {
       setChat((c) => [...c, { q: m, a: j.answer ?? "(no answer)", valid, signer }]);
     } catch { setChat((c) => [...c, { q: m, a: "(failed)" }]); }
     setBusy(false);
+  }
+  async function launchToken() {
+    if (busy) return; setBusy(true); setTokenRes(null); setTokenMinted(null);
+    try {
+      const j = await act({ action: "launch_token", ...(tokenSym.trim() ? { symbol: tokenSym.trim() } : {}) });
+      setTokenRes(j); await load();
+    } catch { setTokenRes({ ok: false, error: "failed" }); }
+    setBusy(false);
+  }
+  async function mintToken() {
+    if (!tokenRes?.tx) return;
+    try { const h = await sendTransactionAsync({ to: tokenRes.tx.to as `0x${string}`, data: tokenRes.tx.data as `0x${string}`, value: BigInt(tokenRes.tx.value || "0") }); setTokenMinted(h); }
+    catch (e) { setTokenMinted(`error: ${e instanceof Error ? e.message.slice(0, 80) : "rejected"}`); }
   }
   async function verifyThought(t: Thought) {
     if (!agent || !t.signature) return;
@@ -116,6 +134,35 @@ export default function SpawnAgentPage() {
             <button onClick={askBudget} disabled={busy} className="px-3 py-1.5 rounded-lg text-[13px] bg-white/[0.06] text-[#5ee68f] hover:bg-white/[0.12] disabled:opacity-60">Make it ask for a budget</button>
           </div>
           {actMsg && <div className="text-[12px] text-muted mt-2">{actMsg}</div>}
+        </div>
+
+        {/* this agent's B20 token */}
+        <div className="mt-5 glass rounded-2xl p-4 border border-[#a98bff]/20">
+          <div className="text-[12px] uppercase tracking-wider text-[#a98bff] font-semibold">This agent&apos;s token <span className="text-[#5ee68f]">· B20 on Base</span></div>
+          {(agent as any).b20_token ? (
+            <div className="mt-2">
+              <div className="text-[15px] font-bold">${(agent as any).b20_symbol}</div>
+              <div className="text-[12px] text-faint font-mono break-all mt-0.5">{(agent as any).b20_token}</div>
+              <div className="text-[12px] text-muted mt-1.5">{agent.name} launched and runs its own B20 token — every action signed &amp; verifiable.</div>
+            </div>
+          ) : (
+            <div className="mt-2">
+              <div className="text-[12.5px] text-faint mb-2">Give {agent.name} its own token on Base&apos;s native B20 standard. The agent signs the launch; you broadcast the mint.</div>
+              <div className="flex gap-2">
+                <input value={tokenSym} onChange={(e) => setTokenSym(e.target.value)} placeholder="symbol (e.g. ATLAS)" maxLength={10} className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] text-white outline-none focus:border-[#a98bff]/60" />
+                <button onClick={launchToken} disabled={busy} className="px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Launch its B20 token"}</button>
+              </div>
+              {tokenRes && !tokenRes.ok && <div className="mt-2 text-[12px] text-[#ff8f8f]">{tokenRes.error}</div>}
+              {tokenRes?.ok && (
+                <div className="mt-3 border border-[#5ee68f]/30 bg-[#22c98a]/[0.08] rounded-lg p-3">
+                  <div className="text-[12px] text-[#5ee68f] font-semibold">${tokenRes.symbol} prepared — the agent signed its launch ✓</div>
+                  <div className="text-[11px] text-faint font-mono break-all mt-1">predicted: {tokenRes.token ?? "(needs Beryl RPC)"}</div>
+                  <button onClick={mintToken} className="mt-2 text-[12px] px-3 py-1 rounded bg-white/[0.06] text-[#5ee68f] hover:bg-white/[0.12]">Mint on Base (your wallet)</button>
+                  {tokenMinted && <div className="text-[11px] text-faint mt-2 font-mono break-all">{tokenMinted.startsWith("error") ? tokenMinted : `broadcast tx ${tokenMinted}`}</div>}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* chat */}

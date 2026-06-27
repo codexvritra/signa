@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
-import { getAgent, thoughtsFor, tickIfDue, agentThink, agentChat, agentFeed, agentAskBudget, agentSpend, agentPayB20, agentMandates } from "@/lib/launchpad";
+import { getAgent, thoughtsFor, tickIfDue, agentThink, agentChat, agentFeed, agentAskBudget, agentSpend, agentPayB20, agentMandates, agentLaunchToken } from "@/lib/launchpad";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,6 +57,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       if (!b.mandate_id || b.usdc == null) return NextResponse.json({ ok: false, error: "spend needs { mandate_id, usdc, note? }" }, { status: 400, headers: CORS });
       const r = await agentSpend(origin, agent, String(b.mandate_id), Number(b.usdc), String(b.note ?? ""));
       return NextResponse.json({ ok: true, agent: agent.address, action: "spend", result: r }, { headers: CORS });
+    }
+    if (action === "launch_token") {
+      const r = await agentLaunchToken(db, origin, agent, { symbol: b.symbol ? String(b.symbol) : undefined, variant: b.variant === "STABLECOIN" ? "STABLECOIN" : "ASSET", decimals: b.decimals != null ? Number(b.decimals) : undefined, currency: b.currency != null ? String(b.currency) : undefined });
+      return NextResponse.json({ ok: !!r.ok, agent: agent.address, action: "launch_token", ...r }, { headers: CORS });
     }
     if (action === "b20pay") {
       if (!b.token || !b.to || b.amount == null || !b.note) return NextResponse.json({ ok: false, error: "b20pay needs { token, to, amount, note }" }, { status: 400, headers: CORS });
