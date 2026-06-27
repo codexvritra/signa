@@ -11,7 +11,7 @@ const api = (m, body) => fetch(`https://api.telegram.org/bot${TOKEN}/${m}`, { me
 const me = await api("getMe", {});
 console.log("bot:", me.result?.username ? `@${me.result.username}` : me);
 
-const set = await api("setWebhook", { url: URL, secret_token: SECRET || undefined, allowed_updates: ["message"], drop_pending_updates: true });
+const set = await api("setWebhook", { url: URL, secret_token: SECRET || undefined, allowed_updates: ["message", "callback_query", "my_chat_member"], drop_pending_updates: true });
 console.log("setWebhook:", set);
 
 const info = await api("getWebhookInfo", {});
@@ -25,6 +25,8 @@ await api("setMyCommands", { commands: [
   { command: "token", description: "Look up a B20 token by address" },
   { command: "launch", description: "Launch a verifiable B20" },
   { command: "jobs", description: "The agent economy" },
+  { command: "stats", description: "Live bot + network stats" },
+  { command: "signa", description: "The $SIGNA token" },
   { command: "verify", description: "Re-verify any SIGNA signature" },
 ] });
 console.log("done — message the bot /status to test.");

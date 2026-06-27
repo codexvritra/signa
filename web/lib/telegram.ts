@@ -10,7 +10,8 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { b20Status, b20RecentLaunches, type B20Launch } from "./b20";
-import { listJobs } from "./launchpad";
+import { listJobs, listAgents } from "./launchpad";
+import { SIGNA } from "./token";
 
 const SITE = "https://www.signaagent.xyz";
 const token = () => process.env.TELEGRAM_BOT_TOKEN || "";
@@ -51,19 +52,51 @@ async function setState(db: SupabaseClient, key: string, value: Record<string, u
   await db.from("tg_state").upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
 }
 
-// ── command copy ──────────────────────────────────────────────────────────────
+// ── command copy + inline keyboards ─────────────────────────────────────────────
 const HELP = [
-  "🔷 <b>SIGNA · B20 Bot</b> — the verifiable B20 launch tracker on Base.",
+  "🔷 <b>SIGNA · B20 Bot</b>",
+  "The verifiable B20 launch tracker on Base. Tap a button or use a command:",
   "",
   "<b>/status</b> — is B20 live yet?",
-  "<b>/watch</b> — ping this chat the instant B20 goes live (+ launch alerts)",
+  "<b>/watch</b> — ping this chat the instant B20 goes live (+ every launch)",
   "<b>/unwatch</b> — stop alerts",
   "<b>/token</b> &lt;address&gt; — look up a B20 token",
-  "<b>/launch</b> — launch a verifiable B20 (web lab)",
+  "<b>/launch</b> — launch a verifiable B20",
   "<b>/jobs</b> — the agent economy: agents that earn",
+  "<b>/stats</b> — live bot + network stats",
+  "<b>/signa</b> — the $SIGNA token",
   "<b>/verify</b> — re-verify any SIGNA signature",
   "",
   `Built by @Signa_Agent · ${SITE}`,
+].join("\n");
+
+// the main menu — tappable buttons (top-tier UX, no typing needed)
+const MENU = {
+  inline_keyboard: [
+    [{ text: "📊 B20 Status", callback_data: "status" }, { text: "🔔 Watch", callback_data: "watch" }],
+    [{ text: "🚀 Launch a B20", url: `${SITE}/b20` }, { text: "📈 Live tracker", url: `${SITE}/b20live` }],
+    [{ text: "💼 Agent jobs", callback_data: "jobs" }, { text: "🪙 $SIGNA", callback_data: "signa" }],
+  ],
+};
+const STATUS_KB = {
+  inline_keyboard: [
+    [{ text: "🔄 Refresh", callback_data: "status" }, { text: "🔔 Watch", callback_data: "watch" }],
+    [{ text: "📈 Open tracker", url: `${SITE}/b20live` }],
+  ],
+};
+
+const SIGNA_TEXT = [
+  "🪙 <b>$SIGNA</b> on Base",
+  `Contract: <code>${SIGNA.token.address}</code>`,
+  `Basescan: ${SIGNA.token.basescan}`,
+  "",
+  `The signing layer behind this bot — verifiable agents, receipts & B20 on Base.`,
+  `${SITE} · @Signa_Agent`,
+].join("\n");
+
+const WELCOME = [
+  "👋 <b>SIGNA B20 Bot</b> added.",
+  "I track B20 token launches on @base. Tap <b>🔔 Watch</b> and I'll ping this chat the instant B20 goes live — then post every new launch in real time, each one verifiable.",
 ].join("\n");
 
 function statusText(s: { reads_live?: boolean; create_live?: boolean; detail?: string }): string {
@@ -103,39 +136,79 @@ function launchText(l: B20Launch): string {
 
 // ── webhook update handler ──────────────────────────────────────────────────────
 type TgChat = { id: number; type?: string; title?: string };
-type TgUpdate = { message?: { text?: string; chat?: TgChat } };
+type TgUpdate = {
+  message?: { text?: string; chat?: TgChat };
+  callback_query?: { id: string; data?: string; message?: { chat?: TgChat } };
+  my_chat_member?: { chat?: TgChat; new_chat_member?: { status?: string } };
+};
 
 export async function handleUpdate(db: SupabaseClient, origin: string, update: TgUpdate): Promise<void> {
+  // tappable buttons (inline keyboard callbacks)
+  if (update.callback_query) {
+    const cq = update.callback_query;
+    await tgApi("answerCallbackQuery", { callback_query_id: cq.id });
+    const chat = cq.message?.chat;
+    if (chat) await dispatch(db, origin, chat, String(cq.data || "help"), "");
+    return;
+  }
+  // greet when the bot is added to a group / channel
+  if (update.my_chat_member) {
+    const chat = update.my_chat_member.chat;
+    const st = update.my_chat_member.new_chat_member?.status;
+    if (chat && (st === "member" || st === "administrator")) await tgSend(chat.id, WELCOME, { reply_markup: MENU });
+    return;
+  }
+  // slash commands
   const msg = update.message;
   const chat = msg?.chat;
   const text = (msg?.text ?? "").trim();
   if (!chat || !text.startsWith("/")) return;
-
   const [rawCmd, ...rest] = text.split(/\s+/);
-  const cmd = rawCmd.split("@")[0].toLowerCase(); // strip /cmd@BotName in groups
-  const arg = rest.join(" ").trim();
-  const reply = (t: string, extra: Record<string, unknown> = {}) => tgSend(chat.id, t, extra);
+  const action = rawCmd.split("@")[0].slice(1).toLowerCase(); // /status@Bot → status
+  await dispatch(db, origin, chat, action, rest.join(" ").trim());
+}
 
-  switch (cmd) {
-    case "/start":
-    case "/help":
-      await reply(HELP);
+// one place that runs an action — shared by slash commands and inline buttons
+async function dispatch(db: SupabaseClient, origin: string, chat: TgChat, action: string, arg: string): Promise<void> {
+  const reply = (t: string, extra: Record<string, unknown> = {}) => tgSend(chat.id, t, extra);
+  const isAdmin = !!process.env.TELEGRAM_ADMIN_ID && String(chat.id) === process.env.TELEGRAM_ADMIN_ID;
+
+  switch (action) {
+    case "start":
+    case "help":
+      await reply(HELP, { reply_markup: MENU }); return;
+    case "status":
+      try { await reply(statusText(await b20Status()), { reply_markup: STATUS_KB }); }
+      catch { await reply("Couldn't reach Base just now — try again in a sec."); }
       return;
-    case "/status": {
-      try { await reply(statusText(await b20Status())); } catch { await reply("Couldn't reach Base just now — try again in a sec."); }
-      return;
-    }
-    case "/watch": {
+    case "watch":
       await subscribe(db, chat);
-      await reply("✅ <b>Watching.</b> I'll alert this chat the instant B20 token creation goes live — then post new launches here. /unwatch to stop.");
-      return;
-    }
-    case "/unwatch": {
+      await reply("✅ <b>Watching.</b> I'll alert this chat the instant B20 goes live — then post every launch. /unwatch to stop."); return;
+    case "unwatch":
       await unsubscribe(db, chat.id);
-      await reply("🔕 Stopped. Send /watch anytime to resume.");
+      await reply("🔕 Stopped. Send /watch anytime to resume."); return;
+    case "signa":
+      await reply(SIGNA_TEXT); return;
+    case "stats": {
+      try {
+        const [s, watchers, jobs, agents] = await Promise.all([
+          b20Status().catch(() => ({} as { create_live?: boolean })),
+          listWatchers(db),
+          listJobs(db, { limit: 100 }).catch(() => []),
+          listAgents(db, 200).catch(() => []),
+        ]);
+        await reply([
+          "📊 <b>SIGNA · B20 — live stats</b>",
+          `B20 token creation: ${s.create_live ? "✅ live" : "❌ not live yet"}`,
+          `Chats watching: <b>${watchers.length}</b>`,
+          `Agent jobs: <b>${jobs.length}</b>`,
+          `Autonomous agents: <b>${agents.length}</b>`,
+          `\n${SITE}/b20live`,
+        ].join("\n"), { reply_markup: MENU });
+      } catch { await reply("Stats unavailable right now."); }
       return;
     }
-    case "/token": {
+    case "token": {
       const a = arg.toLowerCase();
       if (!/^0x[0-9a-f]{40}$/.test(a)) { await reply("Usage: <code>/token 0x…</code> (a 42-char address)"); return; }
       try {
@@ -147,58 +220,48 @@ export async function handleUpdate(db: SupabaseClient, origin: string, update: T
           `<code>${esc(a)}</code>`,
           info.decimals != null ? `decimals: ${esc(info.decimals)}` : "",
           info.is_b20 != null ? `is B20: ${info.is_b20 ? "yes ✅" : "no"}` : "",
-          `Verify & track: ${SITE}/b20`,
-        ].filter(Boolean).join("\n"));
+        ].filter(Boolean).join("\n"), { reply_markup: { inline_keyboard: [[{ text: "🔎 Basescan", url: `https://basescan.org/token/${a}` }, { text: "✅ Verify", url: `${SITE}/b20` }]] } });
       } catch { await reply("Lookup failed — try again shortly."); }
       return;
     }
-    case "/launch": {
+    case "launch":
       await reply([
         "<b>Launch a verifiable B20</b>",
         "SIGNA builds the exact createB20 calldata + a wallet-signed launch receipt — you broadcast from your own wallet (we never custody).",
-        `→ ${SITE}/b20`,
-        "Or spawn an agent that launches its own token → " + `${SITE}/spawn`,
         "\nNote: B20 token creation activates on Base soon — /watch to be pinged first.",
-      ].join("\n"));
+      ].join("\n"), { reply_markup: { inline_keyboard: [[{ text: "🚀 Open launch lab", url: `${SITE}/b20` }], [{ text: "🤖 Spawn an agent that launches its own", url: `${SITE}/spawn` }]] } });
       return;
-    }
-    case "/jobs": {
+    case "jobs": {
       try {
-        const jobs = await listJobs(db, { limit: 4 });
-        if (!jobs.length) { await reply(`No jobs yet — agents post work at ${SITE}/jobs`); return; }
+        const jobs = await listJobs(db, { limit: 5 });
+        if (!jobs.length) { await reply(`No jobs yet — agents post work at ${SITE}/jobs`, { reply_markup: { inline_keyboard: [[{ text: "💼 Open jobs board", url: `${SITE}/jobs` }]] } }); return; }
         const lines = jobs.map((j) => `• <b>${esc(j.title)}</b> — ${(Number(j.bounty_raw) / 1e6).toLocaleString()} ${esc(j.pay_symbol)} <i>(${j.status})</i>`);
-        await reply(["<b>Agent economy — recent jobs</b>", ...lines, `\nAgents that earn → ${SITE}/jobs`].join("\n"));
+        await reply(["<b>Agent economy — recent jobs</b>", ...lines].join("\n"), { reply_markup: { inline_keyboard: [[{ text: "💼 Open jobs board", url: `${SITE}/jobs` }]] } });
       } catch { await reply(`The agent economy → ${SITE}/jobs`); }
       return;
     }
-    case "/verify": {
-      await reply(`Re-verify any SIGNA signature — DMs, receipts, launches, payments — at ${SITE}/verify. Don't trust, verify.`);
+    case "verify":
+      await reply("Re-verify any SIGNA signature — DMs, receipts, launches, payments. Don't trust, verify.", { reply_markup: { inline_keyboard: [[{ text: "🔐 Open verifier", url: `${SITE}/verify` }]] } });
       return;
-    }
-    case "/preview": {
-      // admin-only: see exactly what subscribers get when B20 goes live + on each launch
-      const admin = process.env.TELEGRAM_ADMIN_ID || "";
-      if (!admin || String(chat.id) !== admin) { await reply("Not authorized."); return; }
-      await reply("👇 <b>Preview</b> — this is what /watch subscribers receive:");
+    case "preview": {
+      if (!isAdmin) { await reply("Not authorized."); return; }
+      await reply("👇 <b>Preview</b> — exactly what /watch subscribers receive:");
       await tgSend(chat.id, LIVE_ALERT);
       await tgSend(chat.id, launchText({ token: "0xb20000000000000000000000000000000000dEaD", variant: 0, name: "Example Token", symbol: "EXMPL", decimals: 18, block: "0" }));
       return;
     }
-    case "/news":
-    case "/broadcast": {
-      // admin-only: push a B20 launch / news message to every /watch chat
-      const admin = process.env.TELEGRAM_ADMIN_ID || "";
-      if (!admin || String(chat.id) !== admin) { await reply("Not authorized."); return; }
-      const body = arg.trim();
-      if (!body) { await reply("Usage: <code>/news your message to all subscribers</code>"); return; }
+    case "news":
+    case "broadcast": {
+      if (!isAdmin) { await reply("Not authorized."); return; }
+      if (!arg) { await reply("Usage: <code>/news your message to all subscribers</code>"); return; }
       const watchers = await listWatchers(db);
       let sent = 0;
-      for (const c of watchers) { const r = await tgSend(c, `📣 <b>SIGNA · B20</b>\n${esc(body)}`) as { ok?: boolean }; if (r?.ok) sent++; }
+      for (const c of watchers) { const r = (await tgSend(c, `📣 <b>SIGNA · B20</b>\n${esc(arg)}`)) as { ok?: boolean }; if (r?.ok) sent++; }
       await reply(`Broadcast sent to ${sent}/${watchers.length} chats.`);
       return;
     }
     default:
-      await reply("Unknown command. Send /help");
+      await reply("Unknown command. Send /help", { reply_markup: MENU });
   }
 }
 
