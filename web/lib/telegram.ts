@@ -77,12 +77,27 @@ function statusText(s: { reads_live?: boolean; create_live?: boolean; detail?: s
   ].filter(Boolean).join("\n");
 }
 
+// the "B20 just went live" broadcast (sent once, the moment createB20 activates)
+const LIVE_ALERT = [
+  "🚨🚨 <b>B20 IS LIVE ON BASE</b> 🚨🚨",
+  "",
+  "Token creation just activated — anyone can launch a B20 token now.",
+  "I'll post <b>every new launch right here</b>, the moment it happens.",
+  "",
+  `🚀 Launch a verifiable one: ${SITE}/b20`,
+  `📊 Status: ${SITE}/b20live`,
+].join("\n");
+
+// one message per B20 token launch (the live tracking feed)
 function launchText(l: B20Launch): string {
   return [
-    "🚨 <b>New B20 launch</b>",
-    `${esc(l.name)} ($${esc(l.symbol)}) · ${l.variant === 1 ? "stablecoin" : "asset"} · ${l.decimals} dec`,
+    "🚀 <b>New B20 launch on Base</b>",
+    `${esc(l.name)} ($${esc(l.symbol)}) · ${l.variant === 1 ? "stablecoin" : "asset"} · ${l.decimals} decimals`,
     `<code>${esc(l.token)}</code>`,
-    `Verify the launch: ${SITE}/b20`,
+    "",
+    `🔎 Basescan: https://basescan.org/token/${esc(l.token)}`,
+    `✅ Verify who launched it: ${SITE}/b20`,
+    "<i>tracked by @Signa_agent_bot</i>",
   ].join("\n");
 }
 
@@ -160,6 +175,15 @@ export async function handleUpdate(db: SupabaseClient, origin: string, update: T
       await reply(`Re-verify any SIGNA signature — DMs, receipts, launches, payments — at ${SITE}/verify. Don't trust, verify.`);
       return;
     }
+    case "/preview": {
+      // admin-only: see exactly what subscribers get when B20 goes live + on each launch
+      const admin = process.env.TELEGRAM_ADMIN_ID || "";
+      if (!admin || String(chat.id) !== admin) { await reply("Not authorized."); return; }
+      await reply("👇 <b>Preview</b> — this is what /watch subscribers receive:");
+      await tgSend(chat.id, LIVE_ALERT);
+      await tgSend(chat.id, launchText({ token: "0xb20000000000000000000000000000000000dEaD", variant: 0, name: "Example Token", symbol: "EXMPL", decimals: 18, block: "0" }));
+      return;
+    }
     case "/news":
     case "/broadcast": {
       // admin-only: push a B20 launch / news message to every /watch chat
@@ -188,21 +212,25 @@ export async function broadcastTick(db: SupabaseClient): Promise<{ ok: boolean; 
   const flipped = s.create_live === true && prev.create_live !== true;
   await setState(db, "b20", { create_live: !!s.create_live, reads_live: !!s.reads_live, at: Date.now() });
 
+  // the moment B20 goes live: announce ONCE, and set the launch-scan baseline to now
+  // (so the feed starts here instead of dumping the chain's whole backlog).
   if (flipped) {
-    const alert = ["🚨🚨 <b>B20 IS LIVE ON BASE.</b>", "Token creation just activated — you can launch a B20 token now.", `🚀 Launch a verifiable one: ${SITE}/b20`, `Track it: ${SITE}/b20live`].join("\n");
-    for (const c of watchers) { await tgSend(c, alert); }
+    for (const c of watchers) { await tgSend(c, LIVE_ALERT); }
+    try { const { head } = await b20RecentLaunches(); await setState(db, "scan", { head }); } catch { /* set baseline next tick */ }
+    return { ok: true, flipped: true, launches: 0, watchers: watchers.length, live: true };
   }
 
+  // steady state while live: post only NEW launches since the last scanned block
   let posted = 0;
   if (s.create_live) {
     try {
       const scan = await getState(db, "scan");
       const fromBlock = scan.head ? BigInt(String(scan.head)) : undefined;
       const { head, launches } = await b20RecentLaunches(fromBlock);
-      for (const l of launches.slice(0, 10)) { for (const c of watchers) { await tgSend(c, launchText(l)); } posted++; }
+      for (const l of launches.slice(0, 12)) { for (const c of watchers) { await tgSend(c, launchText(l)); } posted++; }
       await setState(db, "scan", { head });
     } catch { /* best effort */ }
   }
 
-  return { ok: true, flipped, launches: posted, watchers: watchers.length, live: !!s.create_live };
+  return { ok: true, flipped: false, launches: posted, watchers: watchers.length, live: !!s.create_live };
 }
