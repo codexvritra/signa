@@ -22,7 +22,7 @@
     },
     {
       "path": "/api/tg/tick",
-      "schedule": "*/2 * * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/social",
