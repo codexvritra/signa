@@ -14,6 +14,7 @@ import { listJobs, listAgents } from "./launchpad";
 import { SIGNA } from "./token";
 
 const SITE = "https://www.signaagent.xyz";
+// b20-1.0 — live deploy marker (B20-only tracker, 24/7)
 const token = () => process.env.TELEGRAM_BOT_TOKEN || "";
 
 const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
