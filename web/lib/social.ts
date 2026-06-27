@@ -42,6 +42,10 @@ function isCleanTake(s: string): boolean {
   if (/\bscore\b|\bexecute\b|\bbuy\b|\bsell\b|\bclick\b/i.test(s)) return false;
   if (/0x[0-9a-fA-F]{6,}|https?:\/\//.test(s)) return false;
   if (/\$[A-Z]{2,6}\b/.test(s.replace(/\$SIGNA/g, ""))) return false; // allow $SIGNA, reject random tickers
+  // reject brain tool-leakage: percentages/scores, domains/app names, sentiment/opportunity chatter
+  if (/\d{1,3}\s?%|\d+\s*\/\s*100/.test(s)) return false;
+  if (/\b[a-z0-9-]+\.(app|xyz|io|com|fun|fi|eth|base|sh|dev|ai|co)\b/i.test(s)) return false;
+  if (/\bsentiment\b|\bopportunit|\btoken\b.*\bscore|\bneutral\b/i.test(s)) return false;
   return true;
 }
 const pick = (ts: number) => CURATED[ts % CURATED.length];
