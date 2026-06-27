@@ -55,12 +55,13 @@ async function setState(db: SupabaseClient, key: string, value: Record<string, u
 // ── command copy + inline keyboards ─────────────────────────────────────────────
 const HELP = [
   "🔷 <b>SIGNA · B20 Bot</b>",
-  "The verifiable B20 launch tracker on Base. Tap a button or use a command:",
+  "The live token-launch tracker for Base. Tap a button or use a command:",
   "",
-  "<b>/status</b> — is B20 live yet?",
-  "<b>/watch</b> — ping this chat the instant B20 goes live (+ every launch)",
+  "<b>/launches</b> — latest token launches on Base (live now)",
+  "<b>/watch</b> — get every new launch the moment it lands (+ B20-live alert)",
   "<b>/unwatch</b> — stop alerts",
-  "<b>/token</b> &lt;address&gt; — look up a B20 token",
+  "<b>/status</b> — is B20 live yet?",
+  "<b>/token</b> &lt;address&gt; — look up a token",
   "<b>/launch</b> — launch a verifiable B20",
   "<b>/jobs</b> — the agent economy: agents that earn",
   "<b>/stats</b> — live bot + network stats",
@@ -73,8 +74,8 @@ const HELP = [
 // the main menu — tappable buttons (top-tier UX, no typing needed)
 const MENU = {
   inline_keyboard: [
-    [{ text: "📊 B20 Status", callback_data: "status" }, { text: "🔔 Watch", callback_data: "watch" }],
-    [{ text: "🚀 Launch a B20", url: `${SITE}/b20` }, { text: "📈 Live tracker", url: `${SITE}/b20live` }],
+    [{ text: "🚀 Latest launches", callback_data: "launches" }, { text: "🔔 Watch", callback_data: "watch" }],
+    [{ text: "📊 B20 status", callback_data: "status" }, { text: "📈 Tracker", url: `${SITE}/b20live` }],
     [{ text: "💼 Agent jobs", callback_data: "jobs" }, { text: "🪙 $SIGNA", callback_data: "signa" }],
   ],
 };
@@ -121,7 +122,7 @@ const LIVE_ALERT = [
   `📊 Status: ${SITE}/b20live`,
 ].join("\n");
 
-// one message per B20 token launch (the live tracking feed)
+// one message per B20 token launch (the native B20 feed, once B20 creation is live)
 function launchText(l: B20Launch): string {
   return [
     "🚀 <b>New B20 launch on Base</b>",
@@ -130,6 +131,27 @@ function launchText(l: B20Launch): string {
     "",
     `🔎 Basescan: https://basescan.org/token/${esc(l.token)}`,
     `✅ Verify who launched it: ${SITE}/b20`,
+    "<i>tracked by @Signa_agent_bot</i>",
+  ].join("\n");
+}
+
+// ── REAL Base token launches happening NOW (via Bankr) — live today, no waiting for B20 ──
+type BankrLaunch = { tokenName?: string; tokenSymbol?: string; tokenAddress?: string; chain?: string; launchType?: string; status?: string; deployer?: { xUsername?: string } };
+async function bankrLaunches(): Promise<BankrLaunch[]> {
+  try {
+    const r = await fetch(`${SITE}/api/partners/bankr/launches`, { cache: "no-store" }).then((x) => x.json());
+    return Array.isArray(r?.launches) ? (r.launches as BankrLaunch[]) : [];
+  } catch { return []; }
+}
+function bankrLaunchText(l: BankrLaunch): string {
+  const addr = String(l.tokenAddress ?? "").toLowerCase();
+  return [
+    "🚀 <b>New token launched on Base</b>",
+    `${esc(l.tokenName || "?")} ($${esc(l.tokenSymbol || "?")})${l.deployer?.xUsername ? ` · by @${esc(l.deployer.xUsername)}` : ""}`,
+    `<code>${esc(addr)}</code>`,
+    "",
+    `📈 Chart: https://dexscreener.com/base/${addr}`,
+    `🔎 Basescan: https://basescan.org/token/${addr}`,
     "<i>tracked by @Signa_agent_bot</i>",
   ].join("\n");
 }
@@ -181,9 +203,18 @@ async function dispatch(db: SupabaseClient, origin: string, chat: TgChat, action
       try { await reply(statusText(await b20Status()), { reply_markup: STATUS_KB }); }
       catch { await reply("Couldn't reach Base just now — try again in a sec."); }
       return;
+    case "launches": {
+      try {
+        const ls = await bankrLaunches();
+        if (!ls.length) { await reply("No launches found right now — try again shortly.", { reply_markup: MENU }); return; }
+        const lines = ls.slice(0, 8).map((l) => `• <b>${esc(l.tokenName || "?")}</b> ($${esc(l.tokenSymbol || "?")})${l.deployer?.xUsername ? ` · @${esc(l.deployer.xUsername)}` : ""}`);
+        await reply(["🚀 <b>Latest token launches on Base</b>", ...lines, "\n🔔 /watch to get each new one the moment it lands."].join("\n"), { reply_markup: { inline_keyboard: [[{ text: "🔔 Watch launches", callback_data: "watch" }, { text: "📈 Tracker", url: `${SITE}/b20live` }]] } });
+      } catch { await reply("Couldn't load launches just now — try again shortly."); }
+      return;
+    }
     case "watch":
       await subscribe(db, chat);
-      await reply("✅ <b>Watching.</b> I'll alert this chat the instant B20 goes live — then post every launch. /unwatch to stop."); return;
+      await reply("✅ <b>Watching.</b> You'll get every new token launch on Base the moment it lands — plus a one-time alert the instant B20 goes live. /unwatch to stop."); return;
     case "unwatch":
       await unsubscribe(db, chat.id);
       await reply("🔕 Stopped. Send /watch anytime to resume."); return;
@@ -265,35 +296,47 @@ async function dispatch(db: SupabaseClient, origin: string, chat: TgChat, action
   }
 }
 
-// ── the broadcaster: status-flip alert + live launch feed (called by the cron) ───
+// ── the broadcaster (called by the cron): real launch feed NOW + B20-live alert ───
 export async function broadcastTick(db: SupabaseClient): Promise<{ ok: boolean; flipped?: boolean; launches?: number; watchers?: number; live?: boolean }> {
   const watchers = await listWatchers(db);
-  let s: { create_live?: boolean; reads_live?: boolean };
-  try { s = await b20Status(); } catch { return { ok: false }; }
-
-  const prev = await getState(db, "b20");
-  const flipped = s.create_live === true && prev.create_live !== true;
-  await setState(db, "b20", { create_live: !!s.create_live, reads_live: !!s.reads_live, at: Date.now() });
-
-  // the moment B20 goes live: announce ONCE, and set the launch-scan baseline to now
-  // (so the feed starts here instead of dumping the chain's whole backlog).
-  if (flipped) {
-    for (const c of watchers) { await tgSend(c, LIVE_ALERT); }
-    try { const { head } = await b20RecentLaunches(); await setState(db, "scan", { head }); } catch { /* set baseline next tick */ }
-    return { ok: true, flipped: true, launches: 0, watchers: watchers.length, live: true };
-  }
-
-  // steady state while live: post only NEW launches since the last scanned block
   let posted = 0;
-  if (s.create_live) {
-    try {
+  let flipped = false;
+  let b20live = false;
+
+  // 1) REAL Base token launches happening now (via Bankr) — the working feed, live today.
+  try {
+    const st = await getState(db, "bankr");
+    const seen: string[] = Array.isArray(st.seen) ? (st.seen as string[]) : [];
+    const ls = await bankrLaunches();
+    const addrs = ls.map((l) => String(l.tokenAddress ?? "").toLowerCase()).filter(Boolean);
+    if (!seen.length) {
+      // first run: set the baseline, don't dump the existing backlog
+      if (addrs.length) await setState(db, "bankr", { seen: addrs.slice(0, 150) });
+    } else {
+      const fresh = ls.filter((l) => { const a = String(l.tokenAddress ?? "").toLowerCase(); return a && !seen.includes(a); });
+      for (const l of fresh.slice(0, 8)) { for (const c of watchers) { await tgSend(c, bankrLaunchText(l)); } posted++; }
+      if (fresh.length) await setState(db, "bankr", { seen: [...addrs, ...seen].slice(0, 150) });
+    }
+  } catch { /* best effort */ }
+
+  // 2) B20 activation: announce ONCE the instant token creation flips live.
+  try {
+    const s = await b20Status();
+    b20live = !!s.create_live;
+    const prev = await getState(db, "b20");
+    flipped = s.create_live === true && prev.create_live !== true;
+    await setState(db, "b20", { create_live: !!s.create_live, reads_live: !!s.reads_live, at: Date.now() });
+    if (flipped) for (const c of watchers) { await tgSend(c, LIVE_ALERT); }
+
+    // native B20Created feed once live (baseline first, then only-new)
+    if (b20live) {
       const scan = await getState(db, "scan");
       const fromBlock = scan.head ? BigInt(String(scan.head)) : undefined;
       const { head, launches } = await b20RecentLaunches(fromBlock);
-      for (const l of launches.slice(0, 12)) { for (const c of watchers) { await tgSend(c, launchText(l)); } posted++; }
-      await setState(db, "scan", { head });
-    } catch { /* best effort */ }
-  }
+      if (!scan.head) { await setState(db, "scan", { head }); }
+      else { for (const l of launches.slice(0, 8)) { for (const c of watchers) { await tgSend(c, launchText(l)); } posted++; } await setState(db, "scan", { head }); }
+    }
+  } catch { /* best effort */ }
 
-  return { ok: true, flipped: false, launches: posted, watchers: watchers.length, live: !!s.create_live };
+  return { ok: true, flipped, launches: posted, watchers: watchers.length, live: b20live };
 }

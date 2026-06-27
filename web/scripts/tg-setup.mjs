@@ -19,8 +19,9 @@ console.log("webhook:", info.result?.url, "pending:", info.result?.pending_updat
 
 // nice-to-have: register the command menu shown in Telegram's UI
 await api("setMyCommands", { commands: [
+  { command: "launches", description: "Latest token launches on Base (live)" },
+  { command: "watch", description: "Get every new launch + B20-live alert" },
   { command: "status", description: "Is B20 live yet?" },
-  { command: "watch", description: "Ping me the instant B20 goes live" },
   { command: "unwatch", description: "Stop alerts" },
   { command: "token", description: "Look up a B20 token by address" },
   { command: "launch", description: "Launch a verifiable B20" },
