@@ -23,6 +23,10 @@
     {
       "path": "/api/tg/tick",
       "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/cron/social",
+      "schedule": "0 14 * * *"
     }
   ]
 }

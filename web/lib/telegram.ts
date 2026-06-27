@@ -11,6 +11,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { b20Status, b20RecentLaunches, type B20Launch } from "./b20";
 import { listJobs, listAgents } from "./launchpad";
+import { generateTake, saveTake } from "./social";
 import { SIGNA } from "./token";
 
 const SITE = "https://www.signaagent.xyz";
@@ -260,6 +261,16 @@ async function dispatch(db: SupabaseClient, origin: string, chat: TgChat, action
     case "verify":
       await reply("Re-verify any SIGNA signature — DMs, receipts, launches, payments. Don't trust, verify.", { reply_markup: { inline_keyboard: [[{ text: "🔐 Open verifier", url: `${SITE}/verify` }]] } });
       return;
+    case "take": {
+      if (!isAdmin) { await reply("Not authorized."); return; }
+      await reply("✍️ Writing a take…");
+      try {
+        const t = await generateTake(origin, arg || undefined);
+        await saveTake(db, t);
+        await reply(`📝 <b>Ready to post on X</b> (${t.body.length} chars, signed by the SIGNA agent):\n\n${esc(t.body)}\n\n<i>/take for another · or /take &lt;topic&gt;</i>`);
+      } catch { await reply("Couldn't write one just now — try /take again."); }
+      return;
+    }
     case "preview": {
       if (!isAdmin) { await reply("Not authorized."); return; }
       await reply("👇 <b>Preview</b> — exactly what /watch subscribers receive:");

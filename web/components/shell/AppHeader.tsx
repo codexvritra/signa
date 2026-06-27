@@ -12,6 +12,7 @@ import { cn } from "@/lib/cn";
 const PRIMARY: { href: string; label: string }[] = [
   { href: "/spawn", label: "Spawn" },
   { href: "/jobs", label: "Jobs" },
+  { href: "/social", label: "Takes" },
   { href: "/aletheia", label: "Aletheia" },
   { href: "/vera", label: "VERA" },
   { href: "/network", label: "Network" },

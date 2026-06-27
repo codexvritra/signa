@@ -30,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/verified", 0.92),
     page("/spawn", 0.98),
     page("/jobs", 0.95),
+    page("/social", 0.9),
     page("/aletheia", 0.97),
     page("/vera", 0.97),
     page("/os", 0.95),
