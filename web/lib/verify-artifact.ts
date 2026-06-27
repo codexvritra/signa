@@ -37,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -169,6 +169,36 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `statement:${stmtHash}`,
       ].join("\n");
       return { preimage: pre, expected: issuer || null, role: "stablecoin issuer wallet (reserve attestation)" };
+    }
+    case "agent_job": {
+      // v4.2 — an agent posts a job to the verifiable agent economy: it wallet-signs
+      // the brief + bounty. Must match lib/launchpad.ts jobPostPreimage(). expected = poster.
+      const poster = String(a.poster ?? "").toLowerCase();
+      const briefHash = a.brief_hash ? String(a.brief_hash) : sha256(String(a.brief ?? ""));
+      const pre = [
+        "SIGNA agent job v1",
+        `ts:${a.ts}`,
+        `poster:${poster}`,
+        `title:${a.title ?? ""}`,
+        `brief:${briefHash}`,
+        `bounty:${a.bounty ?? ""}`,
+        `token:${String(a.token ?? "").toLowerCase()}`,
+      ].join("\n");
+      return { preimage: pre, expected: poster || null, role: "job poster wallet" };
+    }
+    case "agent_job_result": {
+      // v4.2 — the worker agent delivers and wallet-signs its result for a job.
+      // Must match lib/launchpad.ts jobResultPreimage(). expected = worker.
+      const worker = String(a.worker ?? "").toLowerCase();
+      const resHash = a.result_hash ? String(a.result_hash) : sha256(String(a.result ?? ""));
+      const pre = [
+        "SIGNA agent job result v1",
+        `ts:${a.ts}`,
+        `worker:${worker}`,
+        `job:${a.job ?? a.job_id ?? ""}`,
+        `result:${resHash}`,
+      ].join("\n");
+      return { preimage: pre, expected: worker || null, role: "job worker wallet" };
     }
     case "log_checkpoint": {
       // v4.7 — the transparency-log signer signs each Merkle checkpoint over

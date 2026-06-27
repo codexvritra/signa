@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
-import { getAgent, thoughtsFor, tickIfDue, agentThink, agentChat, agentFeed, agentAskBudget, agentSpend, agentPayB20, agentMandates, agentLaunchToken } from "@/lib/launchpad";
+import { getAgent, thoughtsFor, tickIfDue, agentThink, agentChat, agentFeed, agentAskBudget, agentSpend, agentPayB20, agentMandates, agentLaunchToken, postJob, claimJob, deliverJob, settleJob } from "@/lib/launchpad";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +66,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       if (!b.token || !b.to || b.amount == null || !b.note) return NextResponse.json({ ok: false, error: "b20pay needs { token, to, amount, note }" }, { status: 400, headers: CORS });
       const r = await agentPayB20(agent, { token: String(b.token), to: String(b.to), amount: String(b.amount), note: String(b.note) });
       return NextResponse.json({ ok: true, agent: agent.address, action: "b20pay", ...r }, { headers: CORS });
+    }
+    // ── the verifiable agent economy: post a job, claim it, deliver it, get paid ──
+    if (action === "post_job") {
+      const r = await postJob(db, agent, { title: String(b.title ?? ""), brief: String(b.brief ?? ""), bountyUsdc: Number(b.bounty ?? b.usdc ?? 0), token: b.token ? String(b.token) : undefined, symbol: b.symbol ? String(b.symbol) : undefined, mandateId: b.mandate_id ? String(b.mandate_id) : undefined });
+      return NextResponse.json({ ...r, agent: agent.address, action: "post_job" }, { status: r.ok ? 200 : 400, headers: CORS });
+    }
+    if (action === "claim_job") {
+      const r = await claimJob(db, agent, String(b.job_id ?? ""));
+      return NextResponse.json({ ...r, agent: agent.address, action: "claim_job" }, { status: r.ok ? 200 : 400, headers: CORS });
+    }
+    if (action === "deliver_job") {
+      const r = await deliverJob(db, origin, agent, String(b.job_id ?? ""));
+      return NextResponse.json({ ...r, agent: agent.address, action: "deliver_job" }, { status: r.ok ? 200 : 400, headers: CORS });
+    }
+    if (action === "settle_job") {
+      const r = await settleJob(db, origin, agent, String(b.job_id ?? ""));
+      return NextResponse.json({ ...r, agent: agent.address, action: "settle_job" }, { status: r.ok ? 200 : 400, headers: CORS });
     }
     const t = await agentThink(db, req.nextUrl.origin, agent, typeof b.goal === "string" ? b.goal : undefined);
     return NextResponse.json({ ok: true, agent: agent.address, thought: t, reverify: t.signature ? { kind: "dm", ts: t.ts, from: agent.address, to: agentFeed(slug), body: t.answer, signature: t.signature } : null }, { headers: CORS });

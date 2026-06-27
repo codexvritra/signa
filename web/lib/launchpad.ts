@@ -12,10 +12,15 @@
  * not "trust me it's an agent," but "here's the signature, check it."
  */
 import { privateKeyToAccount } from "viem/accounts";
-import { keccak256, toBytes } from "viem";
+import { keccak256, toBytes, recoverMessageAddress, type Hex } from "viem";
+import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { runBrain2 } from "./brain2";
 import { buildB20Note } from "./b20";
+
+const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+// USDC on Base — the default settlement asset until an agent pays in its own B20 token
+const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
 
 /** Deterministic, keyless wallet for an agent — derived from its slug. */
 export function agentAccount(slug: string) {
@@ -214,4 +219,120 @@ export async function agentLaunchToken(db: SupabaseClient, origin: string, agent
     ok: true, symbol, variant, token, factory: r.factory, tx: r.tx, receipt: r.receipt,
     announcement: { kind: "dm", ts, from: agent.address, to: feed, body: answer, signature },
   };
+}
+
+// ── the verifiable agent economy: agents post jobs, do the work, and pay each other ──
+// The missing piece: not "an agent that launches a token," but an agent that EARNS.
+// Every step is wallet-signed and re-verifiable — post (poster), result (worker),
+// payment (poster, as a B20 money-note). Money flows for work, and the work is provable.
+export type AgentJob = {
+  id: string; created_at: string; poster: string; poster_slug: string; worker: string | null; worker_slug: string | null;
+  title: string; brief: string; bounty_raw: string; pay_token: string; pay_symbol: string; mandate_id: string | null;
+  status: "open" | "claimed" | "delivered" | "paid"; ts: number; post_sig: string;
+  result: string | null; result_sig: string | null; result_ts: number | null; payment: Record<string, unknown> | null;
+};
+
+function jobPostPreimage(a: { ts: number; poster: string; title: string; brief: string; bounty: string; token: string }) {
+  return ["SIGNA agent job v1", `ts:${a.ts}`, `poster:${a.poster.toLowerCase()}`, `title:${a.title}`, `brief:${sha256(a.brief)}`, `bounty:${a.bounty}`, `token:${a.token.toLowerCase()}`].join("\n");
+}
+function jobResultPreimage(a: { ts: number; worker: string; job_id: string; result: string }) {
+  return ["SIGNA agent job result v1", `ts:${a.ts}`, `worker:${a.worker.toLowerCase()}`, `job:${a.job_id}`, `result:${sha256(a.result)}`].join("\n");
+}
+
+export async function listJobs(db: SupabaseClient, opts: { status?: string; limit?: number } = {}): Promise<AgentJob[]> {
+  let q = db.from("agent_jobs").select("*").order("created_at", { ascending: false }).limit(opts.limit ?? 50);
+  if (opts.status) q = q.eq("status", opts.status);
+  const { data } = await q;
+  return (data ?? []) as AgentJob[];
+}
+export async function getJob(db: SupabaseClient, id: string): Promise<AgentJob | null> {
+  const { data } = await db.from("agent_jobs").select("*").eq("id", id).maybeSingle();
+  return (data as AgentJob) ?? null;
+}
+
+/** A poster agent wallet-signs a job (brief + bounty) and opens it on the board. */
+export async function postJob(db: SupabaseClient, agent: LaunchAgent, input: { title: string; brief: string; bountyUsdc: number; token?: string; symbol?: string; mandateId?: string }): Promise<{ ok: boolean; job?: AgentJob; error?: string }> {
+  const title = (input.title ?? "").trim().slice(0, 80);
+  const brief = (input.brief ?? "").trim().slice(0, 600);
+  if (!title || !brief) return { ok: false, error: "title and brief required" };
+  const bounty = usdcRaw(input.bountyUsdc);
+  if (!/^[0-9]{1,30}$/.test(bounty) || bounty === "0") return { ok: false, error: "bounty must be > 0" };
+  // pay in the agent's OWN B20 token if it has one, else USDC on Base
+  const token = (input.token || agent.b20_token || USDC_BASE).toLowerCase();
+  const symbol = (input.symbol || (agent.b20_token ? agent.b20_symbol : "USDC") || "USDC").slice(0, 12);
+  const ts = Date.now();
+  const account = agentAccount(agent.slug);
+  const post_preimage = jobPostPreimage({ ts, poster: agent.address, title, brief, bounty, token });
+  const post_sig = await account.signMessage({ message: post_preimage });
+  const { data, error } = await db.from("agent_jobs")
+    .insert({ poster: agent.address, poster_slug: agent.slug, title, brief, bounty_raw: bounty, pay_token: token, pay_symbol: symbol, mandate_id: input.mandateId ?? null, status: "open", ts, post_sig, post_preimage })
+    .select("*").single();
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, job: data as AgentJob };
+}
+
+/** A worker agent claims an open job (can't claim its own). */
+export async function claimJob(db: SupabaseClient, agent: LaunchAgent, jobId: string): Promise<{ ok: boolean; job?: AgentJob; error?: string }> {
+  const job = await getJob(db, jobId);
+  if (!job) return { ok: false, error: "job not found" };
+  if (job.status !== "open") return { ok: false, error: `job is ${job.status}` };
+  if (job.poster_slug === agent.slug) return { ok: false, error: "can't claim your own job" };
+  const { data, error } = await db.from("agent_jobs").update({ worker: agent.address, worker_slug: agent.slug, status: "claimed" }).eq("id", jobId).eq("status", "open").select("*").maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "job was already claimed" };
+  return { ok: true, job: data as AgentJob };
+}
+
+/** The worker agent REASONS to produce the deliverable, wallet-signs it, and submits. */
+export async function deliverJob(db: SupabaseClient, origin: string, agent: LaunchAgent, jobId: string): Promise<{ ok: boolean; result?: string; reverify?: Record<string, unknown>; error?: string }> {
+  const job = await getJob(db, jobId);
+  if (!job) return { ok: false, error: "job not found" };
+  if (job.worker_slug !== agent.slug) return { ok: false, error: "you didn't claim this job" };
+  if (job.status !== "claimed") return { ok: false, error: `job is ${job.status}` };
+  const goal = `You are ${agent.name}, an autonomous agent on Base hired to do a job. Your mission: ${agent.mission}\nJob: "${job.title}"\nBrief: ${job.brief}\nDeliver the work itself — concise, concrete, and useful. Ground any claim in a live number where relevant.`;
+  const res = await runBrain2(origin, goal, 3);
+  const result = (res.answer ?? "").slice(0, 5000) || "(no output)";
+  const ts = Date.now();
+  const account = agentAccount(agent.slug);
+  const pre = jobResultPreimage({ ts, worker: agent.address, job_id: jobId, result });
+  const result_sig = await account.signMessage({ message: pre });
+  const { error } = await db.from("agent_jobs").update({ result, result_sig, result_ts: ts, status: "delivered" }).eq("id", jobId).eq("status", "claimed");
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, result, reverify: { kind: "agent_job_result", ts, worker: agent.address, job: jobId, result, signature: result_sig } };
+}
+
+/** The poster agent VERIFIES the worker's signed result, then PAYS — a capped mandate spend
+ *  (if funded) plus a wallet-signed B20 money-note from poster→worker. Settlement, provable. */
+export async function settleJob(db: SupabaseClient, origin: string, agent: LaunchAgent, jobId: string): Promise<{ ok: boolean; payment?: Record<string, unknown>; spend?: Record<string, unknown>; worker_verified?: boolean; error?: string }> {
+  const job = await getJob(db, jobId);
+  if (!job) return { ok: false, error: "job not found" };
+  if (job.poster_slug !== agent.slug) return { ok: false, error: "only the poster can settle" };
+  if (job.status !== "delivered") return { ok: false, error: `job is ${job.status}` };
+  if (!job.worker || !job.result || !job.result_sig) return { ok: false, error: "nothing delivered to settle" };
+
+  // verify the worker actually signed the delivered result before paying
+  let worker_verified = false;
+  try {
+    const pre = jobResultPreimage({ ts: job.result_ts as number, worker: job.worker, job_id: jobId, result: job.result });
+    const recovered = (await recoverMessageAddress({ message: pre, signature: job.result_sig as Hex })).toLowerCase();
+    worker_verified = recovered === job.worker.toLowerCase();
+  } catch { worker_verified = false; }
+  if (!worker_verified) return { ok: false, error: "worker result signature did not verify — refusing to pay" };
+
+  // optional capped mandate spend (refused by the rail if it exceeds the budget)
+  let spend: Record<string, unknown> | undefined;
+  if (job.mandate_id) {
+    spend = await agentSpend(origin, agent, job.mandate_id, Number(job.bounty_raw) / 1e6, `job:${jobId}`);
+    if (spend && spend.ok === false) return { ok: false, error: `payment exceeds budget: ${spend.error ?? "mandate cap"}`, spend };
+  }
+
+  // poster wallet-signs a B20 money-note paying the worker (gasless; broadcastable when B20 is live)
+  const account = agentAccount(agent.slug);
+  const built = buildB20Note({ ts: Date.now(), from: agent.address, to: job.worker, token: job.pay_token, amount: job.bounty_raw, note: `payment for job ${jobId}: ${job.title}` });
+  const signature = await account.signMessage({ message: built.preimage });
+  const payment = { ...built.reverify, signature, tx: built.tx };
+
+  const { error } = await db.from("agent_jobs").update({ status: "paid", payment }).eq("id", jobId).eq("status", "delivered");
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, worker_verified, payment, spend };
 }
