@@ -24,6 +24,28 @@ const TOPICS = [
   "agents launching and running their own tokens on Base — the first tokenized agents",
 ];
 
+// hand-written, on-brand takes — the quality floor. Used when the model output is weak.
+const CURATED = [
+  "Most 'AI agents' are a system prompt with a wallet. The bar on Base should be higher: an agent that thinks on a heartbeat, pays for its own work, and signs every action so you can verify it instead of trusting it.",
+  "The agent economy isn't agents that talk. It's agents that transact: one hiring another, paying for the result, with a receipt anyone can re-verify. That rail has to be signed end to end, or it's just a demo.",
+  "B20 makes launching a token native to Base. The question nobody's answering: who launched what, provably? A token standard needs a provenance layer. That's the part we build.",
+  "An AI agent that handles money should produce a signature for every move — request, payment, delivery — so the proof travels with the action. 'Trust me' does not scale to autonomous agents.",
+  "Autonomy without limits is a liability. The missing primitive for agent commerce on Base is a signed, bounded mandate: a human grants a budget, the agent spends within it, every spend capped and provable.",
+  "x402 moves the money. B20 mints the token. The layer everyone skips is proof — binding request, terms and payment into one re-verifiable receipt. Settlement is not provenance.",
+  "An agent that can't be verified is a brand, not infrastructure. Every SIGNA agent signs its thoughts and its payments with its own wallet. Don't trust the agent. Check the signature.",
+];
+
+// reject model output that's off-brand: internal commands, token shilling, scores, links, addresses.
+function isCleanTake(s: string): boolean {
+  if (s.length < 60 || s.length > 280) return false;
+  if (/\/(trade|me|status|watch|token|jobs|launch|take|start|help)\b/i.test(s)) return false;
+  if (/\bscore\b|\bexecute\b|\bbuy\b|\bsell\b|\bclick\b/i.test(s)) return false;
+  if (/0x[0-9a-fA-F]{6,}|https?:\/\//.test(s)) return false;
+  if (/\$[A-Z]{2,6}\b/.test(s.replace(/\$SIGNA/g, ""))) return false; // allow $SIGNA, reject random tickers
+  return true;
+}
+const pick = (ts: number) => CURATED[ts % CURATED.length];
+
 function dmPreimage(from: string, to: string, body: string, ts: number) {
   return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
@@ -34,19 +56,25 @@ export type SocialTake = { ts: number; body: string; topic: string; signer: stri
 export async function generateTake(origin: string, topicHint?: string): Promise<SocialTake> {
   const topic = (topicHint && topicHint.trim()) || TOPICS[Math.floor(Math.random() * TOPICS.length)];
   const goal = [
-    "You are SIGNA (@Signa_Agent), an autonomous AI agent on Base.",
-    `Write ONE X post (max 270 characters) about: ${topic}.`,
-    "Voice: technical, confident, concrete — like a sharp founder, not a marketer.",
-    "Rules: plain text only, NO hashtags, NO emojis, NO surrounding quotes. One idea, stated crisply. End with a short hook, not a link.",
+    "You are SIGNA (@Signa_Agent), an autonomous AI agent on Base. Write ONE thought-leadership X post about this theme:",
+    topic,
+    "",
+    "It must read like a sharp founder's tweet — an opinion or insight a smart Base developer would nod at.",
+    "HARD RULES:",
+    "- Max 270 characters, plain text, ONE idea.",
+    "- NO hashtags, NO emojis, NO surrounding quotes, NO links or URLs.",
+    "- Do NOT mention any specific token ticker, price, or 'score'. Do NOT give trading advice (no buy/sell/execute).",
+    "- Do NOT reference app commands or pages (nothing starting with '/').",
+    "- Don't describe what you can do as a tool — make a CLAIM about agents, verifiability, or Base. End with a crisp hook.",
   ].join("\n");
   let body = "";
   try {
-    const res = await runBrain2(origin, goal, 2);
-    body = (res.answer ?? "").trim();
+    const res = await runBrain2(origin, goal, 1);
+    body = (res.answer ?? "").trim().replace(/^["']|["']$/g, "").replace(/#[A-Za-z0-9_]+/g, "").replace(/\s+/g, " ").trim();
   } catch { body = ""; }
-  body = body.replace(/^["']|["']$/g, "").replace(/#[A-Za-z0-9_]+/g, "").trim().slice(0, 275);
-  if (!body) body = "Most AI agents are a system prompt with a wallet. On Base, SIGNA agents think on a heartbeat, hire and pay each other, and sign every move — so you can verify it, not just trust it.";
+  // quality gate: only ship model output if it's clean + on-brand, else a curated take
   const ts = Date.now();
+  if (!isCleanTake(body)) body = pick(ts);
   const signature = await SOCIAL.signMessage({ message: dmPreimage(SOCIAL.address, SOCIAL.address, body, ts) });
   return {
     ts, body, topic, signer: SOCIAL.address.toLowerCase(), signature,
