@@ -160,6 +160,19 @@ export async function handleUpdate(db: SupabaseClient, origin: string, update: T
       await reply(`Re-verify any SIGNA signature — DMs, receipts, launches, payments — at ${SITE}/verify. Don't trust, verify.`);
       return;
     }
+    case "/news":
+    case "/broadcast": {
+      // admin-only: push a B20 launch / news message to every /watch chat
+      const admin = process.env.TELEGRAM_ADMIN_ID || "";
+      if (!admin || String(chat.id) !== admin) { await reply("Not authorized."); return; }
+      const body = arg.trim();
+      if (!body) { await reply("Usage: <code>/news your message to all subscribers</code>"); return; }
+      const watchers = await listWatchers(db);
+      let sent = 0;
+      for (const c of watchers) { const r = await tgSend(c, `📣 <b>SIGNA · B20</b>\n${esc(body)}`) as { ok?: boolean }; if (r?.ok) sent++; }
+      await reply(`Broadcast sent to ${sent}/${watchers.length} chats.`);
+      return;
+    }
     default:
       await reply("Unknown command. Send /help");
   }
