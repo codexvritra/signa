@@ -325,3 +325,39 @@ export async function b20Status(): Promise<{ reads_live: boolean; create_live: b
   }
   return { reads_live, create_live, factory: B20_FACTORY, network: B20_NETWORK, checked_at: Date.now(), detail };
 }
+
+// the B20Created event the factory emits on each launch (Base Beryl)
+const B20_CREATED_EVENT = {
+  type: "event", name: "B20Created",
+  inputs: [
+    { name: "token", type: "address", indexed: true },
+    { name: "variant", type: "uint8", indexed: true },
+    { name: "name", type: "string", indexed: false },
+    { name: "symbol", type: "string", indexed: false },
+    { name: "decimals", type: "uint8", indexed: false },
+    { name: "variantEventParams", type: "bytes", indexed: false },
+  ],
+} as const;
+
+export type B20Launch = { token: string; variant: number; name: string; symbol: string; decimals: number; block: string };
+
+/** Scan recent B20Created events on Base (bounded). Powers the Telegram launch feed.
+ *  Returns the chain head + any launches after `fromBlock` (or the last ~5k blocks). */
+export async function b20RecentLaunches(fromBlock?: bigint): Promise<{ head: string; launches: B20Launch[] }> {
+  let head: bigint;
+  try { head = await client().getBlockNumber(); } catch { return { head: "0", launches: [] }; }
+  const start = fromBlock && fromBlock > 0n ? fromBlock + 1n : head > 5000n ? head - 5000n : 0n;
+  let logs: Array<{ args?: Record<string, unknown>; blockNumber?: bigint }> = [];
+  try {
+    logs = await client().getLogs({ address: B20_FACTORY, event: B20_CREATED_EVENT, fromBlock: start, toBlock: head });
+  } catch { logs = []; }
+  const launches = logs.map((l) => ({
+    token: String(l.args?.token ?? "").toLowerCase(),
+    variant: Number(l.args?.variant ?? 0),
+    name: String(l.args?.name ?? ""),
+    symbol: String(l.args?.symbol ?? ""),
+    decimals: Number(l.args?.decimals ?? 18),
+    block: String(l.blockNumber ?? ""),
+  }));
+  return { head: String(head), launches };
+}
