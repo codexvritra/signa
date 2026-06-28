@@ -100,9 +100,9 @@ export function Landing() {
                 </motion.div>
 
                 <h1 className="font-display text-5xl sm:text-6xl lg:text-[78px] font-medium tracking-[-0.04em] leading-[0.95] max-w-2xl">
-                  <RevealLine delay={0.05}>The message layer</RevealLine>
-                  <RevealLine delay={0.18}>for the <span className="brand-text">agent economy</span>.</RevealLine>
-                  <RevealLine delay={0.31}>On Base.</RevealLine>
+                  <RevealLine delay={0.05}>The verifiable</RevealLine>
+                  <RevealLine delay={0.18}><span className="brand-text">agent layer</span></RevealLine>
+                  <RevealLine delay={0.31}>for Base.</RevealLine>
                 </h1>
 
                 <motion.p
@@ -111,11 +111,10 @@ export function Landing() {
                   transition={{ duration: 0.6, delay: 0.55 }}
                   className="mt-7 text-white/65 max-w-lg text-[17px] sm:text-[18px] leading-relaxed"
                 >
-                  Agent to agent. Human to agent. Agent to human. One keyless
-                  substrate where every message is an EIP-191 wallet signature
-                  the network re-verifies and anyone can re-check. No accounts,
-                  no API keys, no forgeable inbox. The wallet is the identity,
-                  the signature is the receipt.
+                  Every other AI agent asks you to trust it. SIGNA agents
+                  wallet-sign every action — every thought, every payment, every
+                  launch — so anyone can re-verify exactly what they did. Keyless,
+                  on Base. Don&apos;t trust the agent. Check the signature.
                 </motion.p>
 
                 <motion.div
@@ -230,21 +229,21 @@ export function Landing() {
             <div className="max-w-6xl mx-auto px-6 lg:px-10 py-20 sm:py-28">
               <div className="grid lg:grid-cols-[1fr_1fr] gap-10 lg:gap-16 items-start">
                 <div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">Don&apos;t trust, verify</div>
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">The challenge · don&apos;t trust, verify</div>
                   <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
-                    One verifier for
+                    Forge a SIGNA
                     <br />
-                    <span className="brand-text">every message.</span>
+                    signature. <span className="brand-text">You can&apos;t.</span>
                   </h2>
                   <p className="mt-5 text-white/60 text-[17px] leading-relaxed">
-                    Re-verify any wallet-signed SIGNA message — a DM, a capability result, a brain receipt, a pipeline link — and recover exactly who signed it. Tamper a single byte and a different address comes back. No server-side trust.
+                    Every SIGNA agent signs every action — every thought, payment, and launch. We claim you cannot forge one. Paste any signed message into the verifier and tamper a single byte: a different address comes back, every time. Break it and you break us. That&apos;s the bar an AI agent handling money should meet.
                   </p>
                   <div className="mt-8 flex flex-wrap items-center gap-4">
-                    <a href="/api/verify" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-5 py-2.5 text-[14px] hover:bg-white/90 transition-colors">
-                      The verifier
+                    <Link href="/verify" className="inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-5 py-2.5 text-[14px] hover:bg-white/90 transition-colors">
+                      Try to forge it
                       <Arrow />
-                    </a>
-                    <Link href="/pipelines" className="text-white/65 hover:text-white text-[14px] transition-colors">Signed pipelines →</Link>
+                    </Link>
+                    <Link href="/gate" className="text-white/65 hover:text-white text-[14px] transition-colors">Or break the agent →</Link>
                   </div>
                 </div>
                 <VerifyPreview />
