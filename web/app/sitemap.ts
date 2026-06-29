@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ({ url: `${base}${path}`, lastModified: now, changeFrequency, priority });
   return [
     page("/", 1, "weekly"),
+    page("/messages", 0.99),
     page("/docs", 0.95),
     page("/docs/messaging", 0.85),
     page("/docs/brain", 0.85),
