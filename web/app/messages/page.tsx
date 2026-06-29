@@ -64,8 +64,15 @@ export default function MessagesPage() {
   const loadThread = useCallback(async (peerAddr: string) => {
     if (!me) return;
     try {
-      const r = await fetch(`/api/dm/thread?a=${me}&b=${peerAddr}&limit=200`, { cache: "no-store" }).then((x) => x.json());
-      setThread((r.dms ?? []) as DM[]);
+      const [r, oc] = await Promise.all([
+        fetch(`/api/dm/thread?a=${me}&b=${peerAddr}&limit=200`, { cache: "no-store" }).then((x) => x.json()),
+        fetch(`/api/onchain-message?to=${me}`, { cache: "no-store" }).then((x) => x.json()).catch(() => ({ messages: [] })),
+      ]);
+      const signed = ((r.dms ?? []) as DM[]).map((d) => ({ ...d, ts: d.ts || (d.created_at ? new Date(d.created_at).getTime() : 0) }));
+      const onchain = ((oc.messages ?? []) as Array<{ tx_hash: string; from_address: string; to_address: string; body: string; created_at: string }>)
+        .filter((m) => m.from_address === peerAddr)
+        .map((m) => ({ id: `oc-${m.tx_hash}`, from_address: m.from_address, to_address: m.to_address, body: m.body, ts: new Date(m.created_at).getTime(), tx: m.tx_hash }));
+      setThread([...signed, ...onchain].sort((a, b) => (a.ts || 0) - (b.ts || 0)));
       setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch {}
   }, [me]);
@@ -128,6 +135,9 @@ export default function MessagesPage() {
       const hash = await sendTransactionAsync({ to: peer.address as `0x${string}`, data, value: 0n });
       setDraft(""); setStatus({ kind: "ok", text: "Written to Base ⛓ — permanent, readable from the chain." });
       setThread((t) => [...t, { id: `chain-${hash}`, from_address: me, to_address: peer.address, body: text, ts: Date.now(), tx: hash }]);
+      // index it for the recipient's onchain inbox (re-verified from chain; best-effort, retried once after it mines)
+      const record = () => fetch("/api/onchain-message", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ tx: hash }) }).then((r) => r.json()).catch(() => ({}));
+      record().then((r) => { if (!r?.ok) setTimeout(record, 6000); });
       setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e) {
       setStatus({ kind: "err", text: e instanceof Error && /reject|denied/i.test(e.message) ? "Transaction rejected." : "Couldn't post on-chain — you need a little ETH on Base for gas." });

@@ -9,6 +9,7 @@
  */
 import { toHex, hexToString, createPublicClient, http, type Address } from "viem";
 import { base } from "viem/chains";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const PREFIX = "SIGNA msg v1";
 
@@ -55,4 +56,34 @@ export async function readOnchainMessage(txHash: string): Promise<
     // the chain proves the sender: the tx's from must equal the claimed message from
     sender_matches: txFrom === msg.from,
   };
+}
+
+export type OnchainMsg = { tx_hash: string; from_address: string; to_address: string; body: string; block: string | null; created_at: string };
+
+/** Index an onchain message after it's broadcast — only if it really decodes on-chain. */
+export async function recordOnchainMessage(db: SupabaseClient, txHash: string): Promise<{ ok: boolean; error?: string; record?: OnchainMsg }> {
+  const m = await readOnchainMessage(txHash);
+  if (!m) return { ok: false, error: "not_a_signa_onchain_message" };
+  if (!m.sender_matches) return { ok: false, error: "tx_sender_mismatch" };
+  const row = { tx_hash: m.tx, from_address: m.from, to_address: m.to, body: m.body, block: m.block };
+  const { error } = await db.from("onchain_messages").upsert(row, { onConflict: "tx_hash" });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, record: { ...row, created_at: new Date().toISOString() } };
+}
+
+/** The onchain inbox for a wallet — rows are re-verified against the chain (no forgery). */
+export async function onchainInbox(db: SupabaseClient, address: string, limit = 20): Promise<OnchainMsg[]> {
+  if (!/^0x[0-9a-f]{40}$/.test(address.toLowerCase())) return [];
+  const { data } = await db
+    .from("onchain_messages")
+    .select("tx_hash,from_address,to_address,body,block,created_at")
+    .eq("to_address", address.toLowerCase())
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(limit, 1), 50));
+  const out: OnchainMsg[] = [];
+  for (const row of (data ?? []) as OnchainMsg[]) {
+    const m = await readOnchainMessage(row.tx_hash);
+    if (m && m.sender_matches && m.from === row.from_address && m.to === row.to_address && m.body === row.body) out.push(row);
+  }
+  return out;
 }
