@@ -120,7 +120,9 @@ export type { BootOptions, MemoryEntry } from "./os.js";
 // onchain messaging — write/read a DM straight into a Base tx (no node, no website)
 export {
   ONCHAIN_MSG_PREFIX,
+  BASE_CHAIN_ID_HEX,
   buildOnchainMessageData,
+  composeOnchain,
   decodeOnchainMessage,
   readOnchainMessage,
   sendOnchainMessage,

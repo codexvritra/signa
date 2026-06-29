@@ -59,6 +59,18 @@ async function send(to, body) {
   console.log("\nit's on Base now. read it back with:\n  node onchain-message.mjs read " + hash);
 }
 
+function compose(from, to, body) {
+  if (!/^0x[a-fA-F0-9]{40}$/.test(from)) throw new Error("set FROM=0x… (your wallet) or PK=0x… so I can derive it");
+  if (!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error(`bad recipient: ${to}`);
+  if (!body) throw new Error("message body is required");
+  const data = buildData({ from, to: norm(to), body });
+  // The wallet-agnostic transaction request. Paste `data` into a wallet's hex
+  // field (MetaMask/Rabby: enable "hex data"), or hand {to,value,data} to any
+  // injected provider / WalletConnect request. No website, no SIGNA node.
+  console.log(JSON.stringify({ to: norm(to), value: "0x0", data, chainId: "0x2105" }, null, 2));
+  console.log("\nhex data to paste into your wallet's send screen:\n" + data);
+}
+
 async function read(txHash) {
   if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) throw new Error(`bad tx hash: ${txHash}`);
   const client = createPublicClient({ chain: base, transport: http(RPC) });
@@ -81,8 +93,12 @@ const [cmd, a, b] = process.argv.slice(2);
 try {
   if (cmd === "send") await send(a, b);
   else if (cmd === "read") await read(a);
-  else {
-    console.log("usage:\n  PK=0x… node onchain-message.mjs send <0xrecipient> \"message\"\n  node onchain-message.mjs read <0xtxhash>");
+  else if (cmd === "data") {
+    let from = process.env.FROM;
+    if (!from && process.env.PK) { const { privateKeyToAccount } = await import("viem/accounts"); from = privateKeyToAccount(process.env.PK.startsWith("0x") ? process.env.PK : `0x${process.env.PK}`).address; }
+    compose(norm(from || ""), a, b);
+  } else {
+    console.log("usage:\n  PK=0x… node onchain-message.mjs send <0xrecipient> \"message\"\n  node onchain-message.mjs read <0xtxhash>\n  FROM=0xyou node onchain-message.mjs data <0xrecipient> \"message\"   # prints the tx + hex to paste into any wallet");
     process.exit(1);
   }
 } catch (e) {

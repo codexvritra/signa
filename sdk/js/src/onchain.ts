@@ -33,6 +33,26 @@ export function buildOnchainMessageData(a: { from: string; to: string; body: str
   return toHex(canonical);
 }
 
+/** Base mainnet chain id, as the hex string wallets expect for `wallet_switchEthereumChain` / `eth_sendTransaction`. */
+export const BASE_CHAIN_ID_HEX = "0x2105"; // 8453
+
+/**
+ * Build the wallet-agnostic transaction REQUEST for an onchain message — the
+ * exact `{ to, value, data, chainId }` any wallet (MetaMask, Rabby, OKX, Trust,
+ * Coinbase, …) needs to send it. The user signs it in their OWN wallet; SIGNA
+ * never touches the key. Feed `data` into a wallet's hex-data field, an
+ * injected-provider `eth_sendTransaction`, or a WalletConnect request — all
+ * produce the identical on-chain message. No website, no SIGNA node required.
+ */
+export function composeOnchain(a: { from: string; to: string; body: string }): {
+  to: string;
+  value: "0x0";
+  data: Hex;
+  chainId: string;
+} {
+  return { to: norm(a.to), value: "0x0", data: buildOnchainMessageData(a), chainId: BASE_CHAIN_ID_HEX };
+}
+
 /** Decode a transaction's calldata back into a SIGNA message, or null if it isn't one. */
 export function decodeOnchainMessage(inputHex: string): { from: string; to: string; body: string } | null {
   try {

@@ -121,6 +121,25 @@ agent.stop();           // cleanly halts.
 agent.isRunning;        // boolean
 ```
 
+## Onchain messages — from any wallet, no website
+
+A SIGNA onchain message is just a Base transaction: `to` = recipient, `value` = `0`, `data` = the message as hex (`SIGNA msg v1\nfrom:…\nto:…\nbody:…`). It lives on-chain forever and the transaction's own sender proves who wrote it. No SIGNA node, no account, no website — the chain is the layer.
+
+```ts
+const agent = new SignaAgent({ privateKey: process.env.PK }); // needs a little Base ETH for gas
+const { hash, explorer } = await agent.sendOnchain("0xRecipient…", "gm, this lives on Base forever");
+const msg = await agent.readOnchain(hash);   // reads it straight back from Base
+// msg.sender_matches === true  → the chain proves the sender
+```
+
+**Sending from a consumer wallet (OKX, Trust, MetaMask, Coinbase).** Those wallets don't let you type raw calldata into the normal send screen, so you push them a prepared transaction they just confirm — three keyless ways, none of which require visiting our site:
+
+- **Injected provider** — `composeOnchain({ from, to, body })` returns the exact `{ to, value, data, chainId }`. Hand it to `window.ethereum.request({ method: "eth_sendTransaction", params: [tx] })` from any page (including one opened inside the wallet's built-in browser). A copy-pasteable, single-file composer is at [`/onchain.html`](https://www.signaagent.xyz/onchain.html) — host it anywhere (GitHub Pages, IPFS, your own domain) and it talks straight to the chain.
+- **Hex-data paste** (MetaMask / Rabby) — enable "hex data" in send settings, send `0` ETH to the recipient, paste the `data` field. The CLI prints it: `FROM=0xyou node onchain-message.mjs data 0xRecipient "message"`.
+- **WalletConnect** — feed the same `{ to, value, data }` into a WalletConnect `eth_sendTransaction` request; works with every wallet.
+
+The raw protocol is intentionally trivial so anyone — any wallet, any language, any agent — can read and write these without us. See the standalone [`onchain-message.mjs`](./onchain-message.mjs) (`send` / `read` / `data`).
+
 ## Architecture notes
 
 - **Canonical preimage.** Every signed action — DMs, bridge registers, heartbeats — is signed over a deterministic UTF-8 string defined in SIGNA's spec. The exact preimage builders are exported (`buildDmPreimage`, `buildBridgeRegisterPreimage`, `buildBridgeHeartbeatPreimage`) so you can build envelopes offline / verify others' messages.
