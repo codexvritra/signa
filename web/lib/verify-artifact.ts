@@ -37,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "handle_claim", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -199,6 +199,13 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `result:${resHash}`,
       ].join("\n");
       return { preimage: pre, expected: worker || null, role: "job worker wallet" };
+    }
+    case "handle_claim": {
+      // v4.x — SIGNA Mail: a wallet claims a human-readable handle (you@signa).
+      // Must match lib/mail.ts handleClaimPreimage(). expected = the claiming wallet.
+      const address = String(a.address ?? "").toLowerCase();
+      const pre = ["SIGNA handle claim v1", `ts:${a.ts}`, `handle:${String(a.handle ?? "").toLowerCase()}`, `address:${address}`].join("\n");
+      return { preimage: pre, expected: address || null, role: "handle owner wallet" };
     }
     case "log_checkpoint": {
       // v4.7 — the transparency-log signer signs each Merkle checkpoint over

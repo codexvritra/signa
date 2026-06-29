@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { bankrResolveRecipient } from "@/lib/skills/bankr";
+import { resolveHandle } from "@/lib/mail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -250,6 +251,17 @@ export async function GET(req: NextRequest) {
           { status: 404, headers: CORS },
         );
       }
+    }
+  }
+
+  // 4.5 SIGNA Mail handle — you@signa / you.signa / a bare claimed handle.
+  //     Re-verified against the claim signature inside resolveHandle().
+  if (!address) {
+    const h = await resolveHandle(supabase, raw);
+    if (h) {
+      address = h.address;
+      socialLabel = `${h.handle}@signa`;
+      source = "signa_handle";
     }
   }
 

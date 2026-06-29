@@ -29,6 +29,13 @@ export default function MessagesPage() {
   const [inbox, setInbox] = useState<DM[]>([]);
   const [live, setLive] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [myHandle, setMyHandle] = useState<string | null>(null);
+  const [handleInput, setHandleInput] = useState("");
+
+  useEffect(() => {
+    if (!me) { setMyHandle(null); return; }
+    fetch(`/api/mail?address=${me}`, { cache: "no-store" }).then((r) => r.json()).then((j) => { if (j.ok) setMyHandle(j.handle ?? null); }).catch(() => {});
+  }, [me]);
 
   const [peer, setPeer] = useState<Peer | null>(null);
   const [thread, setThread] = useState<DM[]>([]);
@@ -86,6 +93,23 @@ export default function MessagesPage() {
     open();
     return () => { stopped = true; es?.close(); };
   }, [me]);
+
+  async function claimHandle() {
+    const h = handleInput.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,20}$/.test(h)) { setStatus({ kind: "err", text: "3–20 chars: a–z, 0–9, _" }); return; }
+    if (!me) return;
+    setBusy(true); setStatus({ kind: "info", text: "Sign to claim…" });
+    try {
+      const ts = Date.now();
+      const signature = await signMessageAsync({ message: `SIGNA handle claim v1\nts:${ts}\nhandle:${h}\naddress:${me}` });
+      const r = await fetch("/api/mail", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ handle: h, address: me, ts, signature }) }).then((x) => x.json());
+      if (r.ok) { setMyHandle(r.handle); setHandleInput(""); setStatus({ kind: "ok", text: `Claimed ${r.handle}@signa` }); }
+      else setStatus({ kind: "err", text: r.error || "claim failed" });
+    } catch (e) {
+      setStatus({ kind: "err", text: e instanceof Error && /reject/i.test(e.message) ? "Signature rejected." : "Couldn't claim." });
+    }
+    setBusy(false);
+  }
 
   async function startConversation() {
     const id = toInput.trim();
@@ -184,7 +208,31 @@ export default function MessagesPage() {
         ) : (
           /* ============ INBOX ============ */
           <>
-            <div className="mt-6 glass rounded-xl p-3.5 border border-white/10 flex items-center gap-2">
+            {/* SIGNA Mail — your wallet's address */}
+            <div className="mt-6 glass rounded-xl p-3.5 border border-[#a98bff]/25">
+              {myHandle ? (
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className="text-[11px] text-faint">your SIGNA address</div>
+                    <div className="text-[16px] font-semibold text-[#c4b4ff]">{myHandle}@signa</div>
+                  </div>
+                  <button onClick={() => { navigator.clipboard?.writeText(`${myHandle}@signa`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="ml-auto shrink-0 text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy"}</button>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-[12px] text-faint mb-2">Claim your <span className="text-white">SIGNA address</span> — a name for your wallet inbox, so people DM you at <span className="text-[#c4b4ff]">you@signa</span> instead of 0x.</div>
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex items-center bg-black/30 border border-white/10 rounded-lg px-3 focus-within:border-[#a98bff]/60">
+                      <input value={handleInput} onChange={(e) => setHandleInput(e.target.value.toLowerCase())} onKeyDown={(e) => { if (e.key === "Enter") claimHandle(); }} placeholder="yourname" maxLength={20} className="flex-1 bg-transparent py-2 text-[14px] outline-none" />
+                      <span className="text-[13px] text-faint">@signa</span>
+                    </div>
+                    <button onClick={claimHandle} disabled={busy} className="px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Claim"}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-3 glass rounded-xl p-3.5 border border-white/10 flex items-center gap-2">
               <div className="min-w-0">
                 <div className="text-[11px] text-faint">your inbox link · share it, anyone can sign you a message</div>
                 <code className="text-[12.5px] text-[#a5c3ff] font-mono truncate block">{myLink}</code>
@@ -198,7 +246,7 @@ export default function MessagesPage() {
                 <input
                   value={toInput} onChange={(e) => setToInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") startConversation(); }}
-                  placeholder="0x…, name.eth, name.base.eth, or @handle"
+                  placeholder="name@signa, 0x…, name.eth, or @handle"
                   className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60"
                 />
                 <button onClick={startConversation} disabled={busy} className="px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Open"}</button>
