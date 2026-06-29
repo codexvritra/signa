@@ -39,7 +39,7 @@ export default function SignaDirectoryPage() {
           {filtered.map((h) => (
             <a
               key={h.handle}
-              href={`/messages`}
+              href={`/signa/${h.handle}`}
               className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] hover:bg-white/[0.04] hover:border-[#a98bff]/30 transition-colors flex items-center gap-3"
             >
               <div className="size-9 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] flex items-center justify-center text-[15px] font-bold text-white shrink-0">{h.handle[0]?.toUpperCase()}</div>

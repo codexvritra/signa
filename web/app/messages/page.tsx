@@ -37,6 +37,11 @@ export default function MessagesPage() {
     fetch(`/api/mail?address=${me}`, { cache: "no-store" }).then((r) => r.json()).then((j) => { if (j.ok) setMyHandle(j.handle ?? null); }).catch(() => {});
   }, [me]);
 
+  // deep link: /messages?to=name@signa pre-fills the composer (from profile pages / directory)
+  useEffect(() => {
+    try { const t = new URLSearchParams(window.location.search).get("to"); if (t) setToInput(t); } catch {}
+  }, []);
+
   const [peer, setPeer] = useState<Peer | null>(null);
   const [thread, setThread] = useState<DM[]>([]);
   const [draft, setDraft] = useState("");
