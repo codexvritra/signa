@@ -46,6 +46,7 @@ import {
   buildDmPriceSetPreimage,
 } from "./envelope.js";
 import { buildPaymentHeader, type Challenge402 } from "./paid-dm.js";
+import { readOnchainMessage, sendOnchainMessage, type OnchainMessage } from "./onchain.js";
 import { Anchor, Nodes, Receipts, Rooms, Search } from "./rooms.js";
 import { EncryptedRooms } from "./encrypted-rooms.js";
 import { encryptSealedBox, decryptSealedBox } from "./encryption.js";
@@ -116,6 +117,15 @@ export type { Challenge402, PaymentRequirements } from "./paid-dm.js";
 // v0.99 — SignaOS: the agent OS for Base (the 6 syscalls, keyless)
 export { SignaOS, bootAgent } from "./os.js";
 export type { BootOptions, MemoryEntry } from "./os.js";
+// onchain messaging — write/read a DM straight into a Base tx (no node, no website)
+export {
+  ONCHAIN_MSG_PREFIX,
+  buildOnchainMessageData,
+  decodeOnchainMessage,
+  readOnchainMessage,
+  sendOnchainMessage,
+} from "./onchain.js";
+export type { OnchainMessage } from "./onchain.js";
 
 /**
  * Thrown by {@link SignaAgent.send} when the recipient's inbox is priced
@@ -160,6 +170,8 @@ export class SignaAgent {
   readonly encrypted: EncryptedRooms;
 
   private readonly account: SignaSigner;
+  /** The raw local key, if one was supplied — needed only to BROADCAST an onchain message (a tx). Null for custody/remote signers. */
+  private readonly localPrivateKey: `0x${string}` | null;
   private readonly pollIntervalMs: number;
   private readonly heartbeatIntervalMs: number;
   private readonly echoOwnMessages: boolean;
@@ -176,11 +188,13 @@ export class SignaAgent {
     // any HSM/TEE) via `account`. The agent never needs the raw key.
     if (opts.account) {
       this.account = opts.account;
+      this.localPrivateKey = null;
     } else if (opts.privateKey) {
       const pk = opts.privateKey.startsWith("0x")
         ? (opts.privateKey as `0x${string}`)
         : (`0x${opts.privateKey}` as `0x${string}`);
       this.account = privateKeyToAccount(pk);
+      this.localPrivateKey = pk;
     } else {
       throw new Error("SignaAgent: provide `privateKey` or `account` (a SignaSigner, e.g. oneClawSigner)");
     }
@@ -489,6 +503,58 @@ export class SignaAgent {
   /** Convenience: send a DM threaded as a reply to a received message. */
   async reply(msg: SignaDm, body: string, opts: SendOptions = {}): Promise<SignaDm> {
     return this.send(msg.from, body, { ...opts, in_reply_to: msg.id });
+  }
+
+  // ─────────────────────────── onchain messaging ───────────────────────────
+
+  /**
+   * Write a message ONCHAIN — a 0-value Base transaction to `to` whose
+   * calldata is the SIGNA message. Permanent, censorship-resistant, and
+   * readable straight from the chain by anyone, with NO SIGNA node and NO
+   * website in the loop. The transaction is signed by this wallet, so the
+   * chain itself proves the sender.
+   *
+   * Needs a LOCAL key with a little Base ETH for gas (pass `privateKey` to the
+   * constructor) — a custody/remote signer signs messages but can't broadcast a
+   * tx. Best-effort, it also pings the node so the message lands in the
+   * recipient's onchain inbox; set `index: false` to skip that and stay fully
+   * off the website. Returns the tx hash + explorer link.
+   *
+   * ```ts
+   * const { hash, explorer } = await agent.sendOnchain("0xRecipient…", "gm, onchain");
+   * ```
+   */
+  async sendOnchain(
+    to: string,
+    body: string,
+    opts: { rpcUrl?: string; index?: boolean } = {},
+  ): Promise<{ hash: string; from: string; to: string; explorer: string }> {
+    if (!this.localPrivateKey) {
+      throw new Error(
+        "SignaAgent.sendOnchain needs a local `privateKey` (a custody/remote signer can't broadcast a transaction)",
+      );
+    }
+    const res = await sendOnchainMessage(this.localPrivateKey, { to, body, rpcUrl: opts.rpcUrl });
+    if (opts.index !== false) {
+      // Index it for the recipient's onchain inbox — the chain is the source of
+      // truth, this just makes it queryable. Never blocks the send.
+      fetch(`${this.baseUrl}/api/onchain-message`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ tx: res.hash }),
+      }).catch(() => {});
+    }
+    return res;
+  }
+
+  /**
+   * Read a SIGNA message back from a Base transaction hash — straight from the
+   * chain via RPC, no SIGNA node needed. Returns null if the tx isn't a SIGNA
+   * onchain message. `sender_matches` is the chain's proof the claimed sender
+   * really broadcast it.
+   */
+  async readOnchain(txHash: string, opts: { rpcUrl?: string } = {}): Promise<OnchainMessage | null> {
+    return readOnchainMessage(txHash, opts);
   }
 
   /**
