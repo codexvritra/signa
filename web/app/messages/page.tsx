@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
+import { toHex } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 /**
@@ -15,7 +16,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
  * /api/agents/[addr]/stream (live push).
  */
 
-type DM = { id: string; from_address: string; to_address?: string; body: string; ts: number; created_at?: string };
+type DM = { id: string; from_address: string; to_address?: string; body: string; ts: number; created_at?: string; tx?: string };
 type Peer = { address: string; label: string };
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 const dmPreimage = (from: string, to: string, body: string, ts: number) =>
@@ -24,6 +25,7 @@ const dmPreimage = (from: string, to: string, body: string, ts: number) =>
 export default function MessagesPage() {
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
   const me = address?.toLowerCase() ?? "";
 
   const [inbox, setInbox] = useState<DM[]>([]);
@@ -116,6 +118,23 @@ export default function MessagesPage() {
     setBusy(false);
   }
 
+  async function sendOnchain() {
+    if (!peer || !me) return;
+    const text = draft.trim();
+    if (!text) return;
+    setBusy(true); setStatus({ kind: "info", text: "Confirm the Base tx to write this on-chain…" });
+    try {
+      const data = toHex(`SIGNA msg v1\nfrom:${me}\nto:${peer.address}\nbody:${text}`);
+      const hash = await sendTransactionAsync({ to: peer.address as `0x${string}`, data, value: 0n });
+      setDraft(""); setStatus({ kind: "ok", text: "Written to Base ⛓ — permanent, readable from the chain." });
+      setThread((t) => [...t, { id: `chain-${hash}`, from_address: me, to_address: peer.address, body: text, ts: Date.now(), tx: hash }]);
+      setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    } catch (e) {
+      setStatus({ kind: "err", text: e instanceof Error && /reject|denied/i.test(e.message) ? "Transaction rejected." : "Couldn't post on-chain — you need a little ETH on Base for gas." });
+    }
+    setBusy(false);
+  }
+
   async function startConversation() {
     const id = toInput.trim();
     if (!id) return;
@@ -192,7 +211,9 @@ export default function MessagesPage() {
                 return (
                   <div key={m.id} className={`max-w-[80%] ${mine ? "self-end" : "self-start"}`}>
                     <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-snug ${mine ? "bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] text-white" : "glass border border-white/10 text-[#e8edf7]"}`}>{m.body}</div>
-                    <div className={`text-[10px] text-faint mt-1 ${mine ? "text-right" : ""}`}>✓ signed</div>
+                    <div className={`text-[10px] mt-1 ${mine ? "text-right" : ""}`}>
+                      {m.tx ? <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Base · Basescan ↗</a> : <span className="text-faint">✓ signed</span>}
+                    </div>
                   </div>
                 );
               })}
@@ -206,8 +227,10 @@ export default function MessagesPage() {
                 placeholder="Message… (Enter to sign & send)"
                 className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60 resize-none"
               />
+              <button onClick={sendOnchain} disabled={busy} title="Write this message on Base — permanent, readable from the chain (costs a little gas)" className="shrink-0 px-3 py-2.5 rounded-xl text-[15px] bg-white/[0.06] text-[#5ee68f] disabled:opacity-60 hover:bg-white/[0.12]">⛓</button>
               <button onClick={sendReply} disabled={busy} className="shrink-0 px-4 py-2.5 rounded-xl text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Send"}</button>
             </div>
+            <div className="text-[11px] text-faint mt-1.5">Send = free wallet-signed DM · ⛓ = write it on Base forever</div>
             {status && <div className={`mt-2 text-[12px] ${status.kind === "err" ? "text-[#ff8f8f]" : "text-muted"}`}>{status.text}</div>}
           </div>
         ) : (
