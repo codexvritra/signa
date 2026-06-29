@@ -30,6 +30,7 @@ export default function MessagesPage() {
   const [status, setStatus] = useState<{ kind: "ok" | "err" | "info"; text: string } | null>(null);
   const [inbox, setInbox] = useState<DM[]>([]);
   const [copied, setCopied] = useState(false);
+  const [live, setLive] = useState(false);
 
   const loadInbox = useCallback(async () => {
     if (!address) return;
@@ -39,7 +40,32 @@ export default function MessagesPage() {
     } catch {}
   }, [address]);
 
-  useEffect(() => { loadInbox(); const t = setInterval(loadInbox, 15000); return () => clearInterval(t); }, [loadInbox]);
+  useEffect(() => { loadInbox(); const t = setInterval(loadInbox, 30000); return () => clearInterval(t); }, [loadInbox]);
+
+  // live inbox — new DMs are pushed instantly over SSE (no polling lag)
+  useEffect(() => {
+    if (!address) return;
+    let es: EventSource | null = null;
+    let since = new Date().toISOString();
+    let stopped = false;
+    const open = () => {
+      es = new EventSource(`/api/agents/${address.toLowerCase()}/stream?since=${encodeURIComponent(since)}`);
+      es.onopen = () => setLive(true);
+      es.onmessage = (e) => {
+        try {
+          const dm = JSON.parse(e.data) as DM & { created_at?: string };
+          if (dm?.id && dm?.body) { since = dm.created_at || since; setInbox((prev) => (prev.some((x) => x.id === dm.id) ? prev : [dm, ...prev])); }
+        } catch {}
+      };
+      es.addEventListener("reconnect", (e) => {
+        try { const d = JSON.parse((e as MessageEvent).data); if (d.since) since = d.since; } catch {}
+        es?.close(); if (!stopped) open();
+      });
+      es.onerror = () => { setLive(false); es?.close(); if (!stopped) setTimeout(open, 1500); };
+    };
+    open();
+    return () => { stopped = true; es?.close(); };
+  }, [address]);
 
   async function send() {
     if (!address) return;
@@ -131,7 +157,10 @@ export default function MessagesPage() {
 
             {/* inbox */}
             <div className="mt-7">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">your inbox · {inbox.length}</div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3 flex items-center gap-2">
+                your inbox · {inbox.length}
+                {live && <span className="inline-flex items-center gap-1 text-[#5ee68f] normal-case tracking-normal"><span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full rounded-full bg-[#5ee68f] opacity-75 animate-ping" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#5ee68f]" /></span>live</span>}
+              </div>
               {inbox.length === 0 ? (
                 <div className="text-[13px] text-faint">No messages yet. Share your inbox link above to get wallet-signed messages.</div>
               ) : (
