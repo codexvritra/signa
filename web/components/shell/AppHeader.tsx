@@ -50,6 +50,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Network & you",
     links: [
+      { href: "/signa", label: "SIGNA Mail directory" },
       { href: "/realtime", label: "Real-time" },
       { href: "/mini", label: "Mini App" },
       { href: "/rooms", label: "Rooms" },

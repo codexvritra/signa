@@ -64,6 +64,21 @@ export async function handleForAddress(db: SupabaseClient, address: string): Pro
   return (data as Row).handle;
 }
 
+/** Recent claimed handles, each re-verified against its claim signature (display directory). */
+export async function listHandles(db: SupabaseClient, limit = 60): Promise<Array<{ handle: string; address: string; created_at: string }>> {
+  const { data } = await db
+    .from("signa_handles")
+    .select("handle,address,signature,signed_message,created_at")
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(limit, 1), 200));
+  if (!data) return [];
+  const out: Array<{ handle: string; address: string; created_at: string }> = [];
+  for (const row of data as Array<Row & { created_at: string }>) {
+    if (await rowIsValid(row)) out.push({ handle: row.handle, address: String(row.address).toLowerCase(), created_at: row.created_at });
+  }
+  return out;
+}
+
 /** Claim a handle: verify the wallet signature, ensure it's free, insert. */
 export async function claimHandle(
   db: SupabaseClient,

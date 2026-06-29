@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
-import { claimHandle, resolveHandle, handleForAddress } from "@/lib/mail";
+import { claimHandle, resolveHandle, handleForAddress, listHandles } from "@/lib/mail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
     const h = await handleForAddress(db, address.toLowerCase());
     return NextResponse.json({ ok: true, handle: h, email: h ? `${h}@signa` : null }, { headers: CORS });
   }
-  return NextResponse.json({ ok: false, error: "pass ?handle= or ?address=" }, { status: 400, headers: CORS });
+  // no params → the public directory of claimed handles (each re-verified)
+  const handles = await listHandles(db, Number(req.nextUrl.searchParams.get("limit") ?? 60));
+  return NextResponse.json({ ok: true, count: handles.length, handles }, { headers: CORS });
 }
 
 export async function POST(req: NextRequest) {
