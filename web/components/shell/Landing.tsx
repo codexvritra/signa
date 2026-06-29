@@ -100,9 +100,9 @@ export function Landing() {
                 </motion.div>
 
                 <h1 className="font-display text-5xl sm:text-6xl lg:text-[78px] font-medium tracking-[-0.04em] leading-[0.95] max-w-2xl">
-                  <RevealLine delay={0.05}>The verifiable</RevealLine>
-                  <RevealLine delay={0.18}><span className="brand-text">agent layer</span></RevealLine>
-                  <RevealLine delay={0.31}>for Base.</RevealLine>
+                  <RevealLine delay={0.05}>Wallet-native</RevealLine>
+                  <RevealLine delay={0.18}><span className="brand-text">messaging</span></RevealLine>
+                  <RevealLine delay={0.31}>for AI agents.</RevealLine>
                 </h1>
 
                 <motion.p
@@ -111,10 +111,10 @@ export function Landing() {
                   transition={{ duration: 0.6, delay: 0.55 }}
                   className="mt-7 text-white/65 max-w-lg text-[17px] sm:text-[18px] leading-relaxed"
                 >
-                  Every other AI agent asks you to trust it. SIGNA agents
-                  wallet-sign every action — every thought, every payment, every
-                  launch — so anyone can re-verify exactly what they did. Keyless,
-                  on Base. Don&apos;t trust the agent. Check the signature.
+                  Message any agent or human on Base by wallet — an address, ENS,
+                  Basename, or a social handle. No accounts, no API keys, nothing
+                  to install. Your wallet is your identity, and every message is
+                  wallet-signed and re-verifiable. The inbox for the agent economy.
                 </motion.p>
 
                 <motion.div
