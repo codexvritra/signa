@@ -2,8 +2,12 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
-import { toHex } from "viem";
+import { encodeFunctionData, parseAbiItem } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+
+// SignaMessages on Base — send(to, body) records a readable Message event on the explorer.
+const SIGNA_MESSAGES = "0x142770698171a8e76b6268963a5a531ec4b64ad9";
+const SEND_ABI = [parseAbiItem("function send(address to, string body) returns (uint256)")];
 
 /**
  * Messages — the wallet-native messenger. The core SIGNA wedge, made real:
@@ -66,12 +70,12 @@ export default function MessagesPage() {
     try {
       const [r, oc] = await Promise.all([
         fetch(`/api/dm/thread?a=${me}&b=${peerAddr}&limit=200`, { cache: "no-store" }).then((x) => x.json()),
-        fetch(`/api/onchain-message?to=${me}`, { cache: "no-store" }).then((x) => x.json()).catch(() => ({ messages: [] })),
+        fetch(`/api/onchain-message?thread=${me},${peerAddr}`, { cache: "no-store" }).then((x) => x.json()).catch(() => ({ messages: [] })),
       ]);
       const signed = ((r.dms ?? []) as DM[]).map((d) => ({ ...d, ts: d.ts || (d.created_at ? new Date(d.created_at).getTime() : 0) }));
-      const onchain = ((oc.messages ?? []) as Array<{ tx_hash: string; from_address: string; to_address: string; body: string; created_at: string }>)
-        .filter((m) => m.from_address === peerAddr)
-        .map((m) => ({ id: `oc-${m.tx_hash}`, from_address: m.from_address, to_address: m.to_address, body: m.body, ts: new Date(m.created_at).getTime(), tx: m.tx_hash }));
+      // onchain messages from the SignaMessages contract's event logs (both directions, straight from Base)
+      const onchain = ((oc.messages ?? []) as Array<{ id: string; from: string; to: string; body: string; timestamp: number; tx: string }>)
+        .map((m) => ({ id: `oc-${m.tx}`, from_address: m.from, to_address: m.to, body: m.body, ts: (m.timestamp || 0) * 1000, tx: m.tx }));
       setThread([...signed, ...onchain].sort((a, b) => (a.ts || 0) - (b.ts || 0)));
       setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch {}
@@ -129,15 +133,13 @@ export default function MessagesPage() {
     if (!peer || !me) return;
     const text = draft.trim();
     if (!text) return;
-    setBusy(true); setStatus({ kind: "info", text: "Confirm the Base tx to write this on-chain…" });
+    setBusy(true); setStatus({ kind: "info", text: "Confirm the Base tx to record this on-chain…" });
     try {
-      const data = toHex(`SIGNA msg v1\nfrom:${me}\nto:${peer.address}\nbody:${text}`);
-      const hash = await sendTransactionAsync({ to: peer.address as `0x${string}`, data, value: 0n });
-      setDraft(""); setStatus({ kind: "ok", text: "Written to Base ⛓ — permanent, readable from the chain." });
+      // call SignaMessages.send(to, body) → a readable Message event on Basescan (the chain self-indexes via logs)
+      const data = encodeFunctionData({ abi: SEND_ABI, functionName: "send", args: [peer.address as `0x${string}`, text] });
+      const hash = await sendTransactionAsync({ to: SIGNA_MESSAGES as `0x${string}`, data, value: 0n });
+      setDraft(""); setStatus({ kind: "ok", text: "Recorded on Base ⛓ — a readable Message event on the explorer." });
       setThread((t) => [...t, { id: `chain-${hash}`, from_address: me, to_address: peer.address, body: text, ts: Date.now(), tx: hash }]);
-      // index it for the recipient's onchain inbox (re-verified from chain; best-effort, retried once after it mines)
-      const record = () => fetch("/api/onchain-message", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ tx: hash }) }).then((r) => r.json()).catch(() => ({}));
-      record().then((r) => { if (!r?.ok) setTimeout(record, 6000); });
       setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e) {
       setStatus({ kind: "err", text: e instanceof Error && /reject|denied/i.test(e.message) ? "Transaction rejected." : "Couldn't post on-chain — you need a little ETH on Base for gas." });

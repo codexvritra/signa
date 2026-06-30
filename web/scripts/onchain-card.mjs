@@ -47,6 +47,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
   .msg .lbl b{color:#5ee68f}
   .msg .body{font-size:25px;font-weight:700;color:#eaf6ee;margin-top:6px}
   .msg .meta{font-size:14px;color:#86a0c0;font-family:ui-monospace,Menlo,Consolas,monospace;margin-top:7px}
+  .partners{margin-top:16px;font-size:17px;color:#9fb0d0}.partners b{color:#a5c3ff}
   .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
   .foot .site{font-size:23px;font-weight:700;color:#cdd8f0}
   .foot .t{font-size:18px;color:#8aa0c8}.foot .t b{color:#a98bff}
@@ -63,6 +64,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
       <div class="body">&ldquo;${esc(m.body)}&rdquo;</div>
       <div class="meta">${sa(m.from)} → ${sa(m.to)} · tx ${sa(m.tx, 12)} · re-reads to the same bytes, no trust required</div>
     </div>
+    <div class="partners">shipping as a skill in <b>Bankr</b> · a pack in <b>Aeon</b> · the <b>signa-agent</b> SDK + MCP — any agent plugs into the same contract</div>
     <div class="foot"><span class="site">signaagent.xyz/onchain.html</span><span class="t">x402 moves the money — <b>SIGNA carries the message.</b></span></div>
   </div>
 </body></html>`;
