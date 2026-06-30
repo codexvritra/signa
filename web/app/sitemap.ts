@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/", 1, "weekly"),
     page("/messages", 0.99),
     page("/onchain", 0.96),
+    page("/onchain/rooms", 0.95),
     page("/pay", 0.95),
     page("/signa", 0.95),
     page("/docs", 0.95),
