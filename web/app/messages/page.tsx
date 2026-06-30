@@ -4,10 +4,13 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
 import { encodeFunctionData, parseAbiItem } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { deriveSignaKeyPair, encryptSealedBox, decryptSealedBox, SEALEDBOX_VERSION, type SignaKeyPair } from "@/lib/encryption";
+import { buildMessageToSign } from "@/lib/feed-types";
 
 // SignaMessages on Base — send(to, body) records a readable Message event on the explorer.
 const SIGNA_MESSAGES = "0x142770698171a8e76b6268963a5a531ec4b64ad9";
 const SEND_ABI = [parseAbiItem("function send(address to, string body) returns (uint256)")];
+const ENC_PREFIX = `${SEALEDBOX_VERSION}:`; // onchain bodies with this prefix are sealed-box ciphertext
 
 /**
  * Messages — the wallet-native messenger. The core SIGNA wedge, made real:
@@ -54,6 +57,8 @@ export default function MessagesPage() {
   const [toInput, setToInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ kind: "ok" | "err" | "info"; text: string } | null>(null);
+  const [myKeys, setMyKeys] = useState<SignaKeyPair | null>(null); // derived X25519 keypair (for E2E)
+  const [encOn, setEncOn] = useState(false); // encrypt the next onchain message
   const threadEnd = useRef<HTMLDivElement>(null);
 
   const loadInbox = useCallback(async () => {
@@ -129,17 +134,59 @@ export default function MessagesPage() {
     setBusy(false);
   }
 
+  // Derive this wallet's X25519 keypair (one sig) + publish the pubkey so others can
+  // send encrypted, and so you can read encrypted messages sent to you.
+  async function enableEncryption() {
+    if (!me) return;
+    setBusy(true); setStatus({ kind: "info", text: "Sign to derive your encryption key…" });
+    try {
+      const kp = await deriveSignaKeyPair((m) => signMessageAsync({ message: m }));
+      const ts = Date.now();
+      const preimage = buildMessageToSign({ kind: "signa_pubkey_register", address: me, x25519_pubkey: kp.publicKeyBase64, ts });
+      const signature = await signMessageAsync({ message: preimage });
+      await fetch(`/api/users/${me}/pubkey`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ address: me, x25519_pubkey: kp.publicKeyBase64, ts, signature }) });
+      setMyKeys(kp);
+      setStatus({ kind: "ok", text: "Encryption enabled — others can now send you encrypted onchain messages, and you can read yours." });
+      if (peer) loadThread(peer.address);
+    } catch (e) {
+      setStatus({ kind: "err", text: e instanceof Error && /reject/i.test(e.message) ? "Signature rejected." : "Couldn't enable encryption." });
+    }
+    setBusy(false);
+  }
+
+  // Decode a bubble: sealed-box ciphertext → plaintext (if I'm the recipient + have keys), else a lock label.
+  function displayBody(m: DM): { text: string; enc: boolean } {
+    const b = m.body || "";
+    if (!b.startsWith(ENC_PREFIX)) return { text: b, enc: false };
+    const ct = b.slice(ENC_PREFIX.length);
+    const mine = m.from_address?.toLowerCase() === me;
+    if (!mine && myKeys) {
+      const pt = decryptSealedBox(ct, myKeys.secretKey);
+      if (pt != null) return { text: pt, enc: true };
+    }
+    return { text: mine ? "🔒 sent encrypted — only they can read it" : "🔒 encrypted — enable encryption to read", enc: true };
+  }
+
   async function sendOnchain() {
     if (!peer || !me) return;
     const text = draft.trim();
     if (!text) return;
-    setBusy(true); setStatus({ kind: "info", text: "Confirm the Base tx to record this on-chain…" });
+    setBusy(true);
     try {
+      let body = text;
+      if (encOn) {
+        setStatus({ kind: "info", text: "Encrypting…" });
+        const pk = await (await fetch(`/api/users/${peer.address}/pubkey`)).json();
+        if (!pk.ok || !pk.pubkey?.x25519_pubkey) { setStatus({ kind: "err", text: `${peer.label} hasn't enabled encryption yet — they need to open Messages and click "Enable encryption".` }); setBusy(false); return; }
+        body = ENC_PREFIX + encryptSealedBox(text, pk.pubkey.x25519_pubkey);
+      }
+      setStatus({ kind: "info", text: encOn ? "Confirm the Base tx (encrypted)…" : "Confirm the Base tx to record this on-chain…" });
       // call SignaMessages.send(to, body) → a readable Message event on Basescan (the chain self-indexes via logs)
-      const data = encodeFunctionData({ abi: SEND_ABI, functionName: "send", args: [peer.address as `0x${string}`, text] });
+      const data = encodeFunctionData({ abi: SEND_ABI, functionName: "send", args: [peer.address as `0x${string}`, body] });
       const hash = await sendTransactionAsync({ to: SIGNA_MESSAGES as `0x${string}`, data, value: 0n });
-      setDraft(""); setStatus({ kind: "ok", text: "Recorded on Base ⛓ — a readable Message event on the explorer." });
-      setThread((t) => [...t, { id: `chain-${hash}`, from_address: me, to_address: peer.address, body: text, ts: Date.now(), tx: hash }]);
+      setDraft(""); setStatus({ kind: "ok", text: encOn ? "Encrypted message recorded on Base ⛓ — only they can read it." : "Recorded on Base ⛓ — a readable Message event on the explorer." });
+      // optimistic: show the sender their own plaintext in-session (sealed-box can't be self-decrypted later)
+      setThread((t) => [...t, { id: `chain-${hash}`, from_address: me, to_address: peer.address, body: encOn ? text : body, ts: Date.now(), tx: hash }]);
       setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e) {
       setStatus({ kind: "err", text: e instanceof Error && /reject|denied/i.test(e.message) ? "Transaction rejected." : "Couldn't post on-chain — you need a little ETH on Base for gas." });
@@ -220,10 +267,12 @@ export default function MessagesPage() {
                 <div className="text-[13px] text-faint text-center py-10">No messages yet — say something. It&apos;ll be wallet-signed.</div>
               ) : thread.map((m) => {
                 const mine = m.from_address?.toLowerCase() === me;
+                const d = displayBody(m);
                 return (
                   <div key={m.id} className={`max-w-[80%] ${mine ? "self-end" : "self-start"}`}>
-                    <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-snug ${mine ? "bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] text-white" : "glass border border-white/10 text-[#e8edf7]"}`}>{m.body}</div>
-                    <div className={`text-[10px] mt-1 ${mine ? "text-right" : ""}`}>
+                    <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-snug whitespace-pre-wrap break-words ${mine ? "bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] text-white" : "glass border border-white/10 text-[#e8edf7]"}`}>{d.text}</div>
+                    <div className={`text-[10px] mt-1 flex gap-1.5 ${mine ? "justify-end" : ""}`}>
+                      {d.enc && <span className="text-[#a98bff]">🔒 encrypted</span>}
                       {m.tx ? <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Base · Basescan ↗</a> : <span className="text-faint">✓ signed</span>}
                     </div>
                   </div>
@@ -239,10 +288,15 @@ export default function MessagesPage() {
                 placeholder="Message… (Enter to sign & send)"
                 className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60 resize-none"
               />
+              <button onClick={() => setEncOn((v) => !v)} disabled={busy} title="Encrypt the onchain message — only the recipient can read it" className={`shrink-0 px-3 py-2.5 rounded-xl text-[15px] disabled:opacity-60 ${encOn ? "bg-[#a98bff]/25 text-[#c4b4ff]" : "bg-white/[0.06] text-faint hover:bg-white/[0.12]"}`}>🔒</button>
               <button onClick={sendOnchain} disabled={busy} title="Write this message on Base — permanent, readable from the chain (costs a little gas)" className="shrink-0 px-3 py-2.5 rounded-xl text-[15px] bg-white/[0.06] text-[#5ee68f] disabled:opacity-60 hover:bg-white/[0.12]">⛓</button>
               <button onClick={sendReply} disabled={busy} className="shrink-0 px-4 py-2.5 rounded-xl text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Send"}</button>
             </div>
-            <div className="text-[11px] text-faint mt-1.5">Send = free wallet-signed DM · ⛓ = write it on Base forever</div>
+            <div className="text-[11px] text-faint mt-1.5">
+              Send = free wallet-signed DM · ⛓ = write it on Base forever · 🔒+⛓ = encrypted onchain (only they can read){" "}
+              {!myKeys && <button onClick={enableEncryption} disabled={busy} className="text-[#a98bff] underline ml-1">Enable encryption</button>}
+              {myKeys && <span className="text-[#5ee68f] ml-1">· encryption on</span>}
+            </div>
             {status && <div className={`mt-2 text-[12px] ${status.kind === "err" ? "text-[#ff8f8f]" : "text-muted"}`}>{status.text}</div>}
           </div>
         ) : (
