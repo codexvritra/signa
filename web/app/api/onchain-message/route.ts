@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
 import { readOnchainMessage, recordOnchainMessage, onchainInbox } from "@/lib/onchain-msg";
-import { contractInbox, contractOutbox, contractThread, SIGNA_MESSAGES_ADDRESS } from "@/lib/signa-messages";
+import { contractInbox, contractOutbox, contractThread, contractRecent, SIGNA_MESSAGES_ADDRESS } from "@/lib/signa-messages";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,8 +30,14 @@ export async function GET(req: NextRequest) {
   const inbox = sp.get("inbox");
   const outbox = sp.get("outbox");
   const thread = sp.get("thread");
+  const feed = sp.get("feed");
 
   // ---- SignaMessages contract (readable events; chain is the index) ----
+  if (feed === "recent" || sp.has("recent")) {
+    const limit = Math.min(Math.max(Number(sp.get("limit") || 50), 1), 100);
+    const messages = await contractRecent(limit);
+    return NextResponse.json({ ok: true, contract: SIGNA_MESSAGES_ADDRESS, count: messages.length, messages }, { headers: CORS });
+  }
   if (inbox) {
     const messages = await contractInbox(inbox.toLowerCase());
     return NextResponse.json({ ok: true, contract: SIGNA_MESSAGES_ADDRESS, count: messages.length, messages }, { headers: CORS });

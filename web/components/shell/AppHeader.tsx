@@ -41,6 +41,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
       { href: "/pipelines", label: "Pipelines" },
       { href: "/frameworks", label: "Frameworks" },
       { href: "/x402", label: "x402" },
+      { href: "/onchain", label: "Onchain Wall" },
       { href: "/b20", label: "B20" },
       { href: "/b20live", label: "B20 Live" },
       { href: "/telegram", label: "Telegram Bot" },

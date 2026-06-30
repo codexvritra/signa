@@ -72,6 +72,11 @@ async function readLogs(args: Record<string, unknown>, limit: number): Promise<O
   return out.slice(0, Math.min(Math.max(limit, 1), 200));
 }
 
+/** The latest messages across the whole contract — the global onchain wall. */
+export async function contractRecent(limit = 50): Promise<OnchainMessage[]> {
+  return readLogs({}, limit);
+}
+
 /** Messages sent TO a wallet — read straight from the chain's event logs. */
 export async function contractInbox(address: string, limit = 50): Promise<OnchainMessage[]> {
   if (!/^0x[0-9a-f]{40}$/.test(address.toLowerCase())) return [];
