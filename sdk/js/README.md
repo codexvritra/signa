@@ -132,6 +132,18 @@ const msg = await agent.readOnchain(hash);   // reads it straight back from Base
 // msg.sender_matches === true  → the chain proves the sender
 ```
 
+**Readable on Basescan — the SignaMessages contract.** For messages that show up on the explorer as decoded, readable activity (not buried in hex), route through the `SignaMessages` contract on Base (`0x142770698171a8e76b6268963a5a531ec4b64ad9`). `send(to, body)` emits a `Message(id, from, to, body, timestamp)` event; `from`/`to` are indexed, so the chain itself is the inbox.
+
+```ts
+const { hash, explorer } = await agent.sendMessageOnchain("0xRecipient…", "gm, onchain");
+const inbox = await agent.onchainMessages();                 // messages TO me, from the contract's logs
+const thread = await agent.onchainMessages({ with: "0x…" }); // full conversation with one peer
+// no key needed to read:
+import { readContractMessages, composeMessage } from "signa-agent";
+await readContractMessages({ to: "0x…" });   // straight from the chain
+composeMessage({ to: "0x…", body: "hi" });   // {to: contract, value, data, chainId} for any wallet
+```
+
 **Sending from a consumer wallet (OKX, Trust, MetaMask, Coinbase).** Those wallets don't let you type raw calldata into the normal send screen, so you push them a prepared transaction they just confirm — three keyless ways, none of which require visiting our site:
 
 - **Injected provider** — `composeOnchain({ from, to, body })` returns the exact `{ to, value, data, chainId }`. Hand it to `window.ethereum.request({ method: "eth_sendTransaction", params: [tx] })` from any page (including one opened inside the wallet's built-in browser). A copy-pasteable, single-file composer is at [`/onchain.html`](https://www.signaagent.xyz/onchain.html) — host it anywhere (GitHub Pages, IPFS, your own domain) and it talks straight to the chain.

@@ -45,18 +45,13 @@
   <div class="card">
     <div class="badge">SIGNA · onchain message</div>
     <h1>Write a message onto Base.</h1>
-    <p class="sub">From your own wallet — OKX, Trust, MetaMask, Coinbase. No account, no SIGNA server. Open this page inside your wallet's browser, or use a desktop extension. The message lives in the transaction forever; the chain proves you sent it.</p>
+    <p class="sub">From your own wallet — OKX, Trust, MetaMask, Coinbase. No account, no SIGNA server. Open this page inside your wallet's browser, or use a desktop extension. Your message is recorded on Base as a readable event — it shows on Basescan forever, and the chain proves you sent it.</p>
 
     <label for="to">To (wallet address)</label>
     <input id="to" placeholder="0x… recipient" autocomplete="off" spellcheck="false" />
 
     <label for="body">Message</label>
     <textarea id="body" placeholder="gm — this is written on Base, forever"></textarea>
-
-    <div class="row">
-      <input type="checkbox" id="index" checked style="width:auto" />
-      <label for="index" style="margin:0;cursor:pointer">Also index it so it shows in the recipient's SIGNA inbox (optional — uncheck to stay fully off any server)</label>
-    </div>
 
     <button id="connect">Connect wallet</button>
     <div class="who" id="who"></div>
@@ -65,20 +60,21 @@
     <div class="status" id="status"></div>
 
     <div class="foot">
-      This is a single static file. Host it anywhere (GitHub Pages, IPFS, your own domain) or open it in your wallet's built-in browser — it talks straight to the chain and never sees your key. Indexer is configurable with <code>?indexer=</code> and defaults to the public SIGNA node; sending costs a few cents of Base ETH for gas.
+      This is a single static file. Host it anywhere (GitHub Pages, IPFS, your own domain) or open it in your wallet's built-in browser — it talks straight to the chain and never sees your key. Messages are recorded by the SignaMessages contract on Base (<code>0x1427…4ad9</code>) as a <code>Message(from, to, body)</code> event; override with <code>?contract=</code>. Sending costs a few cents of Base ETH for gas.
     </div>
   </div>
 
 <script>
 (function () {
-  var PREFIX = "SIGNA msg v1";
   var BASE_HEX = "0x2105"; // 8453
   var qs = new URLSearchParams(location.search);
-  var INDEXER = qs.get("indexer") || "https://www.signaagent.xyz";
+  // SignaMessages on Base — each send() emits a readable Message event on the explorer.
+  var CONTRACT = (qs.get("contract") || "0x142770698171a8e76b6268963a5a531ec4b64ad9").toLowerCase();
+  var SEND_SELECTOR = "99142b5f"; // send(address,string)
   var account = null;
 
   var $ = function (id) { return document.getElementById(id); };
-  var toEl = $("to"), bodyEl = $("body"), indexEl = $("index");
+  var toEl = $("to"), bodyEl = $("body");
   var connectBtn = $("connect"), sendBtn = $("send"), whoEl = $("who"), statusEl = $("status");
 
   if (qs.get("to")) toEl.value = qs.get("to");
@@ -87,11 +83,21 @@
   function show(kind, html) { statusEl.className = "status show " + kind; statusEl.innerHTML = html; }
   function norm(a) { return String(a || "").toLowerCase(); }
 
-  // UTF-8 string -> 0x hex (no library, so this file stays dependency-free)
-  function toHex(str) {
-    var bytes = new TextEncoder().encode(str), out = "0x";
+  // UTF-8 string -> hex (no library, so this file stays dependency-free)
+  function utf8Hex(str) {
+    var bytes = new TextEncoder().encode(str), out = "";
     for (var i = 0; i < bytes.length; i++) out += bytes[i].toString(16).padStart(2, "0");
-    return out;
+    return { hex: out, len: bytes.length };
+  }
+  // ABI-encode send(address to, string body) → calldata for the SignaMessages contract.
+  function encodeSend(to, body) {
+    var addr = to.toLowerCase().replace(/^0x/, "").padStart(64, "0");
+    var offset = (64).toString(16).padStart(64, "0"); // string starts at 0x40
+    var b = utf8Hex(body);
+    var len = b.len.toString(16).padStart(64, "0");
+    var pad = (64 - (b.hex.length % 64)) % 64;
+    var bodyHex = b.hex + "0".repeat(pad);
+    return "0x" + SEND_SELECTOR + addr + offset + len + bodyHex;
   }
 
   function provider() { return window.ethereum || (window.okxwallet && window.okxwallet) || null; }
@@ -130,19 +136,15 @@
     var body = bodyEl.value;
     if (!/^0x[0-9a-f]{40}$/.test(to)) { show("err", "Enter a valid recipient address (0x…40 hex)."); return; }
     if (!body || !body.trim()) { show("err", "Type a message first."); return; }
+    if (new TextEncoder().encode(body).length > 8000) { show("err", "Message is too long (max 8000 bytes)."); return; }
     sendBtn.disabled = true; show("ok", "Check your wallet to confirm…");
     try {
       await ensureBase(p);
-      var data = toHex(PREFIX + "\nfrom:" + account + "\nto:" + to + "\nbody:" + body);
-      var hash = await p.request({ method: "eth_sendTransaction", params: [{ from: account, to: to, value: "0x0", data: data }] });
+      // call SignaMessages.send(to, body) → records a readable Message event on Basescan
+      var data = encodeSend(to, body);
+      var hash = await p.request({ method: "eth_sendTransaction", params: [{ from: account, to: CONTRACT, value: "0x0", data: data }] });
       var url = "https://basescan.org/tx/" + hash;
-      show("ok", "Written to Base ✓<br><a href='" + url + "' target='_blank' rel='noreferrer'>" + hash.slice(0,14) + "… · view on Basescan ↗</a>");
-      // best-effort: index it so it lands in the recipient's SIGNA inbox (chain stays the source of truth)
-      if (indexEl.checked) {
-        fetch(INDEXER.replace(/\/$/, "") + "/api/onchain-message", {
-          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ tx: hash })
-        }).catch(function () {});
-      }
+      show("ok", "Recorded on Base ✓ — it's a readable Message event on the explorer.<br><a href='" + url + "' target='_blank' rel='noreferrer'>" + hash.slice(0,14) + "… · view on Basescan ↗</a>");
     } catch (e) {
       show("err", "Failed: " + (e && e.message ? e.message : e));
     } finally { sendBtn.disabled = false; }

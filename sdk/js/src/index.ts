@@ -46,7 +46,14 @@ import {
   buildDmPriceSetPreimage,
 } from "./envelope.js";
 import { buildPaymentHeader, type Challenge402 } from "./paid-dm.js";
-import { readOnchainMessage, sendOnchainMessage, type OnchainMessage } from "./onchain.js";
+import {
+  readOnchainMessage,
+  sendOnchainMessage,
+  sendContractMessage,
+  readContractMessages,
+  type OnchainMessage,
+  type ContractMessage,
+} from "./onchain.js";
 import { Anchor, Nodes, Receipts, Rooms, Search } from "./rooms.js";
 import { EncryptedRooms } from "./encrypted-rooms.js";
 import { encryptSealedBox, decryptSealedBox } from "./encryption.js";
@@ -121,13 +128,18 @@ export type { BootOptions, MemoryEntry } from "./os.js";
 export {
   ONCHAIN_MSG_PREFIX,
   BASE_CHAIN_ID_HEX,
+  SIGNA_MESSAGES_ADDRESS,
   buildOnchainMessageData,
   composeOnchain,
   decodeOnchainMessage,
   readOnchainMessage,
   sendOnchainMessage,
+  buildMessageCall,
+  composeMessage,
+  sendContractMessage,
+  readContractMessages,
 } from "./onchain.js";
-export type { OnchainMessage } from "./onchain.js";
+export type { OnchainMessage, ContractMessage } from "./onchain.js";
 
 /**
  * Thrown by {@link SignaAgent.send} when the recipient's inbox is priced
@@ -557,6 +569,52 @@ export class SignaAgent {
    */
   async readOnchain(txHash: string, opts: { rpcUrl?: string } = {}): Promise<OnchainMessage | null> {
     return readOnchainMessage(txHash, opts);
+  }
+
+  /**
+   * Send a message through the SignaMessages contract on Base — records it as a
+   * `Message(from, to, body)` event that renders as readable activity on Basescan
+   * (the chain is the index). Needs a local `privateKey` with a little Base ETH for
+   * gas. Returns the tx hash + explorer link.
+   *
+   * ```ts
+   * const { hash, explorer } = await agent.sendMessageOnchain("0xRecipient…", "gm, onchain");
+   * ```
+   */
+  async sendMessageOnchain(
+    to: string,
+    body: string,
+    opts: { contract?: string; rpcUrl?: string } = {},
+  ): Promise<{ hash: string; from: string; to: string; contract: string; explorer: string }> {
+    if (!this.localPrivateKey) {
+      throw new Error(
+        "SignaAgent.sendMessageOnchain needs a local `privateKey` (a custody/remote signer can't broadcast a transaction)",
+      );
+    }
+    return sendContractMessage(this.localPrivateKey, { to, body, contract: opts.contract, rpcUrl: opts.rpcUrl });
+  }
+
+  /**
+   * Read this wallet's on-chain messages from the SignaMessages contract's event
+   * logs. Default returns the inbox (messages TO this wallet); pass
+   * `{ direction: "sent" }` for the outbox, or `{ with: "0x…" }` for the full
+   * conversation with one peer. Straight from the chain — no node needed.
+   */
+  async onchainMessages(
+    opts: { direction?: "received" | "sent"; with?: string; contract?: string; rpcUrl?: string; limit?: number } = {},
+  ): Promise<ContractMessage[]> {
+    const base = { contract: opts.contract, rpcUrl: opts.rpcUrl, limit: opts.limit };
+    if (opts.with) {
+      const peer = opts.with.toLowerCase();
+      const [ab, ba] = await Promise.all([
+        readContractMessages({ ...base, from: this.address, to: peer }),
+        readContractMessages({ ...base, from: peer, to: this.address }),
+      ]);
+      return [...ab, ...ba].sort((x, y) => Number(x.id) - Number(y.id));
+    }
+    return opts.direction === "sent"
+      ? readContractMessages({ ...base, from: this.address })
+      : readContractMessages({ ...base, to: this.address });
   }
 
   /**

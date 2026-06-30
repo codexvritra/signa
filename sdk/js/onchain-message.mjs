@@ -59,6 +59,31 @@ async function send(to, body) {
   console.log("\nit's on Base now. read it back with:\n  node onchain-message.mjs read " + hash);
 }
 
+// SignaMessages contract on Base — send(to, body) emits a readable Message event.
+const SIGNA_MESSAGES = (process.env.CONTRACT || "0x142770698171a8e76b6268963a5a531ec4b64ad9").toLowerCase();
+function encodeSend(to, body) {
+  const addr = norm(to).replace(/^0x/, "").padStart(64, "0");
+  const offset = (64).toString(16).padStart(64, "0");
+  const bytes = new TextEncoder().encode(body);
+  const len = bytes.length.toString(16).padStart(64, "0");
+  let hex = ""; for (const b of bytes) hex += b.toString(16).padStart(2, "0");
+  hex += "0".repeat((64 - (hex.length % 64)) % 64);
+  return "0x99142b5f" + addr + offset + len + hex; // selector send(address,string)
+}
+async function msg(to, body) {
+  const pk = process.env.PK;
+  if (!pk) throw new Error("set PK=0x… (the sending wallet's private key, needs Base ETH for gas)");
+  if (!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error(`bad recipient: ${to}`);
+  if (!body) throw new Error("message body is required");
+  const account = privateKeyToAccount(pk.startsWith("0x") ? pk : `0x${pk}`);
+  const wallet = createWalletClient({ account, chain: base, transport: http(RPC) });
+  console.log(`recording message ${norm(account.address)} → ${norm(to)} via SignaMessages ${SIGNA_MESSAGES} …`);
+  const hash = await wallet.sendTransaction({ to: SIGNA_MESSAGES, value: 0n, data: encodeSend(to, body) });
+  console.log("tx:        ", hash);
+  console.log("explorer:  ", `https://basescan.org/tx/${hash}`);
+  console.log("\nit's a readable Message event on Base now.");
+}
+
 function compose(from, to, body) {
   if (!/^0x[a-fA-F0-9]{40}$/.test(from)) throw new Error("set FROM=0x… (your wallet) or PK=0x… so I can derive it");
   if (!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error(`bad recipient: ${to}`);
@@ -91,14 +116,15 @@ async function read(txHash) {
 
 const [cmd, a, b] = process.argv.slice(2);
 try {
-  if (cmd === "send") await send(a, b);
+  if (cmd === "msg") await msg(a, b);
+  else if (cmd === "send") await send(a, b);
   else if (cmd === "read") await read(a);
   else if (cmd === "data") {
     let from = process.env.FROM;
     if (!from && process.env.PK) { const { privateKeyToAccount } = await import("viem/accounts"); from = privateKeyToAccount(process.env.PK.startsWith("0x") ? process.env.PK : `0x${process.env.PK}`).address; }
     compose(norm(from || ""), a, b);
   } else {
-    console.log("usage:\n  PK=0x… node onchain-message.mjs send <0xrecipient> \"message\"\n  node onchain-message.mjs read <0xtxhash>\n  FROM=0xyou node onchain-message.mjs data <0xrecipient> \"message\"   # prints the tx + hex to paste into any wallet");
+    console.log("usage:\n  PK=0x… node onchain-message.mjs msg  <0xrecipient> \"message\"   # via SignaMessages contract → readable Basescan event (recommended)\n  PK=0x… node onchain-message.mjs send <0xrecipient> \"message\"   # raw calldata to the recipient\n  node onchain-message.mjs read <0xtxhash>\n  FROM=0xyou node onchain-message.mjs data <0xrecipient> \"message\"   # prints the tx + hex to paste into any wallet");
     process.exit(1);
   }
 } catch (e) {
