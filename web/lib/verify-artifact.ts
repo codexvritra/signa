@@ -37,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "handle_claim", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "handle_claim", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -199,6 +199,40 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `result:${resHash}`,
       ].join("\n");
       return { preimage: pre, expected: worker || null, role: "job worker wallet" };
+    }
+    case "deal_offer": {
+      // Agent Deals — the buyer signs the exact terms. expected = from (buyer).
+      // Must match lib/deals.ts dealOfferPreimage().
+      const from = String(a.from ?? "").toLowerCase();
+      const pre = [
+        "SIGNA deal offer v1",
+        `ts:${a.ts}`,
+        `from:${from}`,
+        `to:${String(a.to ?? "").toLowerCase()}`,
+        `task:${a.task ?? ""}`,
+        `amount:${a.amount ?? ""}`,
+        `asset:${String(a.asset ?? "").toLowerCase()}`,
+        `deadline:${a.deadline ?? ""}`,
+      ].join("\n");
+      return { preimage: pre, expected: from || null, role: "deal buyer wallet" };
+    }
+    case "deal_accept": {
+      // The seller signs the deal_id (= the exact terms). expected = accepter (seller).
+      const accepter = String(a.accepter ?? "").toLowerCase();
+      const pre = ["SIGNA deal accept v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `accepter:${accepter}`].join("\n");
+      return { preimage: pre, expected: accepter || null, role: "deal seller wallet" };
+    }
+    case "deal_deliver": {
+      // The seller signs the result. expected = worker (seller).
+      const worker = String(a.worker ?? "").toLowerCase();
+      const pre = ["SIGNA deal deliver v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `worker:${worker}`, `result:${a.result ?? ""}`].join("\n");
+      return { preimage: pre, expected: worker || null, role: "deal seller wallet" };
+    }
+    case "deal_settle": {
+      // The buyer signs the payment reference. expected = payer (buyer).
+      const payer = String(a.payer ?? "").toLowerCase();
+      const pre = ["SIGNA deal settle v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `payer:${payer}`, `payment:${a.payment ?? ""}`].join("\n");
+      return { preimage: pre, expected: payer || null, role: "deal buyer wallet" };
     }
     case "handle_claim": {
       // v4.x — SIGNA Mail: a wallet claims a human-readable handle (you@signa).
