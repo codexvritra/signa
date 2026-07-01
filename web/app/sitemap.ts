@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/onchain", 0.96),
     page("/onchain/rooms", 0.95),
     page("/pay", 0.95),
+    page("/deals", 0.95),
     page("/signa", 0.95),
     page("/docs", 0.95),
     page("/docs/messaging", 0.85),
