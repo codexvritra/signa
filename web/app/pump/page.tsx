@@ -58,6 +58,19 @@ export default function PumpPage() {
     catch { await p.request({ method: "wallet_addEthereumChain", params: [{ chainId: RH_CHAIN_ID_HEX, chainName: RH_CHAIN_NAME, nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: [RH_RPC], blockExplorerUrls: RH_EXPLORER ? [RH_EXPLORER] : [] }] }); }
   }
 
+  // one-click: push the Robinhood Chain network config into the wallet (it's a
+  // brand-new chain, so no wallet ships it by default)
+  async function addChain() {
+    const p = provider();
+    if (!p) { setStatus({ k: "err", t: "No wallet detected — install MetaMask/OKX or open this in your wallet's browser." }); return; }
+    try {
+      await ensureChain(p);
+      setStatus({ k: "ok", t: `${RH_CHAIN_NAME} added to your wallet ✓ (chain ${RH_CHAIN_ID})` });
+    } catch (e: any) {
+      setStatus({ k: "err", t: e?.code === 4001 ? "You declined adding the network." : "Wallet refused the network add — add it manually (see below)." });
+    }
+  }
+
   async function onImage(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]; if (!f) return;
     if (f.size > 1_500_000) { setStatus({ k: "err", t: "Image must be under 1.5 MB." }); return; }
@@ -142,7 +155,10 @@ export default function PumpPage() {
           ) : (
             <button onClick={connect} className="w-full mt-3 px-4 py-3 rounded-xl text-[15px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white hover:brightness-110">Connect wallet</button>
           )}
-          {account && <div className="text-[11px] text-faint mt-2 font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</div>}
+          <div className="mt-2 flex items-center gap-3">
+            {account && <span className="text-[11px] text-faint font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</span>}
+            <button onClick={addChain} className="text-[11px] text-[#a98bff] underline">+ Add Robinhood Chain to wallet</button>
+          </div>
         </div>
 
         {status && <div className={`mt-4 text-[13px] rounded-lg px-3 py-2.5 break-words ${status.k === "ok" ? "bg-[#22c98a]/10 text-[#bdf5d2] border border-[#5ee68f]/30" : status.k === "err" ? "bg-red-500/10 text-red-300 border border-red-500/30" : "bg-white/[0.05] text-faint"}`}>{status.t}</div>}
