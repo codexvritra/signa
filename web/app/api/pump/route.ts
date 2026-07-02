@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
-import { readLaunches, tokenFromReceipt, tokenChainState, launchFeeWei, pumpLive, SIGNA_PUMP_ADDRESS, RH_CHAIN_ID } from "@/lib/pump";
+import { readLaunches, tokenFromReceipt, tokenChainState, tokenTrades, launchFeeWei, pumpLive, SIGNA_PUMP_ADDRESS, RH_CHAIN_ID } from "@/lib/pump";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,9 +23,12 @@ export async function GET(req: NextRequest) {
 
   if (token) {
     const t = token.toLowerCase();
-    const { data: meta } = await db.from("pump_tokens").select("*").eq("token", t).maybeSingle();
-    const chain = await tokenChainState(t);
-    return NextResponse.json({ ok: true, token: t, meta: meta ?? null, chain }, { headers: CORS });
+    const [{ data: meta }, chain, trades] = await Promise.all([
+      db.from("pump_tokens").select("*").eq("token", t).maybeSingle(),
+      tokenChainState(t),
+      tokenTrades(t),
+    ]);
+    return NextResponse.json({ ok: true, token: t, meta: meta ?? null, chain, contract: SIGNA_PUMP_ADDRESS || null, trades }, { headers: CORS });
   }
 
   const [launches, { data: metas }] = await Promise.all([

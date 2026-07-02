@@ -135,7 +135,7 @@ export default function PumpPage() {
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {tokens.length === 0 && <div className="text-[13px] text-faint text-center py-8 col-span-full">{pumpLive ? "No coins yet — launch the first." : "Coins appear here once the launchpad is live."}</div>}
             {tokens.map((t) => (
-              <div key={t.token} className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] flex items-center gap-3">
+              <a key={t.token} href={`/pump/${t.token}`} className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] hover:border-[#a98bff]/30 flex items-center gap-3">
                 <div className="size-11 rounded-lg overflow-hidden bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] flex items-center justify-center text-[15px] font-bold text-white shrink-0">
                   {t.meta?.image_url ? <img src={t.meta.image_url} alt="" className="w-full h-full object-cover" /> : (t.symbol?.[0] || "?")}
                 </div>
@@ -143,7 +143,7 @@ export default function PumpPage() {
                   <div className="text-[15px] font-semibold truncate">{t.name} <span className="text-faint font-normal">${t.symbol}</span></div>
                   <div className="text-[11px] text-faint truncate">{t.meta?.description || short(t.token)}</div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>

@@ -39,6 +39,18 @@ export function buildBuyCalldata(token: string, minTokensOut: bigint): `0x${stri
 export function buildSellCalldata(token: string, tokensIn: bigint, minEthOut: bigint): `0x${string}` {
   return encodeFunctionData({ abi: PUMP_ABI, functionName: "sell", args: [token as Address, tokensIn, minEthOut] });
 }
+const ERC20 = [
+  parseAbiItem("function approve(address spender, uint256 value) returns (bool)"),
+  parseAbiItem("function balanceOf(address owner) view returns (uint256)"),
+] as const;
+/** approve(pump, amount) on the token — needed before selling (transferFrom). */
+export function buildApproveCalldata(spender: string, amount: bigint): `0x${string}` {
+  return encodeFunctionData({ abi: ERC20, functionName: "approve", args: [spender as Address, amount] });
+}
+/** balanceOf(owner) calldata — for a client-side eth_call to a token. */
+export function buildBalanceOfCalldata(owner: string): `0x${string}` {
+  return encodeFunctionData({ abi: ERC20, functionName: "balanceOf", args: [owner as Address] });
+}
 
 /** Resolve the launched token + creator from a launch tx receipt (verifies it's a real SignaPump launch). */
 export async function tokenFromReceipt(txHash: string): Promise<{ token: string; creator: string; name: string; symbol: string } | null> {
