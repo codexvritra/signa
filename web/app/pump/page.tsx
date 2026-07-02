@@ -25,17 +25,33 @@ export default function PumpPage() {
   const [tokens, setTokens] = useState<Tok[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const provider = () => (typeof window !== "undefined" ? (window as any).ethereum : null);
+  const provider = () => {
+    if (typeof window === "undefined") return null;
+    const w = window as any;
+    const eth = w.ethereum;
+    if (eth?.providers?.length) return eth.providers.find((p: any) => p.isMetaMask) || eth.providers[0];
+    return eth || w.okxwallet || w.coinbaseWalletExtension || null;
+  };
 
   const load = useCallback(async () => {
     try { const j = await (await fetch("/api/pump", { cache: "no-store" })).json(); if (j.ok) { setTokens(j.tokens ?? []); setFeeWei(j.launch_fee_wei ?? "0"); } } catch {}
   }, []);
   useEffect(() => { load(); const t = setInterval(load, 25000); return () => clearInterval(t); }, [load]);
+  // reflect an already-connected wallet on load
+  useEffect(() => { const p = provider(); if (!p) return; p.request({ method: "eth_accounts" }).then((a: string[]) => { if (a?.[0]) setAccount(a[0].toLowerCase()); }).catch(() => {}); }, []);
 
   async function connect() {
     const p = provider();
-    if (!p) { setStatus({ k: "err", t: "No wallet — open in a wallet browser or install an extension." }); return; }
-    try { const a = await p.request({ method: "eth_requestAccounts" }); setAccount(String(a[0]).toLowerCase()); await ensureChain(p); } catch { setStatus({ k: "err", t: "Connect rejected." }); }
+    if (!p) { setStatus({ k: "err", t: "No wallet detected. Install MetaMask or OKX, or open signaagent.xyz/pump inside your wallet's built-in browser." }); return; }
+    try {
+      const a = await p.request({ method: "eth_requestAccounts" });
+      if (!a?.[0]) { setStatus({ k: "err", t: "Wallet returned no account — unlock it and try again." }); return; }
+      setAccount(String(a[0]).toLowerCase());
+      setStatus({ k: "ok", t: "Wallet connected. It'll switch to Robinhood Chain when you launch." });
+      ensureChain(p).catch(() => {}); // best-effort; don't fail the connect if network-add is declined
+    } catch (e: any) {
+      setStatus({ k: "err", t: e?.code === 4001 ? "You rejected the connection in your wallet." : "Couldn't connect — make sure your wallet is unlocked." });
+    }
   }
   async function ensureChain(p: any) {
     try { await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: RH_CHAIN_ID_HEX }] }); }

@@ -63,7 +63,13 @@ export default function TokenPage() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ k: "ok" | "err" | "info"; t: string } | null>(null);
 
-  const provider = () => (typeof window !== "undefined" ? (window as any).ethereum : null);
+  const provider = () => {
+    if (typeof window === "undefined") return null;
+    const w = window as any;
+    const eth = w.ethereum;
+    if (eth?.providers?.length) return eth.providers.find((p: any) => p.isMetaMask) || eth.providers[0];
+    return eth || w.okxwallet || w.coinbaseWalletExtension || null;
+  };
   const load = useCallback(async () => {
     try { const j = await (await fetch(`/api/pump?token=${token}`, { cache: "no-store" })).json(); if (j.ok) setD(j); } catch {}
   }, [token]);
@@ -79,8 +85,17 @@ export default function TokenPage() {
     catch { await p.request({ method: "wallet_addEthereumChain", params: [{ chainId: RH_CHAIN_ID_HEX, chainName: RH_CHAIN_NAME, nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: [RH_RPC], blockExplorerUrls: RH_EXPLORER ? [RH_EXPLORER] : [] }] }); }
   }
   async function connect() {
-    const p = provider(); if (!p) { setStatus({ k: "err", t: "No wallet found." }); return; }
-    try { const a = await p.request({ method: "eth_requestAccounts" }); const acct = String(a[0]).toLowerCase(); setAccount(acct); await ensureChain(p); readBal(acct); } catch { setStatus({ k: "err", t: "Connect rejected." }); }
+    const p = provider();
+    if (!p) { setStatus({ k: "err", t: "No wallet detected. Install MetaMask or OKX, or open this page inside your wallet's browser." }); return; }
+    try {
+      const a = await p.request({ method: "eth_requestAccounts" });
+      if (!a?.[0]) { setStatus({ k: "err", t: "Wallet returned no account — unlock it and try again." }); return; }
+      const acct = String(a[0]).toLowerCase(); setAccount(acct);
+      setStatus({ k: "ok", t: "Wallet connected." });
+      ensureChain(p).catch(() => {}); readBal(acct);
+    } catch (e: any) {
+      setStatus({ k: "err", t: e?.code === 4001 ? "You rejected the connection." : "Couldn't connect — make sure your wallet is unlocked." });
+    }
   }
 
   async function buy() {

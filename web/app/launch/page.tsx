@@ -25,7 +25,13 @@ export default function LaunchPage() {
   const [status, setStatus] = useState<{ k: "ok" | "err" | "info"; t: string; tx?: string; token?: string } | null>(null);
   const [launches, setLaunches] = useState<Launch[]>([]);
 
-  const provider = () => (typeof window !== "undefined" ? (window as any).ethereum : null);
+  const provider = () => {
+    if (typeof window === "undefined") return null;
+    const w = window as any;
+    const eth = w.ethereum;
+    if (eth?.providers?.length) return eth.providers.find((p: any) => p.isMetaMask) || eth.providers[0];
+    return eth || w.okxwallet || w.coinbaseWalletExtension || null;
+  };
 
   const load = useCallback(async () => {
     try { const j = await (await fetch("/api/launchpad", { cache: "no-store" })).json(); if (j.ok) setLaunches(j.launches ?? []); } catch {}
@@ -34,12 +40,14 @@ export default function LaunchPage() {
 
   async function connect() {
     const p = provider();
-    if (!p) { setStatus({ k: "err", t: "No wallet found — open in a wallet browser or install an extension." }); return; }
+    if (!p) { setStatus({ k: "err", t: "No wallet detected. Install MetaMask or OKX, or open this page inside your wallet's browser." }); return; }
     try {
       const accts = await p.request({ method: "eth_requestAccounts" });
+      if (!accts?.[0]) { setStatus({ k: "err", t: "Wallet returned no account — unlock it and try again." }); return; }
       setAccount(String(accts[0]).toLowerCase());
-      await ensureChain(p);
-    } catch (e: any) { setStatus({ k: "err", t: "Connect rejected." }); }
+      setStatus({ k: "ok", t: "Wallet connected." });
+      ensureChain(p).catch(() => {});
+    } catch (e: any) { setStatus({ k: "err", t: e?.code === 4001 ? "You rejected the connection." : "Couldn't connect — make sure your wallet is unlocked." }); }
   }
 
   async function ensureChain(p: any) {
