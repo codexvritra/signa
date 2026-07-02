@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { buildLaunchCalldata, SIGNA_PUMP_ADDRESS, pumpLive } from "@/lib/pump";
 import { RH_CHAIN_ID, RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER } from "@/lib/signa-launch";
+import PumpNotifications from "@/components/pump/PumpNotifications";
 
 /**
  * /pump — pump.fun/ape.store-style bonding-curve launchpad on Robinhood Chain.
@@ -86,6 +87,7 @@ export default function PumpPage() {
 
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
+      <PumpNotifications />
       <div className="max-w-[720px] mx-auto px-5 py-12 sm:py-16">
         <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Pump · bonding curve · Robinhood Chain</div>
         <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a coin. <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">Fair curve.</span></h1>

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { parseEther, formatEther } from "viem";
 import { buildBuyCalldata, buildSellCalldata, buildApproveCalldata, buildBalanceOfCalldata, SIGNA_PUMP_ADDRESS, pumpLive } from "@/lib/pump";
 import { RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER } from "@/lib/signa-launch";
+import PumpNotifications from "@/components/pump/PumpNotifications";
 
 type Trade = { isBuy: boolean; eth: string; tokens: string; priceE18: string; timestamp: number; tx: string };
 type Data = { meta?: any; chain?: { raised: string; threshold: string; graduated: boolean; priceE18: string } | null; trades?: Trade[]; contract?: string | null };
@@ -119,6 +120,7 @@ export default function TokenPage() {
 
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
+      <PumpNotifications />
       <div className="max-w-[720px] mx-auto px-5 py-10 sm:py-14">
         <a href="/pump" className="text-[13px] text-[#a98bff]">← all coins</a>
         <div className="mt-3 flex items-center gap-3">

@@ -15,6 +15,7 @@ export { RH_EXPLORER, RH_CHAIN_ID } from "./signa-launch";
 
 export const LAUNCHED_EVENT = parseAbiItem("event Launched(address indexed token, address indexed creator, string name, string symbol, uint64 timestamp)");
 export const TRADE_EVENT = parseAbiItem("event Trade(address indexed token, address indexed trader, bool isBuy, uint256 ethAmount, uint256 tokenAmount, uint256 priceE18, uint64 timestamp)");
+export const GRADUATED_EVENT = parseAbiItem("event Graduated(address indexed token, uint256 ethToDex, uint256 tokensToDex, uint64 timestamp)");
 const PUMP_ABI = [
   parseAbiItem("function launch(string name, string symbol) payable returns (address)"),
   parseAbiItem("function buy(address token, uint256 minTokensOut) payable"),
@@ -111,3 +112,23 @@ export async function tokenTrades(token: string, limit = 500): Promise<PumpTrade
 }
 
 export const fmtEth = (wei: string) => { try { return formatEther(BigInt(wei)); } catch { return "0"; } };
+
+export type Activity = { kind: "buy" | "sell" | "launch" | "graduate"; token: string; actor: string; eth: string; ts: number; tx: string; block: number };
+
+/** Recent activity across the whole launchpad — buys, sells, launches, graduations. Newest first. */
+export async function pumpActivity(limit = 40): Promise<Activity[]> {
+  if (!pumpLive) return [];
+  try {
+    const [trades, launches, grads] = await Promise.all([
+      client().getContractEvents({ address: SIGNA_PUMP_ADDRESS as Address, abi: [TRADE_EVENT], eventName: "Trade", fromBlock: SIGNA_PUMP_DEPLOY_BLOCK, toBlock: "latest" }),
+      client().getContractEvents({ address: SIGNA_PUMP_ADDRESS as Address, abi: [LAUNCHED_EVENT], eventName: "Launched", fromBlock: SIGNA_PUMP_DEPLOY_BLOCK, toBlock: "latest" }),
+      client().getContractEvents({ address: SIGNA_PUMP_ADDRESS as Address, abi: [GRADUATED_EVENT], eventName: "Graduated", fromBlock: SIGNA_PUMP_DEPLOY_BLOCK, toBlock: "latest" }),
+    ]);
+    const items: Activity[] = [];
+    for (const l of trades as any[]) items.push({ kind: l.args.isBuy ? "buy" : "sell", token: String(l.args.token).toLowerCase(), actor: String(l.args.trader).toLowerCase(), eth: String(l.args.ethAmount), ts: Number(l.args.timestamp ?? 0), tx: l.transactionHash, block: Number(l.blockNumber) });
+    for (const l of launches as any[]) items.push({ kind: "launch", token: String(l.args.token).toLowerCase(), actor: String(l.args.creator).toLowerCase(), eth: "0", ts: Number(l.args.timestamp ?? 0), tx: l.transactionHash, block: Number(l.blockNumber) });
+    for (const l of grads as any[]) items.push({ kind: "graduate", token: String(l.args.token).toLowerCase(), actor: "", eth: String(l.args.ethToDex ?? 0), ts: Number(l.args.timestamp ?? 0), tx: l.transactionHash, block: Number(l.blockNumber) });
+    items.sort((a, b) => b.block - a.block);
+    return items.slice(0, Math.min(Math.max(limit, 1), 100));
+  } catch { return []; }
+}
