@@ -37,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "handle_claim", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "token_launch", "handle_claim", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -233,6 +233,22 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       const payer = String(a.payer ?? "").toLowerCase();
       const pre = ["SIGNA deal settle v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `payer:${payer}`, `payment:${a.payment ?? ""}`].join("\n");
       return { preimage: pre, expected: payer || null, role: "deal buyer wallet" };
+    }
+    case "token_launch": {
+      // SignaLaunch — the launcher wallet-signs a receipt for a token they launched.
+      // Must match lib/signa-launch.ts launchReceiptPreimage(). expected = launcher.
+      const launcher = String(a.launcher ?? "").toLowerCase();
+      const pre = [
+        "SIGNA token launch v1",
+        `ts:${a.ts}`,
+        `launcher:${launcher}`,
+        `token:${String(a.token ?? "").toLowerCase()}`,
+        `name:${a.name ?? ""}`,
+        `symbol:${a.symbol ?? ""}`,
+        `supply:${a.supply ?? ""}`,
+        `chain:${a.chain ?? ""}`,
+      ].join("\n");
+      return { preimage: pre, expected: launcher || null, role: "token launcher wallet" };
     }
     case "handle_claim": {
       // v4.x — SIGNA Mail: a wallet claims a human-readable handle (you@signa).
