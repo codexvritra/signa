@@ -5,13 +5,20 @@
  * (NEXT_PUBLIC_SIGNA_PUMP_ADDRESS) — empty until the pump is deployed.
  * ⚠️ Custodial contract — testnet only until audited.
  */
-import { createPublicClient, http, parseAbiItem, encodeFunctionData, formatEther, type Address } from "viem";
-import { rhChain, RH_RPC, RH_EXPLORER, RH_CHAIN_ID } from "./signa-launch";
+import { createPublicClient, http, parseAbiItem, encodeFunctionData, formatEther, defineChain, type Address } from "viem";
+
+// Robinhood Chain TESTNET — SignaPump is custodial + unaudited, so it stays on
+// testnet (separate from the non-custodial SignaLaunch, which runs on mainnet).
+export const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_PUMP_CHAIN_ID || 46646);
+export const RH_RPC = process.env.NEXT_PUBLIC_PUMP_RPC || "https://rpc.testnet.chain.robinhood.com";
+export const RH_EXPLORER = (process.env.NEXT_PUBLIC_PUMP_EXPLORER || "").replace(/\/$/, "");
+export const RH_CHAIN_NAME = process.env.NEXT_PUBLIC_PUMP_CHAIN_NAME || "Robinhood Chain Testnet";
+export const RH_CHAIN_ID_HEX = "0x" + RH_CHAIN_ID.toString(16);
+const rhChain = defineChain({ id: RH_CHAIN_ID, name: RH_CHAIN_NAME, nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [RH_RPC] } }, blockExplorers: RH_EXPLORER ? { default: { name: "Explorer", url: RH_EXPLORER } } : undefined });
 
 export const SIGNA_PUMP_ADDRESS = (process.env.NEXT_PUBLIC_SIGNA_PUMP_ADDRESS || process.env.SIGNA_PUMP_ADDRESS || "").toLowerCase();
 export const SIGNA_PUMP_DEPLOY_BLOCK = BigInt(process.env.SIGNA_PUMP_DEPLOY_BLOCK || 0);
 export const pumpLive = /^0x[0-9a-f]{40}$/.test(SIGNA_PUMP_ADDRESS);
-export { RH_EXPLORER, RH_CHAIN_ID } from "./signa-launch";
 
 export const LAUNCHED_EVENT = parseAbiItem("event Launched(address indexed token, address indexed creator, string name, string symbol, uint64 timestamp)");
 export const TRADE_EVENT = parseAbiItem("event Trade(address indexed token, address indexed trader, bool isBuy, uint256 ethAmount, uint256 tokenAmount, uint256 priceE18, uint64 timestamp)");

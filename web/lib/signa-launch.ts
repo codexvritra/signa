@@ -14,10 +14,12 @@ import { createPublicClient, http, parseAbiItem, encodeFunctionData, defineChain
 
 // Robinhood Chain — Arbitrum Orbit L2, ETH gas. Testnet params are verified;
 // override via env for mainnet (NEXT_PUBLIC_RH_CHAIN_ID / _RPC / _EXPLORER).
-export const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_RH_CHAIN_ID || 46646);
-export const RH_RPC = process.env.NEXT_PUBLIC_RH_RPC || "https://rpc.testnet.chain.robinhood.com";
-export const RH_EXPLORER = (process.env.NEXT_PUBLIC_RH_EXPLORER || "").replace(/\/$/, "");
-export const RH_CHAIN_NAME = process.env.NEXT_PUBLIC_RH_CHAIN_NAME || "Robinhood Chain Testnet";
+// Robinhood Chain MAINNET (verified from the chain: eth_chainId → 0x1237 = 4663).
+// The non-custodial SignaLaunch factory is safe to run on mainnet.
+export const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_RH_CHAIN_ID || 4663);
+export const RH_RPC = process.env.NEXT_PUBLIC_RH_RPC || "https://rpc.mainnet.chain.robinhood.com";
+export const RH_EXPLORER = (process.env.NEXT_PUBLIC_RH_EXPLORER || "https://robinhoodchain.blockscout.com").replace(/\/$/, "");
+export const RH_CHAIN_NAME = process.env.NEXT_PUBLIC_RH_CHAIN_NAME || "Robinhood Chain";
 export const RH_CHAIN_ID_HEX = "0x" + RH_CHAIN_ID.toString(16);
 
 /** SignaLaunch factory address on Robinhood Chain — set after deploy. Empty = not deployed yet. */

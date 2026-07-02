@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { parseEther, formatEther } from "viem";
-import { buildBuyCalldata, buildSellCalldata, buildApproveCalldata, buildBalanceOfCalldata, SIGNA_PUMP_ADDRESS, pumpLive } from "@/lib/pump";
-import { RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER } from "@/lib/signa-launch";
+import { buildBuyCalldata, buildSellCalldata, buildApproveCalldata, buildBalanceOfCalldata, SIGNA_PUMP_ADDRESS, pumpLive, RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER } from "@/lib/pump";
 import PumpNotifications from "@/components/pump/PumpNotifications";
 
 type Trade = { isBuy: boolean; eth: string; tokens: string; priceE18: string; timestamp: number; tx: string };

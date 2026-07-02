@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { buildLaunchCalldata, SIGNA_PUMP_ADDRESS, pumpLive } from "@/lib/pump";
-import { RH_CHAIN_ID, RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER } from "@/lib/signa-launch";
+import { buildLaunchCalldata, SIGNA_PUMP_ADDRESS, pumpLive, RH_CHAIN_ID, RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER } from "@/lib/pump";
 import PumpNotifications from "@/components/pump/PumpNotifications";
 
 /**

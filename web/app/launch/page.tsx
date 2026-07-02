@@ -62,6 +62,14 @@ export default function LaunchPage() {
     }
   }
 
+  // one-click: push the Robinhood Chain network into the wallet (new chain, in no wallet by default)
+  async function addChain() {
+    const p = provider();
+    if (!p) { setStatus({ k: "err", t: "No wallet detected — install MetaMask/OKX or open this in your wallet's browser." }); return; }
+    try { await ensureChain(p); setStatus({ k: "ok", t: `${RH_CHAIN_NAME} added to your wallet ✓ (chain ${RH_CHAIN_ID})` }); }
+    catch (e: any) { setStatus({ k: "err", t: e?.code === 4001 ? "You declined adding the network." : "Wallet refused the network add." }); }
+  }
+
   async function launch() {
     const p = provider();
     if (!p || !account) { connect(); return; }
@@ -110,7 +118,10 @@ export default function LaunchPage() {
           ) : (
             <button onClick={connect} className="w-full mt-3 px-4 py-3 rounded-xl text-[15px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white hover:brightness-110">Connect wallet</button>
           )}
-          {account && <div className="text-[11px] text-faint mt-2 font-mono">connected {short(account)} · will switch to {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</div>}
+          <div className="mt-2 flex items-center gap-3">
+            {account && <span className="text-[11px] text-faint font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</span>}
+            <button onClick={addChain} className="text-[11px] text-[#a98bff] underline">+ Add Robinhood Chain to wallet</button>
+          </div>
         </div>
 
         {status && (
