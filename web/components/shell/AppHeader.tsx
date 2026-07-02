@@ -46,6 +46,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
       { href: "/onchain/rooms", label: "Token Rooms" },
       { href: "/pay", label: "Pay to Reach" },
       { href: "/launch", label: "Launchpad" },
+      { href: "/pump", label: "Pump" },
       { href: "/b20", label: "B20" },
       { href: "/b20live", label: "B20 Live" },
       { href: "/telegram", label: "Telegram Bot" },
