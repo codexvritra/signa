@@ -10,6 +10,8 @@ via_ir = true
 [rpc_endpoints]
 base = "https://mainnet.base.org"
 base_sepolia = "https://sepolia.base.org"
+robinhood_testnet = "https://rpc.testnet.chain.robinhood.com"
+# robinhood_mainnet = "<confirm mainnet RPC at docs.robinhood.com/chain before using>"
 
 [etherscan]
 base = { key = "${BASESCAN_API_KEY}", chain = 8453, url = "https://api.basescan.org/api" }
