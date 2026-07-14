@@ -23,6 +23,7 @@ const X402_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:
 const LOG_SIGNER = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1"))).address.toLowerCase();
 const ALETHEIA = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1"))).address.toLowerCase();
 const B20_LAUNCH = privateKeyToAccount(keccak256(toBytes("signa:b20-launch:v1"))).address.toLowerCase();
+const RWA_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:rwa-attestor:v1"))).address.toLowerCase();
 
 export type VerifyInput = Record<string, unknown> & { kind?: string; signature?: string };
 
@@ -37,7 +38,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "token_launch", "handle_claim", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "token_launch", "rwa_attestation", "handle_claim", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -249,6 +250,27 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `chain:${a.chain ?? ""}`,
       ].join("\n");
       return { preimage: pre, expected: launcher || null, role: "token launcher wallet" };
+    }
+    case "rwa_attestation": {
+      // SIGNA Proof-of-Stock — the RWA attestor vouches that a contract is the
+      // canonical Robinhood Chain Stock Token for a ticker, and pins its onchain
+      // supply at a block. Must match lib/rwa.ts rwaAttestationPreimage()
+      // byte-for-byte. Two-leg verification: this recovers the attestor; the
+      // caller can independently replay the eth_call at `block`.
+      const pre = [
+        "SIGNA rwa attestation v1",
+        `ts:${a.ts}`,
+        `chain:${a.chain ?? ""}`,
+        `block:${a.block ?? ""}`,
+        `ticker:${String(a.ticker ?? "").toUpperCase()}`,
+        `subject:${a.subject ?? ""}`,
+        `contract:${String(a.contract ?? "").toLowerCase()}`,
+        `canonical:true`,
+        `decimals:${a.decimals ?? ""}`,
+        `supply:${a.supply ?? ""}`,
+        `source:robinhood-chain:erc20`,
+      ].join("\n");
+      return { preimage: pre, expected: RWA_ATTESTOR, role: "SIGNA RWA attestor (Robinhood Chain Stock Tokens)" };
     }
     case "handle_claim": {
       // v4.x — SIGNA Mail: a wallet claims a human-readable handle (you@signa).
