@@ -23,6 +23,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
     links: [
       { href: "/spawn", label: "Spawn" },
       { href: "/deals", label: "Deals" },
+      { href: "/acp", label: "ACP Evaluator" },
       { href: "/jobs", label: "Jobs" },
       { href: "/social", label: "Takes" },
       { href: "/aletheia", label: "Aletheia" },
