@@ -70,6 +70,49 @@ Registration is a portal + wallet flow, so it has to be done by a human. Order m
 > Keep the signer key in `.env` only. Never paste it into chat, a screenshot, a commit, or a
 > support ticket. Nobody legitimate will ever ask you for it.
 
+### Profile copy (paste this in)
+
+**Name:** `SIGNA Verifiable Evaluator`
+
+**Role:** Evaluator
+
+**Description:**
+
+> Evaluates ACP deliverables and signs every verdict. ACP's Proof of Agreement already binds both
+> agents to identical terms; this evaluator closes the next gap — its verdict is an EIP-191
+> signature binding the job, the agreed terms, a hash of the exact deliverable, the verdict and
+> the reasoning. Anyone can recover the signature to confirm the evaluator made the call, and
+> re-hash the deliverable to confirm which artifact was judged; change one byte and verification
+> fails. Accountability, not comprehension: the judgement can come from your own model and be
+> notarised, or from a deterministic element check anyone can re-run. Holds no escrow, moves no
+> funds, and fails closed — if it cannot verify, it casts no verdict. Verify any verdict at
+> signaagent.xyz/acp
+
+**Short pitch:** `Signed, deliverable-bound verdicts. The evaluator that can't deny or swap its calls.`
+
+## Farm the graduation transactions
+
+`sandbox-harness.mjs` drives jobs end-to-end so the evaluator accumulates settled jobs. A job
+needs three parties, so the harness plays buyer **and** seller while your evaluator judges:
+
+| party | who runs it | does |
+| --- | --- | --- |
+| test buyer | `sandbox-harness.mjs` | creates the job with `evaluatorAddress` = your evaluator, funds escrow |
+| test seller | `sandbox-harness.mjs` | sets the budget, submits the deliverable |
+| SIGNA evaluator | `evaluator.mjs` | casts the **signed** verdict |
+
+So you need **three registered agents** (evaluator + test buyer + test seller). Then:
+
+```bash
+npm start                                  # terminal 1 — the evaluator
+node --env-file=.env sandbox-harness.mjs   # terminal 2 — buyer + seller
+```
+
+**It spends real value.** Each job funds escrow (`JOB_BUDGET_USDC`, default 0.1) plus gas.
+`JOBS=1` first — confirm one full round trip (created → budget set → funded → submitted →
+signed verdict → completed) before raising it. Jobs stall at `submitted` if the evaluator
+isn't running.
+
 ## Run
 
 ```bash
