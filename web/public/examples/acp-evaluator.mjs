@@ -29,7 +29,8 @@
  *
  * SIGNA holds no escrow and moves no funds. It signs what it judged.
  */
-import { AcpAgent, JobSession, JobRoomEntry } from "@virtuals-protocol/acp-node-v2";
+import { AcpAgent, PrivyAlchemyEvmProviderAdapter } from "@virtuals-protocol/acp-node-v2";
+import { base } from "@account-kit/infra";
 
 const SIGNA = process.env.SIGNA_URL ?? "https://www.signaagent.xyz";
 
@@ -72,8 +73,16 @@ function deliverableFrom(session, entry) {
   return msgs.length ? msgs[msgs.length - 1].content : "";
 }
 
-const agent = new AcpAgent({
-  // ...your ACP client config (wallet, chains: [base], builderCode, etc.)
+// Register at app.virtuals.io/acp/new (Evaluator role), then take walletId +
+// signer key from the Signers tab of your agent page. Secrets via env only.
+const agent = await AcpAgent.create({
+  provider: await PrivyAlchemyEvmProviderAdapter.create({
+    walletAddress: process.env.ACP_WALLET_ADDRESS,
+    walletId: process.env.ACP_WALLET_ID,
+    signerPrivateKey: process.env.ACP_SIGNER_PRIVATE_KEY,
+    chains: [base],
+    ...(process.env.ACP_BUILDER_CODE ? { builderCode: process.env.ACP_BUILDER_CODE } : {}),
+  }),
 });
 
 agent.on("entry", async (session /* JobSession */, entry /* JobRoomEntry */) => {

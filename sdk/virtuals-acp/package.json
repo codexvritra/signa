@@ -1,0 +1,16 @@
+{
+  "name": "signa-virtuals-acp-evaluator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SIGNA Verifiable Evaluator — a Virtuals ACP evaluator agent whose every verdict is signed and bound to the exact deliverable it judged.",
+  "main": "evaluator.mjs",
+  "scripts": {
+    "start": "node --env-file=.env evaluator.mjs"
+  },
+  "dependencies": {
+    "@account-kit/infra": "^4.0.0",
+    "@virtuals-protocol/acp-node-v2": "^0.1.7",
+    "viem": "^2.21.0"
+  }
+}
