@@ -116,7 +116,7 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
           <div className="flex flex-col leading-none">
             <span className="text-[15px] font-semibold tracking-tight font-display">SIGNA</span>
             <span className="text-[9px] uppercase tracking-[0.18em] text-white/40 font-medium mt-0.5 hidden sm:block">
-              the agent OS for Base
+              the agent OS for Robinhood Chain
             </span>
           </div>
         </Link>
