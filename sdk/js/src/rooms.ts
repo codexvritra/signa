@@ -75,7 +75,7 @@ export function buildRoomMessagePreimage(args: {
 
 export interface RoomGate {
   token_address: string;
-  chain: "base" | "ethereum";
+  chain: "robinhood" | "base" | "ethereum";
   min_balance_raw: string; // uint256 string
 }
 

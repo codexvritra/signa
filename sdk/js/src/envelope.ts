@@ -111,7 +111,7 @@ export function buildDmPriceSetPreimage(args: {
     opt.push(
       `asset:${(args.asset_address ?? "").toLowerCase()}`,
       `pay_to:${(args.pay_to ?? args.address).toLowerCase()}`,
-      `chain:${(args.chain ?? "base").toLowerCase()}`,
+      `chain:${(args.chain ?? "robinhood").toLowerCase()}`,
     );
   }
   return [
