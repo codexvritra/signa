@@ -10,7 +10,7 @@
  *   <script src="https://www.signaagent.xyz/signa.js"></script>
  *   <script>
  *     const reply = await signa.gateway.respond({
- *       prompt: "what is the price of $USDC on base?",
+ *       prompt: "what is the price of $USDG on robinhood chain?",
  *     });
  *     console.log(reply.response);
  *     console.log(reply.signa.signed);       // wallet-signed?
@@ -132,9 +132,9 @@
         return self._req("/api/stats");
       },
     };
-    this.base = {
+    this.chain = {
       status: function () {
-        return self._req("/api/base-status");
+        return self._req("/api/robinhood-status");
       },
     };
     this.search = {

@@ -1,27 +1,26 @@
 import { NextResponse } from "next/server";
+import { RH_RPC } from "@/lib/chain";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 15;
 
 /**
- * GET /api/base-status
+ * GET /api/robinhood-status
  *
- * Live Base mainnet status snapshot. Public, free. Used by the landing
- * BASE NETWORK section to show real numbers instead of marketing copy.
+ * Live Robinhood Chain mainnet status snapshot. Public, free. Used by the
+ * landing page's network section to show real numbers instead of marketing
+ * copy.
  *
  * Reads the latest block via JSON-RPC eth_getBlockByNumber("latest") on
- * the public Base RPC (mainnet.base.org). No API key required.
+ * the Robinhood Chain RPC. No API key required.
  *
- * Cached 15s — Base produces a block every ~2s so a 15s cache keeps
- * the homepage snappy without showing stale data.
+ * Cached 15s.
  */
-
-const BASE_RPC = process.env.BASE_RPC_URL || "https://mainnet.base.org";
 
 export async function GET() {
   try {
-    const res = await fetch(BASE_RPC, {
+    const res = await fetch(RH_RPC, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -33,7 +32,7 @@ export async function GET() {
       // Override Next's default fetch cache so each tick re-pulls.
       cache: "no-store",
     });
-    if (!res.ok) throw new Error(`base rpc ${res.status}`);
+    if (!res.ok) throw new Error(`robinhood chain rpc ${res.status}`);
     const j = (await res.json()) as {
       result?: {
         number?: string;
@@ -55,8 +54,8 @@ export async function GET() {
 
     return NextResponse.json({
       ok: true,
-      chain: "base-mainnet",
-      chain_id: 8453,
+      chain: "robinhood-mainnet",
+      chain_id: 4663,
       block,
       block_hash: r.hash,
       block_time_unix: ts,

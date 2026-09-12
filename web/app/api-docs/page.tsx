@@ -228,13 +228,13 @@ const ENDPOINTS = [
   {
     group: "Network",
     intro:
-      "Observability. Live block height from Base, platform-wide stats. Cached.",
+      "Observability. Live block height from Robinhood Chain, platform-wide stats. Cached.",
     rows: [
       { method: "GET", path: "/api/stats", summary: "Platform counters" },
       {
         method: "GET",
-        path: "/api/base-status",
-        summary: "Latest Base mainnet block",
+        path: "/api/robinhood-status",
+        summary: "Latest Robinhood Chain block",
       },
     ],
   },

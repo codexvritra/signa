@@ -1174,10 +1174,10 @@ const PATHS: Record<string, unknown> = {
       responses: { "200": { description: "Stats" } },
     },
   },
-  "/api/base-status": {
+  "/api/robinhood-status": {
     get: {
       tags: ["Network"],
-      summary: "Latest Base mainnet block",
+      summary: "Latest Robinhood Chain block",
       responses: { "200": { description: "Block snapshot" } },
     },
   },

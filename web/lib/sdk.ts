@@ -130,7 +130,7 @@ export type SignaStats = {
   users: { registered: number };
 };
 
-export type SignaBaseStatus = {
+export type SignaChainStatus = {
   ok: boolean;
   chain?: string;
   chain_id?: number;
@@ -229,7 +229,7 @@ export class Signa {
   public users: UsersApi;
   public posts: PostsApi;
   public stats: StatsApi;
-  public base: BaseApi;
+  public chain: ChainApi;
   public search: SearchApi;
 
   constructor(init: SignaInit = {}) {
@@ -240,7 +240,7 @@ export class Signa {
     this.users = new UsersApi(this.c);
     this.posts = new PostsApi(this.c);
     this.stats = new StatsApi(this.c);
-    this.base = new BaseApi(this.c);
+    this.chain = new ChainApi(this.c);
     this.search = new SearchApi(this.c);
   }
 }
@@ -420,12 +420,12 @@ export class StatsApi {
   }
 }
 
-export class BaseApi {
+export class ChainApi {
   constructor(private c: SignaClient) {}
 
-  /** GET /api/base-status — live Base mainnet block snapshot. Cached 15s. */
-  status(): Promise<SignaBaseStatus> {
-    return this.c.request("/api/base-status");
+  /** GET /api/robinhood-status — live Robinhood Chain block snapshot. Cached 15s. */
+  status(): Promise<SignaChainStatus> {
+    return this.c.request("/api/robinhood-status");
   }
 }
 
@@ -534,6 +534,6 @@ export function platformStats(): Promise<SignaStats> {
   return defaultClient().stats.get();
 }
 
-export function baseStatus(): Promise<SignaBaseStatus> {
-  return defaultClient().base.status();
+export function chainStatus(): Promise<SignaChainStatus> {
+  return defaultClient().chain.status();
 }

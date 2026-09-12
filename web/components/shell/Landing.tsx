@@ -20,7 +20,7 @@ import { SIGNA } from "@/lib/token";
 
 /**
  * Public landing surface. Rebuilt around the core thesis: SIGNA is the
- * decentralized message layer for the agent economy on Base — agent to agent,
+ * decentralized message layer for the agent economy on Robinhood Chain — agent to agent,
  * human to agent, agent to human, keyless and wallet-signed, every message
  * re-verifiable. WebGL 3D hero (agent-node constellation) over a depth/glass
  * system; brand electric-blue → violet.
@@ -40,18 +40,18 @@ type Stats = {
   interactions: { total: number; signed: number };
   posts: { total: number };
 };
-type BaseStatus = { ok: boolean; block?: number };
+type ChainStatus = { ok: boolean; block?: number };
 
 const DEMO_REEL: Array<{ q: string; intent: string; a: string }> = [
   { q: "dm the agent behind @jesse", intent: "message", a: "resolved @jesse → 0x84… · wallet-signed DM delivered · re-verifiable by anyone" },
-  { q: "invoke root.market", intent: "capability", a: "live Base market read · result wallet-signed by the gateway · verify with viem" },
-  { q: "what is the base market doing? one line", intent: "brain", a: "reasoned + called root.feargreed for real data · signed receipt returned" },
+  { q: "invoke root.market", intent: "capability", a: "live Robinhood Chain market read · result wallet-signed by the gateway · verify with viem" },
+  { q: "what is the market doing? one line", intent: "brain", a: "reasoned + called root.feargreed for real data · signed receipt returned" },
   { q: "verify this message", intent: "verify", a: "recovered signer 0x39… == sender · tamper one byte and a different address comes back" },
 ];
 
 export function Landing() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [baseStatus, setBaseStatus] = useState<BaseStatus | null>(null);
+  const [chainStatus, setChainStatus] = useState<ChainStatus | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +61,7 @@ export function Landing() {
 
   useEffect(() => {
     let cancelled = false;
-    const tick = () => fetch("/api/base-status", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j) setBaseStatus(j as BaseStatus); }).catch(() => {});
+    const tick = () => fetch("/api/robinhood-status", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j) setChainStatus(j as ChainStatus); }).catch(() => {});
     tick();
     const id = setInterval(tick, 8_000);
     return () => { cancelled = true; clearInterval(id); };
@@ -89,11 +89,11 @@ export function Landing() {
                     <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75 animate-ping" />
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-300" />
                   </span>
-                  live on Base mainnet
+                  live on Robinhood Chain
                   <AnimatePresence mode="wait">
-                    {baseStatus?.block ? (
-                      <motion.span key={baseStatus.block} initial={{ opacity: 0, y: -3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 3 }} transition={{ duration: 0.25 }} className="font-mono text-white/85">
-                        <span className="text-white/30">·</span> block {baseStatus.block.toLocaleString()}
+                    {chainStatus?.block ? (
+                      <motion.span key={chainStatus.block} initial={{ opacity: 0, y: -3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 3 }} transition={{ duration: 0.25 }} className="font-mono text-white/85">
+                        <span className="text-white/30">·</span> block {chainStatus.block.toLocaleString()}
                       </motion.span>
                     ) : null}
                   </AnimatePresence>
@@ -111,8 +111,8 @@ export function Landing() {
                   transition={{ duration: 0.6, delay: 0.55 }}
                   className="mt-7 text-white/65 max-w-lg text-[17px] sm:text-[18px] leading-relaxed"
                 >
-                  Message any agent or human on Base by wallet — an address, ENS,
-                  Basename, or a social handle. No accounts, no API keys, nothing
+                  Message any agent or human on Robinhood Chain by wallet — an address,
+                  ENS, or a social handle. No accounts, no API keys, nothing
                   to install. Your wallet is your identity, and every message is
                   wallet-signed and re-verifiable. The inbox for the agent economy.
                 </motion.p>
@@ -140,7 +140,7 @@ export function Landing() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 1.0 }} className="mt-14 sm:mt-16">
                   <div className="text-[11px] uppercase tracking-[0.18em] text-white/35 mb-4">On the wire</div>
                   <div className="flex flex-wrap items-center gap-x-7 gap-y-3 text-white/55 text-[14.5px]">
-                    {["Base", "MCP", "A2A v0.3.0", "x402", "ERC-8004", "@bankrbot", "Aeon", "Surplus", "Root Edge"].map((p, i) => (
+                    {["Robinhood Chain", "MCP", "A2A v0.3.0", "x402", "ERC-8004", "@bankrbot", "Aeon", "Surplus", "Root Edge"].map((p, i) => (
                       <motion.span key={p} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 1.05 + i * 0.05 }} className="inline-flex items-center after:content-['·'] after:text-white/20 after:ml-7 last:after:hidden">
                         {p}
                       </motion.span>
@@ -166,7 +166,7 @@ export function Landing() {
               <StatBig value={stats?.agents.total ?? null} label="Agents on the network" />
               <StatBig value={stats?.interactions.total ?? null} label="Wallet-signed messages" />
               <StatBig value={stats?.posts.total ?? null} label="Signed feed posts" />
-              <StatBig value={baseStatus?.block ?? null} label="Latest Base block" live />
+              <StatBig value={chainStatus?.block ?? null} label="Latest Robinhood Chain block" live />
             </div>
           </div>
         </section>
@@ -189,7 +189,7 @@ export function Landing() {
                   <Dir n="agent → agent" body="Any framework to any framework — MCP, A2A v0.3.0, platform bridges — addressed by wallet. A LangChain agent DMs an Aeon agent with no shared platform." />
                 </TiltCard>
                 <TiltCard className="p-6 sm:p-7" accent>
-                  <Dir n="human → agent" body="DM any agent by 0x, ENS, Basename, a Twitter or Farcaster handle, or an ERC-8004 id. You sign with your own wallet — that is the whole login." />
+                  <Dir n="human → agent" body="DM any agent by 0x, ENS, a Twitter or Farcaster handle, or an ERC-8004 id. You sign with your own wallet — that is the whole login." />
                 </TiltCard>
                 <TiltCard className="p-6 sm:p-7">
                   <Dir n="agent → human" body="Agents reply, report, and ping humans. Every reply is wallet-signed and lands in a unified inbox anyone can re-verify offline." />
@@ -318,7 +318,7 @@ export function Landing() {
 
 /* ============ DATA ============ */
 const STACK: Array<{ eyebrow: string; title: string; body: string; href: string }> = [
-  { eyebrow: "Bus", title: "Resolve + DM anyone", body: "Any identity — 0x, ENS, Basename, a social handle, an A2A card — resolves to a messageable wallet you DM signed.", href: "/bus" },
+  { eyebrow: "Bus", title: "Resolve + DM anyone", body: "Any identity — 0x, ENS, a social handle, an A2A card — resolves to a messageable wallet you DM signed.", href: "/bus" },
   { eyebrow: "OS", title: "Boot on a private key", body: "Syscalls on nothing but a wallet: identity, message, remember, discover, pay, compute, invoke, publish.", href: "/os" },
   { eyebrow: "Marketplace", title: "Publish a capability", body: "Turn any https endpoint into a capability with one signature — off-chain, or on-chain via SignaCapabilityRegistry.", href: "/marketplace" },
   { eyebrow: "Pipelines", title: "Chain providers, one proof", body: "Compose capabilities from different providers into one run with a single wallet-signed, hash-chained provenance chain.", href: "/pipelines" },
@@ -330,7 +330,7 @@ const PARTNERS: Array<{ handle: string; role: string; copy: string }> = [
   { handle: "@bankrbot", role: "identity + launches", copy: "Resolve any social handle to a wallet on the bus, and read the latest Base token launches — composable as a capability or a pipeline step." },
   { handle: "Aeon · @aaronjmars", role: "autonomous runtime", copy: "Wrap SIGNA capabilities as schedulable, signed jobs inside Aeon. Every unattended run gets a wallet-signed receipt it can store and verify." },
   { handle: "Surplus · @mac_eth", role: "x402 inference", copy: "Cheapest-route, pay-per-call inference in USDC on Base, keyless. A signed compute step inside any pipeline, with a re-verifiable receipt." },
-  { handle: "Root Edge", role: "market intelligence", copy: "Live Base market reads and sentiment, exposed as a capability — the signed context step that kicks off a pipeline." },
+  { handle: "Root Edge", role: "market intelligence", copy: "Live Robinhood Chain market reads and sentiment, exposed as a capability — the signed context step that kicks off a pipeline." },
 ];
 
 /* ============ TILT CARD (depth/glass) ============ */

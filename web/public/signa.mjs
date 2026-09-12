@@ -2,7 +2,7 @@
 // signa — the signa CLI. v0.3.0
 //
 // Real decentralized wallet client. A full terminal product for the
-// signa network — wallet-native messaging on Base mainnet.
+// signa network — wallet-native messaging on Robinhood Chain.
 //
 // Two ways to use it:
 //   1. One-shot:    signa <command> [args]       e.g.  signa ask "hi"
@@ -16,7 +16,7 @@
 //   • wallet       login, logout, wallet, whoami
 //   • messaging    post, dm, reply, like, unlike, rate, inbox, watch,
 //                  receipts, thread
-//   • tokens       send <to> <amount> <ETH|USDC|0xerc20> [--dry]
+//   • tokens       send <to> <amount> <ETH|USDG|0xerc20> [--dry]
 //
 // PRIVATE KEY HANDLING
 //   Stored at ~/.signa/keystore.json with file mode 0600. Plain text.
@@ -65,13 +65,16 @@ const AGENTS_DIR = join(SIGNA_HOME, "agents");
 // leaving it at the default umask is fine for a single-user home dir.
 const XMTP_DIR = join(SIGNA_HOME, "xmtp");
 
-// Base mainnet — chain id 8453. RPC defaults to mainnet.base.org which
-// is public + rate-limited but works fine for low-volume CLI traffic.
-const BASE_RPC = env.SIGNA_BASE_RPC || "https://mainnet.base.org";
-const BASE_CHAIN_ID = 8453;
+// Robinhood Chain mainnet — chain id 4663 (verified via eth_chainId).
+// RPC defaults to the public mainnet RPC, fine for low-volume CLI traffic.
+const RH_RPC = env.SIGNA_ROBINHOOD_RPC || "https://rpc.mainnet.chain.robinhood.com";
+const RH_CHAIN_ID = 4663;
+const RH_EXPLORER = "https://robinhoodchain.blockscout.com";
 
-// USDC on Base — official Coinbase USDC contract.
-const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+// USDG (Global Dollar, Paxos) — Robinhood Chain's native stablecoin. Circle
+// has never issued USDC on this chain; verified via Paxos's own docs +
+// on-chain at Blockscout.
+const USDG_ADDRESS = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
 
 // Ethereum mainnet RPC for ERC-8004 (aeon) reads. Default publicnode is
 // rate-limited but works fine for CLI-volume traffic. Override with
@@ -99,21 +102,16 @@ const SIGNA_SEED_NODES = [
   },
 ];
 
-// SignaNodeRegistry contract on Base mainnet (chain id 8453). Permission-
+// SignaNodeRegistry contract on Robinhood Chain (chain id 4663). Permission-
 // less on-chain registry — anyone can `register()` a node by sending a
 // tx from their wallet. CLI reads listActiveNodes() and cross-verifies
 // each URL by hitting /api/node/info.
 //
-// Deployed: 2026-05-21 on Base mainnet.
-// Source:   contracts/src/SignaNodeRegistry.sol
-// Basescan: https://basescan.org/address/0x4316De3847629705C401F8FaF0cecdb40bd68E5A
+// Source: contracts/src/SignaNodeRegistry.sol
 //
-// Override via SIGNA_NODE_REGISTRY env to point at a fresh deploy on
-// another chain (or to disable the on-chain path entirely by setting
-// it to 0x0...).
-const SIGNA_NODE_REGISTRY =
-  env.SIGNA_NODE_REGISTRY ||
-  "0x4316De3847629705C401F8FaF0cecdb40bd68E5A";
+// Set SIGNA_NODE_REGISTRY once redeployed to Robinhood Chain (or leave unset
+// to disable the on-chain path — the CLI falls back to the seed node list).
+const SIGNA_NODE_REGISTRY = env.SIGNA_NODE_REGISTRY || "";
 
 const SIGNA_NODE_REGISTRY_ABI = [
   {
@@ -353,7 +351,13 @@ async function viem() {
     _viem = {
       ...accounts,
       ...core,
-      base: chains.base,
+      rhChain: core.defineChain({
+        id: RH_CHAIN_ID,
+        name: "Robinhood Chain",
+        nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+        rpcUrls: { default: { http: [RH_RPC] } },
+        blockExplorers: { default: { name: "Explorer", url: RH_EXPLORER } },
+      }),
       mainnet: chains.mainnet,
     };
     return _viem;
@@ -632,7 +636,7 @@ ${paint(c.bold, "Agents")}
                                     --kind=miroshark-sim: fires a swarm
                                       sim each tick + posts audit entry.
                                     --kind=payment: broadcasts an EIP-1559
-                                      tx on Base mainnet each tick. caps:
+                                      tx on Robinhood Chain each tick. caps:
                                       0.1 ETH or 1000 USDC per tick.
   agent autonomous list <addr>   list active recurring tasks for an agent
   agent autonomous cancel <addr> <task_id>
@@ -646,7 +650,7 @@ ${paint(c.bold, "Wallet")}
   login --new                    mint a fresh wallet + store the key
   login --key 0x...              use an existing private key
   logout                         delete the local keystore
-  wallet                         show your address + ETH/USDC balance on Base
+  wallet                         show your address + ETH/USDG balance on Robinhood Chain
   whoami                         config + version + node + wallet status
 
 ${paint(c.bold, "Decentralized messaging")}
@@ -661,7 +665,7 @@ ${paint(c.bold, "Decentralized messaging")}
   receipts                       your sent interactions
 
 ${paint(c.bold, "Tokens")}
-  send <to> <amount> <token>     build + send an EIP-1559 tx on Base mainnet
+  send <to> <amount> <token>     build + send an EIP-1559 tx on Robinhood Chain
                                  token: ETH | USDC | 0x<erc20_addr>
                                  --dry  to print the tx without broadcasting
 
@@ -698,9 +702,9 @@ ${paint(c.bold, "Daily-use")}
   verify <interaction_id>        local cryptographic re-verification of a
                                   signed agent reply — proves the server
                                   did not forge it
-  portfolio                      your token holdings on Base + watchlist
-  trending [--kind=new] [--limit=N]   hot tokens on Base via GeckoTerminal
-  token <0x address>             detailed info for a single Base token
+  portfolio                      your token holdings on Robinhood Chain + watchlist
+  trending [--kind=new] [--limit=N]   hot tokens on Robinhood Chain via GeckoTerminal
+  token <0x address>             detailed info for a single Robinhood Chain token
   watchlist                      list your bookmarked tokens
   watchlist add <0x token>       wallet-signed bookmark
   watchlist remove <0x token>    wallet-signed unbookmark
@@ -716,7 +720,7 @@ ${paint(c.bold, "Federation — signa is multi-node")}
   node use <url>                 point this CLI at a different signa node
   node sign-attestation <url>    operator helper — sign your node descriptor
                                   with your local wallet, output env vars
-  node register "<name>" <url>   permissionless on-chain registration on Base
+  node register "<name>" <url>   permissionless on-chain registration on Robinhood Chain
                                   via SignaNodeRegistry contract
   node deregister                remove your node from the on-chain registry
   node registry                  contract info + total registered nodes
@@ -777,17 +781,17 @@ ${paint(c.bold, "Other")}
 
 ${paint(c.dim, "Env:")}
   SIGNA_BASE_URL                 override the api base URL
-  SIGNA_BASE_RPC                 override the Base mainnet RPC URL
+  SIGNA_ROBINHOOD_RPC            override the Robinhood Chain mainnet RPC URL
   NO_COLOR=1                     disable ANSI color
 
 ${paint(c.dim, "Examples:")}
   signa                          # drops you into the REPL
-  signa ask "price of \\$USDC on base"
+  signa ask "price of \\$USDG on robinhood chain"
   signa login --new
   signa post "shipped a decentralized cli today"
   signa dm vitalik.eth "gm"
   signa watch                    # live tail of your inbox
-  signa send 0xrecipient... 5 USDC --dry
+  signa send 0xrecipient... 5 USDG --dry
 `.trim();
 
 async function cmdAsk(args) {
@@ -1258,7 +1262,7 @@ async function cmdWhoami() {
   out(paint(c.dim, "─".repeat(40)));
   out(paint(c.dim, "version".padEnd(20)), VERSION);
   out(paint(c.dim, "base url".padEnd(20)), base);
-  out(paint(c.dim, "base rpc".padEnd(20)), BASE_RPC);
+  out(paint(c.dim, "robinhood rpc".padEnd(20)), RH_RPC);
   out(paint(c.dim, "config".padEnd(20)), CONFIG_PATH);
   out(paint(c.dim, "node".padEnd(20)), process.version);
   if (ks?.address) {
@@ -1314,7 +1318,7 @@ async function cmdConfig(args) {
 // When other operators stand up signa nodes (open-source repo + Vercel
 // + Supabase + AGENT_RUNTIME_MASTER_KEY = ~10 min deploy), they fit in
 // here immediately. v0.13+ adds the cross-node sync worker + an on-
-// chain node registry contract on Base.
+// chain node registry contract on Robinhood Chain.
 
 /**
  * Hit a node's /api/node/info endpoint with a strict timeout so a dead
@@ -1348,7 +1352,7 @@ async function fetchNodeInfo(baseUrl, { timeoutMs = 5000 } = {}) {
 
 /**
  * Read the active node list from the on-chain SignaNodeRegistry contract
- * on Base mainnet. Returns null if the contract address is the zero
+ * on Robinhood Chain mainnet. Returns null if the contract address is the zero
  * address (not deployed yet on this build), or if the read fails — the
  * caller falls back to the hardcoded SIGNA_SEED_NODES list.
  *
@@ -1366,8 +1370,8 @@ async function fetchOnChainNodes() {
   try {
     const v = await viem();
     const client = v.createPublicClient({
-      chain: v.base,
-      transport: v.http(BASE_RPC),
+      chain: v.rhChain,
+      transport: v.http(RH_RPC),
     });
     const records = await client.readContract({
       address: SIGNA_NODE_REGISTRY,
@@ -1454,7 +1458,7 @@ async function cmdNodes() {
         paint(c.dim, " · SignaNodeRegistry at ") +
         paint(c.cyan, SIGNA_NODE_REGISTRY),
     );
-    out(paint(c.dim, "  basescan: https://basescan.org/address/" + SIGNA_NODE_REGISTRY));
+    out(paint(c.dim, "  blockscout: https://robinhoodchain.blockscout.com/address/" + SIGNA_NODE_REGISTRY));
   } else {
     out(paint(c.dim, "  source: seed list (on-chain registry empty or unreachable)"));
   }
@@ -1767,7 +1771,7 @@ async function cmdNode(args) {
   err("  signa node verify <url>                  validate URL + check operator attestation");
   err("  signa node use <url>                     point this cli at a different node");
   err("  signa node sign-attestation <url>        operator helper — sign your node descriptor");
-  err("  signa node register \"<name>\" <url>       on-chain register on Base mainnet");
+  err("  signa node register \"<name>\" <url>       on-chain register on Robinhood Chain mainnet");
   err("  signa node deregister                    on-chain deregister your node");
   err("  signa node registry                      show contract info + total registered");
   bail(2);
@@ -1832,26 +1836,26 @@ async function cmdNodeRegister(args) {
 
   const acc = await account();
   const v = await viem();
-  const pub = v.createPublicClient({ chain: v.base, transport: v.http(BASE_RPC) });
+  const pub = v.createPublicClient({ chain: v.rhChain, transport: v.http(RH_RPC) });
   const wallet = v.createWalletClient({
     account: acc.viemAccount,
-    chain: v.base,
-    transport: v.http(BASE_RPC),
+    chain: v.rhChain,
+    transport: v.http(RH_RPC),
   });
 
   // Check ETH balance — surface a clear error if the user can't afford
   // the tx instead of letting viem produce a cryptic insufficient-funds.
   const bal = await pub.getBalance({ address: acc.address });
   // 0.00005 ETH is comfortably above the ~0.00002 ETH a register tx
-  // costs at current Base gas prices.
+  // costs at current Robinhood Chain gas prices.
   const MIN = 50_000_000_000_000n; // 0.00005 ETH in wei
   if (bal < MIN) {
-    err(paint(c.red, "✗"), "wallet has insufficient ETH on Base for the register tx.");
+    err(paint(c.red, "✗"), "wallet has insufficient ETH on Robinhood Chain for the register tx.");
     err(
       paint(c.dim, "  current balance: " + (Number(bal) / 1e18).toFixed(6) + " ETH"),
     );
     err(paint(c.dim, "  need at least:  0.00005 ETH (~$0.20)"));
-    err(paint(c.dim, "  send a small amount of ETH to " + acc.address + " on Base and retry."));
+    err(paint(c.dim, "  send a small amount of ETH to " + acc.address + " on Robinhood Chain and retry."));
     bail(1);
   }
 
@@ -1875,13 +1879,13 @@ async function cmdNodeRegister(args) {
   out(paint(c.dim, "hash".padEnd(10)), paint(c.cyan, hash));
   out(
     paint(c.dim, "view".padEnd(10)),
-    "https://basescan.org/tx/" + hash,
+    "https://robinhoodchain.blockscout.com/tx/" + hash,
   );
   out(paint(c.dim, "waiting for confirmation…"));
 
   const receipt = await pub.waitForTransactionReceipt({ hash });
   if (receipt.status === "success") {
-    out(paint(c.green, "✓"), "confirmed on Base mainnet at block " + receipt.blockNumber);
+    out(paint(c.green, "✓"), "confirmed on Robinhood Chain at block " + receipt.blockNumber);
     out("");
     out(paint(c.dim, "  your node is now discoverable on-chain. anyone running"));
     out(paint(c.dim, "  `signa nodes` reads from this contract and will see you."));
@@ -1895,11 +1899,11 @@ async function cmdNodeDeregister() {
   await _ensureRegistryDeployed();
   const acc = await account();
   const v = await viem();
-  const pub = v.createPublicClient({ chain: v.base, transport: v.http(BASE_RPC) });
+  const pub = v.createPublicClient({ chain: v.rhChain, transport: v.http(RH_RPC) });
   const wallet = v.createWalletClient({
     account: acc.viemAccount,
-    chain: v.base,
-    transport: v.http(BASE_RPC),
+    chain: v.rhChain,
+    transport: v.http(RH_RPC),
   });
 
   out(paint(c.dim, "sending deregister tx to " + SIGNA_NODE_REGISTRY + "…"));
@@ -1929,7 +1933,7 @@ async function cmdNodeDeregister() {
 async function cmdNodeRegistry() {
   await _ensureRegistryDeployed();
   const v = await viem();
-  const client = v.createPublicClient({ chain: v.base, transport: v.http(BASE_RPC) });
+  const client = v.createPublicClient({ chain: v.rhChain, transport: v.http(RH_RPC) });
   const [totalOps, active] = await Promise.all([
     client.readContract({
       address: SIGNA_NODE_REGISTRY,
@@ -1945,7 +1949,7 @@ async function cmdNodeRegistry() {
   out("");
   out(paint(c.bold, "SignaNodeRegistry"));
   out(paint(c.dim, "─".repeat(64)));
-  out(paint(c.dim, "chain".padEnd(16)), paint(c.cyan, "base mainnet (8453)"));
+  out(paint(c.dim, "chain".padEnd(16)), paint(c.cyan, "robinhood chain (4663)"));
   out(paint(c.dim, "address".padEnd(16)), paint(c.cyan, SIGNA_NODE_REGISTRY));
   out(
     paint(c.dim, "operators".padEnd(16)),
@@ -1955,7 +1959,7 @@ async function cmdNodeRegistry() {
     paint(c.dim, "active".padEnd(16)),
     paint(c.green, String(active)) + paint(c.dim, " currently"),
   );
-  out(paint(c.dim, "basescan".padEnd(16)), "https://basescan.org/address/" + SIGNA_NODE_REGISTRY);
+  out(paint(c.dim, "blockscout".padEnd(16)), "https://robinhoodchain.blockscout.com/address/" + SIGNA_NODE_REGISTRY);
 }
 
 // ---------- federation: cross-node sync (v0.16) ----------
@@ -2231,17 +2235,17 @@ async function cmdWallet() {
   const acc = await account();
   const v = await viem();
 
-  // Read ETH + USDC balances directly from Base mainnet — no signa
+  // Read ETH + USDG balances directly from Robinhood Chain — no signa
   // server involved. This is the decentralization claim made literal.
   const pub = v.createPublicClient({
-    chain: v.base,
-    transport: v.http(BASE_RPC),
+    chain: v.rhChain,
+    transport: v.http(RH_RPC),
   });
 
-  const [ethRaw, usdcRaw, nonce, blockNum] = await Promise.all([
+  const [ethRaw, usdgRaw, nonce, blockNum] = await Promise.all([
     pub.getBalance({ address: acc.address }),
     pub.readContract({
-      address: USDC_BASE,
+      address: USDG_ADDRESS,
       abi: [
         {
           type: "function",
@@ -2259,10 +2263,10 @@ async function cmdWallet() {
   ]);
 
   const eth = Number(ethRaw) / 1e18;
-  const usdc = Number(usdcRaw) / 1e6;
+  const usdg = Number(usdgRaw) / 1e6;
 
   out("");
-  out(paint(c.bold, "wallet on base mainnet"));
+  out(paint(c.bold, "wallet on robinhood chain"));
   out(paint(c.dim, "─".repeat(48)));
   out(paint(c.dim, "address".padEnd(16)), paint(c.cyan, acc.address));
   out(
@@ -2271,13 +2275,13 @@ async function cmdWallet() {
     paint(c.dim, "ETH"),
   );
   out(
-    paint(c.dim, "USDC".padEnd(16)),
-    paint(c.bold, usdc.toFixed(2)),
-    paint(c.dim, "USDC"),
+    paint(c.dim, "USDG".padEnd(16)),
+    paint(c.bold, usdg.toFixed(2)),
+    paint(c.dim, "USDG"),
   );
   out(paint(c.dim, "nonce".padEnd(16)), String(nonce));
   out(paint(c.dim, "block".padEnd(16)), String(blockNum));
-  out(paint(c.dim, "rpc".padEnd(16)), BASE_RPC);
+  out(paint(c.dim, "rpc".padEnd(16)), RH_RPC);
   out("");
 }
 
@@ -3084,23 +3088,23 @@ async function cmdSend(args) {
 
   const tokenU = tokenRaw.toUpperCase();
   const isEth = tokenU === "ETH";
-  const isUsdc = tokenU === "USDC";
+  const isUsdg = tokenU === "USDG";
   const isErc20 =
-    !isEth && !isUsdc && /^0x[a-fA-F0-9]{40}$/.test(tokenRaw);
+    !isEth && !isUsdg && /^0x[a-fA-F0-9]{40}$/.test(tokenRaw);
 
-  if (!isEth && !isUsdc && !isErc20) {
+  if (!isEth && !isUsdg && !isErc20) {
     err("unknown token. use ETH, USDC, or a 0x<erc20> address.");
     bail(2);
   }
 
   const pub = v.createPublicClient({
-    chain: v.base,
-    transport: v.http(BASE_RPC),
+    chain: v.rhChain,
+    transport: v.http(RH_RPC),
   });
   const wallet = v.createWalletClient({
     account: acc.viemAccount,
-    chain: v.base,
-    transport: v.http(BASE_RPC),
+    chain: v.rhChain,
+    transport: v.http(RH_RPC),
   });
 
   out("");
@@ -3109,7 +3113,7 @@ async function cmdSend(args) {
   out(paint(c.dim, "from".padEnd(12)), paint(c.cyan, acc.address));
   out(paint(c.dim, "to".padEnd(12)), paint(c.cyan, to));
   out(paint(c.dim, "amount".padEnd(12)), paint(c.bold, String(amount)), tokenU);
-  out(paint(c.dim, "chain".padEnd(12)), `base mainnet (id ${BASE_CHAIN_ID})`);
+  out(paint(c.dim, "chain".padEnd(12)), `robinhood chain (id ${RH_CHAIN_ID})`);
 
   let hash;
   try {
@@ -3124,10 +3128,10 @@ async function cmdSend(args) {
       hash = await wallet.sendTransaction({ to, value });
     } else {
       // ERC-20 transfer
-      const erc20 = isUsdc ? USDC_BASE : v.getAddress(tokenRaw);
+      const erc20 = isUsdg ? USDG_ADDRESS : v.getAddress(tokenRaw);
       // pull decimals — required to compute the correct value
-      let decimals = isUsdc ? 6 : 18;
-      if (!isUsdc) {
+      let decimals = isUsdg ? 6 : 18;
+      if (!isUsdg) {
         try {
           decimals = Number(
             await pub.readContract({
@@ -3186,7 +3190,7 @@ async function cmdSend(args) {
   out(paint(c.dim, "hash:".padEnd(12)), paint(c.cyan, hash));
   out(
     paint(c.dim, "view:".padEnd(12)),
-    `https://basescan.org/tx/${hash}`,
+    `https://robinhoodchain.blockscout.com/tx/${hash}`,
   );
 }
 
@@ -3519,7 +3523,7 @@ async function cmdLaunch(args) {
   }
   if (positional.length < 2) {
     err('usage: launch <name> "<description>" [--tags=a,b] [--prompt="..." | --prompt-file=path]');
-    err('  e.g.  launch defi-helper "answers $TOKEN questions on base" --tags=defi,base');
+    err('  e.g.  launch defi-helper "answers $TOKEN questions on-chain" --tags=defi,agents');
     bail(2);
   }
   const name = positional[0].trim();
@@ -4009,7 +4013,7 @@ async function cmdAgentAutonomous(args) {
               paint(c.cyan, t.last_tx_hash) +
               paint(
                 c.dim,
-                "  basescan.org/tx/" + t.last_tx_hash,
+                "  robinhoodchain.blockscout.com/tx/" + t.last_tx_hash,
               ),
           );
         }
@@ -4152,8 +4156,8 @@ async function cmdAgentAutonomous(args) {
         err("--to=0x<address> is required for --kind=payment");
         bail(2);
       }
-      if (pay_token !== "ETH" && pay_token !== "USDC") {
-        err("--token=ETH or --token=USDC is required for --kind=payment");
+      if (pay_token !== "ETH" && pay_token !== "USDG") {
+        err("--token=ETH or --token=USDG is required for --kind=payment");
         bail(2);
       }
       const amountNum = Number(pay_amount);
@@ -4269,7 +4273,7 @@ async function cmdAgentAutonomous(args) {
       paint(
         c.dim,
         r.task.kind === "payment"
-          ? "  the cron will broadcast an EIP-1559 tx on Base mainnet every tick."
+          ? "  the cron will broadcast an EIP-1559 tx on Robinhood Chain every tick."
           : "  the SIGNA cron fires every minute. the first post lands at the next_run_at above.",
       ),
     );
@@ -5370,7 +5374,7 @@ async function cmdBankr(args) {
       const x = r.result;
       if (x.transactionHash) {
         out(paint(c.dim, "tx".padEnd(14)), paint(c.cyan, x.transactionHash));
-        out(paint(c.dim, "view".padEnd(14)), `https://basescan.org/tx/${x.transactionHash}`);
+        out(paint(c.dim, "view".padEnd(14)), `https://robinhoodchain.blockscout.com/tx/${x.transactionHash}`);
       }
       if (x.tokenSymbol) out(paint(c.dim, "token".padEnd(14)), x.tokenSymbol);
       if (x.amountIn) out(paint(c.dim, "in".padEnd(14)), x.amountIn);
@@ -5577,7 +5581,7 @@ async function cmdPortfolio() {
       );
     }
   } else {
-    out(paint(c.dim, "  no holdings on base mainnet (or balances are below dust threshold)"));
+    out(paint(c.dim, "  no holdings on robinhood chain (or balances are below dust threshold)"));
   }
   out("");
 }
@@ -5602,7 +5606,7 @@ async function cmdTrending(args) {
   }
   out("");
   out(
-    paint(c.bold, kind === "new" ? "new pools on base" : "trending on base"),
+    paint(c.bold, kind === "new" ? "new pools on robinhood chain" : "trending on robinhood chain"),
     paint(c.dim, `(${r.source})`),
   );
   out(paint(c.dim, "─".repeat(80)));
@@ -5637,14 +5641,14 @@ async function cmdTrending(args) {
 async function cmdToken(args) {
   const a = args[0];
   if (!a || !/^0x[a-fA-F0-9]{40}$/.test(a)) {
-    err("usage: token <0x address on Base>");
+    err("usage: token <0x address on Robinhood Chain>");
     err("  find addresses via: signa trending");
     bail(2);
   }
   const addr = a.toLowerCase();
   const r = await httpJson(`/api/tokens/${addr}`).catch(() => null);
   if (!r?.ok) {
-    err(paint(c.red, "✗"), `token ${addr} not found on Base mainnet`);
+    err(paint(c.red, "✗"), `token ${addr} not found on Robinhood Chain`);
     bail(1);
   }
   out("");
@@ -5664,7 +5668,7 @@ async function cmdToken(args) {
     out(paint(c.dim, "top pool".padEnd(16)), paint(c.dim, r.top_pool_address));
   }
   out("");
-  out(paint(c.dim, "  basescan: https://basescan.org/token/" + addr));
+  out(paint(c.dim, "  blockscout: https://robinhoodchain.blockscout.com/token/" + addr));
 }
 
 async function cmdWatchlist(args) {
@@ -5707,7 +5711,7 @@ async function cmdWatchlist(args) {
   const op = sub === "remove" || sub === "rm" ? "remove" : "add";
   const tokenAddr = (args[1] ?? "").toLowerCase();
   if (!/^0x[a-f0-9]{40}$/.test(tokenAddr)) {
-    err("token must be a 0x… address on Base");
+    err("token must be a 0x… address on Robinhood Chain");
     bail(2);
   }
   const ts = Date.now();
@@ -6345,7 +6349,7 @@ async function printBanner({ welcome = true } = {}) {
     "  " +
       rgb(VIOLET[0], VIOLET[1], VIOLET[2], "●━━●━━●━━●━━●━━●") +
       "   " +
-      rgb(DIM[0], DIM[1], DIM[2], "wallet-native messaging · base mainnet"),
+      rgb(DIM[0], DIM[1], DIM[2], "wallet-native messaging · robinhood chain"),
   );
   out(
     "  " +
@@ -6526,7 +6530,7 @@ function replCompleter(line) {
     return [hits.length ? hits : opts, last];
   }
   if (head === "send" && tokens.length === 4) {
-    const opts = ["ETH", "USDC"];
+    const opts = ["ETH", "USDG"];
     const hits = opts.filter((s) =>
       s.toUpperCase().startsWith(last.toUpperCase()),
     );
