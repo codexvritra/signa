@@ -6,13 +6,13 @@
  *   2. spend          — the agent records a spend against its mandate.
  *   3. budget request — the agent asks the human for more money.
  *
- * The point this answers (from the Base agentic-commerce debate): humans don't
+ * The point this answers (from the agentic-commerce debate): humans don't
  * fund agents because there's no safe way to — no bounded authority, no way for
  * the agent to ask, no verifiable record of what it spent. This is that rail.
  */
 
-export const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
-export const NETWORK_BASE = "eip155:8453";
+export const USDG_ROBINHOOD = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
+export const NETWORK_ROBINHOOD = "eip155:4663";
 
 export function mandatePreimage(a: {
   ts: number;
@@ -75,10 +75,10 @@ export function budgetRequestPreimage(a: {
   ].join("\n");
 }
 
-/** USDC base units -> "0.05 USDC" */
-export function usdc(raw: string): string {
+/** USDG base units -> "0.05 USDG" */
+export function usdg(raw: string): string {
   try {
-    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDC`;
+    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDG`;
   } catch {
     return `${raw}`;
   }

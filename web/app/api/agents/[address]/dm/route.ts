@@ -11,7 +11,7 @@ import {
   decodePaymentHeader,
   humanizePrice,
   verifyExactPayment,
-  type Eip3009Authorization,
+  type Permit2Authorization,
   type InboxPrice,
 } from "@/lib/x402-paid-dm";
 
@@ -222,10 +222,10 @@ export async function POST(
   // attach a valid x402 payment, the DM is flagged paid=true (priority)
   // and a payment receipt is recorded. If no/invalid payment is
   // attached, the message is STILL delivered as a normal free DM.
-  // Delivery is never blocked. SIGNA never holds funds (the EIP-3009
+  // Delivery is never blocked. SIGNA never holds funds (the Permit2
   // authorization settles out of band, permissionlessly).
   let paid = false;
-  let paymentAuthorization: Eip3009Authorization | null = null;
+  let paymentAuthorization: Permit2Authorization | null = null;
   let paymentAsset: string | null = null;
   let paymentAmountRaw: string | null = null;
   let paymentNetwork: string | null = null;
@@ -257,7 +257,7 @@ export async function POST(
         : ({ ok: false, reason: "bad_payment_header" } as const);
 
       if (result.ok) {
-        // Replay guard — each EIP-3009 nonce is single-use. A replayed
+        // Replay guard — each Permit2 nonce is single-use. A replayed
         // nonce just means "not counted as a fresh tip"; the DM still
         // delivers free.
         const nonce = result.authorization.nonce.toLowerCase();
@@ -270,7 +270,7 @@ export async function POST(
           paid = true;
           paymentAuthorization = result.authorization;
           paymentAsset = result.assetAddress;
-          paymentAmountRaw = result.authorization.value;
+          paymentAmountRaw = result.authorization.amount;
           paymentNetwork = result.network;
         }
       }

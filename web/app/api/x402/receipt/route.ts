@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { serverClient, supabase } from "@/lib/supabase";
 import { issueReceipt, type X402Terms, type X402Payment } from "@/lib/x402-receipt";
 import { verifyTransferAuthorization } from "@/lib/x402-paid-dm";
+import { RECEIPT_SERVICE_ID } from "@/lib/permit2";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,12 +11,13 @@ export const dynamic = "force-dynamic";
  * /api/x402/receipt
  *
  * Issue a SIGNA x402 receipt. The caller submits the deal: the request, the
- * terms, the buyer's EIP-3009 payment authorization (+ signature), and the
- * delivered output. We cryptographically verify the authorization recovers to
- * the buyer, then bind all four parts into one canonical envelope signed by the
- * SIGNA attestor — re-verifiable by anyone via /api/verify (kind x402_receipt).
+ * terms, the buyer's Permit2 witness-transfer payment authorization (+
+ * signature), and the delivered output. We cryptographically verify the
+ * authorization recovers to the buyer, then bind all four parts into one
+ * canonical envelope signed by the SIGNA attestor — re-verifiable by anyone
+ * via /api/verify (kind x402_receipt).
  *
- * SIGNA never settles. The EIP-3009 authorization is the payment instrument;
+ * SIGNA never settles. The Permit2 authorization is the payment instrument;
  * pulling the funds is a permissionless out-of-band step. The receipt proves
  * the agreement + the authorization + the delivery were bound together.
  *
@@ -65,32 +67,33 @@ export async function POST(req: NextRequest) {
   for (const f of ["amount", "asset", "network", "payTo"] as const) {
     if (!terms[f]) return json({ ok: false, error: `missing_terms_${f}` }, { status: 400 });
   }
-  for (const f of ["from", "to", "value", "validAfter", "validBefore", "nonce", "signature"] as const) {
+  for (const f of ["owner", "spender", "to", "token", "amount", "nonce", "deadline", "signature"] as const) {
     if (!payment[f]) return json({ ok: false, error: `missing_payment_${f}` }, { status: 400 });
   }
   if (payment.to.toLowerCase() !== terms.payTo.toLowerCase()) {
     return json({ ok: false, error: "payment_to_does_not_match_terms_payTo" }, { status: 400 });
   }
-  let value: bigint, required: bigint;
+  let amount: bigint, required: bigint;
   try {
-    value = BigInt(payment.value);
+    amount = BigInt(payment.amount);
     required = BigInt(terms.amount);
   } catch {
     return json({ ok: false, error: "invalid_amount" }, { status: 400 });
   }
-  if (value < required) return json({ ok: false, error: "underpaid" }, { status: 400 });
+  if (amount < required) return json({ ok: false, error: "underpaid" }, { status: 400 });
 
   // the core check: the buyer really authorized this exact payment
   const v = await verifyTransferAuthorization({
-    from: payment.from,
+    owner: payment.owner,
+    spender: payment.spender,
     to: payment.to,
-    value: payment.value,
-    validAfter: payment.validAfter,
-    validBefore: payment.validBefore,
+    token: payment.token,
+    amount: payment.amount,
     nonce: payment.nonce,
+    deadline: payment.deadline,
     signature: payment.signature,
-    asset: terms.asset,
     network: terms.network,
+    expectedServiceId: RECEIPT_SERVICE_ID,
   });
   if (!v.ok) return json({ ok: false, error: v.reason }, { status: 401 });
 

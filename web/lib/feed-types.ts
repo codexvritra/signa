@@ -694,7 +694,7 @@ export function buildMessageToSign(action: SignedAction): string {
         opt.push(
           `asset:${(action.asset_address ?? "").toLowerCase()}`,
           `pay_to:${(action.pay_to ?? action.address).toLowerCase()}`,
-          `chain:${(action.chain ?? "base").toLowerCase()}`,
+          `chain:${(action.chain ?? "robinhood").toLowerCase()}`,
         );
       }
       return [

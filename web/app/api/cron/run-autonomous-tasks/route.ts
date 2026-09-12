@@ -11,19 +11,18 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { base } from "viem/chains";
 import { serverClient } from "@/lib/supabase";
 import { decryptAgentKey } from "@/lib/key-vault";
 import { authorizeBearer } from "@/lib/secret-auth";
 import { buildMessageToSign } from "@/lib/feed-types";
+import { rhChain, RH_RPC } from "@/lib/chain";
 import {
   mirosharkConfigured,
   mirosharkCreateSim,
 } from "@/lib/skills/miroshark";
 
-const BASE_RPC = process.env.BASE_RPC_URL || "https://mainnet.base.org";
-// Base mainnet USDC — Coinbase's official ERC-20.
-const USDC_BASE: Address = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+// USDG (Global Dollar, Paxos) — Robinhood Chain's native stablecoin.
+const USDG_ROBINHOOD: Address = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
 const ERC20_ABI = parseAbi([
   "function transfer(address to, uint256 amount) returns (bool)",
   "function balanceOf(address owner) view returns (uint256)",
@@ -73,7 +72,7 @@ type TaskRow = {
   runs_failed: number;
   // Payment-only fields (NULL for other kinds)
   payment_to: string | null;
-  payment_token: "ETH" | "USDC" | null;
+  payment_token: "ETH" | "USDG" | null;
   payment_amount_wei: string | null;
 };
 
@@ -226,10 +225,10 @@ async function runMirosharkSimTask(
 /**
  * payment kind:
  *   1. Load + decrypt the agent's runtime key.
- *   2. Build + sign + broadcast an EIP-1559 tx on Base mainnet
+ *   2. Build + sign + broadcast an EIP-1559 tx on Robinhood Chain
  *      sending payment_amount_wei of payment_token to payment_to.
- *      ETH = native value transfer. USDC = ERC-20 transfer call to
- *      the Base mainnet USDC contract.
+ *      ETH = native value transfer. USDG = ERC-20 transfer call to
+ *      the Robinhood Chain USDG contract.
  *   3. Pre-flight balance check — abort cleanly with insufficient_balance
  *      if the agent can't cover the spend. The task is not auto-cancelled
  *      so the operator can refund + retry.
@@ -273,17 +272,17 @@ async function runPaymentTask(
   const to = task.payment_to.toLowerCase() as Address;
 
   const pub = createPublicClient({
-    chain: base,
-    transport: http(BASE_RPC),
+    chain: rhChain,
+    transport: http(RH_RPC),
   });
   const wallet = createWalletClient({
     account,
-    chain: base,
-    transport: http(BASE_RPC),
+    chain: rhChain,
+    transport: http(RH_RPC),
   });
 
   // Pre-flight balance check. For ETH, native balance must cover
-  // (amount + estimated gas). For USDC, token balance must cover amount;
+  // (amount + estimated gas). For USDG, token balance must cover amount;
   // gas is paid in ETH from the agent's wallet.
   try {
     if (task.payment_token === "ETH") {
@@ -295,19 +294,19 @@ async function runPaymentTask(
         };
       }
     } else {
-      const [usdcBal, ethBal] = await Promise.all([
+      const [usdgBal, ethBal] = await Promise.all([
         pub.readContract({
-          address: USDC_BASE,
+          address: USDG_ROBINHOOD,
           abi: ERC20_ABI,
           functionName: "balanceOf",
           args: [account.address],
         }) as Promise<bigint>,
         pub.getBalance({ address: account.address }),
       ]);
-      if (usdcBal < amountWei) {
+      if (usdgBal < amountWei) {
         return {
           ok: false,
-          error: `insufficient_usdc_balance_${usdcBal}_lt_${amountWei}`,
+          error: `insufficient_usdg_balance_${usdgBal}_lt_${amountWei}`,
         };
       }
       // ERC-20 transfer needs gas in ETH — sanity-check a tiny minimum.
@@ -341,7 +340,7 @@ async function runPaymentTask(
         args: [to, amountWei],
       });
       txHash = await wallet.sendTransaction({
-        to: USDC_BASE,
+        to: USDG_ROBINHOOD,
         data,
       });
     }
@@ -357,11 +356,11 @@ async function runPaymentTask(
   const human =
     task.payment_token === "ETH"
       ? `${formatEther(amountWei)} ETH`
-      : `${formatUnits(amountWei, 6)} USDC`;
+      : `${formatUnits(amountWei, 6)} USDG`;
   const memo = task.prompt ? ` — memo: ${task.prompt}` : "";
   const auditBody =
-    `sent ${human} to ${to} on Base mainnet · ` +
-    `tx ${txHash} · https://basescan.org/tx/${txHash}${memo}`;
+    `sent ${human} to ${to} on Robinhood Chain · ` +
+    `tx ${txHash} · https://robinhoodchain.blockscout.com/tx/${txHash}${memo}`;
   const audit = await signAndInsertPost(
     db,
     account,

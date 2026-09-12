@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import { keccak256, toBytes } from "viem";
-import { mandatePreimage, USDC_BASE, NETWORK_BASE } from "@/lib/mandate";
+import { mandatePreimage, USDG_ROBINHOOD, NETWORK_ROBINHOOD } from "@/lib/mandate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,11 +11,12 @@ export const maxDuration = 60;
  * POST /api/brain/demo — the metered brain, live.
  *
  * A human grants the SIGNA brain a one-run budget. The brain reasons toward a
- * goal and pays for its OWN inference within that budget — a real EIP-3009
- * USDC-on-Base authorization, a verifiable x402 receipt, a capped spend. The
- * budget is now empty, so the next run stops and the brain wallet-signs a
- * request for more. The brain holds no funds; SIGNA enforces the cap. Every
- * step is a real signature; nothing is broadcast.
+ * goal and pays for its OWN inference within that budget — a real Permit2
+ * witness-transfer USDG-on-Robinhood-Chain authorization, a verifiable x402
+ * receipt, a capped spend. The budget is now empty, so the next run stops
+ * and the brain wallet-signs a request for more. The brain holds no funds;
+ * SIGNA enforces the cap. Every step is a real signature; nothing is
+ * broadcast.
  */
 const CORS = {
   "access-control-allow-origin": "*",
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
   const origin = req.nextUrl.origin;
   const human = privateKeyToAccount(generatePrivateKey());
   const grantor = human.address.toLowerCase();
-  const LIMIT = "100000"; // 0.10 USDC budget
+  const LIMIT = "100000"; // 0.10 USDG budget
   const PERTX = "50000"; // 0.05 per-purchase cap
   const goal = "Fetch the premium market-data capability and give a one-line read.";
 
@@ -50,12 +51,12 @@ export async function POST(req: NextRequest) {
   const expiry = Math.floor(Date.now() / 1000) + 3600;
   const ts = Date.now();
   const sig = await human.signMessage({
-    message: mandatePreimage({ ts, grantor, agent: brainAddr, asset: USDC_BASE, network: NETWORK_BASE, limit: LIMIT, perTx: PERTX, expiry, memo: "brain working budget" }),
+    message: mandatePreimage({ ts, grantor, agent: brainAddr, asset: USDG_ROBINHOOD, network: NETWORK_ROBINHOOD, limit: LIMIT, perTx: PERTX, expiry, memo: "brain working budget" }),
   });
-  const m = await post("/api/mandates", { grantor, agent: brainAddr, asset: USDC_BASE, network: NETWORK_BASE, limit: LIMIT, per_tx: PERTX, expiry, memo: "brain working budget", ts, signature: sig });
+  const m = await post("/api/mandates", { grantor, agent: brainAddr, asset: USDG_ROBINHOOD, network: NETWORK_ROBINHOOD, limit: LIMIT, per_tx: PERTX, expiry, memo: "brain working budget", ts, signature: sig });
   if (!m.ok) return NextResponse.json({ ok: false, error: `mandate: ${m.error}` }, { status: 500, headers: CORS });
   const mandateId = m.mandate.id;
-  steps.push({ who: "human", text: `granted the brain a ${usd(LIMIT)} USDC budget (max ${usd(PERTX)} per purchase)`, status: "grant" });
+  steps.push({ who: "human", text: `granted the brain a ${usd(LIMIT)} USDG budget (max ${usd(PERTX)} per purchase)`, status: "grant" });
 
   // 2) the brain reasons, pays for its own inference, and buys a priced
   //    service — all within the budget. Directed at the demo priced cap.
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
   if (s?.ok) {
     steps.push({
       who: "brain",
-      text: `reasoned and paid ${usd(s.paid_raw)} USDC for its own inference · x402 receipt ✓`,
+      text: `reasoned and paid ${usd(s.paid_raw)} USDG for its own inference · x402 receipt ✓`,
       status: "ok",
       link: s.receipt_id ? `/x402/${s.receipt_id}` : undefined,
     });
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
     const left = caps[caps.length - 1].remaining_raw;
     steps.push({
       who: "brain",
-      text: `bought premium data — ${usd(total)} USDC paid to the provider${caps.length > 1 ? ` (${caps.length}×)` : ""}, within budget · ${usd(left)} left`,
+      text: `bought premium data — ${usd(total)} USDG paid to the provider${caps.length > 1 ? ` (${caps.length}×)` : ""}, within budget · ${usd(left)} left`,
       status: "buy",
     });
   }

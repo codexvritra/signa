@@ -99,7 +99,7 @@ export async function POST(
   // Payment-specific validation. Reject early before we touch the DB.
   // payment_amount_wei is a string to preserve precision (>2^53).
   let payment_to: `0x${string}` | null = null;
-  let payment_token: "ETH" | "USDC" | null = null;
+  let payment_token: "ETH" | "USDG" | null = null;
   let payment_amount_wei: bigint | null = null;
   if (task_kind === "payment") {
     const to = (body.payment_to ?? "").trim();
@@ -111,9 +111,9 @@ export async function POST(
         { status: 400 },
       );
     }
-    if (token !== "ETH" && token !== "USDC") {
+    if (token !== "ETH" && token !== "USDG") {
       return NextResponse.json(
-        { error: "invalid_payment_token_must_be_ETH_or_USDC" },
+        { error: "invalid_payment_token_must_be_ETH_or_USDG" },
         { status: 400 },
       );
     }
@@ -131,12 +131,12 @@ export async function POST(
         { status: 400 },
       );
     }
-    // Hard cap per-tick spend: 0.1 ETH or 1000 USDC. Caps are
+    // Hard cap per-tick spend: 0.1 ETH or 1000 USDG. Caps are
     // unconditional protection against a compromised launcher signing
     // an excessive envelope. Operators who need higher limits can edit
     // these constants per deployment.
     const MAX_ETH_WEI = 100_000_000_000_000_000n; // 0.1 ETH
-    const MAX_USDC_RAW = 1_000_000_000n; // 1000 USDC (6 decimals)
+    const MAX_USDG_RAW = 1_000_000_000n; // 1000 USDG (6 decimals)
     if (token === "ETH" && payment_amount_wei > MAX_ETH_WEI) {
       return NextResponse.json(
         {
@@ -146,11 +146,11 @@ export async function POST(
         { status: 400 },
       );
     }
-    if (token === "USDC" && payment_amount_wei > MAX_USDC_RAW) {
+    if (token === "USDG" && payment_amount_wei > MAX_USDG_RAW) {
       return NextResponse.json(
         {
           error: "payment_amount_exceeds_per_tick_cap",
-          hint: "max 1000 USDC per tick on this deployment.",
+          hint: "max 1000 USDG per tick on this deployment.",
         },
         { status: 400 },
       );

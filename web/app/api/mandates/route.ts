@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient, supabase } from "@/lib/supabase";
 import { verifySignedMessage } from "@/lib/verify-signature";
-import { mandatePreimage, USDC_BASE, NETWORK_BASE } from "@/lib/mandate";
+import { mandatePreimage, USDG_ROBINHOOD, NETWORK_ROBINHOOD } from "@/lib/mandate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
   }
   const grantor = String(b.grantor ?? "").toLowerCase();
   const agent = String(b.agent ?? "").toLowerCase();
-  const asset = String(b.asset ?? USDC_BASE).toLowerCase();
-  const network = String(b.network ?? NETWORK_BASE);
+  const asset = String(b.asset ?? USDG_ROBINHOOD).toLowerCase();
+  const network = String(b.network ?? NETWORK_ROBINHOOD);
   const limit = String(b.limit ?? "");
   const perTx = String(b.per_tx ?? "");
   const expiry = Number(b.expiry ?? 0);

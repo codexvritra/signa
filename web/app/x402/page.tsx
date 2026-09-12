@@ -6,20 +6,20 @@ import { SITE } from "@/lib/miniapp";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "x402 Receipts — proof for agentic commerce on Base",
+  title: "x402 Receipts — proof for agentic commerce on Robinhood Chain",
   description:
-    "x402 moves the money. SIGNA proves the deal: every agent payment wrapped in a wallet-signed, re-verifiable receipt binding request, terms, the x402 authorization, and delivery — on Base.",
+    "x402 moves the money. SIGNA proves the deal: every agent payment wrapped in a wallet-signed, re-verifiable receipt binding request, terms, the x402 authorization, and delivery — on Robinhood Chain.",
   openGraph: {
     title: "x402 moves the money. SIGNA proves the deal.",
     description:
-      "The verifiable receipt layer for agentic commerce on Base. Bind request → terms → x402 payment → delivery into one signed, re-verifiable envelope.",
+      "The verifiable receipt layer for agentic commerce on Robinhood Chain. Bind request → terms → x402 payment → delivery into one signed, re-verifiable envelope.",
     url: `${SITE}/x402`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "x402 moves the money. SIGNA proves the deal.",
-    description: "The verifiable receipt layer for agentic commerce on Base.",
+    description: "The verifiable receipt layer for agentic commerce on Robinhood Chain.",
   },
 };
 
@@ -35,7 +35,7 @@ type Receipt = {
 const short = (a: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
 const usdc = (raw: string) => {
   try {
-    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDC`;
+    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDG`;
   } catch {
     return raw;
   }
@@ -54,7 +54,7 @@ async function recent(): Promise<Receipt[]> {
 const STEPS = [
   { k: "1", t: "Request", d: "A buyer agent asks another agent for something — data, compute, a service.", c: "#5b8def" },
   { k: "2", t: "Terms", d: "The seller answers with an HTTP 402: price, asset, payTo — the x402 challenge.", c: "#8b5cf6" },
-  { k: "3", t: "Payment", d: "The buyer signs an EIP-3009 USDC authorization on Base. The auth is the instrument.", c: "#5b8def" },
+  { k: "3", t: "Payment", d: "The buyer signs a Permit2 witness-transfer USDG authorization on Robinhood Chain. The auth is the instrument.", c: "#5b8def" },
   { k: "4", t: "Delivery", d: "The seller delivers. SIGNA binds all four into one signed, re-verifiable receipt.", c: "#8b5cf6" },
 ];
 
@@ -65,7 +65,7 @@ export default async function X402Page() {
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[900px] mx-auto px-5 py-10 sm:py-14">
         {/* hero */}
-        <div className="text-[12px] uppercase tracking-[0.18em] text-faint">agentic commerce · on Base</div>
+        <div className="text-[12px] uppercase tracking-[0.18em] text-faint">agentic commerce · on Robinhood Chain</div>
         <h1 className="font-display text-[34px] sm:text-[46px] leading-[1.05] font-bold mt-3 tracking-tight">
           x402 moves the money.
           <br />
@@ -75,7 +75,7 @@ export default async function X402Page() {
           Over 100M agent payments have settled through x402 on Base. But x402 proves money moved — not{" "}
           <em>what was agreed</em>. SIGNA wraps every payment in a wallet-signed, re-verifiable receipt
           that binds the <b>request</b>, the <b>terms</b>, the <b>x402 authorization</b>, and the{" "}
-          <b>delivery</b> into one envelope anyone can check on Base. Forever.
+          <b>delivery</b> into one envelope anyone can check on Robinhood Chain. Forever.
         </p>
 
         {/* how it works */}
@@ -103,7 +103,7 @@ export default async function X402Page() {
         {receipts.length > 0 && (
           <div className="mt-10">
             <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">
-              recent receipts on Base
+              recent receipts on Robinhood Chain
             </div>
             <div className="flex flex-col gap-2">
               {receipts.map((r) => (
@@ -160,7 +160,7 @@ const v = await verifyReceipt(await getReceipt(id));
 
         {/* honest footer */}
         <div className="mt-10 pt-6 border-t border-white/[0.06] text-[12px] text-faint leading-relaxed">
-          SIGNA never settles or custodies funds. The EIP-3009 authorization is the payment instrument;
+          SIGNA never settles or custodies funds. The Permit2 authorization is the payment instrument;
           pulling the funds is the permissionless x402 step, done out of band. A receipt proves the
           agreement, the cryptographic payment authorization, and the delivery were bound together and
           signed — it is provenance, not a settlement guarantee.

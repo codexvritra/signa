@@ -3,11 +3,14 @@ import { serverClient, supabase } from "@/lib/supabase";
 import { verifySignedMessage } from "@/lib/verify-signature";
 import { buildMessageToSign } from "@/lib/feed-types";
 import {
-  EIP3009_TOKENS,
-  DEFAULT_ASSET_BASE_USDC,
+  DEFAULT_ASSET_USDG,
   humanizePrice,
   type InboxPrice,
 } from "@/lib/x402-paid-dm";
+import { RH_CHAIN_ID } from "@/lib/chain";
+
+/** v0.84 supports pricing in USDG only (Robinhood Chain's native stablecoin). */
+const SUPPORTED_ASSET = { address: DEFAULT_ASSET_USDG, symbol: "USDG", decimals: 6 };
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,7 +80,7 @@ export async function GET(
       asset_decimals: price.asset_decimals,
       chain: price.chain,
       human_price: humanizePrice(price),
-      network: price.chain === "base" ? "eip155:8453" : "eip155:84532",
+      network: `eip155:${RH_CHAIN_ID}`,
       // re-verifiable: the signed envelope that set this price
       signature: price.signature,
       signed_message: price.signed_message,
@@ -135,14 +138,14 @@ export async function POST(
 
   const isClear = price_raw === "0";
 
-  // Defaults: USDC on Base, payTo = the wallet itself.
+  // Defaults: USDG on Robinhood Chain, payTo = the wallet itself.
   const asset_address = isClear
-    ? DEFAULT_ASSET_BASE_USDC
-    : String(body.asset_address ?? DEFAULT_ASSET_BASE_USDC).toLowerCase();
+    ? DEFAULT_ASSET_USDG
+    : String(body.asset_address ?? DEFAULT_ASSET_USDG).toLowerCase();
   const pay_to = isClear
     ? address
     : String(body.pay_to ?? address).toLowerCase();
-  const chain = isClear ? "base" : String(body.chain ?? "base").toLowerCase();
+  const chain = isClear ? "robinhood" : String(body.chain ?? "robinhood").toLowerCase();
 
   if (!isClear) {
     if (!/^0x[a-f0-9]{40}$/.test(asset_address)) {
@@ -157,19 +160,19 @@ export async function POST(
         { status: 400, headers: CORS },
       );
     }
-    if (!EIP3009_TOKENS[asset_address]) {
+    if (asset_address !== SUPPORTED_ASSET.address) {
       return NextResponse.json(
         {
           ok: false,
           error: "unsupported_asset",
-          hint: "v0.84 supports EIP-3009 tokens with a known EIP-712 domain (USDC on Base). More coming.",
+          hint: "v0.84 supports USDG on Robinhood Chain only. More coming.",
         },
         { status: 400, headers: CORS },
       );
     }
-    if (chain !== "base") {
+    if (chain !== "robinhood") {
       return NextResponse.json(
-        { ok: false, error: "unsupported_chain", hint: "base only in v0.84" },
+        { ok: false, error: "unsupported_chain", hint: "robinhood only in v0.84" },
         { status: 400, headers: CORS },
       );
     }
@@ -216,7 +219,6 @@ export async function POST(
     );
   }
 
-  const token = EIP3009_TOKENS[asset_address];
   const { data, error: upErr } = await db
     .from("signa_dm_pricing")
     .upsert(
@@ -225,8 +227,8 @@ export async function POST(
         price_raw,
         pay_to,
         asset_address,
-        asset_symbol: token.symbol,
-        asset_decimals: token.decimals,
+        asset_symbol: SUPPORTED_ASSET.symbol,
+        asset_decimals: SUPPORTED_ASSET.decimals,
         chain,
         ts,
         signature,

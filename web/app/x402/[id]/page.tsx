@@ -7,9 +7,9 @@ import { SITE, miniAppEmbedMeta } from "@/lib/miniapp";
 export const dynamic = "force-dynamic";
 
 const short = (a: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a || "—");
-const usdc = (raw: string) => {
+const usdg = (raw: string) => {
   try {
-    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDC`;
+    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDG`;
   } catch {
     return raw;
   }
@@ -57,7 +57,7 @@ export async function generateMetadata({
   const r = await load(id);
   const img = `${SITE}/api/og/x402/${id}`;
   if (!r) return { title: "receipt not found · SIGNA" };
-  const title = `x402 receipt · ${usdc(r.amount)} on Base`;
+  const title = `x402 receipt · ${usdg(r.amount)} on Robinhood Chain`;
   const desc = `${r.request?.item ?? "agent purchase"} — request, terms, x402 payment, and delivery bound into one verifiable receipt.`;
   return {
     title,
@@ -101,7 +101,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         </div>
 
         <div className="mt-6 flex items-baseline justify-between">
-          <h1 className="font-display text-[24px] font-bold tracking-tight">{usdc(r.amount)} on Base</h1>
+          <h1 className="font-display text-[24px] font-bold tracking-tight">{usdg(r.amount)} on Robinhood Chain</h1>
           <div className="text-[12px] text-faint font-mono">{r.network}</div>
         </div>
         <div className="text-[14px] text-muted mt-1">{r.request?.item ?? "agent purchase"}</div>
@@ -112,11 +112,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <div className="mt-1 text-[11px] text-faint font-mono">buyer {short(r.buyer)}</div>
           </Row>
           <Row label="2 · terms" c="#8b5cf6">
-            <div className="text-[13px]">{r.terms?.description ?? usdc(r.amount)}</div>
+            <div className="text-[13px]">{r.terms?.description ?? usdg(r.amount)}</div>
             <div className="mt-1 text-[11px] text-faint font-mono">payTo {short(r.seller)}</div>
           </Row>
           <Row label="3 · x402 payment" c="#5b8def">
-            <div className="text-[13px]">EIP-3009 authorization ✓ verified</div>
+            <div className="text-[13px]">Permit2 witness-transfer authorization ✓ verified</div>
             <div className="mt-1 text-[11px] text-faint font-mono break-all">sig {short(r.payment?.signature ?? "")}</div>
           </Row>
           <Row label="4 · delivery" c="#8b5cf6">
@@ -128,13 +128,13 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         <div className="glass rounded-2xl p-4 mt-4 text-[12px] text-faint font-mono flex flex-col gap-1.5">
           <div>
             buyer:{" "}
-            <a href={`https://basescan.org/address/${r.buyer}`} target="_blank" rel="noreferrer" className="text-[#a5c3ff] hover:underline">
+            <a href={`https://robinhoodchain.blockscout.com/address/${r.buyer}`} target="_blank" rel="noreferrer" className="text-[#a5c3ff] hover:underline">
               {r.buyer}
             </a>
           </div>
           <div>
             seller:{" "}
-            <a href={`https://basescan.org/address/${r.seller}`} target="_blank" rel="noreferrer" className="text-[#a5c3ff] hover:underline">
+            <a href={`https://robinhoodchain.blockscout.com/address/${r.seller}`} target="_blank" rel="noreferrer" className="text-[#a5c3ff] hover:underline">
               {r.seller}
             </a>
           </div>

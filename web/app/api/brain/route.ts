@@ -4,7 +4,11 @@ import { keccak256, toBytes, getAddress } from "viem";
 import { createHash, randomBytes } from "node:crypto";
 import { CAPABILITY_CATALOG, fulfillCapability } from "@/lib/capabilities";
 import { listRegistered, callRegistered, type RegisteredCapability } from "@/lib/marketplace";
-import { spendPreimage, budgetRequestPreimage, USDC_BASE, NETWORK_BASE } from "@/lib/mandate";
+import { spendPreimage, budgetRequestPreimage, USDG_ROBINHOOD, NETWORK_ROBINHOOD } from "@/lib/mandate";
+import { permit2Domain, PERMIT2_WITNESS_TYPES, buildPermit2WitnessMessage, RECEIPT_SERVICE_ID, serviceId } from "@/lib/permit2";
+import { RH_CHAIN_ID } from "@/lib/chain";
+
+const CAPABILITY_SERVICE_ID = serviceId("capability");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -96,24 +100,14 @@ async function resolveAddr(origin: string, id: string): Promise<string | null> {
 // The brain runs on paid, decentralized inference; it holds no funds of its own.
 // When a human grants it a bounded mandate (agent = the brain's address), the
 // brain pays per reasoning run for its own compute: it signs a REAL EIP-3009
-// USDC-on-Base authorization -> SIGNA issues a verifiable x402 receipt -> the
+// USDG-on-Robinhood-Chain authorization -> SIGNA issues a verifiable x402 receipt -> the
 // spend is recorded against the mandate, capped per-run and in total. When the
 // budget is exhausted the brain STOPS (it won't burn compute it can't pay for)
 // and wallet-signs a request for more. The model decides; SIGNA enforces the
 // cap and proves the spend. Nothing is broadcast.
-const COMPUTE = privateKeyToAccount(keccak256(toBytes("signa:inference:v1"))).address.toLowerCase();
-const INFERENCE_PRICE = "10000"; // 0.01 USDC per reasoning run
-const TW_TYPES = {
-  TransferWithAuthorization: [
-    { name: "from", type: "address" },
-    { name: "to", type: "address" },
-    { name: "value", type: "uint256" },
-    { name: "validAfter", type: "uint256" },
-    { name: "validBefore", type: "uint256" },
-    { name: "nonce", type: "bytes32" },
-  ],
-} as const;
-// truthful USDC formatting: 2 decimals minimum, but keep sub-cent precision so
+const COMPUTE = privateKeyToAccount(keccak256(toBytes("signa:inference:v1"))).address.toLowerCase() as `0x${string}`;
+const INFERENCE_PRICE = "10000"; // 0.01 USDG per reasoning run
+// truthful USDG formatting: 2 decimals minimum, but keep sub-cent precision so
 // "0.005 left" never rounds up to read like "0.01 left" next to a 0.01 price.
 const usd = (raw: string) => {
   try {
@@ -138,33 +132,43 @@ async function lookupMandate(origin: string, mandateId: string): Promise<Mandate
   }
 }
 
-// the brain signs a real EIP-3009 USDC auth for its compute -> x402 receipt
+// the brain signs a real Permit2 witness-transfer USDG auth for its compute -> x402 receipt
 async function mintComputeReceipt(origin: string, amount: string): Promise<string | null> {
   try {
     const nowSec = Math.floor(Date.now() / 1000);
-    const auth = {
-      from: brain.address,
-      to: COMPUTE as `0x${string}`,
-      value: amount,
-      validAfter: String(nowSec - 60),
-      validBefore: String(nowSec + 3600),
-      nonce: ("0x" + randomBytes(32).toString("hex")) as `0x${string}`,
-    };
-    const signature = await brain.signTypedData({
-      domain: { name: "USD Coin", version: "2", chainId: 8453, verifyingContract: USDC_BASE as `0x${string}` },
-      types: TW_TYPES,
-      primaryType: "TransferWithAuthorization",
-      message: {
-        from: auth.from, to: auth.to, value: BigInt(auth.value),
-        validAfter: BigInt(auth.validAfter), validBefore: BigInt(auth.validBefore), nonce: auth.nonce,
-      },
+    const nonce = BigInt("0x" + randomBytes(32).toString("hex"));
+    const deadline = BigInt(nowSec + 3600);
+    const message = buildPermit2WitnessMessage({
+      token: USDG_ROBINHOOD as `0x${string}`,
+      amount: BigInt(amount),
+      spender: COMPUTE, // recipient redeems its own payment
+      nonce,
+      deadline,
+      to: COMPUTE,
+      serviceId: RECEIPT_SERVICE_ID,
     });
+    const signature = await brain.signTypedData({
+      domain: permit2Domain(RH_CHAIN_ID),
+      types: PERMIT2_WITNESS_TYPES,
+      primaryType: "PermitWitnessTransferFrom",
+      message,
+    });
+    const payment = {
+      owner: brain.address,
+      spender: COMPUTE,
+      to: COMPUTE,
+      token: USDG_ROBINHOOD,
+      amount,
+      nonce: nonce.toString(),
+      deadline: deadline.toString(),
+      signature,
+    };
     const r = await (await fetch(`${origin}/api/x402/receipt`, {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({
         request: { item: "SIGNA brain inference", buyer_agent: brain.address.toLowerCase() },
-        terms: { amount, asset: USDC_BASE, network: NETWORK_BASE, payTo: COMPUTE },
-        payment: { ...auth, signature },
+        terms: { amount, asset: USDG_ROBINHOOD, network: NETWORK_ROBINHOOD, payTo: COMPUTE },
+        payment,
         output: { delivered: true, item: "inference" },
       }),
     })).json();
@@ -188,29 +192,39 @@ async function payForCompute(origin: string, mandateId: string, amount: string, 
   return { ...r, receiptId };
 }
 
-// build an x402 "exact" payment header: the brain signs an EIP-3009 USDC auth
-// to the provider so it can pay for a priced capability through the gateway.
+// build an x402 "exact" payment header: the brain signs a Permit2
+// witness-transfer USDG auth to the provider so it can pay for a priced
+// capability through the gateway.
 async function buildPaymentHeader(payTo: string, amount: string): Promise<string> {
   const nowSec = Math.floor(Date.now() / 1000);
   const to = getAddress(payTo);
-  const auth = {
-    from: brain.address,
+  const nonce = BigInt("0x" + randomBytes(32).toString("hex"));
+  const deadline = BigInt(nowSec + 3600);
+  const message = buildPermit2WitnessMessage({
+    token: USDG_ROBINHOOD as `0x${string}`,
+    amount: BigInt(amount),
+    spender: to, // recipient (the capability provider) redeems its own payment
+    nonce,
+    deadline,
     to,
-    value: amount,
-    validAfter: String(nowSec - 60),
-    validBefore: String(nowSec + 3600),
-    nonce: ("0x" + randomBytes(32).toString("hex")) as `0x${string}`,
-  };
-  const signature = await brain.signTypedData({
-    domain: { name: "USD Coin", version: "2", chainId: 8453, verifyingContract: USDC_BASE as `0x${string}` },
-    types: TW_TYPES,
-    primaryType: "TransferWithAuthorization",
-    message: {
-      from: auth.from, to: auth.to, value: BigInt(auth.value),
-      validAfter: BigInt(auth.validAfter), validBefore: BigInt(auth.validBefore), nonce: auth.nonce,
-    },
+    serviceId: CAPABILITY_SERVICE_ID,
   });
-  const payload = { x402Version: 2, scheme: "exact", network: NETWORK_BASE, payload: { signature, authorization: auth } };
+  const signature = await brain.signTypedData({
+    domain: permit2Domain(RH_CHAIN_ID),
+    types: PERMIT2_WITNESS_TYPES,
+    primaryType: "PermitWitnessTransferFrom",
+    message,
+  });
+  const authorization = {
+    owner: brain.address,
+    spender: to,
+    to,
+    token: USDG_ROBINHOOD,
+    amount,
+    nonce: nonce.toString(),
+    deadline: deadline.toString(),
+  };
+  const payload = { x402Version: 2, scheme: "exact", network: NETWORK_ROBINHOOD, payload: { signature, authorization } };
   return Buffer.from(JSON.stringify(payload)).toString("base64");
 }
 
@@ -268,8 +282,8 @@ async function run(
         const requestId = await askForBudget(origin, mandate.grantor, "50000", goal.slice(0, 80));
         const ts = Date.now();
         const answer =
-          `I've spent the budget you granted me — only ${usd(remaining)} USDC is left and each reasoning run costs ${usd(INFERENCE_PRICE)}. ` +
-          `I've wallet-signed a request for 0.05 USDC more so I can keep working. Approve it and I'll finish the job.`;
+          `I've spent the budget you granted me — only ${usd(remaining)} USDG is left and each reasoning run costs ${usd(INFERENCE_PRICE)}. ` +
+          `I've wallet-signed a request for 0.05 USDG more so I can keep working. Approve it and I'll finish the job.`;
         const answerHash = createHash("sha256").update(answer).digest("hex");
         const preimage = ["SIGNA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:`, `answer:${answerHash}`].join("\n");
         const signature = await brain.signMessage({ message: preimage });
@@ -307,7 +321,7 @@ async function run(
   const regByName = new Map(registered.map((r) => [r.name, r] as const));
   const allowed = new Set<string>([...CAPABILITY_CATALOG.map((c) => c.name), ...regByName.keys()]);
   const regDoc = registered
-    .map((r) => `- ${r.name}(arg): ${r.description} [community${r.price_usdc > 0 ? `, ${r.price_usdc} USDC` : ""}]`)
+    .map((r) => `- ${r.name}(arg): ${r.description} [community${r.price_usdc > 0 ? `, ${r.price_usdc} USDG` : ""}]`)
     .join("\n");
   const toolsDoc = regDoc ? `${BUILTIN_DOC}\n${regDoc}` : BUILTIN_DOC;
 
@@ -334,7 +348,7 @@ async function run(
     const amount = BigInt(Math.round(rec.price_usdc * 1e6)).toString();
     const payTo = (rec.pay_to ?? rec.provider_address).toLowerCase();
     const sp = await spendFromMandate(amount, `cap:${cap}`);
-    if (!sp?.ok) throw new Error(`over budget for ${cap}: ${usd(sp?.remaining_raw ?? "0")} USDC left, needs ${usd(amount)}`);
+    if (!sp?.ok) throw new Error(`over budget for ${cap}: ${usd(sp?.remaining_raw ?? "0")} USDG left, needs ${usd(amount)}`);
     const header = await buildPaymentHeader(payTo, amount);
     const r = await fetch(`${origin}/api/capabilities/invoke?cap=${encodeURIComponent(cap)}&arg=${encodeURIComponent(arg)}`, { headers: { "x-payment": header } });
     const j = await r.json();
@@ -405,9 +419,9 @@ async function run(
 
   const capsPaidRaw = paidCaps.reduce((s, c) => s + BigInt(c.paid_raw), 0n).toString();
   const note = spend?.ok
-    ? `This run was paid from a bounded mandate: ${usd(INFERENCE_PRICE)} USDC for inference` +
+    ? `This run was paid from a bounded mandate: ${usd(INFERENCE_PRICE)} USDG for inference` +
       `${spend.receipt_id ? ` (x402 receipt ${spend.receipt_id})` : ""}` +
-      `${paidCaps.length ? ` + ${usd(capsPaidRaw)} USDC for ${paidCaps.length} priced capabilit${paidCaps.length === 1 ? "y" : "ies"} (${paidCaps.map((c) => c.cap).join(", ")})` : ""}. ` +
+      `${paidCaps.length ? ` + ${usd(capsPaidRaw)} USDG for ${paidCaps.length} priced capabilit${paidCaps.length === 1 ? "y" : "ies"} (${paidCaps.map((c) => c.cap).join(", ")})` : ""}. ` +
       `The brain holds no funds of its own — a human granted the budget; SIGNA enforced the per-tx + total caps and proved every spend. The model decides; it cannot spend past the cap.`
     : "The brain reasons on decentralized inference, acts through the SIGNA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.";
 
@@ -448,7 +462,7 @@ export async function GET(req: NextRequest) {
   const reportTo = sp.get("report_to") ?? "";
   const mandateId = sp.get("mandate_id") ?? "";
   const use = (sp.get("use") ?? "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 3);
-  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the base market doing&report_to=@handle&remember=1&mandate_id=<uuid>&use=demo.premium:base" }, { status: 400, headers: CORS });
+  if (!goal || goal.length < 2) return NextResponse.json({ ok: false, error: "missing_goal", hint: "?goal=what is the market doing&report_to=@handle&remember=1&mandate_id=<uuid>&use=demo.premium:base" }, { status: 400, headers: CORS });
   try {
     return NextResponse.json(await run(goal, req.nextUrl.origin, { remember, reportTo: reportTo || undefined, mandateId: mandateId || undefined, use: use.length ? use : undefined }), { headers: CORS });
   } catch (e) {

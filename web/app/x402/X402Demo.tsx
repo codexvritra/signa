@@ -5,9 +5,9 @@ import { useState } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const short = (a: string) => (a && a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
-const usdc = (raw: string) => {
+const usdg = (raw: string) => {
   try {
-    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDC`;
+    return `${(Number(BigInt(raw)) / 1e6).toFixed(2)} USDG`;
   } catch {
     return `${raw}`;
   }
@@ -43,7 +43,7 @@ export function X402Demo() {
         <div>
           <div className="text-[15px] font-semibold">Run a live receipt</div>
           <div className="text-[13px] text-muted mt-0.5">
-            Generates a real EIP-3009 USDC authorization on Base, then issues a signed receipt for it.
+            Generates a real Permit2 witness-transfer USDG authorization on Robinhood Chain, then issues a signed receipt for it.
             Nothing is broadcast — no funds move.
           </div>
         </div>
@@ -65,11 +65,11 @@ export function X402Demo() {
             <div className="mt-1 text-[11px] text-faint font-mono">buyer {short(receipt.buyer)}</div>
           </Part>
           <Part label="2 · terms" tone="violet">
-            <div className="text-[13px]">{usdc(receipt.amount)} on Base</div>
+            <div className="text-[13px]">{usdg(receipt.amount)} on Robinhood Chain</div>
             <div className="mt-1 text-[11px] text-faint font-mono">to {short(receipt.seller)}</div>
           </Part>
           <Part label="3 · x402 payment" tone="blue">
-            <div className="text-[13px]">EIP-3009 authorization ✓ valid</div>
+            <div className="text-[13px]">Permit2 witness-transfer authorization ✓ valid</div>
             <div className="mt-1 text-[11px] text-faint font-mono break-all">
               sig {short(receipt.payment?.signature ?? "")}
             </div>

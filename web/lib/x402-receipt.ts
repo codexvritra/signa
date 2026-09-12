@@ -1,14 +1,16 @@
 /**
- * x402 Receipts — the verifiable receipt layer for agentic commerce on Base.
+ * x402 Receipts — the verifiable receipt layer for agentic commerce on
+ * Robinhood Chain.
  *
- * x402 moves the money (an EIP-3009 payment authorization). But x402 alone
- * doesn't prove WHAT was agreed: which request, which terms, which delivery.
- * A SIGNA x402 receipt binds all four — request, terms, payment authorization,
- * delivery — into one canonical envelope, signed by the SIGNA attestor wallet,
- * and re-verifiable by anyone with viem + the universal verifier. No trust in
- * SIGNA: the attestor only signs after cryptographically verifying the buyer's
- * EIP-3009 authorization. Settlement stays out-of-band — SIGNA never custodies
- * funds, never pays gas. The receipt proves the deal, not the on-chain pull.
+ * x402 moves the money (a Permit2 witness-transfer payment authorization —
+ * see lib/permit2.ts). But x402 alone doesn't prove WHAT was agreed: which
+ * request, which terms, which delivery. A SIGNA x402 receipt binds all four —
+ * request, terms, payment authorization, delivery — into one canonical
+ * envelope, signed by the SIGNA attestor wallet, and re-verifiable by anyone
+ * with viem + the universal verifier. No trust in SIGNA: the attestor only
+ * signs after cryptographically verifying the buyer's Permit2 authorization.
+ * Settlement stays out-of-band — SIGNA never custodies funds, never pays gas.
+ * The receipt proves the deal, not the on-chain pull.
  */
 import { keccak256, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -35,19 +37,20 @@ export const ATTESTOR_ADDRESS = ATTESTOR.address.toLowerCase();
 export type X402Terms = {
   amount: string; // raw base units
   asset: string; // token address
-  network: string; // CAIP-2, e.g. eip155:8453
+  network: string; // CAIP-2, e.g. eip155:4663
   payTo: string;
   description?: string;
 };
 
 export type X402Payment = {
-  from: string;
+  owner: string;
+  spender: string;
   to: string;
-  value: string;
-  validAfter: string;
-  validBefore: string;
+  token: string;
+  amount: string;
   nonce: string;
-  signature: string; // EIP-3009 typed-data signature
+  deadline: string;
+  signature: string; // Permit2 PermitWitnessTransferFrom typed-data signature
 };
 
 /** The exact string the attestor signs. Mirror this byte-for-byte in any verifier. */
@@ -99,9 +102,10 @@ export type X402Receipt = {
 };
 
 /**
- * Issue a signed receipt. Caller MUST have already verified the EIP-3009
- * authorization signature recovers to `payment.from`. This computes the part
- * hashes, builds the canonical preimage, and signs it with the attestor.
+ * Issue a signed receipt. Caller MUST have already verified the Permit2
+ * witness-transfer authorization signature recovers to `payment.owner`. This
+ * computes the part hashes, builds the canonical preimage, and signs it with
+ * the attestor.
  */
 export async function issueReceipt(args: {
   request: unknown;
@@ -111,7 +115,7 @@ export async function issueReceipt(args: {
   ts: number;
 }): Promise<X402Receipt> {
   const { request, terms, payment, output, ts } = args;
-  const buyer = payment.from.toLowerCase();
+  const buyer = payment.owner.toLowerCase();
   const seller = payment.to.toLowerCase();
 
   const request_hash = hashPart(request);
@@ -123,7 +127,7 @@ export async function issueReceipt(args: {
     ts,
     buyer,
     seller,
-    amount: payment.value,
+    amount: payment.amount,
     asset: terms.asset,
     network: terms.network,
     requestHash: request_hash,
@@ -138,7 +142,7 @@ export async function issueReceipt(args: {
     ts,
     buyer,
     seller,
-    amount: payment.value,
+    amount: payment.amount,
     asset: terms.asset.toLowerCase(),
     network: terms.network,
     request,

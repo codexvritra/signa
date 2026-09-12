@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listRegistered } from "@/lib/marketplace";
-import { build402Challenge, DEFAULT_ASSET_BASE_USDC, EIP3009_TOKENS, X402_VERSION, type InboxPrice } from "@/lib/x402-paid-dm";
+import { build402Challenge, DEFAULT_ASSET_USDG, X402_VERSION, type InboxPrice } from "@/lib/x402-paid-dm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,10 +31,10 @@ export function OPTIONS() {
 }
 
 function priceFor(payTo: string, priceUsdc: number): InboxPrice {
-  const asset = DEFAULT_ASSET_BASE_USDC;
-  const token = EIP3009_TOKENS[asset];
-  const raw = BigInt(Math.round(priceUsdc * 10 ** (token?.decimals ?? 6))).toString();
-  return { address: payTo, price_raw: raw, pay_to: payTo, asset_address: asset, asset_symbol: token?.symbol ?? "USDC", asset_decimals: token?.decimals ?? 6, chain: "base" };
+  const asset = DEFAULT_ASSET_USDG;
+  const decimals = 6;
+  const raw = BigInt(Math.round(priceUsdc * 10 ** decimals)).toString();
+  return { address: payTo, price_raw: raw, pay_to: payTo, asset_address: asset, asset_symbol: "USDG", asset_decimals: decimals, chain: "robinhood" };
 }
 
 export async function GET(req: NextRequest) {
@@ -74,12 +74,12 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       x402Version: X402_VERSION,
-      service: "SIGNA — the trust layer for the agent economy on Base",
+      service: "SIGNA — the trust layer for the agent economy on Robinhood Chain",
       schema: "x402 Bazaar discovery (CDP-compatible resources format)",
       bazaar: "https://docs.cdp.coinbase.com/x402/bazaar",
       trust_layer: {
         discovery: "x402 Bazaar finds the service",
-        payment: "x402 moves the money on Base",
+        payment: "x402 moves the money on Robinhood Chain",
         proof: "SIGNA signs the result + mints a re-verifiable receipt",
         safe_spend: "the buyer agent spends inside a human-granted, capped mandate",
       },

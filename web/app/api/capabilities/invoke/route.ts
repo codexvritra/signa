@@ -9,10 +9,12 @@ import {
   build402Challenge,
   decodePaymentHeader,
   verifyExactPayment,
-  DEFAULT_ASSET_BASE_USDC,
-  EIP3009_TOKENS,
+  DEFAULT_ASSET_USDG,
   type InboxPrice,
 } from "@/lib/x402-paid-dm";
+import { serviceId } from "@/lib/permit2";
+
+const CAPABILITY_SERVICE_ID = serviceId("capability");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,8 +38,9 @@ export const maxDuration = 30;
  *
  * Optional pricing rides x402: a provider may price a registered capability,
  * in which case this endpoint behaves as a non-custodial x402 resource server
- * — it returns a 402 challenge, verifies the presented EIP-3009 authorization
- * pays the provider, then fulfils. SIGNA never settles and never holds funds.
+ * — it returns a 402 challenge, verifies the presented Permit2 witness-transfer
+ * authorization pays the provider, then fulfils. SIGNA never settles and never
+ * holds funds.
  */
 const CORS = {
   "access-control-allow-origin": "*",
@@ -83,19 +86,19 @@ async function signedResult(cap: string, input: string, provider: string, source
   );
 }
 
-/** A registered cap's USDC price expressed as an x402 InboxPrice (Base mainnet USDC). */
+/** A registered cap's USDG price expressed as an x402 InboxPrice (Robinhood Chain USDG). */
 function capPrice(payTo: string, priceUsdc: number): InboxPrice {
-  const asset = DEFAULT_ASSET_BASE_USDC;
-  const token = EIP3009_TOKENS[asset];
-  const raw = BigInt(Math.round(priceUsdc * 10 ** (token?.decimals ?? 6))).toString();
+  const asset = DEFAULT_ASSET_USDG;
+  const decimals = 6;
+  const raw = BigInt(Math.round(priceUsdc * 10 ** decimals)).toString();
   return {
     address: payTo,
     price_raw: raw,
     pay_to: payTo,
     asset_address: asset,
-    asset_symbol: token?.symbol ?? "USDC",
-    asset_decimals: token?.decimals ?? 6,
-    chain: "base",
+    asset_symbol: "USDG",
+    asset_decimals: decimals,
+    chain: "robinhood",
   };
 }
 
@@ -123,15 +126,15 @@ async function run(cap: string, arg: string, paymentHeader: string | null, resou
       const payTo = rec.pay_to ?? rec.provider_address;
       const price = capPrice(payTo, rec.price_usdc);
       if (!paymentHeader) {
-        return NextResponse.json(build402Challenge(price, resource), { status: 402, headers: CORS });
+        return NextResponse.json(build402Challenge(price, resource, CAPABILITY_SERVICE_ID), { status: 402, headers: CORS });
       }
       const decoded = decodePaymentHeader(paymentHeader);
-      if (!decoded) return NextResponse.json({ ...build402Challenge(price, resource), error: "bad_payment_header" }, { status: 402, headers: CORS });
+      if (!decoded) return NextResponse.json({ ...build402Challenge(price, resource, CAPABILITY_SERVICE_ID), error: "bad_payment_header" }, { status: 402, headers: CORS });
       // anonymous paid call: the payer is whoever signed the authorization;
       // we require it pays the provider the asked amount within its window.
-      const v = await verifyExactPayment({ payment: decoded, price, expectedFrom: decoded.payload.authorization.from });
-      if (!v.ok) return NextResponse.json({ ...build402Challenge(price, resource), error: `payment_invalid:${v.reason}` }, { status: 402, headers: CORS });
-      payment = { payer: v.authorization.from.toLowerCase(), amount_raw: v.authorization.value, asset: v.assetAddress.toLowerCase() };
+      const v = await verifyExactPayment({ payment: decoded, price, expectedFrom: decoded.payload.authorization.owner, expectedServiceId: CAPABILITY_SERVICE_ID });
+      if (!v.ok) return NextResponse.json({ ...build402Challenge(price, resource, CAPABILITY_SERVICE_ID), error: `payment_invalid:${v.reason}` }, { status: 402, headers: CORS });
+      payment = { payer: v.authorization.owner.toLowerCase(), amount_raw: v.authorization.amount, asset: v.assetAddress.toLowerCase() };
     }
 
     let output: unknown;
