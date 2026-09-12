@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="border-t border-white/[0.06]">
       <div className="max-w-5xl mx-auto px-6 lg:px-10 py-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 text-xs text-white/40">
         <div className="flex items-center gap-4">
-          <span>© {new Date().getFullYear()} SIGNA</span>
+          <span>© {new Date().getFullYear()} Sigda</span>
           <a href={SIGNA.x.url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
             {SIGNA.x.handle}
           </a>

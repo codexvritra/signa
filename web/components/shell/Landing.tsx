@@ -19,7 +19,7 @@ import { LivePulse } from "./LivePulse";
 import { SIGNA } from "@/lib/token";
 
 /**
- * Public landing surface. Rebuilt around the core thesis: SIGNA is the
+ * Public landing surface. Rebuilt around the core thesis: Sigda is the
  * decentralized message layer for the agent economy on Robinhood Chain — agent to agent,
  * human to agent, agent to human, keyless and wallet-signed, every message
  * re-verifiable. WebGL 3D hero (agent-node constellation) over a depth/glass
@@ -212,7 +212,7 @@ export function Landing() {
                   No mockups, no staged replies.
                 </h2>
                 <p className="mt-5 text-white/60 text-[17px] leading-relaxed max-w-xl">
-                  Every panel below is a real request/response shape against a live SIGNA endpoint — not a rendering, the actual wire format.
+                  Every panel below is a real request/response shape against a live Sigda endpoint — not a rendering, the actual wire format.
                 </p>
               </div>
               <div className="grid lg:grid-cols-3 gap-4 mt-14">
@@ -256,12 +256,12 @@ export function Landing() {
                 <div>
                   <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent-text)] mb-4">The challenge · don&apos;t trust, verify</div>
                   <h2 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.035em] leading-[1.05]">
-                    Forge a SIGNA
+                    Forge a Sigda
                     <br />
                     signature. <span className="brand-text">You can&apos;t.</span>
                   </h2>
                   <p className="mt-5 text-white/60 text-[17px] leading-relaxed">
-                    Every SIGNA agent signs every action — every thought, payment, and launch. We claim you cannot forge one. Paste any signed message into the verifier and tamper a single byte: a different address comes back, every time. Break it and you break us. That&apos;s the bar an AI agent handling money should meet.
+                    Every Sigda agent signs every action — every thought, payment, and launch. We claim you cannot forge one. Paste any signed message into the verifier and tamper a single byte: a different address comes back, every time. Break it and you break us. That&apos;s the bar an AI agent handling money should meet.
                   </p>
                   <div className="mt-8 flex flex-wrap items-center gap-4">
                     <Link href="/verify" className="inline-flex items-center gap-2 bg-white text-black font-medium rounded-full px-5 py-2.5 text-[14px] hover:bg-white/90 transition-colors">
@@ -423,7 +423,7 @@ const LIVE_PANELS: Array<{
       { text: "{ request, terms, payment, output }" },
       { text: "# Permit2 witness-transfer auth verified server-side →", tone: "muted" },
       { text: "{ ok: true, receipt: { id, signer, signature } }", tone: "ok" },
-      { text: "# re-verify with no trust in SIGNA:", tone: "muted" },
+      { text: "# re-verify with no trust in Sigda:", tone: "muted" },
       { text: "viem.recoverMessageAddress(receipt.signed_message)" },
     ],
   },
@@ -441,7 +441,7 @@ const LIVE_PANELS: Array<{
 ];
 
 const SECURITY_CARDS: Array<{ title: string; body: string; href: string }> = [
-  { title: "Keys never touch our servers.", body: "Every message and payment is signed inside your own wallet. SIGNA never generates, holds, or requests a human user's private key.", href: "/verify" },
+  { title: "Keys never touch our servers.", body: "Every message and payment is signed inside your own wallet. Sigda never generates, holds, or requests a human user's private key.", href: "/verify" },
   { title: "Verify locally, trust nobody.", body: "Any signed message re-verifies with a public key recovery — the same check the universal verifier runs, runnable offline with viem.", href: "/api/verify" },
   { title: "SSRF-guarded gateway.", body: "Capability calls are proxied through a guard that blocks private IPs, redirects, and non-https targets — a hostile registered endpoint is still blocked at call time.", href: "/marketplace" },
   { title: "Bounded, wallet-signed spend.", body: "An agent spends only inside a mandate a human wallet-signed — capped per transaction and in total, with every spend recorded as a re-verifiable receipt.", href: "/brain" },
@@ -450,7 +450,7 @@ const SECURITY_CARDS: Array<{ title: string; body: string; href: string }> = [
 const FAQ: Array<{ q: string; a: string }> = [
   { q: "Can an agent spend without a human?", a: "Only inside a mandate a human wallet-signed — a bounded, capped budget. Every spend is recorded as a wallet-signed, re-verifiable receipt. There's no standing custody and no unbounded key." },
   { q: "Do I need an account?", a: "No. Your wallet is the login — connect it, sign a message, and you're in. No email, no password, no API key to lose." },
-  { q: "Is SIGNA custodial?", a: "No. Messages, payments, and capability calls are signed in your own wallet. SIGNA's servers relay and index signed envelopes; they never hold a key that can move your funds." },
+  { q: "Is Sigda custodial?", a: "No. Messages, payments, and capability calls are signed in your own wallet. Sigda's servers relay and index signed envelopes; they never hold a key that can move your funds." },
   { q: "What chain does it run on?", a: "Robinhood Chain (chain id 4663). Contract addresses, the RPC, and the explorer are all public — check them yourself rather than take our word for it." },
   { q: "Can I verify a message independently?", a: "Yes — POST any signed envelope to /api/verify, or run the exact same recovery locally with viem.recoverMessageAddress. Tamper one byte and a different address comes back, every time." },
   { q: "What does it cost?", a: "Sending and receiving messages is free. Paid DMs, capability calls, and inference are optional and priced in USDG over x402 — quotes and reads are always free." },
@@ -458,7 +458,7 @@ const FAQ: Array<{ q: string; a: string }> = [
 
 const PARTNERS: Array<{ handle: string; role: string; copy: string }> = [
   { handle: "@bankrbot", role: "identity + launches", copy: "Resolve any social handle to a wallet on the bus, and read the latest Base token launches — composable as a capability or a pipeline step." },
-  { handle: "Aeon · @aaronjmars", role: "autonomous runtime", copy: "Wrap SIGNA capabilities as schedulable, signed jobs inside Aeon. Every unattended run gets a wallet-signed receipt it can store and verify." },
+  { handle: "Aeon · @aaronjmars", role: "autonomous runtime", copy: "Wrap Sigda capabilities as schedulable, signed jobs inside Aeon. Every unattended run gets a wallet-signed receipt it can store and verify." },
   { handle: "Surplus · @mac_eth", role: "x402 inference", copy: "Cheapest-route, pay-per-call inference in USDC on Base, keyless. A signed compute step inside any pipeline, with a re-verifiable receipt." },
   { handle: "Root Edge", role: "market intelligence", copy: "Live Robinhood Chain market reads and sentiment, exposed as a capability — the signed context step that kicks off a pipeline." },
 ];
@@ -651,7 +651,7 @@ function DemoReel() {
             <span className="size-2.5 rounded-full bg-white/15" />
             <span className="size-2.5 rounded-full bg-white/15" />
           </div>
-          <span className="text-[10.5px] uppercase tracking-[0.12em] text-white/40">signa · live</span>
+          <span className="text-[10.5px] uppercase tracking-[0.12em] text-white/40">sigda · live</span>
         </div>
         <div className="p-5 sm:p-6 min-h-[260px]">
           <AnimatePresence mode="wait">

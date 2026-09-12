@@ -26,38 +26,37 @@ const siteUrl = "https://www.signaagent.xyz";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "SIGNA",
-    template: "%s · SIGNA",
+    default: "Sigda",
+    template: "%s · Sigda",
   },
   description:
-    "Wallet-native messaging on Base. Encrypted chats, payments, and agents — all from one wallet identity.",
-  applicationName: "SIGNA",
-  authors: [{ name: "SIGNA" }],
+    "Wallet-native messaging on Robinhood Chain. Encrypted chats, payments, and agents — all from one wallet identity.",
+  applicationName: "Sigda",
+  authors: [{ name: "Sigda" }],
   keywords: [
-    "SIGNA",
+    "Sigda",
     "XMTP",
-    "Base",
-    "Basenames",
+    "Robinhood Chain",
     "wallet messaging",
     "AI agent",
     "Groq",
     "web3 chat",
   ],
   openGraph: {
-    title: "SIGNA",
+    title: "Sigda",
     description:
-      "Wallet-native messaging. Encrypted chats, payments, and agents on Base.",
+      "Wallet-native messaging. Encrypted chats, payments, and agents on Robinhood Chain.",
     url: siteUrl,
-    siteName: "SIGNA",
+    siteName: "Sigda",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@Signa_Agent",
     creator: "@Signa_Agent",
-    title: "SIGNA",
+    title: "Sigda",
     description:
-      "Wallet-native messaging. Encrypted chats, payments, and agents on Base.",
+      "Wallet-native messaging. Encrypted chats, payments, and agents on Robinhood Chain.",
   },
   // Google Search Console ownership verification (for the Safe Browsing review).
   verification: {

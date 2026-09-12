@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "SIGNA — wallet-native messaging on Base";
+export const alt = "Sigda — wallet-native messaging on Robinhood Chain";
 
 export default function OG() {
   return new ImageResponse(
@@ -56,7 +56,7 @@ export default function OG() {
             />
           </div>
           <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.4 }}>
-            SIGNA
+            Sigda
           </div>
           <div
             style={{
@@ -104,7 +104,7 @@ export default function OG() {
               maxWidth: 900,
             }}
           >
-            XMTP · Base · Basenames + ENS · Llama 3.3 70B on Groq · Open source
+            XMTP · Robinhood Chain · ENS · Llama 3.3 70B on Groq · Open source
           </div>
         </div>
 
@@ -120,7 +120,7 @@ export default function OG() {
           }}
         >
           <div style={{ display: "flex" }}>signaagent.xyz</div>
-          <div style={{ display: "flex" }}>wallet-native messaging on @base</div>
+          <div style={{ display: "flex" }}>wallet-native messaging on Robinhood Chain</div>
         </div>
       </div>
     ),
