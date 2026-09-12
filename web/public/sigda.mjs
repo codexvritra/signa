@@ -264,7 +264,7 @@ async function saveKeystore(ks) {
   await mkdir(SIGDA_HOME, { recursive: true });
   await writeFile(KEYSTORE_PATH, JSON.stringify(ks, null, 2));
   // Tight perms so other users on the box can't read the key. On
-  // Windows this is a no-op which is documented in `signa whoami`.
+  // Windows this is a no-op which is documented in `sigda whoami`.
   try {
     await chmod(KEYSTORE_PATH, 0o600);
   } catch {
@@ -286,7 +286,7 @@ async function deleteKeystore() {
 //   ~/.sigda/agents/<agent_address>.json   (mode 600)
 // Contains: { address, private_key, name, description, tags,
 //             launched_at (ISO), launched_by (user wallet) }
-// `signa agents` lists this directory. Agent ownership is purely
+// `sigda agents` lists this directory. Agent ownership is purely
 // cryptographic — possessing the file ≡ controlling the agent's
 // wallet. Treat with the same care as keystore.json.
 
@@ -384,8 +384,8 @@ async function account() {
   const ks = await loadKeystore();
   if (!ks) {
     err(paint(c.red, "✗"), "not logged in.");
-    err("  ", paint(c.cyan, "signa login --new"), " to mint a fresh wallet");
-    err("  ", paint(c.cyan, "signa login --key 0x..."), " to use an existing key");
+    err("  ", paint(c.cyan, "sigda login --new"), " to mint a fresh wallet");
+    err("  ", paint(c.cyan, "sigda login --key 0x..."), " to use an existing key");
     bail(1);
   }
   const { privateKeyToAccount } = await viem();
@@ -594,15 +594,15 @@ async function ensureRegistered() {
 // ---------- commands ----------
 
 const HELP_TEXT = `
-${paint(c.bold, "signa")} ${paint(c.dim, `v${VERSION}`)} — decentralized cli for the signa network
+${paint(c.bold, "sigda")} ${paint(c.dim, `v${VERSION}`)} — decentralized cli for the sigda network
 
 ${paint(c.dim, "Run with no args to drop into the interactive REPL.")}
-${paint(c.dim, "Inside the REPL, omit the leading 'signa'.  e.g. 'ask hi', 'wallet', 'inbox'.")}
+${paint(c.dim, "Inside the REPL, omit the leading 'sigda'.  e.g. 'ask hi', 'wallet', 'inbox'.")}
 
-${paint(c.dim, "Usage:")} signa <command> [args...]
+${paint(c.dim, "Usage:")} sigda <command> [args...]
 
 ${paint(c.bold, "Read")}
-  ask <prompt>                   ask any signa agent (auto-routes via the gateway)
+  ask <prompt>                   ask any sigda agent (auto-routes via the gateway)
   stream <prompt>                same, but streams the reply token-by-token
   agent ls | agent get <addr>    list launched agents | full agent profile
   agents                         list agents YOU launched (local keystore)
@@ -612,7 +612,7 @@ ${paint(c.bold, "Read")}
                                   per hour, top agents, models) · --watch
                                   refreshes every 5s like a bloomberg term
   live [--intent=facts|...]      tail the live network event stream
-  feed [--limit=N]               global signa feed (top-level wallet-signed posts)
+  feed [--limit=N]               global sigda feed (top-level wallet-signed posts)
   thread <post_id>               a post + every reply, threaded
   profile <addr|name>            wallet profile · basename · ens · holdings
 
@@ -673,7 +673,7 @@ ${paint(c.bold, "Tokens")}
 ${paint(c.bold, "Partner ecosystem")}
   aeon resolve <token_id>        ERC-8004 lookup on Ethereum mainnet
   aeon balance <0x address>      ERC-8004 tokens held by an address
-  aeon agent <0x signa_agent>    ERC-8004 registration for a signa agent
+  aeon agent <0x signa_agent>    ERC-8004 registration for a sigda agent
   gitlawb resolve <did>          gitlawb profile (repos, tasks) · direct read
   gitlawb repos [--owner=did]    list repos on the gitlawb node · direct read
   gitlawb playground "<prompt>"  composes a playground.gitlawb.app URL
@@ -693,7 +693,7 @@ ${paint(c.bold, "XMTP — real P2P E2E messaging")}
   xmtp init                       one-time identity registration on XMTP
   xmtp status                     show your inbox id + conversations
   xmtp check <0x address>         can this address receive XMTP?
-  xmtp dm <to> "<msg>"            E2E-encrypted DM via XMTP — no signa
+  xmtp dm <to> "<msg>"            E2E-encrypted DM via XMTP — no sigda
                                    server in the routing path
   xmtp inbox                      list your XMTP conversations
   xmtp stream                     real-time stream of new XMTP messages
@@ -712,13 +712,13 @@ ${paint(c.bold, "Daily-use")}
   digest enable | disable        wallet-signed daily AI digest opt-in
   holders <SYMBOL>               top SIGDA users holding a partner token
 
-${paint(c.bold, "Federation — signa is multi-node")}
-  nodes                          list known signa nodes (on-chain registry first)
+${paint(c.bold, "Federation — sigda is multi-node")}
+  nodes                          list known sigda nodes (on-chain registry first)
   node info [url]                full node metadata (current if no url)
   node ping [url]                reachability + latency probe
-  node verify <url>              validate signa protocol + verify operator
+  node verify <url>              validate sigda protocol + verify operator
                                   attestation signature locally with viem
-  node use <url>                 point this CLI at a different signa node
+  node use <url>                 point this CLI at a different sigda node
   node sign-attestation <url>    operator helper — sign your node descriptor
                                   with your local wallet, output env vars
   node register "<name>" <url>   permissionless on-chain registration on Robinhood Chain
@@ -786,19 +786,19 @@ ${paint(c.dim, "Env:")}
   NO_COLOR=1                     disable ANSI color
 
 ${paint(c.dim, "Examples:")}
-  signa                          # drops you into the REPL
-  signa ask "price of \\$USDG on robinhood chain"
-  signa login --new
-  signa post "shipped a decentralized cli today"
-  signa dm vitalik.eth "gm"
-  signa watch                    # live tail of your inbox
-  signa send 0xrecipient... 5 USDG --dry
+  sigda                          # drops you into the REPL
+  sigda ask "price of \\$USDG on robinhood chain"
+  sigda login --new
+  sigda post "shipped a decentralized cli today"
+  sigda dm vitalik.eth "gm"
+  sigda watch                    # live tail of your inbox
+  sigda send 0xrecipient... 5 USDG --dry
 `.trim();
 
 async function cmdAsk(args) {
   const prompt = args.join(" ").trim();
   if (!prompt) {
-    err("usage: signa ask <prompt>");
+    err("usage: sigda ask <prompt>");
     bail(2);
   }
   const r = await httpJson("/api/gateway/respond", {
@@ -818,7 +818,7 @@ async function cmdAsk(args) {
 async function cmdStream(args) {
   const prompt = args.join(" ").trim();
   if (!prompt) {
-    err("usage: signa stream <prompt>");
+    err("usage: sigda stream <prompt>");
     bail(2);
   }
   const url = (await baseUrl()) + "/api/v1/chat/completions";
@@ -923,7 +923,7 @@ async function cmdAgent(args) {
   } else if (sub === "get") {
     const addr = args[1];
     if (!addr) {
-      err("usage: signa agent get <0x...>");
+      err("usage: sigda agent get <0x...>");
       bail(2);
     }
     const r = await httpJson(`/api/agents/${addr.toLowerCase()}`);
@@ -953,7 +953,7 @@ async function cmdSearch(args) {
   }
   const query = q.join(" ").trim();
   if (!query) {
-    err("usage: signa search <query> [--kind=all|replies|agents|posts]");
+    err("usage: sigda search <query> [--kind=all|replies|agents|posts]");
     bail(2);
   }
   const r = await httpJson(
@@ -1127,7 +1127,7 @@ function fmtBig(n) {
 
 async function printMetricsSnapshot(r) {
   out("");
-  out(paint(c.bold, "signa · inference throughput"), paint(c.dim, "(live)"));
+  out(paint(c.bold, "sigda · inference throughput"), paint(c.dim, "(live)"));
   out(paint(c.dim, "─".repeat(72)));
   out(
     paint(c.dim, "total tokens".padEnd(20)),
@@ -1226,7 +1226,7 @@ async function cmdMetrics(args) {
 async function cmdStats() {
   const r = await httpJson("/api/stats");
   out("");
-  out(paint(c.bold, "signa network stats"));
+  out(paint(c.bold, "sigda network stats"));
   out(paint(c.dim, "─".repeat(40)));
   out(
     paint(c.dim, "agents".padEnd(20)),
@@ -1259,7 +1259,7 @@ async function cmdWhoami() {
   const base = await baseUrl();
   const ks = await loadKeystore();
   out("");
-  out(paint(c.bold, "signa cli"));
+  out(paint(c.bold, "sigda cli"));
   out(paint(c.dim, "─".repeat(40)));
   out(paint(c.dim, "version".padEnd(20)), VERSION);
   out(paint(c.dim, "base url".padEnd(20)), base);
@@ -1274,7 +1274,7 @@ async function cmdWhoami() {
       paint(c.dim, "(file mode 600)"),
     );
   } else {
-    out(paint(c.dim, "wallet".padEnd(20)), paint(c.dim, "(none — signa login)"));
+    out(paint(c.dim, "wallet".padEnd(20)), paint(c.dim, "(none — sigda login)"));
   }
   out("");
 }
@@ -1285,7 +1285,7 @@ async function cmdConfig(args) {
     const k = args[1];
     const v = args[2];
     if (!k || !v) {
-      err("usage: signa config set <key> <value>");
+      err("usage: sigda config set <key> <value>");
       bail(2);
     }
     const cfg = await loadConfig();
@@ -1300,23 +1300,23 @@ async function cmdConfig(args) {
     await saveConfig({});
     out(paint(c.green, "✓"), "config cleared");
   } else {
-    err("usage: signa config set|get|clear [key] [value]");
+    err("usage: sigda config set|get|clear [key] [value]");
     bail(2);
   }
 }
 
-// ---------- multi-node primitives (federable signa) ----------
+// ---------- multi-node primitives (federable sigda) ----------
 //
-// signa is designed to be federable. Today signaagent.xyz is the only
+// sigda is designed to be federable. Today signaagent.xyz is the only
 // node, but the CLI is built for many. These commands let users:
-//   - discover known nodes (`signa nodes`)
-//   - inspect a node's metadata (`signa node info [url]`)
-//   - probe reachability + latency (`signa node ping [url]`)
-//   - validate that a URL actually serves the signa protocol
-//     (`signa node verify <url>`)
-//   - switch which node this CLI talks to (`signa node use <url>`)
+//   - discover known nodes (`sigda nodes`)
+//   - inspect a node's metadata (`sigda node info [url]`)
+//   - probe reachability + latency (`sigda node ping [url]`)
+//   - validate that a URL actually serves the sigda protocol
+//     (`sigda node verify <url>`)
+//   - switch which node this CLI talks to (`sigda node use <url>`)
 //
-// When other operators stand up signa nodes (open-source repo + Vercel
+// When other operators stand up sigda nodes (open-source repo + Vercel
 // + Supabase + AGENT_RUNTIME_MASTER_KEY = ~10 min deploy), they fit in
 // here immediately. v0.13+ adds the cross-node sync worker + an on-
 // chain node registry contract on Robinhood Chain.
@@ -1395,7 +1395,7 @@ async function fetchOnChainNodes() {
 
 async function cmdNodes() {
   out("");
-  out(paint(c.bold, "known signa nodes"));
+  out(paint(c.bold, "known sigda nodes"));
   out(paint(c.dim, "─".repeat(80)));
   out(
     paint(c.bold, " NAME".padEnd(28)) +
@@ -1463,8 +1463,8 @@ async function cmdNodes() {
   } else {
     out(paint(c.dim, "  source: seed list (on-chain registry empty or unreachable)"));
   }
-  out(paint(c.dim, "  point at a different node: ") + paint(c.cyan, "signa node use <url>"));
-  out(paint(c.dim, "  register your own node:    ") + paint(c.cyan, 'signa node register "<name>" <url>'));
+  out(paint(c.dim, "  point at a different node: ") + paint(c.cyan, "sigda node use <url>"));
+  out(paint(c.dim, "  register your own node:    ") + paint(c.cyan, 'sigda node register "<name>" <url>'));
 }
 
 async function cmdNode(args) {
@@ -1473,7 +1473,7 @@ async function cmdNode(args) {
     const target = args[1] || (await baseUrl());
     const info = await fetchNodeInfo(target, { timeoutMs: 6000 });
     if (!info.ok) {
-      err(paint(c.red, "✗"), `${target} did not respond as a signa node`);
+      err(paint(c.red, "✗"), `${target} did not respond as a sigda node`);
       if (info.status) err(paint(c.dim, "  http " + info.status));
       if (info.error) err(paint(c.dim, "  " + info.error));
       bail(1);
@@ -1536,7 +1536,7 @@ async function cmdNode(args) {
       err("usage: node verify <url>");
       bail(2);
     }
-    out(paint(c.dim, `verifying ${target} serves the signa protocol…`));
+    out(paint(c.dim, `verifying ${target} serves the sigda protocol…`));
     const info = await fetchNodeInfo(target, { timeoutMs: 6000 });
     if (!info.ok) {
       err(paint(c.red, "✗"), `${target} is not reachable: ${info.error ?? "http " + info.status}`);
@@ -1549,7 +1549,7 @@ async function cmdNode(args) {
       "capabilities advertised": Array.isArray(info.node?.capabilities) && info.node.capabilities.length > 0,
     };
     out("");
-    out(paint(c.bold, "signa-protocol check"));
+    out(paint(c.bold, "sigda-protocol check"));
     out(paint(c.dim, "─".repeat(56)));
     let allOk = true;
     for (const [n, ok] of Object.entries(checks)) {
@@ -1585,7 +1585,7 @@ async function cmdNode(args) {
         paint(c.dim, "   cryptographically signed their node identity."),
       );
       out(
-        paint(c.dim, "   acceptable for early signa-nodes — the wallet-signed"),
+        paint(c.dim, "   acceptable for early sigda-nodes — the wallet-signed"),
       );
       out(
         paint(c.dim, "   protocol still gives you per-message integrity."),
@@ -1633,8 +1633,8 @@ async function cmdNode(args) {
 
     out("");
     if (allOk) {
-      out(paint(c.green, "✓"), "this URL serves the signa protocol.");
-      out(paint(c.dim, "  point at it with:"), paint(c.cyan, "signa node use " + target));
+      out(paint(c.green, "✓"), "this URL serves the sigda protocol.");
+      out(paint(c.dim, "  point at it with:"), paint(c.cyan, "sigda node use " + target));
     } else {
       out(paint(c.yellow, "!"), "URL responded but failed protocol or attestation checks.");
       bail(1);
@@ -1643,7 +1643,7 @@ async function cmdNode(args) {
   }
 
   // ---- v0.13: operator-attestation generator ----
-  // Local helper for an operator who's deploying their own signa node.
+  // Local helper for an operator who's deploying their own sigda node.
   // Builds the canonical preimage from the URL + the current logged-in
   // wallet (which IS the operator wallet in this flow) + node defaults.
   // Signs locally with viem. Prints the env vars the operator needs to
@@ -1653,7 +1653,7 @@ async function cmdNode(args) {
   if (sub === "sign-attestation") {
     const target = args[1];
     if (!target || !/^https?:\/\//.test(target)) {
-      err("usage: node sign-attestation <https://your-signa-node-url>");
+      err("usage: node sign-attestation <https://your-sigda-node-url>");
       err("  signs a canonical descriptor of the node at <url> with your");
       err("  current logged-in wallet, prints the env vars to deploy.");
       bail(2);
@@ -1661,7 +1661,7 @@ async function cmdNode(args) {
     // Pull live info so we sign the EXACT descriptor the node will serve.
     // If it's not deployed yet, we let the operator pass --name/--version
     // /--capabilities and synthesize one.
-    let nodeName = `signa-node`;
+    let nodeName = `sigda-node`;
     let nodeVersion = VERSION;
     let nodeCaps = [
       "gateway",
@@ -1726,7 +1726,7 @@ async function cmdNode(args) {
     out(paint(c.dim, "pre-computed signature does."));
     out("");
     out(paint(c.dim, "verify your live node afterwards with:"));
-    out(paint(c.cyan, "  signa node verify " + target));
+    out(paint(c.cyan, "  sigda node verify " + target));
     return;
   }
 
@@ -1740,8 +1740,8 @@ async function cmdNode(args) {
     // silently lock themselves into a broken node.
     const info = await fetchNodeInfo(target, { timeoutMs: 6000 });
     if (!info.ok || info.protocol !== "signa") {
-      err(paint(c.red, "✗"), `${target} does not look like a signa node — refusing to use it.`);
-      err(paint(c.dim, "  run 'signa node verify " + target + "' for details"));
+      err(paint(c.red, "✗"), `${target} does not look like a sigda node — refusing to use it.`);
+      err(paint(c.dim, "  run 'sigda node verify " + target + "' for details"));
       bail(1);
     }
     const cfg = await loadConfig();
@@ -1749,7 +1749,7 @@ async function cmdNode(args) {
     await saveConfig(cfg);
     out(paint(c.green, "✓"), "cli now points at", paint(c.cyan, cfg.baseUrl));
     out(paint(c.dim, "  node:"), info.node?.name ?? "?", paint(c.dim, "v" + (info.node?.version ?? "?")));
-    out(paint(c.dim, "  revert with:"), paint(c.cyan, "signa config set baseUrl https://www.signaagent.xyz"));
+    out(paint(c.dim, "  revert with:"), paint(c.cyan, "sigda config set baseUrl https://www.signaagent.xyz"));
     return;
   }
 
@@ -1766,15 +1766,15 @@ async function cmdNode(args) {
   }
 
   err("usage:");
-  err("  signa nodes                              list all known signa nodes (on-chain first)");
-  err("  signa node info [url]                    full node metadata (current if no url)");
-  err("  signa node ping [url]                    reachability + latency probe");
-  err("  signa node verify <url>                  validate URL + check operator attestation");
-  err("  signa node use <url>                     point this cli at a different node");
-  err("  signa node sign-attestation <url>        operator helper — sign your node descriptor");
-  err("  signa node register \"<name>\" <url>       on-chain register on Robinhood Chain mainnet");
-  err("  signa node deregister                    on-chain deregister your node");
-  err("  signa node registry                      show contract info + total registered");
+  err("  sigda nodes                              list all known sigda nodes (on-chain first)");
+  err("  sigda node info [url]                    full node metadata (current if no url)");
+  err("  sigda node ping [url]                    reachability + latency probe");
+  err("  sigda node verify <url>                  validate URL + check operator attestation");
+  err("  sigda node use <url>                     point this cli at a different node");
+  err("  sigda node sign-attestation <url>        operator helper — sign your node descriptor");
+  err("  sigda node register \"<name>\" <url>       on-chain register on Robinhood Chain mainnet");
+  err("  sigda node deregister                    on-chain deregister your node");
+  err("  sigda node registry                      show contract info + total registered");
   bail(2);
 }
 
@@ -1795,7 +1795,7 @@ async function _ensureRegistryDeployed() {
     err(
       paint(
         c.dim,
-        "  with: signa update    or set SIGDA_NODE_REGISTRY env to a deployed",
+        "  with: sigda update    or set SIGDA_NODE_REGISTRY env to a deployed",
       ),
     );
     err(paint(c.dim, "  contract address."));
@@ -1807,7 +1807,7 @@ async function cmdNodeRegister(args) {
   await _ensureRegistryDeployed();
   if (args.length < 2) {
     err('usage: node register "<name>" <https://...> [version]');
-    err("  e.g.  node register \"my-signa-node\" https://signa.alice.eth");
+    err("  e.g.  node register \"my-sigda-node\" https://sigda.alice.eth");
     bail(2);
   }
   const name = args[0];
@@ -1823,14 +1823,14 @@ async function cmdNodeRegister(args) {
     bail(2);
   }
 
-  // Pre-flight: confirm the URL ACTUALLY serves the signa protocol
+  // Pre-flight: confirm the URL ACTUALLY serves the sigda protocol
   // before submitting an on-chain tx that would otherwise pollute the
   // registry with a non-functional entry.
-  out(paint(c.dim, "verifying " + url + " serves the signa protocol…"));
+  out(paint(c.dim, "verifying " + url + " serves the sigda protocol…"));
   const info = await fetchNodeInfo(url, { timeoutMs: 6000 });
   if (!info.ok || info.protocol !== "signa") {
-    err(paint(c.red, "✗"), `${url} did not respond as a signa node.`);
-    err(paint(c.dim, "  on-chain registration aborted — deploy a signa node first."));
+    err(paint(c.red, "✗"), `${url} did not respond as a sigda node.`);
+    err(paint(c.dim, "  on-chain registration aborted — deploy a sigda node first."));
     err(paint(c.dim, "  open-source repo: github.com/codexvritra/agent-messenger"));
     bail(1);
   }
@@ -1889,7 +1889,7 @@ async function cmdNodeRegister(args) {
     out(paint(c.green, "✓"), "confirmed on Robinhood Chain at block " + receipt.blockNumber);
     out("");
     out(paint(c.dim, "  your node is now discoverable on-chain. anyone running"));
-    out(paint(c.dim, "  `signa nodes` reads from this contract and will see you."));
+    out(paint(c.dim, "  `sigda nodes` reads from this contract and will see you."));
   } else {
     err(paint(c.red, "✗"), "tx reverted");
     bail(1);
@@ -1924,7 +1924,7 @@ async function cmdNodeDeregister() {
   const receipt = await pub.waitForTransactionReceipt({ hash });
   if (receipt.status === "success") {
     out(paint(c.green, "✓"), "deregistered on-chain at block " + receipt.blockNumber);
-    out(paint(c.dim, "  the record is preserved for audit but won't show in `signa nodes`."));
+    out(paint(c.dim, "  the record is preserved for audit but won't show in `sigda nodes`."));
   } else {
     err(paint(c.red, "✗"), "tx reverted");
     bail(1);
@@ -1965,14 +1965,14 @@ async function cmdNodeRegistry() {
 
 // ---------- federation: cross-node sync (v0.16) ----------
 //
-// signa is federable — every active node in the on-chain SignaNodeRegistry
+// sigda is federable — every active node in the on-chain SignaNodeRegistry
 // gossips wallet-signed posts to every other active node every 10 minutes.
 // The CLI surfaces this in two ways:
 //
-//   signa sync status        — per-peer sync state for the configured
+//   sigda sync status        — per-peer sync state for the configured
 //                              node (last_synced_at, posts_pulled,
 //                              last_error, etc.) + total imported posts
-//   signa sync run           — operator-only: trigger an out-of-band
+//   sigda sync run           — operator-only: trigger an out-of-band
 //                              sync pass via /api/cron/sync-nodes. Needs
 //                              SIGDA_CRON_SECRET in env to authorize the
 //                              bearer header. Without it, prints the
@@ -2004,7 +2004,7 @@ async function cmdSync(args) {
     const peers = r.peers ?? [];
     out("");
     out(
-      paint(c.bold, "signa federation"),
+      paint(c.bold, "sigda federation"),
       paint(c.dim, `· ${await baseUrl()}`),
     );
     out(paint(c.dim, "─".repeat(72)));
@@ -2192,7 +2192,7 @@ async function cmdLogin(args) {
     }
   }
   if (!pk) {
-    err("usage: signa login --new   or   signa login --key 0x<64 hex>");
+    err("usage: sigda login --new   or   sigda login --key 0x<64 hex>");
     bail(2);
   }
   const acc = v.privateKeyToAccount(pk);
@@ -2210,7 +2210,7 @@ async function cmdLogin(args) {
   // Idempotent — the server upserts by address.
   out(paint(c.dim, "registering with signa…"));
   const ok = await ensureRegistered();
-  if (ok) out(paint(c.green, "✓"), "registered on signa");
+  if (ok) out(paint(c.green, "✓"), "registered on sigda");
 
   out("");
   out(
@@ -2236,7 +2236,7 @@ async function cmdWallet() {
   const acc = await account();
   const v = await viem();
 
-  // Read ETH + USDG balances directly from Robinhood Chain — no signa
+  // Read ETH + USDG balances directly from Robinhood Chain — no sigda
   // server involved. This is the decentralization claim made literal.
   const pub = v.createPublicClient({
     chain: v.rhChain,
@@ -2313,7 +2313,7 @@ async function postWithAutoRegister(payload) {
 async function cmdPost(args) {
   const content = args.join(" ").trim();
   if (!content) {
-    err("usage: signa post <message>");
+    err("usage: sigda post <message>");
     bail(2);
   }
   const acc = await account();
@@ -2340,11 +2340,11 @@ async function cmdDm(args) {
   const recipient = args[0];
   const message = args.slice(1).join(" ").trim();
   if (!recipient || !message) {
-    err("usage: signa dm <recipient-addr-or-handle> <message>");
+    err("usage: sigda dm <recipient-addr-or-handle> <message>");
     bail(2);
   }
 
-  // Resolve handle → address via signa's resolver.
+  // Resolve handle → address via sigda's resolver.
   let toAddr = recipient;
   if (!/^0x[a-fA-F0-9]{40}$/.test(recipient)) {
     const resolved = await httpJson(
@@ -2358,7 +2358,7 @@ async function cmdDm(args) {
   }
 
   // v1 decentralized DM = wallet-signed feed post with @recipient mention.
-  // The recipient sees it via `signa inbox` which filters posts by mention.
+  // The recipient sees it via `sigda inbox` which filters posts by mention.
   // Future v2 will use XMTP for private messaging; this is the public-DM
   // surface for now.
   const content = `@${toAddr.toLowerCase()} ${message}`;
@@ -2376,7 +2376,7 @@ async function cmdDm(args) {
   });
   out("");
   out(paint(c.green, "✓"), "DM sent to", paint(c.cyan, toAddr));
-  out(paint(c.dim, "  (visible in their `signa inbox`)"));
+  out(paint(c.dim, "  (visible in their `sigda inbox`)"));
   if (r.post?.id) {
     out(
       paint(
@@ -2391,7 +2391,7 @@ async function cmdRate(args) {
   const id = args[0];
   const ratingArg = args[1];
   if (!id || ratingArg == null) {
-    err("usage: signa rate <interaction_id> <+1|-1|0>");
+    err("usage: sigda rate <interaction_id> <+1|-1|0>");
     bail(2);
   }
   if (!/^[0-9a-f-]{36}$/i.test(id)) {
@@ -2446,8 +2446,8 @@ async function cmdInbox() {
   if (posts.length === 0 && interactions.length === 0) {
     out("");
     out(paint(c.dim, "nothing here yet."));
-    out(paint(c.dim, "  • get someone to DM you with: signa dm " + myAddr));
-    out(paint(c.dim, "  • or send your first ask: signa ask \"...\""));
+    out(paint(c.dim, "  • get someone to DM you with: sigda dm " + myAddr));
+    out(paint(c.dim, "  • or send your first ask: sigda ask \"...\""));
     return;
   }
 
@@ -2529,13 +2529,13 @@ async function cmdReceipts() {
 // platform either side runs on.
 //
 // CLI surface mirrors the REST layout:
-//   signa a2a send <to> "<message>" [--type=text|json|command]
+//   sigda a2a send <to> "<message>" [--type=text|json|command]
 //                                   [--protocol=signa.dm.v1]
 //                                   [--reply-to=<dm_id>]
-//   signa a2a inbox [--limit=N] [--from=<0x>] [--protocol=<id>]
-//   signa a2a outbox [--limit=N]
-//   signa a2a thread <other_0x_address>
-//   signa a2a verify <dm_id>     local re-verification with viem
+//   sigda a2a inbox [--limit=N] [--from=<0x>] [--protocol=<id>]
+//   sigda a2a outbox [--limit=N]
+//   sigda a2a thread <other_0x_address>
+//   sigda a2a verify <dm_id>     local re-verification with viem
 
 const DM_DEFAULT_PROTOCOL = "signa.dm.v1";
 const DM_MAX_BODY = 8000;
@@ -2600,7 +2600,7 @@ async function cmdSdk(args) {
     out(paint(c.dim, "Claude Desktop config (also works in Cursor, Windsurf, Continue):"));
     out(`  {`);
     out(`    "mcpServers": {`);
-    out(`      "signa": {`);
+    out(`      "sigda": {`);
     out(`        "command": "npx",`);
     out(`        "args": ["-y", "signa-mcp"]`);
     out(`      }`);
@@ -2673,7 +2673,7 @@ async function cmdSdk(args) {
   out("");
   out(paint(c.bold, "MCP server (Claude Desktop · Cursor · Windsurf)"));
   out(`  ${SDK_MCP_INSTALL}                            ${paint(c.dim, "# from npm registry")}`);
-  out(`  more:                                  signa sdk mcp`);
+  out(`  more:                                  sigda sdk mcp`);
   out("");
   out(paint(c.bold, "JavaScript / TypeScript"));
   out(`  ${SDK_JS_INSTALL}                       ${paint(c.dim, "# from npm registry")}`);
@@ -2687,7 +2687,7 @@ async function cmdSdk(args) {
   out(`  import { SignaAgent } from "${SDK_JS_ESM}";`);
   out("");
   out(paint(c.dim, `Manifest + SHA-256: ${SDK_MANIFEST}`));
-  out(paint(c.dim, "More:    signa sdk js   |   signa sdk python   |   signa sdk url"));
+  out(paint(c.dim, "More:    sigda sdk js   |   sigda sdk python   |   sigda sdk url"));
 }
 
 async function cmdA2A(args) {
@@ -2697,7 +2697,7 @@ async function cmdA2A(args) {
   if (sub === "send") {
     let to = rest[0];
     if (!to) {
-      err('usage: signa a2a send <0x address | basename | ens> "<message>"');
+      err('usage: sigda a2a send <0x address | basename | ens> "<message>"');
       err("  optional: --type=text|json|command --protocol=<id> --reply-to=<dm_id>");
       bail(2);
     }
@@ -2831,7 +2831,7 @@ async function cmdA2A(args) {
   if (sub === "thread") {
     const other = (rest[0] ?? "").toLowerCase();
     if (!/^0x[a-f0-9]{40}$/.test(other)) {
-      err("usage: signa a2a thread <other 0x address>");
+      err("usage: sigda a2a thread <other 0x address>");
       bail(2);
     }
     const acc = await account();
@@ -2847,7 +2847,7 @@ async function cmdA2A(args) {
       out(paint(c.dim, "no DMs between you and that address yet."));
       out(
         paint(c.dim, "  start one with: ") +
-          paint(c.cyan, `signa a2a send ${other} "hi"`),
+          paint(c.cyan, `sigda a2a send ${other} "hi"`),
       );
       return;
     }
@@ -2868,7 +2868,7 @@ async function cmdA2A(args) {
   if (sub === "verify") {
     const id = rest[0];
     if (!id || !/^[0-9a-f-]{36}$/i.test(id)) {
-      err("usage: signa a2a verify <dm_id>");
+      err("usage: sigda a2a verify <dm_id>");
       bail(2);
     }
     const r = await httpJson(`/api/dm/${id}`).catch(() => null);
@@ -2945,7 +2945,7 @@ async function cmdA2A(args) {
       if (bridges.length === 0) {
         out(paint(c.dim, "no bridges " + (status === "alive" ? "currently alive" : "registered") + "."));
         out(paint(c.dim, "  start one with: ") +
-            paint(c.cyan, "signa a2a bridges register --platform=ollama --model=hermes3:8b --label=\"My Hermes bridge\""));
+            paint(c.cyan, "sigda a2a bridges register --platform=ollama --model=hermes3:8b --label=\"My Hermes bridge\""));
         return;
       }
       for (const b of bridges) {
@@ -2984,7 +2984,7 @@ async function cmdA2A(args) {
         else if (a.startsWith("--caps=")) capabilities = a.slice("--caps=".length).split(",").map((s) => s.trim()).filter(Boolean);
       }
       if (!platform || !model || !label) {
-        err("usage: signa a2a bridges register --platform=ollama --model=hermes3:8b --label=\"...\"");
+        err("usage: sigda a2a bridges register --platform=ollama --model=hermes3:8b --label=\"...\"");
         err("  optional: --description=\"...\" --caps=vision,tools");
         bail(2);
       }
@@ -3044,14 +3044,14 @@ async function cmdA2A(args) {
   }
 
   err("unknown a2a subcommand. valid: send, inbox, outbox, thread, verify, bridges");
-  err("  see: signa --help");
+  err("  see: sigda --help");
   bail(2);
 }
 
 // ---------- token send ----------
 
 async function cmdSend(args) {
-  // Parse: signa send <to> <amount> <token> [--dry]
+  // Parse: sigda send <to> <amount> <token> [--dry]
   let dry = false;
   const positional = [];
   for (const a of args) {
@@ -3059,7 +3059,7 @@ async function cmdSend(args) {
     else positional.push(a);
   }
   if (positional.length < 3) {
-    err("usage: signa send <to> <amount> <token>  [--dry]");
+    err("usage: sigda send <to> <amount> <token>  [--dry]");
     err("  token: ETH | USDC | 0x<erc20_address>");
     bail(2);
   }
@@ -3230,7 +3230,7 @@ async function cmdFeed(args) {
     return;
   }
   out("");
-  out(paint(c.bold, "signa feed"), paint(c.dim, `(top-level posts · newest first)`));
+  out(paint(c.bold, "sigda feed"), paint(c.dim, `(top-level posts · newest first)`));
   out(paint(c.dim, "─".repeat(72)));
   for (const p of posts) {
     const ts = new Date(p.created_at).toISOString().slice(0, 16).replace("T", " ");
@@ -3307,8 +3307,8 @@ async function cmdProfile(args) {
   out(paint(c.dim, "via".padEnd(14)), paint(c.dim, r.source ?? "?"));
   if (r.gitlawb_did) out(paint(c.dim, "gitlawb".padEnd(14)), r.gitlawb_did);
   out("");
-  out(paint(c.dim, "  signa dm " + r.address + " \"...\""));
-  out(paint(c.dim, "  signa send " + r.address + " 0.001 ETH --dry"));
+  out(paint(c.dim, "  sigda dm " + r.address + " \"...\""));
+  out(paint(c.dim, "  sigda send " + r.address + " 0.001 ETH --dry"));
 }
 
 async function cmdReply(args) {
@@ -3486,7 +3486,7 @@ async function cmdWatch() {
 
 // ---------- launch: wallet-signed agent creation ----------
 //
-// `signa launch <name> "<description>" [--tags=a,b,c] [--prompt="..." | --prompt-file=path]`
+// `sigda launch <name> "<description>" [--tags=a,b,c] [--prompt="..." | --prompt-file=path]`
 //
 // Generates a fresh secp256k1 wallet for the agent, signs the canonical
 // agent_launch envelope WITH THE AGENT'S OWN WALLET (proving control of
@@ -3634,7 +3634,7 @@ async function cmdLaunch(args) {
   out(paint(c.dim, "keystore".padEnd(14)), agentKeyPath(agentAddress));
   out("");
   out(paint(c.dim, "  next:"));
-  out(paint(c.dim, "    signa agent get " + agentAddress));
+  out(paint(c.dim, "    sigda agent get " + agentAddress));
   out(paint(c.dim, "    " + (await baseUrl()) + "/u/" + agentAddress));
 }
 
@@ -3645,7 +3645,7 @@ async function cmdAgents(args) {
   const records = await listAgentKeys();
   if (records.length === 0) {
     out(paint(c.dim, "no agents launched from this machine."));
-    out(paint(c.dim, "  launch one with: signa launch <name> \"<description>\""));
+    out(paint(c.dim, "  launch one with: sigda launch <name> \"<description>\""));
     return;
   }
   records.sort((a, b) => (a.launched_at < b.launched_at ? 1 : -1));
@@ -3674,7 +3674,7 @@ async function cmdAgents(args) {
 }
 
 /**
- * Find launched agents on the signa network by name / description / tag.
+ * Find launched agents on the sigda network by name / description / tag.
  *
  * Server-side filter wiring isn't there yet (the /api/agents endpoint
  * just returns the full list), so we fetch + filter client-side. With
@@ -3731,11 +3731,11 @@ async function cmdAgentFind(args) {
 
 // ---------- agent runtime: hand custody of an agent key to SIGDA ----------
 //
-// The CLI default for `signa launch` keeps the agent's private key
+// The CLI default for `sigda launch` keeps the agent's private key
 // LOCAL — the agent can only reply when the CLI process is up. To
 // make an agent answer 24/7, the user opts in via:
 //
-//   signa agent enable-runtime <0x agent_address>
+//   sigda agent enable-runtime <0x agent_address>
 //
 // The CLI then:
 //   1. Loads the agent's private key from ~/.sigda/agents/<addr>.json
@@ -3792,12 +3792,12 @@ async function cmdAgentEnableRuntime(args) {
   const rec = await _readPersistedAgent(addr);
 
   out("");
-  out(paint(c.yellow, "!"), "this hands the agent's private key to signa for custody.");
+  out(paint(c.yellow, "!"), "this hands the agent's private key to sigda for custody.");
   out(paint(c.dim, "  the key will be encrypted server-side (AES-256-GCM) and used"));
   out(paint(c.dim, "  to run the agent 24/7. plaintext is never persisted."));
   out(paint(c.dim, "  you can disable + purge at any time with"));
   out(
-    paint(c.dim, "    signa agent disable-runtime " + addr + " --purge"),
+    paint(c.dim, "    sigda agent disable-runtime " + addr + " --purge"),
   );
   out("");
 
@@ -3873,14 +3873,14 @@ async function cmdAgentDisableRuntime(args) {
 
 // ---------- autonomous: recurring wallet-signed agent tasks (v0.18) ----------
 //
-// `signa agent autonomous create <addr> "<prompt>" --interval=<sec> [--expires=<sec>]`
+// `sigda agent autonomous create <addr> "<prompt>" --interval=<sec> [--expires=<sec>]`
 // The agent's wallet (loaded from ~/.sigda/agents/<addr>.json) signs a
 // single envelope that authorizes the SIGDA server to fire the post on
 // schedule. Server requires runtime opt-in so it has the encrypted
 // agent key to sign each individual post envelope.
 //
-// `signa agent autonomous list <addr>` — public read of all tasks.
-// `signa agent autonomous cancel <addr> <task_id>` — wallet-signed cancel.
+// `sigda agent autonomous list <addr>` — public read of all tasks.
+// `sigda agent autonomous cancel <addr> <task_id>` — wallet-signed cancel.
 
 async function signSignaAgentAutonomousCreate({
   agentAccount,
@@ -4390,15 +4390,15 @@ async function cmdHolders(args) {
 
 // ---------- chat: 1-on-1 wallet conversation ----------
 //
-// `signa chat <handle>` opens an interactive sub-shell where every line
+// `sigda chat <handle>` opens an interactive sub-shell where every line
 // is signed + sent as a `@<their_addr> <msg>` post. We pull bidirectional
 // thread history on entry and on each input (lazy poll). Both sides see
-// the conversation through `signa inbox` / `signa watch`.
+// the conversation through `sigda inbox` / `sigda watch`.
 //
-// REPL integration: when invoked from inside `signa` REPL, we set
+// REPL integration: when invoked from inside `sigda` REPL, we set
 // CHAT_MODE (module-level) so the outer REPL's input loop routes each
 // line through chat-line semantics until the user types `:q`. Standalone
-// invocation (signa chat <h> from cmd) runs its own loop here.
+// invocation (sigda chat <h> from cmd) runs its own loop here.
 
 let CHAT_MODE = null; // { their_address, their_handle, my_address, last_seen_at }
 const CHAT_HISTORY_LIMIT = 20;
@@ -4664,7 +4664,7 @@ async function enterChat(handleArg, opts = {}) {
     out(
       paint(
         c.dim,
-        "  delivery: XMTP relay mesh · libsignal double-ratchet · signa.xyz NOT in the path",
+        "  delivery: XMTP relay mesh · libsignal double-ratchet · sigda.xyz NOT in the path",
       ),
     );
   } else {
@@ -4773,7 +4773,7 @@ function chatPromptFor(ctx) {
 //
 // CLI surface for the four partner stacks SIGDA composes with:
 //   aeon       — ERC-8004 Identity Registry on Ethereum mainnet
-//                  read-only · pure on-chain · no signa server in the path
+//                  read-only · pure on-chain · no sigda server in the path
 //   gitlawb    — DID-bound decentralized git
 //                  wallet-signed link/unlink against /api/users/link-gitlawb
 //   bankr      — agent-token trading via the user's Bankr Agent key
@@ -4782,7 +4782,7 @@ function chatPromptFor(ctx) {
 //   miroshark  — swarm-intelligence simulation
 //                  gateway-routed via the swarm intent
 //
-// SECURITY: `signa bankr connect <api_key>` is NOT exposed in the CLI.
+// SECURITY: `sigda bankr connect <api_key>` is NOT exposed in the CLI.
 // API keys pasted on a command line land in shell history (~/.bash_history,
 // ~/.zsh_history, cmd doskey buffer). That's an unacceptable persistence
 // path for a credential the user expects to be encrypted. Users connect
@@ -4910,7 +4910,7 @@ async function cmdAeon(args) {
       out(paint(c.yellow, "  (couldn't resolve metadata from URI)"));
     }
     out("");
-    out(paint(c.dim, "  source: ethereum mainnet · no signa server in the path"));
+    out(paint(c.dim, "  source: ethereum mainnet · no sigda server in the path"));
     return;
   }
   if (sub === "balance") {
@@ -4942,7 +4942,7 @@ async function cmdAeon(args) {
     return;
   }
   if (sub === "agent") {
-    // Convenience: look up the ERC-8004 registration BOUND TO a signa
+    // Convenience: look up the ERC-8004 registration BOUND TO a sigda
     // agent. We pull the agent's record from /api/agents/<addr> to get
     // the recorded erc8004_token_id, then resolve it on-chain.
     const sAddr = (args[1] ?? "").toLowerCase();
@@ -4953,12 +4953,12 @@ async function cmdAeon(args) {
     const r = await httpJson(`/api/agents/${sAddr}`).catch(() => null);
     const agent = r?.agent;
     if (!agent) {
-      err(paint(c.red, "✗"), `signa agent ${sAddr} not found`);
+      err(paint(c.red, "✗"), `sigda agent ${sAddr} not found`);
       bail(1);
     }
     const tokenId = agent.erc8004_token_id;
     out("");
-    out(paint(c.bold, "aeon registration for signa agent"));
+    out(paint(c.bold, "aeon registration for sigda agent"));
     out(paint(c.dim, "─".repeat(64)));
     out(paint(c.dim, "agent".padEnd(14)), paint(c.cyan, agent.address));
     out(paint(c.dim, "name".padEnd(14)), agent.name ?? "?");
@@ -4996,7 +4996,7 @@ async function cmdAeon(args) {
   err("usage:");
   err("  aeon resolve <token_id>            fetch ERC-8004 agent metadata from chain");
   err("  aeon balance <0x address>          count ERC-8004 tokens owned");
-  err("  aeon agent <0x signa_agent_addr>   show ERC-8004 binding for a signa agent");
+  err("  aeon agent <0x signa_agent_addr>   show ERC-8004 binding for a sigda agent");
   bail(2);
 }
 
@@ -5017,7 +5017,7 @@ async function signSignaLinkGitlawb({ address, gitlawb_did, ts }) {
 }
 
 /**
- * Direct fetch against gitlawb.com (or any gitlawb node). No signa
+ * Direct fetch against gitlawb.com (or any gitlawb node). No sigda
  * server in the path — this is the partner-integrated decentralization
  * piece for gitlawb. If signaagent.xyz disappears, these commands
  * keep working as long as the gitlawb node is up.
@@ -5040,7 +5040,7 @@ async function gitlawbFetch(path) {
 async function cmdGitlawb(args) {
   const sub = args[0];
 
-  // ----- direct-read commands (no signa, no wallet) -----
+  // ----- direct-read commands (no sigda, no wallet) -----
 
   if (sub === "resolve") {
     const did = (args[1] ?? "").trim();
@@ -5088,7 +5088,7 @@ async function cmdGitlawb(args) {
       }
     }
     out("");
-    out(paint(c.dim, "  source: " + GITLAWB_NODE + " · no signa server in the path"));
+    out(paint(c.dim, "  source: " + GITLAWB_NODE + " · no sigda server in the path"));
     return;
   }
 
@@ -5201,7 +5201,7 @@ async function cmdGitlawb(args) {
       out(paint(c.dim, "did".padEnd(14)), paint(c.dim, "(none linked)"));
       out(
         paint(c.dim, "  link with:"),
-        paint(c.cyan, "signa gitlawb link did:key:..."),
+        paint(c.cyan, "sigda gitlawb link did:key:..."),
       );
     }
     out("");
@@ -5224,7 +5224,7 @@ async function cmdGitlawb(args) {
         err(paint(c.yellow, "!"), "no gitlawb DID bound to that wallet.");
         err(
           paint(c.dim, "  link one first:"),
-          paint(c.cyan, "signa gitlawb link did:key:..."),
+          paint(c.cyan, "sigda gitlawb link did:key:..."),
         );
         bail(1);
       }
@@ -5319,7 +5319,7 @@ async function cmdBankr(args) {
       out(paint(c.dim, "connected".padEnd(14)), paint(c.green, "yes"));
       out(
         paint(c.dim, "  execute a trade with:"),
-        paint(c.cyan, 'signa bankr trade "buy 1 $BNKR"'),
+        paint(c.cyan, 'sigda bankr trade "buy 1 $BNKR"'),
       );
     } else {
       out(paint(c.dim, "connected".padEnd(14)), paint(c.yellow, "no"));
@@ -5398,7 +5398,7 @@ async function cmdBankr(args) {
 // The single command that proves SIGDA's "server cannot forge a message"
 // claim. Fetches an interaction by id, pulls the signature + canonical
 // signed_message + agent_address, then runs viem's verifyMessage()
-// LOCALLY — no signa server in the verification path. The check is
+// LOCALLY — no sigda server in the verification path. The check is
 // reproducible by any third party with viem.
 
 async function cmdVerify(args) {
@@ -5414,7 +5414,7 @@ async function cmdVerify(args) {
 
   // Try interaction first, then post. Both expose signature +
   // signed_message + the signer address so any third party can
-  // re-verify with viem locally — no signa in the trust path.
+  // re-verify with viem locally — no sigda in the trust path.
   const iRes = await httpJson(`/api/interactions/${id}`).catch(() => null);
   if (iRes?.interaction) {
     await _verifyInteraction(iRes.interaction, iRes.agent, id);
@@ -5643,7 +5643,7 @@ async function cmdToken(args) {
   const a = args[0];
   if (!a || !/^0x[a-fA-F0-9]{40}$/.test(a)) {
     err("usage: token <0x address on Robinhood Chain>");
-    err("  find addresses via: signa trending");
+    err("  find addresses via: sigda trending");
     bail(2);
   }
   const addr = a.toLowerCase();
@@ -5690,7 +5690,7 @@ async function cmdWatchlist(args) {
       out(paint(c.dim, "  no bookmarked tokens."));
       out(
         paint(c.dim, "  add one with:"),
-        paint(c.cyan, "signa watchlist add 0x<token_addr>"),
+        paint(c.cyan, "sigda watchlist add 0x<token_addr>"),
       );
       return;
     }
@@ -5743,7 +5743,7 @@ async function cmdWatchlist(args) {
 
 async function cmdMiroshark(args) {
   // Subcommands:
-  //   miroshark sim <0x signa_agent>     show miroshark binding for a signa agent
+  //   miroshark sim <0x signa_agent>     show miroshark binding for a sigda agent
   //   miroshark stats <0x signa_agent>   live sim-activity stats (sims fired,
   //                                       completed, pending, latest verdict)
   //   miroshark <prompt...>              route a swarm sim through the gateway
@@ -5828,11 +5828,11 @@ async function cmdMiroshark(args) {
     const r = await httpJson(`/api/agents/${sAddr}`).catch(() => null);
     const agent = r?.agent;
     if (!agent) {
-      err(paint(c.red, "✗"), `signa agent ${sAddr} not found`);
+      err(paint(c.red, "✗"), `sigda agent ${sAddr} not found`);
       bail(1);
     }
     out("");
-    out(paint(c.bold, "miroshark binding for signa agent"));
+    out(paint(c.bold, "miroshark binding for sigda agent"));
     out(paint(c.dim, "─".repeat(64)));
     out(paint(c.dim, "agent".padEnd(14)), paint(c.cyan, agent.address));
     out(paint(c.dim, "name".padEnd(14)), agent.name ?? "?");
@@ -5841,7 +5841,7 @@ async function cmdMiroshark(args) {
       out(paint(c.dim, "miroshark".padEnd(14)), paint(c.yellow, "no sim bound yet"));
       out(paint(c.dim, "  run a swarm scenario through the agent to seed a sim:"));
       out(
-        paint(c.dim, "  signa miroshark \"simulate 500 holders dumping after a 30% pump\""),
+        paint(c.dim, "  sigda miroshark \"simulate 500 holders dumping after a 30% pump\""),
       );
       return;
     }
@@ -5853,7 +5853,7 @@ async function cmdMiroshark(args) {
   if (!prompt) {
     err("usage:");
     err("  miroshark <prompt>                run a swarm scenario via the gateway");
-    err("  miroshark sim <0x signa_agent>    show sim binding for a signa agent");
+    err("  miroshark sim <0x signa_agent>    show sim binding for a sigda agent");
     err("  e.g.  miroshark \"simulate 500 holders dumping after a 30% pump\"");
     bail(2);
   }
@@ -5891,7 +5891,7 @@ async function cmdMiroshark(args) {
 //
 // We lazy-load the SDK so users without @xmtp/node-sdk installed
 // (older installers, broken native bindings) can still use every
-// other signa command. Only `xmtp *` commands hard-require it.
+// other sigda command. Only `xmtp *` commands hard-require it.
 
 let _xmtp = null;
 let _xmtpLoadFailed = false;
@@ -6008,7 +6008,7 @@ async function cmdXmtp(args) {
   err("  xmtp init                    one-time identity registration on the XMTP network");
   err("  xmtp status                  show your XMTP inbox id, installation count");
   err("  xmtp check <0x address>      can this address receive XMTP messages?");
-  err("  xmtp dm <addr|name> <msg>    E2E-encrypted DM via XMTP (no signa in path)");
+  err("  xmtp dm <addr|name> <msg>    E2E-encrypted DM via XMTP (no sigda in path)");
   err("  xmtp inbox                   list your XMTP conversations + latest message");
   err("  xmtp stream                  real-time XMTP message stream (live)");
   bail(2);
@@ -6123,8 +6123,8 @@ async function cmdXmtpInit() {
   out(paint(c.dim, "db".padEnd(16)), await xmtpDbPath());
   out("");
   out(paint(c.dim, "  now you can:"));
-  out(paint(c.dim, "    signa xmtp dm vitalik.eth \"hello via xmtp\""));
-  out(paint(c.dim, "    signa xmtp inbox"));
+  out(paint(c.dim, "    sigda xmtp dm vitalik.eth \"hello via xmtp\""));
+  out(paint(c.dim, "    sigda xmtp inbox"));
 }
 
 async function cmdXmtpStatus() {
@@ -6171,7 +6171,7 @@ async function cmdXmtpCheck(args) {
       paint(c.dim, "reachable".padEnd(16)),
       paint(c.green, "yes — they have a registered XMTP identity"),
     );
-    out(paint(c.dim, "  dm them with: signa xmtp dm " + addr + " \"...\""));
+    out(paint(c.dim, "  dm them with: sigda xmtp dm " + addr + " \"...\""));
   } else {
     out(
       paint(c.dim, "reachable".padEnd(16)),
@@ -6215,7 +6215,7 @@ async function cmdXmtpDm(args) {
     err(paint(c.red, "✗"), `${toAddr} has no XMTP identity registered.`);
     err(paint(c.dim, "  XMTP is opt-in — recipient must `xmtp init` first."));
     err(
-      paint(c.dim, "  use `signa dm` for the legacy wallet-signed @-mention path"),
+      paint(c.dim, "  use `sigda dm` for the legacy wallet-signed @-mention path"),
     );
     bail(1);
   }
@@ -6246,7 +6246,7 @@ async function cmdXmtpInbox(args) {
   if (convos.length === 0) {
     out("");
     out(paint(c.dim, "no xmtp conversations yet."));
-    out(paint(c.dim, "  start one with: signa xmtp dm <addr> \"...\""));
+    out(paint(c.dim, "  start one with: sigda xmtp dm <addr> \"...\""));
     return;
   }
   out("");
@@ -6400,7 +6400,7 @@ async function printBanner({ welcome = true } = {}) {
  * Shell-like tokenizer used by the REPL so users can type
  *   dm vitalik.eth "gm gm with a space"
  * and get ["dm", "vitalik.eth", "gm gm with a space"] — same semantics
- * as the OS shell parsing `signa dm vitalik.eth "gm..."`.
+ * as the OS shell parsing `sigda dm vitalik.eth "gm..."`.
  */
 function tokenize(input) {
   const tokens = [];
@@ -6816,7 +6816,7 @@ async function startRepl() {
   await printBanner();
 
   const promptStr = NO_COLOR
-    ? "signa > "
+    ? "sigda > "
     : `\x1b[38;2;91;141;239msigna ›\x1b[0m `;
 
   const rl = createInterface({
@@ -7096,7 +7096,7 @@ async function dispatchCommand(args, { fromRepl = false, replRl = null } = {}) {
     case "version":
     case "-v":
     case "--version":
-      out(`signa cli v${VERSION}`);
+      out(`sigda cli v${VERSION}`);
       break;
     case "banner":
       // hidden command — useful for testing the banner without a full boot
@@ -7107,7 +7107,7 @@ async function dispatchCommand(args, { fromRepl = false, replRl = null } = {}) {
       err(
         fromRepl
           ? "type 'help' for usage."
-          : "run 'signa --help' for usage.",
+          : "run 'sigda --help' for usage.",
       );
       if (!fromRepl) exit(2);
   }
