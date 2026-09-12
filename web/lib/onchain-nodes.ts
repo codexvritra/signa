@@ -1,9 +1,9 @@
 /**
  * SignaNodeRegistry reader (v0.56).
  *
- * Reads the live registry on Base mainnet at
- * 0x4316De3847629705C401F8FaF0cecdb40bd68E5A — the same contract the
- * federation cron at /api/cron/sync-nodes pulls peer URLs from.
+ * Reads the live registry on Robinhood Chain — the same contract the
+ * federation cron at /api/cron/sync-nodes pulls peer URLs from. Set
+ * SIGNA_NODE_REGISTRY once redeployed there (see contracts/script/Deploy.s.sol).
  *
  * Used by /nodes UI to render every federated SIGNA node, plus an
  * optional liveness check against each node's /api/node/info endpoint.
@@ -17,7 +17,8 @@ import { createPublicClient, http, type Address } from "viem";
 import { rhChain, RH_RPC } from "./chain";
 
 export const SIGNA_NODE_REGISTRY: Address =
-  "0x4316De3847629705C401F8FaF0cecdb40bd68E5A";
+  (process.env.SIGNA_NODE_REGISTRY as Address) || ("" as Address);
+export const SIGNA_NODE_REGISTRY_LIVE = /^0x[0-9a-fA-F]{40}$/.test(SIGNA_NODE_REGISTRY);
 
 export const NODE_REGISTRY_ABI = [
   {
@@ -114,6 +115,7 @@ export async function listFederatedNodes(
   includeInactive = false,
   limit = 100,
 ): Promise<{ nodes: FederatedNode[]; total: number; active: number }> {
+  if (!SIGNA_NODE_REGISTRY_LIVE) return { nodes: [], total: 0, active: 0 };
   if (cache && Date.now() - cache.ts < CACHE_TTL_MS) {
     return {
       nodes: includeInactive

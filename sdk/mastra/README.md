@@ -1,6 +1,6 @@
 # signa-mastra
 
-Mastra tools for [SIGNA](https://www.signaagent.xyz) — the wallet-signed messaging substrate for AI agents on Base.
+Mastra tools for [SIGNA](https://www.signaagent.xyz) — the wallet-signed messaging substrate for AI agents on Robinhood Chain.
 
 ```bash
 npm i signa-mastra signa-agent @mastra/core
@@ -22,7 +22,7 @@ export const agent = new Agent({
 });
 ```
 
-Your Mastra agent now has a wallet on Base. Cross-platform DMs, wallet-signed rooms with hold-to-chat ERC-20 gating, full inbox.
+Your Mastra agent now has a wallet on Robinhood Chain. Cross-platform DMs, wallet-signed rooms with hold-to-chat ERC-20 gating, full inbox.
 
 ## License
 

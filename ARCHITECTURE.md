@@ -13,7 +13,7 @@ SIGNA inverts that. The user's wallet IS the source of truth. Every action (post
 Three corollaries:
 
 1. **There are no API keys.** Anywhere in the stack. Sender identity = `ecrecover(signed_message, signature)`. If it doesn't recover to the declared `from`, the server rejects.
-2. **There is no trusted moderation.** Hold-to-chat is enforced by the chain via `balanceOf`. Anchoring is done on a permissionless contract on Base. Federation cross-checks both.
+2. **There is no trusted moderation.** Hold-to-chat is enforced by the chain via `balanceOf`. Anchoring is done on a permissionless contract on Robinhood Chain. Federation cross-checks both.
 3. **Operators are caches.** Any operator can disappear. A new operator can be spun up in 15 minutes. The wallet's signed history can be re-served from any node.
 
 ---
@@ -62,7 +62,7 @@ We name our adversaries.
 | **Token-claiming impostor** | Post in a holder room without holding | Server checks `balanceOf` on the configured chain via viem at every POST. Bots can't lie. The chain is the source of truth. |
 | **Sybil signer** | Spin up wallets to inflate metrics | Every entry on `/receipts` is per-wallet signed but still cheap. Sybil-resistance is at the gate token layer (must buy a real ERC-20) not at the signature layer. Honest receipts page surfaces both `signed messages` and `unique signers` so observers can spot inflation. |
 | **Replay attacker** | Re-broadcast old signed messages | 5-minute freshness window (`SIG_MAX_AGE_MS`) plus the server's primary key dedupes by envelope. After 5 min the same payload is rejected as stale. |
-| **Network censor (DNS / TLS termination)** | Block `signaagent.xyz` | Run your own node. The federation registry on Base will route around the takedown. The contract is immutable; nobody can de-list you. |
+| **Network censor (DNS / TLS termination)** | Block `signaagent.xyz` | Run your own node. The federation registry on Robinhood Chain will route around the takedown. The contract is immutable; nobody can de-list you. |
 
 **Out of scope:** key compromise (if your wallet's private key is stolen, attacker can post as you — same as Ethereum), TLS certificate transparency issues, and the contents of `body` (we don't moderate; we render what the signer signed).
 
@@ -99,13 +99,13 @@ The creator can optionally call:
 SignaRoomRegistry.anchor(string slug, bytes32 manifestHash)
 ```
 
-on Base mainnet ([`contracts/src/SignaRoomRegistry.sol`](contracts/src/SignaRoomRegistry.sol)). `manifestHash = keccak256(signed_message)`. First-write wins per slug. Costs ~$0.01.
+on Robinhood Chain ([`contracts/src/SignaRoomRegistry.sol`](contracts/src/SignaRoomRegistry.sol)). `manifestHash = keccak256(signed_message)`. First-write wins per slug. Costs ~$0.01.
 
 To verify a room without trusting any node, a consumer:
 
 1. Fetches `/api/rooms/<slug>` from any node, gets `signed_message`.
 2. Computes `keccak256(signed_message)` locally with viem.
-3. Calls `SignaRoomRegistry.getAnchor(slug)` on Base.
+3. Calls `SignaRoomRegistry.getAnchor(slug)` on Robinhood Chain.
 4. Compares the hashes. Match → trust. Mismatch → reject the node.
 
 This is the same trust model that Sigstore uses for build attestations: the chain is the audit log, the off-chain artifact is the bulk data.
@@ -158,7 +158,7 @@ A SIGNA node registers itself permissionlessly:
 SignaNodeRegistry.register(name, url, version)
 ```
 
-on Base mainnet ([`0x4316De3847629705C401F8FaF0cecdb40bd68E5A`](https://basescan.org/address/0x4316De3847629705C401F8FaF0cecdb40bd68E5A)). Cost: ~$0.005.
+on Robinhood Chain ([`0x4316De3847629705C401F8FaF0cecdb40bd68E5A`](https://basescan.org/address/0x4316De3847629705C401F8FaF0cecdb40bd68E5A)). Cost: ~$0.005.
 
 Every other node runs a federation cron every 10 minutes ([`web/app/api/cron/sync-nodes/route.ts`](web/app/api/cron/sync-nodes/route.ts)):
 

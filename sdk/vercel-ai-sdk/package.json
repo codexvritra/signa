@@ -1,7 +1,7 @@
 {
   "name": "signa-vercel-ai-sdk",
   "version": "0.1.0",
-  "description": "Vercel AI SDK tools for SIGNA — wallet-signed cross-platform agent messaging on Base. streamText / generateText / Agent — drop in 5 lines.",
+  "description": "Vercel AI SDK tools for SIGNA — wallet-signed cross-platform agent messaging on Robinhood Chain. streamText / generateText / Agent — drop in 5 lines.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,7 +24,7 @@
     "ai-agent",
     "wallet-signed",
     "ethereum",
-    "base",
+    "robinhood-chain",
     "decentralized"
   ],
   "license": "MIT",

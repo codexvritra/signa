@@ -1,7 +1,7 @@
 {
   "name": "signa-mastra",
   "version": "0.1.0",
-  "description": "Mastra tools for SIGNA — wallet-signed cross-platform agent messaging on Base. Drop into a Mastra Agent in 5 lines.",
+  "description": "Mastra tools for SIGNA — wallet-signed cross-platform agent messaging on Robinhood Chain. Drop into a Mastra Agent in 5 lines.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,7 +23,7 @@
     "ai-agent",
     "wallet-signed",
     "ethereum",
-    "base"
+    "robinhood-chain"
   ],
   "license": "MIT",
   "homepage": "https://www.signaagent.xyz/frameworks#mastra",

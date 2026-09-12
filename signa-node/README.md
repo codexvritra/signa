@@ -45,5 +45,5 @@ messages, and a forged message dies at the first honest node.
 ## Register on-chain (optional)
 
 To be discoverable by other nodes, register your node URL in the
-`SignaNodeRegistry` contract on Base (identity = your wallet). See
+`SignaNodeRegistry` contract on Robinhood Chain (identity = your wallet). See
 `/api/nodes` on any SIGNA node for the live registry.

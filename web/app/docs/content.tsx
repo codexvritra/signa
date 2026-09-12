@@ -163,7 +163,7 @@ curl localhost:8787/health           # { peer, mirrored, rejected, last_sync }`}
         <P>
           Grant the brain a budget (see <a className="text-[#a5c3ff] hover:underline" href="/docs/budgets">Budgets</a> — the mandate&apos;s{" "}
           <K>agent</K> must be the brain address above), then pass <K>mandate_id</K>. Each run the brain signs
-          a real EIP-3009 USDC authorization for its inference, an x402 receipt is issued, and a capped
+          a real EIP-3009 USDG authorization for its inference, an x402 receipt is issued, and a capped
           spend is recorded. When the budget is exhausted it stops and wallet-signs a budget request
           instead of overspending.
         </P>
@@ -181,12 +181,12 @@ curl localhost:8787/health           # { peer, mirrored, rejected, last_sync }`}
         </P>
         <H2>Buy reasoning — signa.brain</H2>
         <P>
-          The brain also <em>sells</em>: <K>signa.brain</K> is a priced capability (0.01 USDC over x402).
+          The brain also <em>sells</em>: <K>signa.brain</K> is a priced capability (0.01 USDG over x402).
           You get one reasoning run whose answer is signed by the brain wallet itself — a portable
           attestation you can verify offline.
         </P>
         <Code title="402 challenge, then pay via X-PAYMENT">{`curl "https://www.signaagent.xyz/api/capabilities/invoke?cap=signa.brain&arg=why+do+agent+payments+need+budgets"
-// -> 402 with payment terms (10000 raw USDC to the brain wallet)
+// -> 402 with payment terms (10000 raw USDG to the brain wallet)
 // present an x402 "exact" X-PAYMENT header (EIP-3009 auth) -> 200 + signed answer`}</Code>
       </>
     ),
@@ -209,8 +209,8 @@ curl localhost:8787/health           # { peer, mirrored, rejected, last_sync }`}
 ts:<unix ms>
 grantor:<human address, lowercase>
 agent:<agent address, lowercase>
-asset:<erc20, lowercase>          # default: USDC on Base
-network:eip155:8453
+asset:<erc20, lowercase>          # default: USDG on Robinhood Chain
+network:eip155:4663
 limit:<total budget, raw units>
 per_tx:<max per purchase, raw>
 expiry:<unix seconds>
@@ -268,7 +268,7 @@ await os.think("read the market", { mandateId });  // metered brain`}</Code>
         <H2>Issue a receipt</H2>
         <Code title="POST /api/x402/receipt">{`{
   "request": { "item": "premium data", "buyer_agent": "0x..." },
-  "terms":   { "amount": "20000", "asset": "0x8335...2913", "network": "eip155:8453", "payTo": "0x..." },
+  "terms":   { "amount": "20000", "asset": "0x5fc5...d168", "network": "eip155:4663", "payTo": "0x..." },
   "payment": { "from","to","value","validAfter","validBefore","nonce","signature" },  // real EIP-3009
   "output":  { "delivered": true }
 }
@@ -295,7 +295,7 @@ await os.think("read the market", { mandateId });  // metered brain`}</Code>
     slug: "capabilities",
     nav: "Capabilities",
     title: "Capabilities — the open marketplace",
-    description: "Publish any https endpoint as a capability with one wallet signature. Callable by any agent and the brain; results wallet-signed; optionally priced in USDC.",
+    description: "Publish any https endpoint as a capability with one wallet signature. Callable by any agent and the brain; results wallet-signed; optionally priced in USDG.",
     body: (
       <>
         <P>
@@ -321,7 +321,7 @@ price:<usdc number, 0 = free>`}</Code>
           Set <K>price_usdc</K> and callers must present an x402 <K>X-PAYMENT</K> header paying{" "}
           <K>pay_to</K> before the gateway proxies the call. You settle the authorization out of band —
           SIGNA verifies, never custodies. The flagship priced capability is{" "}
-          <K>signa.brain</K> (0.01 USDC per reasoning run, answer signed by the brain wallet).
+          <K>signa.brain</K> (0.01 USDG per reasoning run, answer signed by the brain wallet).
         </P>
       </>
     ),
@@ -470,9 +470,9 @@ checkpoint = signer signs: "SIGNA log checkpoint v1\\nseq:..\\nsize:..\\nprev:..
           with any covered message and its inclusion proof no longer reproduces the signed root — the store
           is tamper-<em>evident</em>, not trusted.
         </P>
-        <H2>Anchored on Base</H2>
+        <H2>Anchored on Robinhood Chain</H2>
         <P>
-          Each checkpoint root is pinned on-chain via the <K>SignaLogAnchor</K> contract on Base — so the
+          Each checkpoint root is pinned on-chain via the <K>SignaLogAnchor</K> contract on Robinhood Chain — so the
           log&apos;s history is settled on the chain, not just signed off it. A later off-chain root that
           contradicts an anchored one is provably a fork, even if SIGNA produced it. Append-only is enforced
           in the contract (seq must advance, treeSize never shrinks). Check anchor status at{" "}

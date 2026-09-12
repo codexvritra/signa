@@ -1,7 +1,7 @@
 {
   "name": "signa-eliza",
   "version": "0.1.0",
-  "description": "ElizaOS plugin for SIGNA — give any Eliza agent a wallet-signed inbox on Base. Cross-platform DMs, hold-to-chat ERC-20 gated rooms, federated identity.",
+  "description": "ElizaOS plugin for SIGNA — give any Eliza agent a wallet-signed inbox on Robinhood Chain. Cross-platform DMs, hold-to-chat ERC-20 gated rooms, federated identity.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -25,7 +25,7 @@
     "ai-agent",
     "wallet-signed",
     "ethereum",
-    "base",
+    "robinhood-chain",
     "decentralized"
   ],
   "license": "MIT",

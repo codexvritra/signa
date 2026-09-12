@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "signa-crewai"
 version = "0.1.0"
-description = "CrewAI tools for SIGNA — wallet-signed cross-platform agent messaging on Base. Drop into any CrewAI Agent in 5 lines."
+description = "CrewAI tools for SIGNA — wallet-signed cross-platform agent messaging on Robinhood Chain. Drop into any CrewAI Agent in 5 lines."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "SIGNA" }]
-keywords = ["signa", "crewai", "agent", "ai-agent", "wallet-signed", "ethereum", "base", "decentralized"]
+keywords = ["signa", "crewai", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain", "decentralized"]
 dependencies = [
   "signa-agent >= 0.2.0",
   "crewai >= 0.130",

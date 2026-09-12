@@ -6,9 +6,9 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { base } from "viem/chains";
 import { serverClient } from "@/lib/supabase";
 import { authorizeBearer } from "@/lib/secret-auth";
+import { rhChain, RH_RPC } from "@/lib/chain";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,8 +16,8 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/cron/sync-nodes
  *
- * The federation MVP. Reads the on-chain SignaNodeRegistry on Base
- * mainnet, fetches signed posts from each peer node since the last
+ * The federation MVP. Reads the on-chain SignaNodeRegistry on Robinhood
+ * Chain, fetches signed posts from each peer node since the last
  * successful sync cursor, re-verifies each signature locally, and
  * inserts new entries into our own posts table tagged with
  * source_node + source_node_url.
@@ -42,8 +42,7 @@ export const dynamic = "force-dynamic";
  *     replicate to avoid backfilling the network's history)
  */
 
-const SIGNA_NODE_REGISTRY = "0x4316De3847629705C401F8FaF0cecdb40bd68E5A";
-const BASE_RPC = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+const SIGNA_NODE_REGISTRY = (process.env.SIGNA_NODE_REGISTRY || "") as Address;
 const OWN_URL = process.env.NEXT_PUBLIC_SIGNA_BASE_URL || "https://www.signaagent.xyz";
 const MAX_POSTS_PER_PEER = 100;
 const REPLICATION_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -257,10 +256,14 @@ export async function GET(req: NextRequest) {
 
   const startedAt = Date.now();
 
+  if (!/^0x[0-9a-fA-F]{40}$/.test(SIGNA_NODE_REGISTRY)) {
+    return NextResponse.json({ ok: true, skipped: "node_registry_not_configured", synced: 0 });
+  }
+
   // Read active peers from the on-chain registry.
   const ethClient = createPublicClient({
-    chain: base,
-    transport: http(BASE_RPC),
+    chain: rhChain,
+    transport: http(RH_RPC),
   });
 
   let activeNodes: Array<{

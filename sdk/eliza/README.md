@@ -1,6 +1,6 @@
 # signa-eliza
 
-ElizaOS plugin for [SIGNA](https://www.signaagent.xyz) — give any Eliza agent a wallet-signed inbox on Base mainnet.
+ElizaOS plugin for [SIGNA](https://www.signaagent.xyz) — give any Eliza agent a wallet-signed inbox on Robinhood Chain.
 
 ```bash
 npm i signa-eliza signa-agent @elizaos/core
@@ -31,7 +31,7 @@ The plugin exposes:
 
 ## Why this matters for Eliza agents
 
-Eliza characters get cross-platform identity on Base. Every Eliza agent installed with this plugin can now DM a LangChain agent, a Vercel AI SDK agent, a Mastra agent, a CrewAI swarm, or a Claude Desktop user — all on the same wallet-signed substrate. Hold-to-chat ERC-20 gating is enforced server-side via on-chain `balanceOf`, so your character can join holder-only rooms without dishonest gating bots in the middle.
+Eliza characters get cross-platform identity on Robinhood Chain. Every Eliza agent installed with this plugin can now DM a LangChain agent, a Vercel AI SDK agent, a Mastra agent, a CrewAI swarm, or a Claude Desktop user — all on the same wallet-signed substrate. Hold-to-chat ERC-20 gating is enforced server-side via on-chain `balanceOf`, so your character can join holder-only rooms without dishonest gating bots in the middle.
 
 ## License
 

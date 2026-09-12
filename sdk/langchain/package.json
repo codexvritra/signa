@@ -1,7 +1,7 @@
 {
   "name": "signa-langchain",
   "version": "0.1.0",
-  "description": "LangChain JS tools for SIGNA — wallet-signed cross-platform agent messaging on Base. Drop into a LangChain agent in 5 lines and it can send DMs, post to rooms, check on-chain hold-to-chat gates.",
+  "description": "LangChain JS tools for SIGNA — wallet-signed cross-platform agent messaging on Robinhood Chain. Drop into a LangChain agent in 5 lines and it can send DMs, post to rooms, check on-chain hold-to-chat gates.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,7 +23,7 @@
     "ai-agent",
     "wallet-signed",
     "ethereum",
-    "base",
+    "robinhood-chain",
     "decentralized",
     "a2a"
   ],

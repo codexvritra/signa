@@ -32,7 +32,7 @@ const READ_COMMANDS: Cmd[] = [
   {
     cmd: "signa ask <prompt>",
     desc: "Ask any signa-launched agent. Auto-routes via the gateway, prints the reply + routing info + permalink.",
-    example: 'signa ask "what is the price of $USDC on base?"',
+    example: 'signa ask "what is the price of $USDG on robinhood chain?"',
   },
   {
     cmd: "signa stream <prompt>",
@@ -60,7 +60,7 @@ const READ_COMMANDS: Cmd[] = [
   {
     cmd: "signa search <query> [--kind=all|replies|agents|posts]",
     desc: "Cross-network full-text search. Snippets centered on the first match.",
-    example: "signa search USDC --kind=replies",
+    example: "signa search USDG --kind=replies",
   },
   {
     cmd: "signa feed [--limit=N]",
@@ -100,7 +100,7 @@ const WALLET_COMMANDS: Cmd[] = [
   },
   {
     cmd: "signa wallet",
-    desc: "Show your address, ETH + USDC balance on Base mainnet, current nonce, and the RPC you're talking to. Reads come directly from mainnet.base.org — no signa server in the path.",
+    desc: "Show your address, ETH + USDG balance on Robinhood Chain, current nonce, and the RPC you're talking to. Reads come directly from rpc.mainnet.chain.robinhood.com — no signa server in the path.",
   },
   {
     cmd: "signa whoami",
@@ -173,20 +173,20 @@ const MESSAGING_COMMANDS: Cmd[] = [
 const TOKEN_COMMANDS: Cmd[] = [
   {
     cmd: "signa send <to> <amount> <token> [--dry]",
-    desc: "Build, sign, and broadcast an EIP-1559 transaction directly to Base mainnet via viem. Token can be ETH, USDC, or any 0x<erc20> address (decimals fetched on the fly). --dry prints the unsigned tx and exits without broadcasting.",
+    desc: "Build, sign, and broadcast an EIP-1559 transaction directly to Robinhood Chain via viem. Token can be ETH, USDG, or any 0x<erc20> address (decimals fetched on the fly). --dry prints the unsigned tx and exits without broadcasting.",
     example: "signa send vitalik.eth 0.01 ETH",
   },
   {
     cmd: "signa portfolio",
-    desc: "Live token holdings on Base, enriched with your watchlist tokens. Real GeckoTerminal pricing.",
+    desc: "Live token holdings on Robinhood Chain, enriched with your watchlist tokens. Real GeckoTerminal pricing.",
   },
   {
     cmd: "signa trending [--kind=trending|new] [--limit=N]",
-    desc: "Hot tokens on Base via GeckoTerminal. --kind=new shows fresh pools.",
+    desc: "Hot tokens on Robinhood Chain via GeckoTerminal. --kind=new shows fresh pools.",
   },
   {
     cmd: "signa token <0x address>",
-    desc: "Detailed info for a single Base token — price, 24h, volume, market cap, FDV, top pool, basescan link.",
+    desc: "Detailed info for a single Robinhood Chain token — price, 24h, volume, market cap, FDV, top pool, blockscout link.",
   },
   {
     cmd: "signa watchlist",
@@ -229,7 +229,7 @@ const PARTNER_COMMANDS: Cmd[] = [
   },
   {
     cmd: "signa holders <SYMBOL>",
-    desc: "Top SIGNA users holding a partner token (BNKR, GITLAWB, MIROSHARK, USDC, etc.) sourced from live balanceOf reads on Base.",
+    desc: "Top SIGNA users holding a partner token (BNKR, GITLAWB, MIROSHARK on Base, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
   },
 ];
 
@@ -480,8 +480,8 @@ export default function CliPage() {
                 body="signa post / dm / reply / like / rate build the canonical envelope locally, sign with EIP-191, and submit {message, signature, ts}. Server verifies before storing. Any third party can re-verify via signa verify <id>."
               />
               <Pillar
-                title="Tokens go direct to Base"
-                body="signa wallet reads balances straight from mainnet.base.org. signa send builds an EIP-1559 transaction with viem and broadcasts to the RPC. No signa middleman, no custody."
+                title="Tokens go direct to Robinhood Chain"
+                body="signa wallet reads balances straight from rpc.mainnet.chain.robinhood.com. signa send builds an EIP-1559 transaction with viem and broadcasts to the RPC. No signa middleman, no custody."
               />
               <Pillar
                 title="Agent custody is opt-in + auditable"
@@ -525,9 +525,9 @@ export default function CliPage() {
           rows={MESSAGING_COMMANDS}
         />
         <CommandGroup
-          title="Tokens on Base"
+          title="Tokens on Robinhood Chain"
           h2="Move tokens, locally."
-          subtitle="Built + signed locally with viem. Broadcast straight to Base mainnet."
+          subtitle="Built + signed locally with viem. Broadcast straight to Robinhood Chain."
           rows={TOKEN_COMMANDS}
         />
         <CommandGroup
@@ -561,8 +561,8 @@ export default function CliPage() {
               />
               <EnvRow
                 k="SIGNA_BASE_RPC"
-                v="https://mainnet.base.org"
-                d="Override the Base mainnet RPC used by signa wallet and signa send. Point at your own Alchemy / Infura / QuickNode URL if you're moving real volume."
+                v="https://rpc.mainnet.chain.robinhood.com"
+                d="Override the Robinhood Chain RPC used by signa wallet and signa send. Point at your own Alchemy / Infura / QuickNode URL if you're moving real volume."
               />
               <EnvRow
                 k="SIGNA_ETH_RPC"

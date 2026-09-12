@@ -1,7 +1,7 @@
 {
   "name": "signa-x402",
   "version": "0.1.0",
-  "description": "Add verifiable receipts to your x402 server in a few lines. SIGNA binds request → terms → the x402 payment authorization → delivery into one wallet-signed, re-verifiable receipt on Base. Zero dependencies. x402 moves the money, SIGNA proves the deal.",
+  "description": "Add verifiable receipts to your x402 server in a few lines. SIGNA binds request → terms → the x402 payment authorization → delivery into one wallet-signed, re-verifiable receipt on Robinhood Chain. Zero dependencies. x402 moves the money, SIGNA proves the deal.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,7 +24,7 @@
     "agent-payments",
     "receipts",
     "eip-3009",
-    "base",
+    "robinhood-chain",
     "ai-agent",
     "verifiable",
     "onchain"
