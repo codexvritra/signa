@@ -19,15 +19,11 @@ console.log("webhook:", info.result?.url, "pending:", info.result?.pending_updat
 
 // nice-to-have: register the command menu shown in Telegram's UI
 await api("setMyCommands", { commands: [
-  { command: "status", description: "Is B20 live yet?" },
-  { command: "watch", description: "Ping me the instant B20 goes live + launches" },
-  { command: "launches", description: "Latest B20 launches (once B20 is live)" },
-  { command: "unwatch", description: "Stop alerts" },
-  { command: "token", description: "Look up a B20 token by address" },
-  { command: "launch", description: "Launch a verifiable B20" },
+  { command: "watch", description: "Subscribe this chat to SIGNA updates" },
+  { command: "unwatch", description: "Stop updates" },
   { command: "jobs", description: "The agent economy" },
   { command: "stats", description: "Live bot + network stats" },
   { command: "signa", description: "The $SIGNA token" },
   { command: "verify", description: "Re-verify any SIGNA signature" },
 ] });
-console.log("done — message the bot /status to test.");
+console.log("done — message the bot /help to test.");

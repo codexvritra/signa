@@ -1,11 +1,11 @@
-// Local pre-release tester for the SIGNA B20 bot — runs the bot in POLLING mode
+// Local pre-release tester for the SIGNA Telegram bot — runs the bot in POLLING mode
 // against your LOCAL dev server, so you can test every command before going public.
 //
 // Terminal 1:  cd web && npm run dev        (needs .env.local: TELEGRAM_BOT_TOKEN,
 //                                             TELEGRAM_ADMIN_ID, supabase keys)
 // Terminal 2:  node scripts/tg-dev.mjs      (reads .env.local automatically)
 //
-// Then DM your bot /status, /watch, /jobs, /news ... and watch it reply. Nothing is
+// Then DM your bot /watch, /jobs, /news ... and watch it reply. Nothing is
 // deployed and no webhook is set, so this never touches production or the public.
 import { readFileSync } from "node:fs";
 
@@ -27,7 +27,7 @@ const tg = (m, q = "") => fetch(`https://api.telegram.org/bot${TOKEN}/${m}${q}`)
 const me = await tg("getMe");
 if (!me.ok) { console.error("Token rejected by Telegram:", me.description, "— regenerate via @BotFather /mybots → API Token."); process.exit(1); }
 console.log(`✅ @${me.result.username} (${me.result.first_name}) — polling. Forwarding updates → ${TARGET}`);
-console.log("   DM the bot /status, /watch, /jobs ... Ctrl-C to stop.\n");
+console.log("   DM the bot /watch, /jobs ... Ctrl-C to stop.\n");
 
 await tg("deleteWebhook", "?drop_pending_updates=false"); // polling needs no webhook
 
