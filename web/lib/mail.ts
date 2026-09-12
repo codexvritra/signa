@@ -25,7 +25,7 @@ export function normalizeHandle(raw: string): string | null {
 
 /** Canonical preimage the wallet signs to claim a handle. */
 export function handleClaimPreimage(a: { ts: number; handle: string; address: string }): string {
-  return ["SIGNA handle claim v1", `ts:${a.ts}`, `handle:${a.handle.toLowerCase()}`, `address:${a.address.toLowerCase()}`].join("\n");
+  return ["SIGDA handle claim v1", `ts:${a.ts}`, `handle:${a.handle.toLowerCase()}`, `address:${a.address.toLowerCase()}`].join("\n");
 }
 
 type Row = { handle: string; address: string; signature: string; signed_message: string };
@@ -95,6 +95,12 @@ export async function claimHandle(
   const message = handleClaimPreimage({ ts: a.ts, handle, address });
   let recovered = "";
   try { recovered = (await recoverMessageAddress({ message, signature: a.signature as Hex })).toLowerCase(); } catch { /* invalid */ }
+  // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed
+  // preimage so a stale cached client doesn't fail to claim.
+  if (recovered !== address && message.startsWith("SIGDA ")) {
+    const legacy = "SIGNA " + message.slice("SIGDA ".length);
+    try { recovered = (await recoverMessageAddress({ message: legacy, signature: a.signature as Hex })).toLowerCase(); } catch { /* invalid */ }
+  }
   if (recovered !== address) return { ok: false, error: "signature does not match the connected wallet" };
 
   const { data: taken } = await db.from("signa_handles").select("handle").eq("handle", handle).maybeSingle();

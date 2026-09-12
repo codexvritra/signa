@@ -1,7 +1,7 @@
 /**
  * SignaPump — bonding-curve launchpad client lib (Robinhood Chain).
  *
- * Reuses the RH chain config from signa-launch.ts. Address via env
+ * Its own RH chain config (separate testnet chain id/RPC below). Address via env
  * (NEXT_PUBLIC_SIGNA_PUMP_ADDRESS) — empty until the pump is deployed.
  * ⚠️ Custodial contract — testnet only until audited.
  */

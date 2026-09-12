@@ -18,8 +18,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { runBrain2 } from "./brain2";
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
-// USDC on Base — the default settlement asset for the agent economy
-const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+// USDG on Robinhood Chain — the default settlement asset for the agent economy
+const USDG_ROBINHOOD = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
 
 /** Deterministic, keyless wallet for an agent — derived from its slug. */
 export function agentAccount(slug: string) {
@@ -45,7 +45,7 @@ export type AgentThought = {
 };
 
 function dmPreimage(from: string, to: string, body: string, ts: number) {
-  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
+  return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
 
 /** A rotating instruction so each tick forces fresh, in-character, tool-grounded thinking. */
@@ -150,7 +150,7 @@ export async function agentAskBudget(origin: string, agent: LaunchAgent, grantor
   const account = agentAccount(agent.slug);
   const ts = Date.now();
   const amount = usdcRaw(usdc);
-  const pre = ["SIGNA budget request v1", `ts:${ts}`, `agent:${agent.address}`, `grantor:${grantor.toLowerCase()}`, `amount:${amount}`, `goal:${goal}`, `reason:${reason}`].join("\n");
+  const pre = ["SIGDA budget request v1", `ts:${ts}`, `agent:${agent.address}`, `grantor:${grantor.toLowerCase()}`, `amount:${amount}`, `goal:${goal}`, `reason:${reason}`].join("\n");
   const signature = await account.signMessage({ message: pre });
   const r = await fetch(`${origin}/api/requests`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ agent: agent.address, grantor: grantor.toLowerCase(), amount, goal, reason, ts, signature }) }).then((x) => x.json()).catch(() => ({ ok: false }));
   return { ...r, amount, grantor: grantor.toLowerCase() };
@@ -161,7 +161,7 @@ export async function agentSpend(origin: string, agent: LaunchAgent, mandateId: 
   const account = agentAccount(agent.slug);
   const ts = Date.now();
   const amount = usdcRaw(usdc);
-  const pre = ["SIGNA spend v1", `ts:${ts}`, `mandate:${mandateId}`, `agent:${agent.address}`, `amount:${amount}`, `note:${note}`].join("\n");
+  const pre = ["SIGDA spend v1", `ts:${ts}`, `mandate:${mandateId}`, `agent:${agent.address}`, `amount:${amount}`, `note:${note}`].join("\n");
   const signature = await account.signMessage({ message: pre });
   return await fetch(`${origin}/api/mandates/spend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ mandate_id: mandateId, agent: agent.address, amount, note, ts, signature }) }).then((x) => x.json()).catch(() => ({ ok: false }));
 }
@@ -186,13 +186,13 @@ export type AgentJob = {
 };
 
 function jobPostPreimage(a: { ts: number; poster: string; title: string; brief: string; bounty: string; token: string }) {
-  return ["SIGNA agent job v1", `ts:${a.ts}`, `poster:${a.poster.toLowerCase()}`, `title:${a.title}`, `brief:${sha256(a.brief)}`, `bounty:${a.bounty}`, `token:${a.token.toLowerCase()}`].join("\n");
+  return ["SIGDA agent job v1", `ts:${a.ts}`, `poster:${a.poster.toLowerCase()}`, `title:${a.title}`, `brief:${sha256(a.brief)}`, `bounty:${a.bounty}`, `token:${a.token.toLowerCase()}`].join("\n");
 }
 function jobResultPreimage(a: { ts: number; worker: string; job_id: string; result: string }) {
-  return ["SIGNA agent job result v1", `ts:${a.ts}`, `worker:${a.worker.toLowerCase()}`, `job:${a.job_id}`, `result:${sha256(a.result)}`].join("\n");
+  return ["SIGDA agent job result v1", `ts:${a.ts}`, `worker:${a.worker.toLowerCase()}`, `job:${a.job_id}`, `result:${sha256(a.result)}`].join("\n");
 }
 function jobPaymentPreimage(a: { ts: number; from: string; to: string; token: string; amount: string; job_id: string }) {
-  return ["SIGNA agent job payment v1", `ts:${a.ts}`, `from:${a.from.toLowerCase()}`, `to:${a.to.toLowerCase()}`, `token:${a.token.toLowerCase()}`, `amount:${a.amount}`, `job:${a.job_id}`].join("\n");
+  return ["SIGDA agent job payment v1", `ts:${a.ts}`, `from:${a.from.toLowerCase()}`, `to:${a.to.toLowerCase()}`, `token:${a.token.toLowerCase()}`, `amount:${a.amount}`, `job:${a.job_id}`].join("\n");
 }
 
 export async function listJobs(db: SupabaseClient, opts: { status?: string; limit?: number } = {}): Promise<AgentJob[]> {
@@ -213,9 +213,9 @@ export async function postJob(db: SupabaseClient, agent: LaunchAgent, input: { t
   if (!title || !brief) return { ok: false, error: "title and brief required" };
   const bounty = usdcRaw(input.bountyUsdc);
   if (!/^[0-9]{1,30}$/.test(bounty) || bounty === "0") return { ok: false, error: "bounty must be > 0" };
-  // pay in the requested token, else USDC on Base
-  const token = (input.token || USDC_BASE).toLowerCase();
-  const symbol = (input.symbol || "USDC").slice(0, 12);
+  // pay in the requested token, else USDG on Robinhood Chain
+  const token = (input.token || USDG_ROBINHOOD).toLowerCase();
+  const symbol = (input.symbol || "USDG").slice(0, 12);
   const ts = Date.now();
   const account = agentAccount(agent.slug);
   const post_preimage = jobPostPreimage({ ts, poster: agent.address, title, brief, bounty, token });
@@ -270,7 +270,13 @@ export async function settleJob(db: SupabaseClient, origin: string, agent: Launc
   let worker_verified = false;
   try {
     const pre = jobResultPreimage({ ts: job.result_ts as number, worker: job.worker, job_id: jobId, result: job.result });
-    const recovered = (await recoverMessageAddress({ message: pre, signature: job.result_sig as Hex })).toLowerCase();
+    let recovered = (await recoverMessageAddress({ message: pre, signature: job.result_sig as Hex })).toLowerCase();
+    // Pre-rebrand compatibility: a worker on an old cached build may have
+    // signed the legacy "SIGNA"-prefixed preimage — don't refuse payment for it.
+    if (recovered !== job.worker.toLowerCase() && pre.startsWith("SIGDA ")) {
+      const legacyPre = "SIGNA " + pre.slice("SIGDA ".length);
+      recovered = (await recoverMessageAddress({ message: legacyPre, signature: job.result_sig as Hex })).toLowerCase();
+    }
     worker_verified = recovered === job.worker.toLowerCase();
   } catch { worker_verified = false; }
   if (!worker_verified) return { ok: false, error: "worker result signature did not verify — refusing to pay" };

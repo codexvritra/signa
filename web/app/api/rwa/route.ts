@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { attestRegistry, attestStock, findStock, STOCK_TOKENS, RWA_ATTESTOR_ADDRESS, RWA_CHAIN_NAME } from "@/lib/rwa";
-import { RH_CHAIN_ID, RH_EXPLORER } from "@/lib/signa-launch";
+import { RH_CHAIN_ID, RH_EXPLORER } from "@/lib/chain";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

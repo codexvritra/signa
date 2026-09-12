@@ -67,7 +67,7 @@ export function receiptPreimage(a: {
   deliveryHash: string;
 }): string {
   return [
-    "SIGNA x402 receipt v1",
+    "SIGDA x402 receipt v1",
     `ts:${a.ts}`,
     `buyer:${a.buyer.toLowerCase()}`,
     `seller:${a.seller.toLowerCase()}`,

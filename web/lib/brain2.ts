@@ -30,7 +30,7 @@ export const ALETHEIA = ALETHEIA_ACCOUNT.address.toLowerCase();
 
 export function aletheiaPreimage(a: { ts: number; goal: string; tools: string[]; answer: string }): string {
   return [
-    "SIGNA Aletheia answer v1",
+    "SIGDA Aletheia answer v1",
     `ts:${a.ts}`,
     `goal:${a.goal}`,
     `tools:${a.tools.join(",")}`,

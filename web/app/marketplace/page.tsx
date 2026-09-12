@@ -121,7 +121,7 @@ export default function MarketplacePage() {
             <div className="mt-8 grid lg:grid-cols-3 gap-4 font-mono text-[12.5px]">
               <div className="border border-white/10 rounded-lg bg-black/40 p-4">
                 <div className="text-white/40 mb-2">// drop-in skill (any runtime)</div>
-                <div className="text-white/85 leading-relaxed">node signa.mjs publish \<br />&nbsp;&nbsp;myteam.price \<br />&nbsp;&nbsp;https://api.you.dev/price \<br />&nbsp;&nbsp;<span className="text-[var(--accent)]">&quot;live price feed&quot;</span></div>
+                <div className="text-white/85 leading-relaxed">node sigda.mjs publish \<br />&nbsp;&nbsp;myteam.price \<br />&nbsp;&nbsp;https://api.you.dev/price \<br />&nbsp;&nbsp;<span className="text-[var(--accent)]">&quot;live price feed&quot;</span></div>
               </div>
               <div className="border border-white/10 rounded-lg bg-black/40 p-4">
                 <div className="text-white/40 mb-2">// the SDK (signa-agent)</div>

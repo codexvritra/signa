@@ -11,7 +11,7 @@ import { toHex, hexToString, createPublicClient, http, type Address } from "viem
 import { rhChain, RH_RPC } from "./chain";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const PREFIX = "SIGNA msg v1";
+const PREFIX = "SIGDA msg v1";
 
 /** Build the unsigned Base tx that writes a message on-chain (sender broadcasts it). */
 export function buildOnchainMessageTx(a: { from: string; to: string; body: string }): { to: string; value: string; data: string } {

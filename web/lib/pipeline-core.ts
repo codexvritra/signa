@@ -31,7 +31,7 @@ export type PipelineLink = {
 /** Canonical preimage the gateway signs for one link (bit-for-bit on verify). */
 export function linkPreimage(runId: string, l: PipelineLink): string {
   return [
-    "SIGNA pipeline link v1",
+    "SIGDA pipeline link v1",
     `run:${runId}`,
     `step:${l.step}`,
     `cap:${l.cap}`,

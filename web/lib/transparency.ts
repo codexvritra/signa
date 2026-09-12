@@ -56,6 +56,12 @@ export type Checkpoint = {
  * guarantees its content; the log commits to the SET of (kind, id, signature).
  * Reproducible by anyone from the public rows.
  */
+// NOTE: intentionally NOT rebranded to "SIGDA" — this is a Merkle-leaf input
+// rebuilt from EVERY historical ledger entry on every tick()/inclusionFor()/
+// consistencyFor() call, not a one-time signed message. Changing this string
+// changes every leaf hash retroactively, producing a different Merkle root
+// than every previously-published checkpoint and breaking all prior
+// inclusion/consistency proofs. Leave it as "SIGNA" forever.
 export function leafEntry(e: LedgerEntry): string {
   return ["SIGNA log leaf v2", `kind:${e.kind}`, `id:${e.id}`, `sig:${e.signature ?? ""}`].join("\n");
 }
@@ -63,7 +69,7 @@ export function leafEntry(e: LedgerEntry): string {
 /** The canonical checkpoint preimage the log signer signs. */
 export function checkpointPreimage(c: { seq: number; tree_size: number; prev_root: string; root: string; ts: number }): string {
   return [
-    "SIGNA log checkpoint v1",
+    "SIGDA log checkpoint v1",
     `seq:${c.seq}`,
     `size:${c.tree_size}`,
     `prev:${c.prev_root}`,

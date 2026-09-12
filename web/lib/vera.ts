@@ -32,7 +32,7 @@ const GOALS = [
 ];
 
 function dmPreimage(from: string, to: string, body: string, ts: number) {
-  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
+  return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
 
 export type VeraThought = {

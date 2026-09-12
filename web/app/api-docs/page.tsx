@@ -91,7 +91,7 @@ const ENDPOINTS = [
       },
       {
         method: "GET",
-        path: "/signa.mjs",
+        path: "/sigda.mjs",
         summary: "the CLI source served as a static file (audit-able)",
       },
     ],

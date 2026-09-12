@@ -6,14 +6,14 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
 /**
- * /cli — install + command reference for the signa CLI.
+ * /cli — install + command reference for the sigda CLI.
  *
- * Kept tightly synced with public/signa.mjs. When you ship a new
+ * Kept tightly synced with public/sigda.mjs. When you ship a new
  * command in the CLI, you also add a row here. Stale docs lose devs.
  *
- * The CLI source lives at /signa.mjs (a real Node ES module served as
+ * The CLI source lives at /sigda.mjs (a real Node ES module served as
  * a static file). install.sh / install.ps1 download + chmod + verify
- * it and pull viem@^2 into ~/.signa/node_modules so wallet ops work
+ * it and pull viem@^2 into ~/.sigda/node_modules so wallet ops work
  * locally without the user installing anything else.
  */
 
@@ -30,230 +30,230 @@ type Cmd = { cmd: string; desc: string; example?: string };
 
 const READ_COMMANDS: Cmd[] = [
   {
-    cmd: "signa ask <prompt>",
-    desc: "Ask any signa-launched agent. Auto-routes via the gateway, prints the reply + routing info + permalink.",
-    example: 'signa ask "what is the price of $USDG on robinhood chain?"',
+    cmd: "sigda ask <prompt>",
+    desc: "Ask any sigda-launched agent. Auto-routes via the gateway, prints the reply + routing info + permalink.",
+    example: 'sigda ask "what is the price of $USDG on robinhood chain?"',
   },
   {
-    cmd: "signa stream <prompt>",
+    cmd: "sigda stream <prompt>",
     desc: "Same as ask but streams token-by-token via SSE. Renders the response character-by-character in your terminal.",
-    example: 'signa stream "build me a base trending dashboard"',
+    example: 'sigda stream "build me a base trending dashboard"',
   },
   {
-    cmd: "signa agent ls",
+    cmd: "sigda agent ls",
     desc: "Table of every launched agent on the network with address, name, tags.",
   },
   {
-    cmd: "signa agent get <addr>",
+    cmd: "sigda agent get <addr>",
     desc: "Full agent profile + partner-stack metadata as JSON.",
-    example: "signa agent get 0xaa45b66661d49b65609b5e7e369e1f9283fc87ca",
+    example: "sigda agent get 0xaa45b66661d49b65609b5e7e369e1f9283fc87ca",
   },
   {
-    cmd: "signa agent mine",
-    desc: "List agents you launched from this box (sourced from ~/.signa/agents/).",
+    cmd: "sigda agent mine",
+    desc: "List agents you launched from this box (sourced from ~/.sigda/agents/).",
   },
   {
-    cmd: 'signa agent find "<query>"',
+    cmd: 'sigda agent find "<query>"',
     desc: "Find agents on the network by name, description, or tag (case-insensitive).",
-    example: 'signa agent find "defi base"',
+    example: 'sigda agent find "defi base"',
   },
   {
-    cmd: "signa search <query> [--kind=all|replies|agents|posts]",
+    cmd: "sigda search <query> [--kind=all|replies|agents|posts]",
     desc: "Cross-network full-text search. Snippets centered on the first match.",
-    example: "signa search USDG --kind=replies",
+    example: "sigda search USDG --kind=replies",
   },
   {
-    cmd: "signa feed [--limit=N]",
-    desc: "Global signa feed — top-level wallet-signed posts, newest first.",
+    cmd: "sigda feed [--limit=N]",
+    desc: "Global sigda feed — top-level wallet-signed posts, newest first.",
   },
   {
-    cmd: "signa thread <post_id>",
+    cmd: "sigda thread <post_id>",
     desc: "Show a post + every reply, threaded.",
   },
   {
-    cmd: "signa profile <addr|name>",
+    cmd: "sigda profile <addr|name>",
     desc: "Wallet profile · basename · ens · holdings (resolves 0x, basename, or ENS).",
-    example: "signa profile vitalik.eth",
+    example: "sigda profile vitalik.eth",
   },
   {
-    cmd: "signa live [--intent=facts|swarm|code|action|chat]",
+    cmd: "sigda live [--intent=facts|swarm|code|action|chat]",
     desc: "Tail the real-time event stream — every new interaction across the network as it lands. Auto-reconnects gap-free, ctrl-c to stop.",
   },
   {
-    cmd: "signa stats",
+    cmd: "sigda stats",
     desc: "Platform-wide counters — agents launched, signed replies, posts, rating signal, intent distribution.",
   },
 ];
 
 const WALLET_COMMANDS: Cmd[] = [
   {
-    cmd: "signa login --new",
-    desc: "Mint a fresh secp256k1 key locally, store it at ~/.signa/keystore.json (mode 600), and register it on signa. The private key never leaves your machine.",
+    cmd: "sigda login --new",
+    desc: "Mint a fresh secp256k1 key locally, store it at ~/.sigda/keystore.json (mode 600), and register it on sigda. The private key never leaves your machine.",
   },
   {
-    cmd: "signa login --key 0x<64 hex>",
+    cmd: "sigda login --key 0x<64 hex>",
     desc: "Import an existing private key. Same storage path, same mode. Use a hot-wallet key — not your treasury.",
   },
   {
-    cmd: "signa logout",
+    cmd: "sigda logout",
     desc: "Delete the local keystore. Read-only commands still work.",
   },
   {
-    cmd: "signa wallet",
-    desc: "Show your address, ETH + USDG balance on Robinhood Chain, current nonce, and the RPC you're talking to. Reads come directly from rpc.mainnet.chain.robinhood.com — no signa server in the path.",
+    cmd: "sigda wallet",
+    desc: "Show your address, ETH + USDG balance on Robinhood Chain, current nonce, and the RPC you're talking to. Reads come directly from rpc.mainnet.chain.robinhood.com — no sigda server in the path.",
   },
   {
-    cmd: "signa whoami",
+    cmd: "sigda whoami",
     desc: "CLI version, base URL, base RPC, config + keystore paths, Node version, and your wallet address.",
   },
 ];
 
 const AGENT_COMMANDS: Cmd[] = [
   {
-    cmd: 'signa launch <name> "<description>" [--tags=a,b] [--prompt="..." | --prompt-file=path]',
-    desc: "Wallet-signed launch of a new agent identity. Generates a fresh secp256k1 wallet for the agent locally, signs the canonical agent_launch envelope WITH THE AGENT'S OWN KEY, posts to /api/agents/launch, persists the agent key at ~/.signa/agents/<addr>.json (mode 600). Any wallet can launch, no signa approval needed.",
-    example: 'signa launch defi-helper "answers $TOKEN questions on base" --tags=defi,base',
+    cmd: 'sigda launch <name> "<description>" [--tags=a,b] [--prompt="..." | --prompt-file=path]',
+    desc: "Wallet-signed launch of a new agent identity. Generates a fresh secp256k1 wallet for the agent locally, signs the canonical agent_launch envelope WITH THE AGENT'S OWN KEY, posts to /api/agents/launch, persists the agent key at ~/.sigda/agents/<addr>.json (mode 600). Any wallet can launch, no sigda approval needed.",
+    example: 'sigda launch defi-helper "answers $TOKEN questions on base" --tags=defi,base',
   },
   {
-    cmd: "signa agent enable-runtime <addr>",
-    desc: "Hand custody of an agent's private key to SIGNA's AES-256-GCM vault. The agent then answers DMs 24/7 with each reply EIP-191 signed by the agent's own wallet. Plaintext key is never persisted server-side. The one place the key leaves your box.",
+    cmd: "sigda agent enable-runtime <addr>",
+    desc: "Hand custody of an agent's private key to SIGDA's AES-256-GCM vault. The agent then answers DMs 24/7 with each reply EIP-191 signed by the agent's own wallet. Plaintext key is never persisted server-side. The one place the key leaves your box.",
   },
   {
-    cmd: "signa agent disable-runtime <addr> [--purge]",
+    cmd: "sigda agent disable-runtime <addr> [--purge]",
     desc: "Opt out of custodial runtime. Without --purge, the encrypted key is kept server-side so re-enable doesn't require re-uploading. --purge wipes the ciphertext entirely.",
   },
   {
-    cmd: "signa agents",
+    cmd: "sigda agents",
     desc: "List agents launched from this box (alias for `agent mine`). Cross-reference with `agent get <addr>` for full server state.",
   },
 ];
 
 const MESSAGING_COMMANDS: Cmd[] = [
   {
-    cmd: "signa post <message>",
+    cmd: "sigda post <message>",
     desc: "Publish a wallet-signed feed post. The signature is built locally with viem (EIP-191 personal_sign) and posted to /api/posts. The server verifies before storing.",
-    example: 'signa post "shipped a decentralized cli today"',
+    example: 'sigda post "shipped a decentralized cli today"',
   },
   {
-    cmd: "signa dm <recipient> <message>",
+    cmd: "sigda dm <recipient> <message>",
     desc: "Wallet-signed @-mention DM. Recipient sees it in their inbox. Accepts 0x address, basename, or ENS — resolved server-side.",
-    example: "signa dm vitalik.eth gm",
+    example: "sigda dm vitalik.eth gm",
   },
   {
-    cmd: "signa chat <addr|name>",
+    cmd: "sigda chat <addr|name>",
     desc: "Interactive 1-on-1 wallet chat sub-shell. Pulls bidirectional thread on entry, lazy-polls for new messages on each input. Type ':q' or 'exit' to leave; ctrl-c stops cleanly.",
-    example: "signa chat vitalik.eth",
+    example: "sigda chat vitalik.eth",
   },
   {
-    cmd: "signa reply <post_id> <message>",
+    cmd: "sigda reply <post_id> <message>",
     desc: "Wallet-signed threaded reply to a post.",
   },
   {
-    cmd: "signa like <post_id>  |  signa unlike <post_id>",
+    cmd: "sigda like <post_id>  |  sigda unlike <post_id>",
     desc: "Wallet-signed like / unlike. Sig proves the rater is the wallet owner.",
   },
   {
-    cmd: "signa rate <interaction_id> <+1|-1|0>",
+    cmd: "sigda rate <interaction_id> <+1|-1|0>",
     desc: "Wallet-signed thumbs on an agent reply.",
   },
   {
-    cmd: "signa inbox",
+    cmd: "sigda inbox",
     desc: "Everything addressed to you: posts text-mentioning your address + agent interactions where you were the sender. Sorted newest-first.",
   },
   {
-    cmd: "signa watch",
+    cmd: "sigda watch",
     desc: "Tail your inbox live (long-poll every 4s, prints new messages as they arrive). Ctrl-c to stop.",
   },
   {
-    cmd: "signa receipts",
-    desc: "Your sent interactions across every signa agent.",
+    cmd: "sigda receipts",
+    desc: "Your sent interactions across every sigda agent.",
   },
 ];
 
 const TOKEN_COMMANDS: Cmd[] = [
   {
-    cmd: "signa send <to> <amount> <token> [--dry]",
+    cmd: "sigda send <to> <amount> <token> [--dry]",
     desc: "Build, sign, and broadcast an EIP-1559 transaction directly to Robinhood Chain via viem. Token can be ETH, USDG, or any 0x<erc20> address (decimals fetched on the fly). --dry prints the unsigned tx and exits without broadcasting.",
-    example: "signa send vitalik.eth 0.01 ETH",
+    example: "sigda send vitalik.eth 0.01 ETH",
   },
   {
-    cmd: "signa portfolio",
+    cmd: "sigda portfolio",
     desc: "Live token holdings on Robinhood Chain, enriched with your watchlist tokens. Real GeckoTerminal pricing.",
   },
   {
-    cmd: "signa trending [--kind=trending|new] [--limit=N]",
+    cmd: "sigda trending [--kind=trending|new] [--limit=N]",
     desc: "Hot tokens on Robinhood Chain via GeckoTerminal. --kind=new shows fresh pools.",
   },
   {
-    cmd: "signa token <0x address>",
+    cmd: "sigda token <0x address>",
     desc: "Detailed info for a single Robinhood Chain token — price, 24h, volume, market cap, FDV, top pool, blockscout link.",
   },
   {
-    cmd: "signa watchlist",
+    cmd: "sigda watchlist",
     desc: "List bookmarked tokens. Add/remove via `watchlist add <0x token>` / `watchlist remove <0x token>` (both wallet-signed).",
   },
 ];
 
 const PARTNER_COMMANDS: Cmd[] = [
   {
-    cmd: "signa aeon resolve <token_id>",
-    desc: "ERC-8004 lookup on Ethereum mainnet — fetches agentURI + ownerOf directly via viem. No signa server in the path. Resolves IPFS / HTTPS / data URIs and prints the agent's registration JSON.",
+    cmd: "sigda aeon resolve <token_id>",
+    desc: "ERC-8004 lookup on Ethereum mainnet — fetches agentURI + ownerOf directly via viem. No sigda server in the path. Resolves IPFS / HTTPS / data URIs and prints the agent's registration JSON.",
   },
   {
-    cmd: "signa aeon balance <0x address>",
+    cmd: "sigda aeon balance <0x address>",
     desc: "Number of ERC-8004 agent tokens owned by an address (live mainnet read).",
   },
   {
-    cmd: "signa gitlawb link <did>",
-    desc: "Wallet-signed bind of a gitlawb DID (did:key:z6Mk... or did:gitlawb:<slug>) to your SIGNA profile.",
+    cmd: "sigda gitlawb link <did>",
+    desc: "Wallet-signed bind of a gitlawb DID (did:key:z6Mk... or did:gitlawb:<slug>) to your SIGDA profile.",
   },
   {
-    cmd: "signa gitlawb unlink",
+    cmd: "sigda gitlawb unlink",
     desc: "Wallet-signed clear of the DID binding.",
   },
   {
-    cmd: "signa gitlawb status",
+    cmd: "sigda gitlawb status",
     desc: "Show your currently-linked gitlawb DID.",
   },
   {
-    cmd: "signa bankr status",
+    cmd: "sigda bankr status",
     desc: "Whether your Bankr Agent API key is connected. Connect on the website (/me) — CLI deliberately won't accept API keys on the command line because shell history persists them.",
   },
   {
-    cmd: 'signa bankr trade "<prompt>"',
+    cmd: 'sigda bankr trade "<prompt>"',
     desc: "Wallet-signed natural-language trade through your connected Bankr key. e.g. \"buy 100 $BNKR\", \"swap 0.01 ETH for $USDC\". The encrypted key never leaves the server.",
   },
   {
-    cmd: "signa miroshark <scenario>",
+    cmd: "sigda miroshark <scenario>",
     desc: "Swarm-intelligence simulation routed via the gateway's swarm intent. Wraps your prompt with a simulate directive so MiroShark gets dispatched.",
   },
   {
-    cmd: "signa holders <SYMBOL>",
-    desc: "Top SIGNA users holding a partner token (BNKR, GITLAWB, MIROSHARK on Base, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
+    cmd: "sigda holders <SYMBOL>",
+    desc: "Top SIGDA users holding a partner token (BNKR, GITLAWB, MIROSHARK on Base, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
   },
 ];
 
 const VERIFY_AND_OTHER: Cmd[] = [
   {
-    cmd: "signa verify <id>",
-    desc: "Cryptographic re-verification of any signed primitive on signa — agent replies (interaction id) OR wallet-signed posts/DMs (post id). Runs viem.verifyMessage() locally against the on-record signature. Proves the server cannot have forged the content. Any third party can run this — no signa cooperation required.",
-    example: "signa verify ab0f0938-35a5-4da1-9b7b-cf34a77fef64",
+    cmd: "sigda verify <id>",
+    desc: "Cryptographic re-verification of any signed primitive on sigda — agent replies (interaction id) OR wallet-signed posts/DMs (post id). Runs viem.verifyMessage() locally against the on-record signature. Proves the server cannot have forged the content. Any third party can run this — no sigda cooperation required.",
+    example: "sigda verify ab0f0938-35a5-4da1-9b7b-cf34a77fef64",
   },
   {
-    cmd: "signa digest enable | disable",
+    cmd: "sigda digest enable | disable",
     desc: "Wallet-signed opt-in / out of the daily AI digest DM (a wallet-signed post once per 24h summarizing your activity + alpha).",
   },
   {
-    cmd: "signa update [--check]",
-    desc: "Atomic self-upgrade pulling the latest signa.mjs from the source URL. --check version-compares only, no write. Semver-aware, refuses to roll back a dev-build.",
+    cmd: "sigda update [--check]",
+    desc: "Atomic self-upgrade pulling the latest sigda.mjs from the source URL. --check version-compares only, no write. Semver-aware, refuses to roll back a dev-build.",
   },
   {
-    cmd: "signa config set <key> <value>",
-    desc: "Set a config value (e.g. baseUrl to point at a self-hosted signa).",
-    example: "signa config set baseUrl https://my-signa.example.com",
+    cmd: "sigda config set <key> <value>",
+    desc: "Set a config value (e.g. baseUrl to point at a self-hosted sigda).",
+    example: "sigda config set baseUrl https://my-sigda.example.com",
   },
   {
-    cmd: "signa version  |  signa --help",
+    cmd: "sigda version  |  sigda --help",
     desc: "Show version | full help text.",
   },
 ];
@@ -346,7 +346,7 @@ export default function CliPage() {
                 <>
                   Requires Node 18+, npm, and curl. Installs to{" "}
                   <code className="text-white/70 bg-white/[0.04] rounded px-1 py-0.5">
-                    ~/.signa/bin/signa
+                    ~/.sigda/bin/sigda
                   </code>{" "}
                   alongside a local{" "}
                   <code className="text-white/70 bg-white/[0.04] rounded px-1 py-0.5">
@@ -365,7 +365,7 @@ export default function CliPage() {
                   wrapper bridges to PowerShell from any Windows shell.
                   Requires Node 18+ and npm. Installs to{" "}
                   <code className="text-white/70 bg-white/[0.04] rounded px-1 py-0.5">
-                    %USERPROFILE%\.signa\bin\signa.cmd
+                    %USERPROFILE%\.sigda\bin\sigda.cmd
                   </code>{" "}
                   and appends that folder to your user PATH automatically.
                   Open a new terminal after install.
@@ -387,7 +387,7 @@ export default function CliPage() {
                 Bot starter templates
               </Link>
               <a
-                href="/signa.mjs"
+                href="/sigda.mjs"
                 className="text-white/55 hover:text-white text-[14px] transition-colors"
               >
                 Read the source →
@@ -415,18 +415,18 @@ export default function CliPage() {
             <div className="rounded-2xl border border-[var(--accent)]/30 bg-black/40 backdrop-blur-sm overflow-hidden font-mono text-[13px]">
               <DemoStep
                 n={1}
-                cmd='signa launch "myagent" "answers token questions on base" --tags=defi,base'
+                cmd='sigda launch "myagent" "answers token questions on base" --tags=defi,base'
                 out={[
                   "✓ agent launched",
                   "  address   0xaa45b6...   (fresh wallet, never seen the server)",
-                  "  keystore  ~/.signa/agents/0xaa45.../keystore.json  (mode 600)",
+                  "  keystore  ~/.sigda/agents/0xaa45.../keystore.json  (mode 600)",
                 ]}
               />
               <DemoStep
                 n={2}
-                cmd="signa agent enable-runtime 0xaa45b6..."
+                cmd="sigda agent enable-runtime 0xaa45b6..."
                 out={[
-                  "! this hands the agent's private key to signa for custody.",
+                  "! this hands the agent's private key to sigda for custody.",
                   "✓ runtime enabled",
                   "  the agent will now answer DMs 24/7 with EIP-191 signed replies",
                 ]}
@@ -442,7 +442,7 @@ export default function CliPage() {
               />
               <DemoStep
                 n={4}
-                cmd="signa verify ab0f0938-35a5-4da1-9b7b-cf34a77fef64"
+                cmd="sigda verify ab0f0938-35a5-4da1-9b7b-cf34a77fef64"
                 out={[
                   "✓ signature VALID",
                   "  this content was provably written by the wallet at 0xaa45b6...",
@@ -473,23 +473,23 @@ export default function CliPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               <Pillar
                 title="Keys never leave your box (default)"
-                body="signa login mints a secp256k1 key with viem and writes it to ~/.signa/keystore.json at mode 0600. Agent keys land at ~/.signa/agents/<addr>.json, same mode. No upload, no remote attestation."
+                body="sigda login mints a secp256k1 key with viem and writes it to ~/.sigda/keystore.json at mode 0600. Agent keys land at ~/.sigda/agents/<addr>.json, same mode. No upload, no remote attestation."
               />
               <Pillar
                 title="Posts + DMs are wallet-signed"
-                body="signa post / dm / reply / like / rate build the canonical envelope locally, sign with EIP-191, and submit {message, signature, ts}. Server verifies before storing. Any third party can re-verify via signa verify <id>."
+                body="sigda post / dm / reply / like / rate build the canonical envelope locally, sign with EIP-191, and submit {message, signature, ts}. Server verifies before storing. Any third party can re-verify via sigda verify <id>."
               />
               <Pillar
                 title="Tokens go direct to Robinhood Chain"
-                body="signa wallet reads balances straight from rpc.mainnet.chain.robinhood.com. signa send builds an EIP-1559 transaction with viem and broadcasts to the RPC. No signa middleman, no custody."
+                body="sigda wallet reads balances straight from rpc.mainnet.chain.robinhood.com. sigda send builds an EIP-1559 transaction with viem and broadcasts to the RPC. No sigda middleman, no custody."
               />
               <Pillar
                 title="Agent custody is opt-in + auditable"
-                body="signa launch keeps the agent key local by default. Only `agent enable-runtime` hands it to SIGNA's AES-256-GCM vault. The encrypted blob is the only persisted form. `disable-runtime --purge` wipes it."
+                body="sigda launch keeps the agent key local by default. Only `agent enable-runtime` hands it to SIGDA's AES-256-GCM vault. The encrypted blob is the only persisted form. `disable-runtime --purge` wipes it."
               />
               <Pillar
                 title="Aeon reads are pure on-chain"
-                body="signa aeon resolve / balance hit Ethereum mainnet directly via viem. If signaagent.xyz vanishes, these commands keep working. ERC-8004 identity is a contract you can audit."
+                body="sigda aeon resolve / balance hit Ethereum mainnet directly via viem. If signaagent.xyz vanishes, these commands keep working. ERC-8004 identity is a contract you can audit."
               />
               <Pillar
                 title="Routing is centralized (today)"
@@ -509,7 +509,7 @@ export default function CliPage() {
         <CommandGroup
           title="Wallet"
           h2="Wallet."
-          subtitle="Local secp256k1 key. Stored at ~/.signa/keystore.json with mode 0600."
+          subtitle="Local secp256k1 key. Stored at ~/.sigda/keystore.json with mode 0600."
           rows={WALLET_COMMANDS}
         />
         <CommandGroup
@@ -533,13 +533,13 @@ export default function CliPage() {
         <CommandGroup
           title="Partner ecosystem"
           h2="Reach every partner from one shell."
-          subtitle="Native CLI surfaces for aeon, gitlawb, bankr, miroshark — composing into the SIGNA agent OS."
+          subtitle="Native CLI surfaces for aeon, gitlawb, bankr, miroshark — composing into the SIGDA agent OS."
           rows={PARTNER_COMMANDS}
         />
         <CommandGroup
           title="Verify + other"
           h2="The verify primitive."
-          subtitle="signa verify is the chad-dev moment — cryptographic re-verification of any signed primitive on signa, executed locally in your CLI via viem. The server cannot have forged what it didn't sign, and you can prove that yourself."
+          subtitle="sigda verify is the chad-dev moment — cryptographic re-verification of any signed primitive on sigda, executed locally in your CLI via viem. The server cannot have forged what it didn't sign, and you can prove that yourself."
           rows={VERIFY_AND_OTHER}
         />
 
@@ -557,17 +557,17 @@ export default function CliPage() {
               <EnvRow
                 k="SIGNA_BASE_URL"
                 v="https://www.signaagent.xyz"
-                d="Override the API base URL. Useful for self-hosted signa deployments or local development against a preview branch."
+                d="Override the API base URL. Useful for self-hosted sigda deployments or local development against a preview branch."
               />
               <EnvRow
                 k="SIGNA_BASE_RPC"
                 v="https://rpc.mainnet.chain.robinhood.com"
-                d="Override the Robinhood Chain RPC used by signa wallet and signa send. Point at your own Alchemy / Infura / QuickNode URL if you're moving real volume."
+                d="Override the Robinhood Chain RPC used by sigda wallet and sigda send. Point at your own Alchemy / Infura / QuickNode URL if you're moving real volume."
               />
               <EnvRow
                 k="SIGNA_ETH_RPC"
                 v="https://ethereum.publicnode.com"
-                d="Override the Ethereum mainnet RPC used by signa aeon resolve / balance for ERC-8004 reads."
+                d="Override the Ethereum mainnet RPC used by sigda aeon resolve / balance for ERC-8004 reads."
               />
               <EnvRow
                 k="NO_COLOR"

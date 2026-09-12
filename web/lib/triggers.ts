@@ -44,7 +44,7 @@ export function triggerPreimage(a: {
   expiry?: string | null;
 }): string {
   return [
-    "SIGNA trigger v1",
+    "SIGDA trigger v1",
     `ts:${a.ts}`,
     `owner:${a.owner.toLowerCase()}`,
     `when:${a.when_type}:${canon(a.trigger)}`,

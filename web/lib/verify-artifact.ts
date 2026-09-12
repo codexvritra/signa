@@ -1,12 +1,12 @@
 /**
- * The universal verifier for the SIGNA message layer.
+ * The universal verifier for the SIGDA message layer.
  *
- * Every message and proof in SIGNA — an agent↔agent DM, a human↔agent DM, a
+ * Every message and proof in SIGDA — an agent↔agent DM, a human↔agent DM, a
  * room message, a delivery ack, a capability result, a brain receipt, a
  * pipeline link — is an
  * EIP-191 wallet signature over a canonical preimage. This module rebuilds the
  * preimage for any artifact kind and RECOVERS the signer, so anyone can confirm
- * who actually signed it without trusting SIGNA. Don't trust, verify.
+ * who actually signed it without trusting SIGDA. Don't trust, verify.
  *
  * Pure except for viem's recoverMessageAddress + node:crypto hashing.
  */
@@ -16,7 +16,7 @@ import { createHash } from "node:crypto";
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
-// deterministic SIGNA service identities (the expected signer for some kinds)
+// deterministic SIGDA service identities (the expected signer for some kinds)
 const GATEWAY = privateKeyToAccount(keccak256(toBytes("signa:capability-gateway:v1"))).address.toLowerCase();
 const BRAIN = privateKeyToAccount(keccak256(toBytes("signa:brain:v1"))).address.toLowerCase();
 const X402_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1"))).address.toLowerCase();
@@ -55,7 +55,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
   switch (kind) {
     case "dm": {
       const from = String(a.from ?? "").toLowerCase();
-      const lines = ["SIGNA agent dm v1", `ts:${a.ts}`, `from:${from}`, `to:${String(a.to ?? "").toLowerCase()}`];
+      const lines = ["SIGDA agent dm v1", `ts:${a.ts}`, `from:${from}`, `to:${String(a.to ?? "").toLowerCase()}`];
       if (a.body_type && a.body_type !== "text") lines.push(`body_type:${a.body_type}`);
       if (a.protocol && a.protocol !== "signa.dm.v1") lines.push(`protocol:${a.protocol}`);
       if (a.in_reply_to) lines.push(`in_reply_to:${a.in_reply_to}`);
@@ -64,7 +64,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
     }
     case "room": {
       const from = String(a.from ?? "").toLowerCase();
-      const lines = ["SIGNA room message v1", `ts:${a.ts}`, `from:${from}`, `room:${a.room ?? ""}`];
+      const lines = ["SIGDA room message v1", `ts:${a.ts}`, `from:${from}`, `room:${a.room ?? ""}`];
       if (a.in_reply_to) lines.push(`in_reply_to:${a.in_reply_to}`);
       lines.push(`body:${a.body ?? ""}`);
       return { preimage: lines.join("\n"), expected: from || null, role: "sender wallet" };
@@ -75,7 +75,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       // match buildMessageToSign({ kind: "agent_dm_ack" }) byte-for-byte.
       const from = String(a.from ?? "").toLowerCase();
       const pre = [
-        "SIGNA delivery ack v1",
+        "SIGDA delivery ack v1",
         `ts:${a.ts}`,
         `message:${a.message ?? ""}`,
         `from:${from}`,
@@ -87,23 +87,23 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
     case "capability": {
       // accept raw output (we hash it) or a precomputed output_hash
       const outHash = a.output_hash ? String(a.output_hash) : sha256(JSON.stringify(a.output ?? null));
-      const pre = ["SIGNA capability result v1", `cap:${a.cap ?? ""}`, `input:${a.input ?? ""}`, `provider:${a.provider ?? ""}`, `ts:${a.ts}`, `output:${outHash}`].join("\n");
-      return { preimage: pre, expected: GATEWAY, role: "SIGNA capability gateway" };
+      const pre = ["SIGDA capability result v1", `cap:${a.cap ?? ""}`, `input:${a.input ?? ""}`, `provider:${a.provider ?? ""}`, `ts:${a.ts}`, `output:${outHash}`].join("\n");
+      return { preimage: pre, expected: GATEWAY, role: "SIGDA capability gateway" };
     }
     case "brain": {
       const ansHash = a.answer_hash ? String(a.answer_hash) : sha256(String(a.answer ?? ""));
       const tools = Array.isArray(a.tools) ? (a.tools as unknown[]).join(",") : String(a.tools ?? "");
-      const pre = ["SIGNA brain receipt v1", `ts:${a.ts}`, `goal:${a.goal ?? ""}`, `tools:${tools}`, `answer:${ansHash}`].join("\n");
-      return { preimage: pre, expected: BRAIN, role: "SIGNA brain" };
+      const pre = ["SIGDA brain receipt v1", `ts:${a.ts}`, `goal:${a.goal ?? ""}`, `tools:${tools}`, `answer:${ansHash}`].join("\n");
+      return { preimage: pre, expected: BRAIN, role: "SIGDA brain" };
     }
     case "pipeline_link": {
-      const pre = ["SIGNA pipeline link v1", `run:${a.runId ?? a.run ?? ""}`, `step:${a.step}`, `cap:${a.cap ?? ""}`, `provider:${String(a.provider ?? "").toLowerCase()}`, `input:${a.input_hash ?? ""}`, `output:${a.output_hash ?? ""}`, `prev:${a.prev ?? ""}`, `ts:${a.ts}`].join("\n");
-      return { preimage: pre, expected: GATEWAY, role: "SIGNA capability gateway" };
+      const pre = ["SIGDA pipeline link v1", `run:${a.runId ?? a.run ?? ""}`, `step:${a.step}`, `cap:${a.cap ?? ""}`, `provider:${String(a.provider ?? "").toLowerCase()}`, `input:${a.input_hash ?? ""}`, `output:${a.output_hash ?? ""}`, `prev:${a.prev ?? ""}`, `ts:${a.ts}`].join("\n");
+      return { preimage: pre, expected: GATEWAY, role: "SIGDA capability gateway" };
     }
     case "x402_receipt": {
-      // the SIGNA attestor signs a receipt binding request->terms->payment->delivery
+      // the SIGDA attestor signs a receipt binding request->terms->payment->delivery
       const pre = [
-        "SIGNA x402 receipt v1",
+        "SIGDA x402 receipt v1",
         `ts:${a.ts}`,
         `buyer:${String(a.buyer ?? "").toLowerCase()}`,
         `seller:${String(a.seller ?? "").toLowerCase()}`,
@@ -115,7 +115,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `payment:${a.payment_hash ?? ""}`,
         `delivery:${a.delivery_hash ?? ""}`,
       ].join("\n");
-      return { preimage: pre, expected: X402_ATTESTOR, role: "SIGNA x402 receipt attestor" };
+      return { preimage: pre, expected: X402_ATTESTOR, role: "SIGDA x402 receipt attestor" };
     }
     case "agent_job": {
       // v4.2 — an agent posts a job to the verifiable agent economy: it wallet-signs
@@ -123,7 +123,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       const poster = String(a.poster ?? "").toLowerCase();
       const briefHash = a.brief_hash ? String(a.brief_hash) : sha256(String(a.brief ?? ""));
       const pre = [
-        "SIGNA agent job v1",
+        "SIGDA agent job v1",
         `ts:${a.ts}`,
         `poster:${poster}`,
         `title:${a.title ?? ""}`,
@@ -139,7 +139,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       const worker = String(a.worker ?? "").toLowerCase();
       const resHash = a.result_hash ? String(a.result_hash) : sha256(String(a.result ?? ""));
       const pre = [
-        "SIGNA agent job result v1",
+        "SIGDA agent job result v1",
         `ts:${a.ts}`,
         `worker:${worker}`,
         `job:${a.job ?? a.job_id ?? ""}`,
@@ -152,7 +152,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       // Must match lib/deals.ts dealOfferPreimage().
       const from = String(a.from ?? "").toLowerCase();
       const pre = [
-        "SIGNA deal offer v1",
+        "SIGDA deal offer v1",
         `ts:${a.ts}`,
         `from:${from}`,
         `to:${String(a.to ?? "").toLowerCase()}`,
@@ -166,19 +166,19 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
     case "deal_accept": {
       // The seller signs the deal_id (= the exact terms). expected = accepter (seller).
       const accepter = String(a.accepter ?? "").toLowerCase();
-      const pre = ["SIGNA deal accept v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `accepter:${accepter}`].join("\n");
+      const pre = ["SIGDA deal accept v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `accepter:${accepter}`].join("\n");
       return { preimage: pre, expected: accepter || null, role: "deal seller wallet" };
     }
     case "deal_deliver": {
       // The seller signs the result. expected = worker (seller).
       const worker = String(a.worker ?? "").toLowerCase();
-      const pre = ["SIGNA deal deliver v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `worker:${worker}`, `result:${a.result ?? ""}`].join("\n");
+      const pre = ["SIGDA deal deliver v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `worker:${worker}`, `result:${a.result ?? ""}`].join("\n");
       return { preimage: pre, expected: worker || null, role: "deal seller wallet" };
     }
     case "deal_settle": {
       // The buyer signs the payment reference. expected = payer (buyer).
       const payer = String(a.payer ?? "").toLowerCase();
-      const pre = ["SIGNA deal settle v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `payer:${payer}`, `payment:${a.payment ?? ""}`].join("\n");
+      const pre = ["SIGDA deal settle v1", `ts:${a.ts}`, `deal:${a.deal ?? ""}`, `payer:${payer}`, `payment:${a.payment ?? ""}`].join("\n");
       return { preimage: pre, expected: payer || null, role: "deal buyer wallet" };
     }
     case "token_launch": {
@@ -186,7 +186,7 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       // Must match lib/signa-launch.ts launchReceiptPreimage(). expected = launcher.
       const launcher = String(a.launcher ?? "").toLowerCase();
       const pre = [
-        "SIGNA token launch v1",
+        "SIGDA token launch v1",
         `ts:${a.ts}`,
         `launcher:${launcher}`,
         `token:${String(a.token ?? "").toLowerCase()}`,
@@ -198,13 +198,13 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
       return { preimage: pre, expected: launcher || null, role: "token launcher wallet" };
     }
     case "rwa_attestation": {
-      // SIGNA Proof-of-Stock — the RWA attestor vouches that a contract is the
+      // SIGDA Proof-of-Stock — the RWA attestor vouches that a contract is the
       // canonical Robinhood Chain Stock Token for a ticker, and pins its onchain
       // supply at a block. Must match lib/rwa.ts rwaAttestationPreimage()
       // byte-for-byte. Two-leg verification: this recovers the attestor; the
       // caller can independently replay the eth_call at `block`.
       const pre = [
-        "SIGNA rwa attestation v1",
+        "SIGDA rwa attestation v1",
         `ts:${a.ts}`,
         `chain:${a.chain ?? ""}`,
         `block:${a.block ?? ""}`,
@@ -216,42 +216,42 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `supply:${a.supply ?? ""}`,
         `source:robinhood-chain:erc20`,
       ].join("\n");
-      return { preimage: pre, expected: RWA_ATTESTOR, role: "SIGNA RWA attestor (Robinhood Chain Stock Tokens)" };
+      return { preimage: pre, expected: RWA_ATTESTOR, role: "SIGDA RWA attestor (Robinhood Chain Stock Tokens)" };
     }
     case "handle_claim": {
-      // v4.x — SIGNA Mail: a wallet claims a human-readable handle (you@signa).
+      // v4.x — SIGDA Mail: a wallet claims a human-readable handle (you@sigda).
       // Must match lib/mail.ts handleClaimPreimage(). expected = the claiming wallet.
       const address = String(a.address ?? "").toLowerCase();
-      const pre = ["SIGNA handle claim v1", `ts:${a.ts}`, `handle:${String(a.handle ?? "").toLowerCase()}`, `address:${address}`].join("\n");
+      const pre = ["SIGDA handle claim v1", `ts:${a.ts}`, `handle:${String(a.handle ?? "").toLowerCase()}`, `address:${address}`].join("\n");
       return { preimage: pre, expected: address || null, role: "handle owner wallet" };
     }
     case "log_checkpoint": {
       // v4.7 — the transparency-log signer signs each Merkle checkpoint over
       // the message layer. Must match transparency.ts checkpointPreimage().
       const pre = [
-        "SIGNA log checkpoint v1",
+        "SIGDA log checkpoint v1",
         `seq:${a.seq}`,
         `size:${a.size ?? a.tree_size ?? ""}`,
         `prev:${a.prev ?? a.prev_root ?? ""}`,
         `root:${a.root ?? ""}`,
         `ts:${a.ts}`,
       ].join("\n");
-      return { preimage: pre, expected: LOG_SIGNER, role: "SIGNA transparency-log signer" };
+      return { preimage: pre, expected: LOG_SIGNER, role: "SIGDA transparency-log signer" };
     }
     case "aletheia": {
-      // v8.0 — SIGNA's verifiable reasoning model signs every answer. Must
+      // v8.0 — SIGDA's verifiable reasoning model signs every answer. Must
       // match brain2.ts aletheiaPreimage().
       const ansHash = a.answer_hash ? String(a.answer_hash) : sha256(String(a.answer ?? ""));
       const tools = Array.isArray(a.tools) ? (a.tools as unknown[]).join(",") : String(a.tools ?? "");
-      const pre = ["SIGNA Aletheia answer v1", `ts:${a.ts}`, `goal:${a.goal ?? ""}`, `tools:${tools}`, `answer:${ansHash}`].join("\n");
-      return { preimage: pre, expected: ALETHEIA, role: "SIGNA Aletheia model" };
+      const pre = ["SIGDA Aletheia answer v1", `ts:${a.ts}`, `goal:${a.goal ?? ""}`, `tools:${tools}`, `answer:${ansHash}`].join("\n");
+      return { preimage: pre, expected: ALETHEIA, role: "SIGDA Aletheia model" };
     }
     case "trigger": {
       // v6.0 — the owner signs a conditional automation rule. Must match
       // triggers.ts triggerPreimage().
       const owner = String(a.owner ?? "").toLowerCase();
       const pre = [
-        "SIGNA trigger v1",
+        "SIGDA trigger v1",
         `ts:${a.ts}`,
         `owner:${owner}`,
         `when:${a.when_type ?? ""}:${canonObj(a.trigger)}`,
@@ -278,13 +278,32 @@ export async function verifyArtifact(a: VerifyInput): Promise<VerifyResult> {
   const built = buildPreimage(a);
   if (!built) return { ok: false, error: kind === "raw" ? "raw_requires_preimage" : "could_not_build_preimage" };
 
-  let recovered: string | null = null;
-  try {
-    recovered = (await recoverMessageAddress({ message: built.preimage, signature: sig as Hex })).toLowerCase();
-  } catch {
-    recovered = null;
-  }
+  const tryRecover = async (message: string): Promise<string | null> => {
+    try {
+      return (await recoverMessageAddress({ message, signature: sig as Hex })).toLowerCase();
+    } catch {
+      return null;
+    }
+  };
+
+  let preimage = built.preimage;
+  let recovered = await tryRecover(preimage);
   const expected = built.expected;
+  const matched = (r: string | null) => (expected ? r === expected : !!r);
+
+  // Pre-rebrand compatibility: every preimage's first line is a "SIGDA <kind>
+  // v1" marker (was "SIGNA" before the rebrand). Nothing signed under the old
+  // marker should stop verifying — retry against the pre-rebrand preimage
+  // before giving up, so historical signatures stay re-verifiable forever.
+  if (kind !== "raw" && !matched(recovered) && preimage.startsWith("SIGDA ")) {
+    const legacyPreimage = "SIGNA " + preimage.slice("SIGDA ".length);
+    const legacyRecovered = await tryRecover(legacyPreimage);
+    if (matched(legacyRecovered) || (!expected && legacyRecovered && !recovered)) {
+      preimage = legacyPreimage;
+      recovered = legacyRecovered;
+    }
+  }
+
   const matches = expected ? (recovered === expected) : null;
   // "valid" means: signature recovers AND (if we know who should have signed) it's them
   const valid = !!recovered && (expected ? recovered === expected : true);
@@ -297,7 +316,7 @@ export async function verifyArtifact(a: VerifyInput): Promise<VerifyResult> {
     expected,
     matches,
     signer_role: built.role,
-    preimage: built.preimage,
+    preimage,
   };
 }
 

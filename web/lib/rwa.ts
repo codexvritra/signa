@@ -20,7 +20,7 @@
 import { createPublicClient, http, parseAbi, formatUnits, type Address } from "viem";
 import { keccak256, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { RH_CHAIN_ID, RH_RPC, RH_EXPLORER, rhChain, explorerToken } from "./signa-launch";
+import { RH_CHAIN_ID, RH_RPC, RH_EXPLORER, rhChain, explorerToken } from "./chain";
 
 /** The SIGNA RWA attestor — a deterministic, keyless service identity (like the x402 attestor). */
 const ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:rwa-attestor:v1")));
@@ -163,7 +163,7 @@ export function rwaAttestationPreimage(a: {
   ts: number; chain: number; block: string; ticker: string; subject: string; contract: string; decimals: number; supply: string;
 }): string {
   return [
-    "SIGNA rwa attestation v1",
+    "SIGDA rwa attestation v1",
     `ts:${a.ts}`,
     `chain:${a.chain}`,
     `block:${a.block}`,

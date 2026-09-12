@@ -121,6 +121,11 @@ export async function verifyPipeline(args: { runId: string; chain: SignedLink[];
     });
     let sigOk = false;
     try { sigOk = await verifyMessage({ address: gateway.address, message: pre, signature: l.signature as `0x${string}` }); } catch { sigOk = false; }
+    // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed preimage.
+    if (!sigOk && pre.startsWith("SIGDA ")) {
+      const legacyPre = "SIGNA " + pre.slice("SIGDA ".length);
+      try { sigOk = await verifyMessage({ address: gateway.address, message: legacyPre, signature: l.signature as `0x${string}` }); } catch { sigOk = false; }
+    }
     const chainOk = l.prev === prev;
     let outOk: boolean | null = null;
     if (args.steps && args.steps[i]) {

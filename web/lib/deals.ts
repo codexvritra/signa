@@ -48,7 +48,7 @@ export type Deal = {
 
 export function dealOfferPreimage(a: { ts: number; from: string; to: string; task: string; amount: string; asset: string; deadline: string }): string {
   return [
-    "SIGNA deal offer v1",
+    "SIGDA deal offer v1",
     `ts:${a.ts}`,
     `from:${norm(a.from)}`,
     `to:${norm(a.to)}`,
@@ -63,19 +63,27 @@ export function dealIdFromOffer(a: { ts: number; from: string; to: string; task:
   return keccak256(toBytes(dealOfferPreimage(a)));
 }
 export function dealAcceptPreimage(a: { ts: number; deal: string; accepter: string }): string {
-  return ["SIGNA deal accept v1", `ts:${a.ts}`, `deal:${a.deal}`, `accepter:${norm(a.accepter)}`].join("\n");
+  return ["SIGDA deal accept v1", `ts:${a.ts}`, `deal:${a.deal}`, `accepter:${norm(a.accepter)}`].join("\n");
 }
 export function dealDeliverPreimage(a: { ts: number; deal: string; worker: string; result: string }): string {
-  return ["SIGNA deal deliver v1", `ts:${a.ts}`, `deal:${a.deal}`, `worker:${norm(a.worker)}`, `result:${a.result}`].join("\n");
+  return ["SIGDA deal deliver v1", `ts:${a.ts}`, `deal:${a.deal}`, `worker:${norm(a.worker)}`, `result:${a.result}`].join("\n");
 }
 export function dealSettlePreimage(a: { ts: number; deal: string; payer: string; payment: string }): string {
-  return ["SIGNA deal settle v1", `ts:${a.ts}`, `deal:${a.deal}`, `payer:${norm(a.payer)}`, `payment:${a.payment}`].join("\n");
+  return ["SIGDA deal settle v1", `ts:${a.ts}`, `deal:${a.deal}`, `payer:${norm(a.payer)}`, `payment:${a.payment}`].join("\n");
 }
 
 async function recovers(message: string, signature: string, expected: string): Promise<boolean> {
   try {
     const rec = await recoverMessageAddress({ message, signature: signature as `0x${string}` });
-    return norm(rec) === norm(expected);
+    if (norm(rec) === norm(expected)) return true;
+    // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed
+    // preimage so an already-signed or stale-client deal step still verifies.
+    if (message.startsWith("SIGDA ")) {
+      const legacy = "SIGNA " + message.slice("SIGDA ".length);
+      const legacyRec = await recoverMessageAddress({ message: legacy, signature: signature as `0x${string}` });
+      return norm(legacyRec) === norm(expected);
+    }
+    return false;
   } catch {
     return false;
   }

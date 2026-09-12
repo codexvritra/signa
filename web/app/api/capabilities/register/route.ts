@@ -54,12 +54,21 @@ export async function POST(req: NextRequest) {
 
   // verify the provider actually signed this registration
   let sigOk = false;
+  const registerMessage = registerPreimage({ ts, name, provider, endpoint, method, price: price_usdc });
   try {
     sigOk = await verifyMessage({
       address: provider as `0x${string}`,
-      message: registerPreimage({ ts, name, provider, endpoint, method, price: price_usdc }),
+      message: registerMessage,
       signature: signature as `0x${string}`,
     });
+    // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed preimage.
+    if (!sigOk && registerMessage.startsWith("SIGDA ")) {
+      sigOk = await verifyMessage({
+        address: provider as `0x${string}`,
+        message: "SIGNA " + registerMessage.slice("SIGDA ".length),
+        signature: signature as `0x${string}`,
+      });
+    }
   } catch { sigOk = false; }
   if (!sigOk) return NextResponse.json({ ok: false, error: "bad_signature" }, { status: 401, headers: CORS });
 

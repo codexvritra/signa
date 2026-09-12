@@ -35,7 +35,7 @@ export type OracleCall = {
 };
 
 function dmPreimage(from: string, to: string, body: string, ts: number) {
-  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
+  return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
 
 async function brainPost(origin: string, body: string): Promise<string | null> {
@@ -107,10 +107,10 @@ export async function readCalls(origin: string): Promise<OracleCall[]> {
     const from = (dm.from ?? dm.from_address ?? "").toLowerCase();
     if (from !== BRAIN_ADDR) continue;
     const body = dm.body ?? "";
-    if (body.startsWith("SIGNA oracle call v1")) {
+    if (body.startsWith("SIGDA oracle call v1") || body.startsWith("SIGNA oracle call v1")) {
       const k = kv(body);
       if (k.id) calls.set(k.id, { id: k.id, asof: Number(k.asof), at: Number(k.at), call: (k.call === "DOWN" ? "DOWN" : "UP"), resolve_after: Number(k.resolve_after), thesis: k.thesis ?? "", signature: dm.signature });
-    } else if (body.startsWith("SIGNA oracle resolve v1")) {
+    } else if (body.startsWith("SIGDA oracle resolve v1") || body.startsWith("SIGNA oracle resolve v1")) {
       const k = kv(body);
       if (k.ref) resolves.push({ ref: k.ref, resolved_at: Number(k.resolved_at), final: Number(k.final), outcome: (k.outcome === "DOWN" ? "DOWN" : "UP"), hit: k.hit === "true", signature: dm.signature });
     }
@@ -134,7 +134,7 @@ export async function tick(origin: string): Promise<void> {
     if (final != null) {
       const outcome: "UP" | "DOWN" = final > latest.at ? "UP" : "DOWN";
       const hit = outcome === latest.call;
-      await brainPost(origin, ["SIGNA oracle resolve v1", `ref:${latest.id}`, `resolved_at:${nowSec}`, `final:${final}`, `outcome:${outcome}`, `hit:${hit}`].join("\n"));
+      await brainPost(origin, ["SIGDA oracle resolve v1", `ref:${latest.id}`, `resolved_at:${nowSec}`, `final:${final}`, `outcome:${outcome}`, `hit:${hit}`].join("\n"));
     }
   }
 
@@ -146,7 +146,7 @@ export async function tick(origin: string): Promise<void> {
     if (score != null) {
       const label = score >= 75 ? "Extreme Greed" : score >= 55 ? "Greed" : score >= 45 ? "Neutral" : score >= 25 ? "Fear" : "Extreme Fear";
       const { call, thesis } = await reasonDirection(origin, score, label);
-      await brainPost(origin, ["SIGNA oracle call v1", `id:${nowSec}`, `metric:feargreed`, `asof:${nowSec}`, `at:${score}`, `call:${call}`, `resolve_after:${nowSec + WINDOW_SEC}`, `thesis:${thesis}`].join("\n"));
+      await brainPost(origin, ["SIGDA oracle call v1", `id:${nowSec}`, `metric:feargreed`, `asof:${nowSec}`, `at:${score}`, `call:${call}`, `resolve_after:${nowSec + WINDOW_SEC}`, `thesis:${thesis}`].join("\n"));
     }
   }
 }

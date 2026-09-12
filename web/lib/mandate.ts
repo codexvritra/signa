@@ -26,7 +26,7 @@ export function mandatePreimage(a: {
   memo?: string;
 }): string {
   return [
-    "SIGNA spend mandate v1",
+    "SIGDA spend mandate v1",
     `ts:${a.ts}`,
     `grantor:${a.grantor.toLowerCase()}`,
     `agent:${a.agent.toLowerCase()}`,
@@ -47,7 +47,7 @@ export function spendPreimage(a: {
   note?: string;
 }): string {
   return [
-    "SIGNA spend v1",
+    "SIGDA spend v1",
     `ts:${a.ts}`,
     `mandate:${a.mandateId}`,
     `agent:${a.agent.toLowerCase()}`,
@@ -65,7 +65,7 @@ export function budgetRequestPreimage(a: {
   reason?: string;
 }): string {
   return [
-    "SIGNA budget request v1",
+    "SIGDA budget request v1",
     `ts:${a.ts}`,
     `agent:${a.agent.toLowerCase()}`,
     `grantor:${a.grantor.toLowerCase()}`,

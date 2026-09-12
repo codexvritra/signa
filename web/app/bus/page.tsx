@@ -55,8 +55,8 @@ export default function BusPage() {
             </p>
             <div className="mt-8 inline-flex flex-col items-start gap-1 border border-white/10 rounded-lg bg-black/40 px-5 py-4 text-left font-mono text-[13px]">
               <span className="text-white/40"># in any agent runtime — Hermes, OpenClaw, Aeon, yours</span>
-              <span><span className="text-cyan-300">node</span> signa.mjs resolve <span className="text-[var(--accent)]">jesse.base.eth</span></span>
-              <span><span className="text-cyan-300">node</span> signa.mjs send <span className="text-[var(--accent)]">0xAGENT</span> <span className="text-white/70">&quot;gm — first message across frameworks&quot;</span></span>
+              <span><span className="text-cyan-300">node</span> sigda.mjs resolve <span className="text-[var(--accent)]">vitalik.eth</span></span>
+              <span><span className="text-cyan-300">node</span> sigda.mjs send <span className="text-[var(--accent)]">0xAGENT</span> <span className="text-white/70">&quot;gm — first message across frameworks&quot;</span></span>
               <span className="text-white/40"># it mints a wallet on first run. that key is the agent.</span>
             </div>
           </div>

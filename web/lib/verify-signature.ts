@@ -35,11 +35,26 @@ export async function verifySignedMessage(args: {
   }
 
   try {
-    const ok = await verifyMessage({
+    let ok = await verifyMessage({
       address: expectedAddress.toLowerCase() as Address,
       message,
       signature: signature as Hex,
     });
+    // Pre-rebrand compatibility: canonical messages are branded "SIGDA"
+    // throughout (was "SIGNA" before the rebrand) — some also repeat the
+    // brand name in signing-prompt prose, not just the leading marker. A
+    // client on an old cached build (or a signature made before the rebrand
+    // shipped) still signs the all-legacy text — retry against the
+    // word-for-word legacy reconstruction before failing, so nothing
+    // already signed silently breaks.
+    if (!ok && /\bSIGDA\b/.test(message)) {
+      const legacyMessage = message.replace(/\bSIGDA\b/g, "SIGNA");
+      ok = await verifyMessage({
+        address: expectedAddress.toLowerCase() as Address,
+        message: legacyMessage,
+        signature: signature as Hex,
+      });
+    }
     if (!ok) return { ok: false, reason: "Signature does not match address" };
     return { ok: true, address: expectedAddress.toLowerCase() as Address };
   } catch (e) {

@@ -42,7 +42,7 @@ export function notePreimage(args: {
   to?: string | null;
 }): string {
   const from = args.address.toLowerCase();
-  const lines = ["SIGNA signed note v1", `ts:${args.ts}`, `from:${from}`];
+  const lines = ["SIGDA signed note v1", `ts:${args.ts}`, `from:${from}`];
   const to = sanitizeTo(args.to);
   if (to) lines.push(`to:${to}`);
   lines.push(`body:${args.body}`);

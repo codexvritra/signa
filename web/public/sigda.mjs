@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-// signa — the signa CLI. v0.3.0
+// sigda — the sigda CLI. v0.3.0
 //
 // Real decentralized wallet client. A full terminal product for the
-// signa network — wallet-native messaging on Robinhood Chain.
+// sigda network — wallet-native messaging on Robinhood Chain.
 //
 // Two ways to use it:
-//   1. One-shot:    signa <command> [args]       e.g.  signa ask "hi"
-//   2. Interactive: signa                        opens the REPL,
+//   1. One-shot:    sigda <command> [args]       e.g.  sigda ask "hi"
+//   2. Interactive: sigda                        opens the REPL,
 //                                                drops you into a prompt
 //                                                where every command works
-//                                                without the `signa` prefix
+//                                                without the `sigda` prefix
 //
 // Capabilities:
 //   • read-only    ask, stream, agent, search, live, stats, feed, profile
@@ -19,7 +19,7 @@
 //   • tokens       send <to> <amount> <ETH|USDG|0xerc20> [--dry]
 //
 // PRIVATE KEY HANDLING
-//   Stored at ~/.signa/keystore.json with file mode 0600. Plain text.
+//   Stored at ~/.sigda/keystore.json with file mode 0600. Plain text.
 //   This is a hot-wallet CLI. Don't put a custodial-grade key here.
 //   The key never leaves your machine — every signed action builds the
 //   envelope locally with viem and submits {message, signature, ts}
@@ -48,26 +48,26 @@ import { createInterface } from "node:readline";
 
 const VERSION = "0.30.0";
 const DEFAULT_BASE_URL = "https://www.signaagent.xyz";
-const SIGNA_HOME = join(homedir(), ".signa");
-const CONFIG_PATH = join(SIGNA_HOME, "config.json");
-const KEYSTORE_PATH = join(SIGNA_HOME, "keystore.json");
-const HISTORY_PATH = join(SIGNA_HOME, "history");
+const SIGDA_HOME = join(homedir(), ".sigda");
+const CONFIG_PATH = join(SIGDA_HOME, "config.json");
+const KEYSTORE_PATH = join(SIGDA_HOME, "keystore.json");
+const HISTORY_PATH = join(SIGDA_HOME, "history");
 // One file per launched agent — agent's own private key. Mode 600. Listed
-// by `signa agents` / `agent mine`. Never transmitted off-box (the launch
+// by `sigda agents` / `agent mine`. Never transmitted off-box (the launch
 // envelope uploaded to the server contains only the agent's PUBLIC address
 // + signature, never the private key).
-const AGENTS_DIR = join(SIGNA_HOME, "agents");
+const AGENTS_DIR = join(SIGDA_HOME, "agents");
 
 // XMTP local database directory — one SQLite file per wallet identity.
 // Contains the double-ratchet encryption state for E2E messaging. Treat
 // as sensitive: the file is what makes future messages decryptable. We
 // don't chmod 600 it explicitly because XMTP's libxmtp opens it RW;
 // leaving it at the default umask is fine for a single-user home dir.
-const XMTP_DIR = join(SIGNA_HOME, "xmtp");
+const XMTP_DIR = join(SIGDA_HOME, "xmtp");
 
 // Robinhood Chain mainnet — chain id 4663 (verified via eth_chainId).
 // RPC defaults to the public mainnet RPC, fine for low-volume CLI traffic.
-const RH_RPC = env.SIGNA_ROBINHOOD_RPC || "https://rpc.mainnet.chain.robinhood.com";
+const RH_RPC = env.SIGDA_ROBINHOOD_RPC || "https://rpc.mainnet.chain.robinhood.com";
 const RH_CHAIN_ID = 4663;
 const RH_EXPLORER = "https://robinhoodchain.blockscout.com";
 
@@ -78,23 +78,23 @@ const USDG_ADDRESS = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
 
 // Ethereum mainnet RPC for ERC-8004 (aeon) reads. Default publicnode is
 // rate-limited but works fine for CLI-volume traffic. Override with
-// SIGNA_ETH_RPC env to point at Alchemy / Infura for heavier use.
-const ETH_RPC = env.SIGNA_ETH_RPC || "https://ethereum.publicnode.com";
+// SIGDA_ETH_RPC env to point at Alchemy / Infura for heavier use.
+const ETH_RPC = env.SIGDA_ETH_RPC || "https://ethereum.publicnode.com";
 
 // ERC-8004 Identity Registry on Ethereum mainnet (aeon protocol).
 // Reference: eips.ethereum.org/EIPS/eip-8004 and 8004.org.
 const ERC8004_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
 
 // Gitlawb node — public REST API for repo/profile/task reads. No auth
-// required for reads. Override with SIGNA_GITLAWB_NODE for a different
+// required for reads. Override with SIGDA_GITLAWB_NODE for a different
 // gitlawb node (the network is multi-node by design).
-const GITLAWB_NODE = env.SIGNA_GITLAWB_NODE || "https://node.gitlawb.com";
+const GITLAWB_NODE = env.SIGDA_GITLAWB_NODE || "https://node.gitlawb.com";
 const GITLAWB_PLAYGROUND = "https://playground.gitlawb.app";
 
 // Seed list — the always-available fallback when the on-chain registry
 // returns nothing or the RPC is down. After v0.15 the CLI prefers the
 // on-chain registry for discovery.
-const SIGNA_SEED_NODES = [
+const SIGDA_SEED_NODES = [
   {
     name: "signaagent.xyz",
     url: "https://www.signaagent.xyz",
@@ -102,18 +102,19 @@ const SIGNA_SEED_NODES = [
   },
 ];
 
-// SignaNodeRegistry contract on Robinhood Chain (chain id 4663). Permission-
+// SigdaNodeRegistry contract on Robinhood Chain (chain id 4663). Permission-
 // less on-chain registry — anyone can `register()` a node by sending a
 // tx from their wallet. CLI reads listActiveNodes() and cross-verifies
 // each URL by hitting /api/node/info.
 //
-// Source: contracts/src/SignaNodeRegistry.sol
+// Source: contracts/src/SignaNodeRegistry.sol (on-chain contract name is
+// unchanged — renaming it would require redeploying to a new address).
 //
-// Set SIGNA_NODE_REGISTRY once redeployed to Robinhood Chain (or leave unset
+// Set SIGDA_NODE_REGISTRY once redeployed to Robinhood Chain (or leave unset
 // to disable the on-chain path — the CLI falls back to the seed node list).
-const SIGNA_NODE_REGISTRY = env.SIGNA_NODE_REGISTRY || "";
+const SIGDA_NODE_REGISTRY = env.SIGDA_NODE_REGISTRY || "";
 
-const SIGNA_NODE_REGISTRY_ABI = [
+const SIGDA_NODE_REGISTRY_ABI = [
   {
     type: "function",
     name: "listActiveNodes",
@@ -193,12 +194,12 @@ const SIGNA_NODE_REGISTRY_ABI = [
   },
 ];
 
-// Make Node ES-module resolution include ~/.signa/node_modules so the
+// Make Node ES-module resolution include ~/.sigda/node_modules so the
 // dynamic import("viem") below finds the installer-placed copy of viem
 // regardless of which directory the user invoked us from.
 const __dirname = dirname(fileURLToPath(import.meta.url));
 if (!env.NODE_PATH) env.NODE_PATH = "";
-const NM = join(SIGNA_HOME, "node_modules");
+const NM = join(SIGDA_HOME, "node_modules");
 if (!env.NODE_PATH.split(/[:;]/).includes(NM)) {
   env.NODE_PATH = NM + (env.NODE_PATH ? `:${env.NODE_PATH}` : "");
 }
@@ -247,7 +248,7 @@ async function loadConfig() {
 }
 
 async function saveConfig(cfg) {
-  await mkdir(SIGNA_HOME, { recursive: true });
+  await mkdir(SIGDA_HOME, { recursive: true });
   await writeFile(CONFIG_PATH, JSON.stringify(cfg, null, 2));
 }
 
@@ -260,7 +261,7 @@ async function loadKeystore() {
 }
 
 async function saveKeystore(ks) {
-  await mkdir(SIGNA_HOME, { recursive: true });
+  await mkdir(SIGDA_HOME, { recursive: true });
   await writeFile(KEYSTORE_PATH, JSON.stringify(ks, null, 2));
   // Tight perms so other users on the box can't read the key. On
   // Windows this is a no-op which is documented in `signa whoami`.
@@ -282,7 +283,7 @@ async function deleteKeystore() {
 // ---------- agent keystores ----------
 //
 // Each launched agent gets its own private key, stored at
-//   ~/.signa/agents/<agent_address>.json   (mode 600)
+//   ~/.sigda/agents/<agent_address>.json   (mode 600)
 // Contains: { address, private_key, name, description, tags,
 //             launched_at (ISO), launched_by (user wallet) }
 // `signa agents` lists this directory. Agent ownership is purely
@@ -332,7 +333,7 @@ async function listAgentKeys() {
 }
 
 async function baseUrl() {
-  if (env.SIGNA_BASE_URL) return env.SIGNA_BASE_URL.replace(/\/$/, "");
+  if (env.SIGDA_BASE_URL) return env.SIGDA_BASE_URL.replace(/\/$/, "");
   const cfg = await loadConfig();
   return (cfg.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
 }
@@ -368,7 +369,7 @@ async function viem() {
     );
     err(
       "  install with: ",
-      paint(c.cyan, "cd ~/.signa && npm install viem@^2"),
+      paint(c.cyan, "cd ~/.sigda && npm install viem@^2"),
     );
     err(
       "  or re-run: ",
@@ -444,7 +445,7 @@ async function http(path, init = {}) {
     ...init,
     headers: {
       accept: "application/json",
-      "user-agent": `signa-cli/${VERSION}`,
+      "user-agent": `sigda-cli/${VERSION}`,
       ...(init.body && !(init.body instanceof Buffer)
         ? { "content-type": "application/json" }
         : {}),
@@ -473,14 +474,14 @@ async function httpJson(path, init) {
 // ---------- signing helpers ----------
 
 /**
- * Build the canonical SIGNA-signed envelope for a feed post + sign it
+ * Build the canonical SIGDA-signed envelope for a feed post + sign it
  * with the loaded key. Mirrors the buildMessageToSign("post") shape on
  * the server.
  */
 async function signSignaPost({ content, parent_id, ts }) {
   const acc = await account();
   const reply = parent_id ? `\nin_reply_to:${parent_id}` : "";
-  const message = `SIGNA post v1\nts:${ts}${reply}\nbody:${content}`;
+  const message = `SIGDA post v1\nts:${ts}${reply}\nbody:${content}`;
   const signature = await acc.viemAccount.signMessage({ message });
   return { signature, message };
 }
@@ -488,7 +489,7 @@ async function signSignaPost({ content, parent_id, ts }) {
 async function signSignaRate({ interaction_id, rating, ts }) {
   const acc = await account();
   const message = [
-    "SIGNA rate v1",
+    "SIGDA rate v1",
     `ts:${ts}`,
     `interaction:${interaction_id}`,
     `rating:${rating}`,
@@ -507,7 +508,7 @@ async function signSignaRate({ interaction_id, rating, ts }) {
 async function signSignaRegister({ address, basename, ens_name, ts }) {
   const acc = await account();
   const message = [
-    "SIGNA register v1",
+    "SIGDA register v1",
     `ts:${ts}`,
     `address:${address}`,
     `basename:${basename ?? "-"}`,
@@ -544,7 +545,7 @@ async function signSignaAgentLaunch({
     .digest("hex");
   const tagLine = (tags ?? []).join(",");
   const message = [
-    "SIGNA agent launch v1",
+    "SIGDA agent launch v1",
     `ts:${ts}`,
     `address:${agentAddress}`,
     `name:${name}`,
@@ -618,7 +619,7 @@ ${paint(c.bold, "Read")}
 ${paint(c.bold, "Agents")}
   launch <name> "<desc>"         wallet-signed launch of a new agent identity
        [--tags=a,b]               agent's secp256k1 key generated locally,
-       [--prompt="..."]           saved at ~/.signa/agents/<addr>.json (mode 600)
+       [--prompt="..."]           saved at ~/.sigda/agents/<addr>.json (mode 600)
        [--prompt-file=path]
   agent enable-runtime <addr>    opt in to 24/7 custodial runtime
                                  (encrypts the agent key server-side
@@ -628,7 +629,7 @@ ${paint(c.bold, "Agents")}
        [--expires=<sec>] [--kind=post|miroshark-sim|payment]
        [--to=0x... --token=ETH|USDC --amount=<decimal>]
                                  wallet-signed recurring agent task — the
-                                  agent's wallet authorizes SIGNA to act
+                                  agent's wallet authorizes SIGDA to act
                                   on the cadence above. needs runtime
                                   enabled.
                                     --kind=post (default): publishes the
@@ -709,7 +710,7 @@ ${paint(c.bold, "Daily-use")}
   watchlist add <0x token>       wallet-signed bookmark
   watchlist remove <0x token>    wallet-signed unbookmark
   digest enable | disable        wallet-signed daily AI digest opt-in
-  holders <SYMBOL>               top SIGNA users holding a partner token
+  holders <SYMBOL>               top SIGDA users holding a partner token
 
 ${paint(c.bold, "Federation — signa is multi-node")}
   nodes                          list known signa nodes (on-chain registry first)
@@ -727,7 +728,7 @@ ${paint(c.bold, "Federation — signa is multi-node")}
   sync status                    per-peer cross-node sync state (last sync,
                                   posts pulled, errors) + total imported
   sync run                       operator-only: trigger one sync pass now
-                                  (needs SIGNA_CRON_SECRET in env;
+                                  (needs SIGDA_CRON_SECRET in env;
                                    scheduled runs fire every 10m anyway)
 
 ${paint(c.bold, "Agent-to-Agent messaging (a2a · v0.27)")}
@@ -742,7 +743,7 @@ ${paint(c.bold, "Agent-to-Agent messaging (a2a · v0.27)")}
 
 ${paint(c.bold, "Agent platform bridges (a2a bridges · v0.28)")}
   a2a bridges list [--platform=X] [--status=alive|all]
-                                 discover wallets that bridge SIGNA DMs
+                                 discover wallets that bridge SIGDA DMs
                                   to external AI platforms (Hermes via
                                   Ollama, OpenAI, Anthropic, Groq, etc.)
   a2a bridges register --platform=<id> --model=<name> --label="..."
@@ -764,7 +765,7 @@ ${paint(c.bold, "MCP server + Agent SDK (v0.30)")}
   sdk url                        all install URLs (machine-readable)
 
   # the MCP server (signa-mcp) drops Claude Desktop / Cursor / Windsurf
-  # onto SIGNA in 30 seconds with zero code. add 3 lines to your client
+  # onto SIGDA in 30 seconds with zero code. add 3 lines to your client
   # config, restart, and your AI tool has a wallet and 5 tool calls.
   #
   # the SDK (signa-agent) is the 5-line drop-in for custom agent
@@ -780,8 +781,8 @@ ${paint(c.bold, "Other")}
   clear                          redraw the banner + clear screen (REPL only)
 
 ${paint(c.dim, "Env:")}
-  SIGNA_BASE_URL                 override the api base URL
-  SIGNA_ROBINHOOD_RPC            override the Robinhood Chain mainnet RPC URL
+  SIGDA_BASE_URL                 override the api base URL
+  SIGDA_ROBINHOOD_RPC            override the Robinhood Chain mainnet RPC URL
   NO_COLOR=1                     disable ANSI color
 
 ${paint(c.dim, "Examples:")}
@@ -825,7 +826,7 @@ async function cmdStream(args) {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "user-agent": `signa-cli/${VERSION}`,
+      "user-agent": `sigda-cli/${VERSION}`,
     },
     body: JSON.stringify({
       model: "signa-gateway",
@@ -1026,7 +1027,7 @@ async function cmdLive(args) {
       try {
         res = await fetch(url, {
           headers: {
-            "user-agent": `signa-cli/${VERSION}`,
+            "user-agent": `sigda-cli/${VERSION}`,
             accept: "text/event-stream",
           },
           signal: controller.signal,
@@ -1111,7 +1112,7 @@ function printLiveInteraction(i) {
 }
 
 /**
- * Live SIGNA inference-throughput readout. Hits /api/metrics (or a
+ * Live SIGDA inference-throughput readout. Hits /api/metrics (or a
  * snapshot per refresh in --watch mode) and renders a terminal-shaped
  * Bloomberg-style panel. Same data the public /metrics page consumes
  * — anyone can independently query.
@@ -1333,7 +1334,7 @@ async function fetchNodeInfo(baseUrl, { timeoutMs = 5000 } = {}) {
   try {
     const res = await fetch(url, {
       signal: ac.signal,
-      headers: { "user-agent": `signa-cli/${VERSION}` },
+      headers: { "user-agent": `sigda-cli/${VERSION}` },
     });
     const elapsed = Date.now() - t0;
     if (!res.ok) return { ok: false, status: res.status, elapsed_ms: elapsed };
@@ -1354,7 +1355,7 @@ async function fetchNodeInfo(baseUrl, { timeoutMs = 5000 } = {}) {
  * Read the active node list from the on-chain SignaNodeRegistry contract
  * on Robinhood Chain mainnet. Returns null if the contract address is the zero
  * address (not deployed yet on this build), or if the read fails — the
- * caller falls back to the hardcoded SIGNA_SEED_NODES list.
+ * caller falls back to the hardcoded SIGDA_SEED_NODES list.
  *
  * Pagination: pulls up to 100 active nodes per call. Anything beyond
  * that gets a "+N more on chain" note and the user has to query the
@@ -1362,8 +1363,8 @@ async function fetchNodeInfo(baseUrl, { timeoutMs = 5000 } = {}) {
  */
 async function fetchOnChainNodes() {
   if (
-    !SIGNA_NODE_REGISTRY ||
-    /^0x0+$/.test(SIGNA_NODE_REGISTRY.toLowerCase().replace(/^0x/, ""))
+    !SIGDA_NODE_REGISTRY ||
+    /^0x0+$/.test(SIGDA_NODE_REGISTRY.toLowerCase().replace(/^0x/, ""))
   ) {
     return null;
   }
@@ -1374,8 +1375,8 @@ async function fetchOnChainNodes() {
       transport: v.http(RH_RPC),
     });
     const records = await client.readContract({
-      address: SIGNA_NODE_REGISTRY,
-      abi: SIGNA_NODE_REGISTRY_ABI,
+      address: SIGDA_NODE_REGISTRY,
+      abi: SIGDA_NODE_REGISTRY_ABI,
       functionName: "listActiveNodes",
       args: [0n, 100n],
     });
@@ -1418,7 +1419,7 @@ async function cmdNodes() {
     }));
     usingChain = true;
   } else {
-    displayNodes = SIGNA_SEED_NODES.map((n) => ({
+    displayNodes = SIGDA_SEED_NODES.map((n) => ({
       name: n.name,
       url: n.url,
       sourceTag: "seed",
@@ -1456,9 +1457,9 @@ async function cmdNodes() {
       paint(c.dim, "  source: ") +
         paint(c.green, "on-chain") +
         paint(c.dim, " · SignaNodeRegistry at ") +
-        paint(c.cyan, SIGNA_NODE_REGISTRY),
+        paint(c.cyan, SIGDA_NODE_REGISTRY),
     );
-    out(paint(c.dim, "  blockscout: https://robinhoodchain.blockscout.com/address/" + SIGNA_NODE_REGISTRY));
+    out(paint(c.dim, "  blockscout: https://robinhoodchain.blockscout.com/address/" + SIGDA_NODE_REGISTRY));
   } else {
     out(paint(c.dim, "  source: seed list (on-chain registry empty or unreachable)"));
   }
@@ -1693,7 +1694,7 @@ async function cmdNode(args) {
     const attestedAt = Date.now();
     const sortedCaps = [...nodeCaps].sort().join(",");
     const preimage = [
-      "SIGNA node v1",
+      "SIGDA node v1",
       `url:${target.replace(/\/$/, "")}`,
       `name:${nodeName}`,
       `operator:${operator}`,
@@ -1715,10 +1716,10 @@ async function cmdNode(args) {
     out("");
     out(paint(c.bold, "env vars to set on your node deployment:"));
     out(paint(c.dim, "─".repeat(72)));
-    out(paint(c.cyan, `SIGNA_NODE_OPERATOR_ADDRESS=${operator}`));
-    out(paint(c.cyan, `SIGNA_NODE_NAME=${nodeName}`));
-    out(paint(c.cyan, `SIGNA_NODE_ATTESTATION_SIGNATURE=${signature}`));
-    out(paint(c.cyan, `SIGNA_NODE_ATTESTED_AT=${attestedAt}`));
+    out(paint(c.cyan, `SIGDA_NODE_OPERATOR_ADDRESS=${operator}`));
+    out(paint(c.cyan, `SIGDA_NODE_NAME=${nodeName}`));
+    out(paint(c.cyan, `SIGDA_NODE_ATTESTATION_SIGNATURE=${signature}`));
+    out(paint(c.cyan, `SIGDA_NODE_ATTESTED_AT=${attestedAt}`));
     out("");
     out(paint(c.dim, "paste these into Vercel project settings, redeploy."));
     out(paint(c.dim, "the operator key NEVER touches the server — only the"));
@@ -1781,8 +1782,8 @@ async function cmdNode(args) {
 
 async function _ensureRegistryDeployed() {
   if (
-    !SIGNA_NODE_REGISTRY ||
-    /^0x0+$/.test(SIGNA_NODE_REGISTRY.toLowerCase().replace(/^0x/, ""))
+    !SIGDA_NODE_REGISTRY ||
+    /^0x0+$/.test(SIGDA_NODE_REGISTRY.toLowerCase().replace(/^0x/, ""))
   ) {
     err(paint(c.red, "✗"), "SignaNodeRegistry contract is not deployed yet.");
     err(
@@ -1794,7 +1795,7 @@ async function _ensureRegistryDeployed() {
     err(
       paint(
         c.dim,
-        "  with: signa update    or set SIGNA_NODE_REGISTRY env to a deployed",
+        "  with: signa update    or set SIGDA_NODE_REGISTRY env to a deployed",
       ),
     );
     err(paint(c.dim, "  contract address."));
@@ -1859,13 +1860,13 @@ async function cmdNodeRegister(args) {
     bail(1);
   }
 
-  out(paint(c.dim, "sending register tx to " + SIGNA_NODE_REGISTRY + "…"));
+  out(paint(c.dim, "sending register tx to " + SIGDA_NODE_REGISTRY + "…"));
 
   let hash;
   try {
     hash = await wallet.writeContract({
-      address: SIGNA_NODE_REGISTRY,
-      abi: SIGNA_NODE_REGISTRY_ABI,
+      address: SIGDA_NODE_REGISTRY,
+      abi: SIGDA_NODE_REGISTRY_ABI,
       functionName: "register",
       args: [name, url, version],
     });
@@ -1906,12 +1907,12 @@ async function cmdNodeDeregister() {
     transport: v.http(RH_RPC),
   });
 
-  out(paint(c.dim, "sending deregister tx to " + SIGNA_NODE_REGISTRY + "…"));
+  out(paint(c.dim, "sending deregister tx to " + SIGDA_NODE_REGISTRY + "…"));
   let hash;
   try {
     hash = await wallet.writeContract({
-      address: SIGNA_NODE_REGISTRY,
-      abi: SIGNA_NODE_REGISTRY_ABI,
+      address: SIGDA_NODE_REGISTRY,
+      abi: SIGDA_NODE_REGISTRY_ABI,
       functionName: "deregister",
       args: [],
     });
@@ -1936,13 +1937,13 @@ async function cmdNodeRegistry() {
   const client = v.createPublicClient({ chain: v.rhChain, transport: v.http(RH_RPC) });
   const [totalOps, active] = await Promise.all([
     client.readContract({
-      address: SIGNA_NODE_REGISTRY,
-      abi: SIGNA_NODE_REGISTRY_ABI,
+      address: SIGDA_NODE_REGISTRY,
+      abi: SIGDA_NODE_REGISTRY_ABI,
       functionName: "totalOperators",
     }),
     client.readContract({
-      address: SIGNA_NODE_REGISTRY,
-      abi: SIGNA_NODE_REGISTRY_ABI,
+      address: SIGDA_NODE_REGISTRY,
+      abi: SIGDA_NODE_REGISTRY_ABI,
       functionName: "activeCount",
     }),
   ]);
@@ -1950,7 +1951,7 @@ async function cmdNodeRegistry() {
   out(paint(c.bold, "SignaNodeRegistry"));
   out(paint(c.dim, "─".repeat(64)));
   out(paint(c.dim, "chain".padEnd(16)), paint(c.cyan, "robinhood chain (4663)"));
-  out(paint(c.dim, "address".padEnd(16)), paint(c.cyan, SIGNA_NODE_REGISTRY));
+  out(paint(c.dim, "address".padEnd(16)), paint(c.cyan, SIGDA_NODE_REGISTRY));
   out(
     paint(c.dim, "operators".padEnd(16)),
     paint(c.cyan, String(totalOps)) + paint(c.dim, " ever registered"),
@@ -1959,7 +1960,7 @@ async function cmdNodeRegistry() {
     paint(c.dim, "active".padEnd(16)),
     paint(c.green, String(active)) + paint(c.dim, " currently"),
   );
-  out(paint(c.dim, "blockscout".padEnd(16)), "https://robinhoodchain.blockscout.com/address/" + SIGNA_NODE_REGISTRY);
+  out(paint(c.dim, "blockscout".padEnd(16)), "https://robinhoodchain.blockscout.com/address/" + SIGDA_NODE_REGISTRY);
 }
 
 // ---------- federation: cross-node sync (v0.16) ----------
@@ -1973,7 +1974,7 @@ async function cmdNodeRegistry() {
 //                              last_error, etc.) + total imported posts
 //   signa sync run           — operator-only: trigger an out-of-band
 //                              sync pass via /api/cron/sync-nodes. Needs
-//                              SIGNA_CRON_SECRET in env to authorize the
+//                              SIGDA_CRON_SECRET in env to authorize the
 //                              bearer header. Without it, prints the
 //                              schedule + how to set the secret.
 //
@@ -2080,12 +2081,12 @@ async function cmdSync(args) {
   }
 
   if (sub === "run") {
-    const secret = env.SIGNA_CRON_SECRET || env.CRON_SECRET;
+    const secret = env.SIGDA_CRON_SECRET || env.CRON_SECRET;
     if (!secret) {
       err(paint(c.red, "✗"), "operator credential required.");
       err(
         "  set",
-        paint(c.cyan, "SIGNA_CRON_SECRET"),
+        paint(c.cyan, "SIGDA_CRON_SECRET"),
         "to the value of the CRON_SECRET on your deployment",
       );
       err(
@@ -2108,7 +2109,7 @@ async function cmdSync(args) {
         method: "GET",
         headers: {
           authorization: `Bearer ${secret}`,
-          "user-agent": `signa-cli/${VERSION}`,
+          "user-agent": `sigda-cli/${VERSION}`,
           accept: "application/json",
         },
       });
@@ -2205,7 +2206,7 @@ async function cmdLogin(args) {
     paint(c.dim, "(file mode 600)"),
   );
 
-  // Register the wallet with SIGNA so it can post / be DM'd / be mentioned.
+  // Register the wallet with SIGDA so it can post / be DM'd / be mentioned.
   // Idempotent — the server upserts by address.
   out(paint(c.dim, "registering with signa…"));
   const ok = await ensureRegistered();
@@ -2556,7 +2557,7 @@ async function signSignaAgentDm({
     optional.push(`protocol:${protocol}`);
   if (in_reply_to) optional.push(`in_reply_to:${in_reply_to}`);
   const message = [
-    "SIGNA agent dm v1",
+    "SIGDA agent dm v1",
     `ts:${ts}`,
     `from:${from.toLowerCase()}`,
     `to:${to.toLowerCase()}`,
@@ -2594,7 +2595,7 @@ async function cmdSdk(args) {
   if (sub === "mcp" || sub === "claude" || sub === "cursor" || sub === "windsurf") {
     out(paint(c.bold, "signa-mcp — Model Context Protocol server"));
     out("");
-    out("Drop your AI tool onto SIGNA in 30 seconds. Zero code.");
+    out("Drop your AI tool onto SIGDA in 30 seconds. Zero code.");
     out("");
     out(paint(c.dim, "Claude Desktop config (also works in Cursor, Windsurf, Continue):"));
     out(`  {`);
@@ -2664,7 +2665,7 @@ async function cmdSdk(args) {
   }
 
   // default — print everything
-  out(paint(c.bold, "SIGNA developer surfaces · v0.30"));
+  out(paint(c.bold, "SIGDA developer surfaces · v0.30"));
   out("");
   out("Drop into any agent runtime (LangChain / LlamaIndex / CrewAI /");
   out("AutoGen / vanilla TS or Python) — or plug into Claude Desktop");
@@ -2913,7 +2914,7 @@ async function cmdA2A(args) {
         "signature verifies against",
         paint(c.cyan, dm.from_address),
       );
-      out(paint(c.dim, "  the SIGNA server cannot forge what it didn't sign."));
+      out(paint(c.dim, "  the SIGDA server cannot forge what it didn't sign."));
     } else {
       out(paint(c.red, "✗"), "signature does NOT match the claimed sender.");
       bail(1);
@@ -2994,15 +2995,15 @@ async function cmdA2A(args) {
       if (description) opt.push(`description:${description}`);
       if (capabilities.length > 0) opt.push(`capabilities:${capabilities.join(",")}`);
       const preimage = [
-        "SIGNA agent bridge register v1",
+        "SIGDA agent bridge register v1",
         `ts:${ts}`,
         `address:${address}`,
         `platform:${platform}`,
         `model:${model}`,
         `label:${label}`,
         ...opt,
-        "I am operating an agent bridge between SIGNA's DM substrate and",
-        `the ${platform} platform. My wallet receives DMs on SIGNA`,
+        "I am operating an agent bridge between SIGDA's DM substrate and",
+        `the ${platform} platform. My wallet receives DMs on SIGDA`,
         "and forwards them to the model above, then signs the reply and",
         "posts it back. I can deregister at any time.",
       ].join("\n");
@@ -3341,7 +3342,7 @@ async function cmdReply(args) {
 async function signSignaLike({ action, post_id, ts }) {
   // Mirrors buildMessageToSign for kind:"like" / "unlike" on the server.
   const acc = await account();
-  const message = `SIGNA ${action} v1\nts:${ts}\npost:${post_id}`;
+  const message = `SIGDA ${action} v1\nts:${ts}\npost:${post_id}`;
   const signature = await acc.viemAccount.signMessage({ message });
   return { signature, message };
 }
@@ -3490,7 +3491,7 @@ async function cmdWatch() {
 // Generates a fresh secp256k1 wallet for the agent, signs the canonical
 // agent_launch envelope WITH THE AGENT'S OWN WALLET (proving control of
 // the address), POSTs to /api/agents/launch, then persists the agent's
-// private key to ~/.signa/agents/<address>.json (mode 600).
+// private key to ~/.sigda/agents/<address>.json (mode 600).
 //
 // The launcher (user's wallet) is recorded in `launched_by` for
 // attribution but is not the signer — server v1 only verifies the
@@ -3639,7 +3640,7 @@ async function cmdLaunch(args) {
 
 async function cmdAgents(args) {
   // List agents launched from THIS machine (i.e. whose private keys are
-  // in ~/.signa/agents/). We cross-check the server only on demand
+  // in ~/.sigda/agents/). We cross-check the server only on demand
   // (`agents --remote` prints registry status for each).
   const records = await listAgentKeys();
   if (records.length === 0) {
@@ -3728,7 +3729,7 @@ async function cmdAgentFind(args) {
   }
 }
 
-// ---------- agent runtime: hand custody of an agent key to SIGNA ----------
+// ---------- agent runtime: hand custody of an agent key to SIGDA ----------
 //
 // The CLI default for `signa launch` keeps the agent's private key
 // LOCAL — the agent can only reply when the CLI process is up. To
@@ -3737,7 +3738,7 @@ async function cmdAgentFind(args) {
 //   signa agent enable-runtime <0x agent_address>
 //
 // The CLI then:
-//   1. Loads the agent's private key from ~/.signa/agents/<addr>.json
+//   1. Loads the agent's private key from ~/.sigda/agents/<addr>.json
 //   2. Signs the canonical `agent_runtime_enable` envelope WITH THE
 //      AGENT'S OWN KEY (proves the caller controls the agent address)
 //   3. POSTs the signed envelope + the raw 32-byte private key to
@@ -3748,7 +3749,7 @@ async function cmdAgentFind(args) {
 //      and stores the ciphertext. Plaintext is never persisted.
 //
 // SECURITY TRADE-OFF (made explicit to the user every time):
-//   This is the ONE point in the SIGNA design where the private key
+//   This is the ONE point in the SIGDA design where the private key
 //   leaves the user's box. It's necessary for "always-on" agents.
 //   Users who want stricter custody can keep their agents local-only
 //   (the default) and accept that replies only happen while the CLI
@@ -3760,10 +3761,10 @@ async function cmdAgentFind(args) {
 
 async function signSignaAgentRuntimeEnable({ agentAccount, address, ts }) {
   const message = [
-    "SIGNA agent runtime enable v1",
+    "SIGDA agent runtime enable v1",
     `ts:${ts}`,
     `address:${address}`,
-    "I authorize SIGNA to take custody of this agent's private key",
+    "I authorize SIGDA to take custody of this agent's private key",
     "and run an XMTP + LLM runtime on its behalf. I can disable",
     "this at any time.",
   ].join("\n");
@@ -3776,7 +3777,7 @@ async function _readPersistedAgent(addr) {
   if (!rec) {
     err(paint(c.red, "✗"), `no local key for ${addr}`);
     err(paint(c.dim, "  this CLI only has keys for agents launched from this box."));
-    err(paint(c.dim, "  if you launched it elsewhere, copy ~/.signa/agents/<addr>.json over."));
+    err(paint(c.dim, "  if you launched it elsewhere, copy ~/.sigda/agents/<addr>.json over."));
     bail(1);
   }
   return rec;
@@ -3873,8 +3874,8 @@ async function cmdAgentDisableRuntime(args) {
 // ---------- autonomous: recurring wallet-signed agent tasks (v0.18) ----------
 //
 // `signa agent autonomous create <addr> "<prompt>" --interval=<sec> [--expires=<sec>]`
-// The agent's wallet (loaded from ~/.signa/agents/<addr>.json) signs a
-// single envelope that authorizes the SIGNA server to fire the post on
+// The agent's wallet (loaded from ~/.sigda/agents/<addr>.json) signs a
+// single envelope that authorizes the SIGDA server to fire the post on
 // schedule. Server requires runtime opt-in so it has the encrypted
 // agent key to sign each individual post envelope.
 //
@@ -3909,20 +3910,20 @@ async function signSignaAgentAutonomousCreate({
   const authorizationLines =
     task_kind === "payment"
       ? [
-          "I authorize SIGNA to broadcast wallet-signed transactions",
+          "I authorize SIGDA to broadcast wallet-signed transactions",
           "from this agent on the cadence above, sending the exact",
           "amount and token specified to the exact address specified,",
           "until expiry or until I cancel.",
           `memo:${prompt}`,
         ]
       : [
-          "I authorize SIGNA to produce wallet-signed posts from this",
+          "I authorize SIGDA to produce wallet-signed posts from this",
           "agent on the cadence above, using the prompt below as the",
           "text of each post. I can cancel any time.",
           `prompt:${prompt}`,
         ];
   const message = [
-    "SIGNA agent autonomous create v1",
+    "SIGDA agent autonomous create v1",
     `ts:${ts}`,
     `agent:${agent}`,
     `interval_seconds:${interval_seconds}`,
@@ -3942,7 +3943,7 @@ async function signSignaAgentAutonomousCancel({
   ts,
 }) {
   const message = [
-    "SIGNA agent autonomous cancel v1",
+    "SIGDA agent autonomous cancel v1",
     `ts:${ts}`,
     `agent:${agent}`,
     `task:${task_id}`,
@@ -4274,7 +4275,7 @@ async function cmdAgentAutonomous(args) {
         c.dim,
         r.task.kind === "payment"
           ? "  the cron will broadcast an EIP-1559 tx on Robinhood Chain every tick."
-          : "  the SIGNA cron fires every minute. the first post lands at the next_run_at above.",
+          : "  the SIGDA cron fires every minute. the first post lands at the next_run_at above.",
       ),
     );
     return;
@@ -4292,12 +4293,12 @@ async function cmdAgentAutonomous(args) {
 async function signSignaDigestToggle({ address, enabled, ts }) {
   const acc = await account();
   const message = [
-    `SIGNA digest ${enabled ? "subscribe" : "unsubscribe"} v1`,
+    `SIGDA digest ${enabled ? "subscribe" : "unsubscribe"} v1`,
     `ts:${ts}`,
     `address:${address}`,
     enabled
-      ? "I subscribe to a daily AI digest DM from SIGNA."
-      : "I unsubscribe from the daily SIGNA digest.",
+      ? "I subscribe to a daily AI digest DM from SIGDA."
+      : "I unsubscribe from the daily SIGDA digest.",
   ].join("\n");
   const signature = await acc.viemAccount.signMessage({ message });
   return { signature, message };
@@ -4331,8 +4332,8 @@ async function cmdDigest(args) {
   out(
     paint(c.green, "✓"),
     enabled
-      ? "subscribed to the daily SIGNA digest"
-      : "unsubscribed from the SIGNA digest",
+      ? "subscribed to the daily SIGDA digest"
+      : "unsubscribed from the SIGDA digest",
   );
   out(paint(c.dim, `  address: ${addr}`));
   if (enabled) {
@@ -4340,7 +4341,7 @@ async function cmdDigest(args) {
   }
 }
 
-// ---------- holders: top SIGNA users holding a partner token ----------
+// ---------- holders: top SIGDA users holding a partner token ----------
 
 async function cmdHolders(args) {
   const symbol = (args[0] ?? "").replace(/^\$/, "").toUpperCase();
@@ -4357,11 +4358,11 @@ async function cmdHolders(args) {
   }
   const holders = r.holders ?? [];
   if (holders.length === 0) {
-    out(paint(c.dim, `no SIGNA users currently hold $${symbol}.`));
+    out(paint(c.dim, `no SIGDA users currently hold $${symbol}.`));
     return;
   }
   out("");
-  out(paint(c.bold, `top $${symbol} holders on SIGNA`), paint(c.dim, `(${holders.length} wallets)`));
+  out(paint(c.bold, `top $${symbol} holders on SIGDA`), paint(c.dim, `(${holders.length} wallets)`));
   out(paint(c.dim, "─".repeat(72)));
   out(
     paint(c.bold, " ADDRESS".padEnd(16)) +
@@ -4770,7 +4771,7 @@ function chatPromptFor(ctx) {
 
 // ---------- partner integrations ----------
 //
-// CLI surface for the four partner stacks SIGNA composes with:
+// CLI surface for the four partner stacks SIGDA composes with:
 //   aeon       — ERC-8004 Identity Registry on Ethereum mainnet
 //                  read-only · pure on-chain · no signa server in the path
 //   gitlawb    — DID-bound decentralized git
@@ -5005,11 +5006,11 @@ async function signSignaLinkGitlawb({ address, gitlawb_did, ts }) {
   // Mirrors buildMessageToSign("link_gitlawb") on the server.
   const acc = await account();
   const message = [
-    "SIGNA link gitlawb v1",
+    "SIGDA link gitlawb v1",
     `ts:${ts}`,
     `address:${address}`,
     `gitlawb_did:${gitlawb_did}`,
-    "I attach this gitlawb DID to my SIGNA profile.",
+    "I attach this gitlawb DID to my SIGDA profile.",
   ].join("\n");
   const signature = await acc.viemAccount.signMessage({ message });
   return { signature, message };
@@ -5026,7 +5027,7 @@ async function gitlawbFetch(path) {
     const res = await fetch(`${GITLAWB_NODE}${path}`, {
       headers: {
         accept: "application/json",
-        "user-agent": `signa-cli/${VERSION}`,
+        "user-agent": `sigda-cli/${VERSION}`,
       },
     });
     if (!res.ok) return null;
@@ -5287,10 +5288,10 @@ async function cmdGitlawb(args) {
 // ----- bankr -----
 
 async function signSignaBankrTrade({ address, prompt, ts }) {
-  // Mirrors the SIGNA trade v1 envelope on /api/me/trade.
+  // Mirrors the SIGDA trade v1 envelope on /api/me/trade.
   const acc = await account();
   const message = [
-    "SIGNA trade v1",
+    "SIGDA trade v1",
     `ts:${ts}`,
     `address:${address}`,
     `prompt:${prompt}`,
@@ -5394,7 +5395,7 @@ async function cmdBankr(args) {
 
 // ---------- verify: cryptographic re-verification of a signed reply ----------
 //
-// The single command that proves SIGNA's "server cannot forge a message"
+// The single command that proves SIGDA's "server cannot forge a message"
 // claim. Fetches an interaction by id, pulls the signature + canonical
 // signed_message + agent_address, then runs viem's verifyMessage()
 // LOCALLY — no signa server in the verification path. The check is
@@ -5525,7 +5526,7 @@ async function signSignaWatchlistToggle({ address, token_address, op, ts }) {
   // Mirrors buildMessageToSign("watchlist_toggle") server-side.
   const acc = await account();
   const message = [
-    `SIGNA watchlist ${op} v1`,
+    `SIGDA watchlist ${op} v1`,
     `ts:${ts}`,
     `address:${address}`,
     `token:${token_address}`,
@@ -5881,7 +5882,7 @@ async function cmdMiroshark(args) {
 // wallet-bound (registration is signed by the user's wallet, proving
 // they control the address).
 //
-// Local state lives at ~/.signa/xmtp/<wallet>.db3 — the SQLite db
+// Local state lives at ~/.sigda/xmtp/<wallet>.db3 — the SQLite db
 // XMTP uses to maintain the conversation ratchet. Losing this file
 // loses your end of past conversations (forward secrecy by design).
 // Identity itself is re-derivable from the wallet, so you can always
@@ -5976,14 +5977,14 @@ async function xmtpDbPath() {
  * Open (or create) an XMTP client for the current wallet. First call
  * after `xmtp init` is fast; first ever call performs the on-network
  * identity registration which signs a "create_inbox" payload with the
- * wallet. We always use production by default; SIGNA_XMTP_ENV can
+ * wallet. We always use production by default; SIGDA_XMTP_ENV can
  * override to "dev" or "local" for development.
  */
 async function xmtpClient() {
   const m = await xmtp();
   const signer = await xmtpSigner();
   const dbPath = await xmtpDbPath();
-  const xmtpEnv = env.SIGNA_XMTP_ENV || "production";
+  const xmtpEnv = env.SIGDA_XMTP_ENV || "production";
   try {
     return await m.Client.create(signer, {
       env: xmtpEnv,
@@ -6022,7 +6023,7 @@ async function xmtpReachable(address) {
   try {
     const m = await xmtp({ soft: true });
     if (!m) return false;
-    const xmtpEnv = env.SIGNA_XMTP_ENV || "production";
+    const xmtpEnv = env.SIGDA_XMTP_ENV || "production";
     const result = await m.Client.canMessage(
       [{ identifier: address.toLowerCase(), identifierKind: 0 }],
       xmtpEnv,
@@ -6136,7 +6137,7 @@ async function cmdXmtpStatus() {
     paint(c.dim, "installation".padEnd(16)),
     paint(c.dim, client.installationId.slice(0, 16) + "…"),
   );
-  out(paint(c.dim, "env".padEnd(16)), env.SIGNA_XMTP_ENV || "production");
+  out(paint(c.dim, "env".padEnd(16)), env.SIGDA_XMTP_ENV || "production");
   out(paint(c.dim, "db".padEnd(16)), await xmtpDbPath());
   // Count conversations
   try {
@@ -6155,7 +6156,7 @@ async function cmdXmtpCheck(args) {
     bail(2);
   }
   const m = await xmtp();
-  const xmtpEnv = env.SIGNA_XMTP_ENV || "production";
+  const xmtpEnv = env.SIGDA_XMTP_ENV || "production";
   const result = await m.Client.canMessage(
     [{ identifier: addr, identifierKind: 0 }],
     xmtpEnv,
@@ -6202,7 +6203,7 @@ async function cmdXmtpDm(args) {
 
   const m = await xmtp();
   const client = await xmtpClient();
-  const xmtpEnv = env.SIGNA_XMTP_ENV || "production";
+  const xmtpEnv = env.SIGDA_XMTP_ENV || "production";
 
   // Pre-flight reachability check so we fail fast with a useful message
   // instead of a cryptic XMTP error.
@@ -6317,16 +6318,16 @@ async function cmdXmtpInbox(args) {
 // ---------- banner + REPL ----------
 
 function bannerLines() {
-  // ANSI-shadow style "SIGNA" — recognizable big-text. Box-drawing chars
+  // ANSI-shadow style "SIGDA" — recognizable big-text. Box-drawing chars
   // render reliably across Windows Terminal, iTerm2, macOS Terminal.app,
-  // gnome-terminal, alacritty, kitty. Width = 41 cols.
+  // gnome-terminal, alacritty, kitty. Width = 36 cols.
   return [
-    "███████╗██╗ ██████╗ ███╗   ██╗  █████╗ ",
-    "██╔════╝██║██╔════╝ ████╗  ██║ ██╔══██╗",
-    "███████╗██║██║  ███╗██╔██╗ ██║ ███████║",
-    "╚════██║██║██║   ██║██║╚██╗██║ ██╔══██║",
-    "███████║██║╚██████╔╝██║ ╚████║ ██║  ██║",
-    "╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═╝  ╚═╝",
+    "███████╗██╗ ██████╗ ██████╗  █████╗ ",
+    "██╔════╝██║██╔════╝ ██╔══██╗██╔══██╗",
+    "███████╗██║██║  ███╗██║  ██║███████║",
+    "╚════██║██║██║   ██║██║  ██║██╔══██║",
+    "███████║██║╚██████╔╝██████╔╝██║  ██║",
+    "╚══════╝╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝",
   ];
 }
 
@@ -6336,32 +6337,32 @@ function rgb(r, g, b, s) {
 }
 
 async function printBanner({ welcome = true } = {}) {
-  const BLUE = [91, 141, 239];
-  const VIOLET = [139, 92, 246];
+  const GREEN = [0, 200, 83];
+  const GREEN_DIM = [0, 150, 64];
   const DIM = [120, 120, 130];
   out("");
   for (const line of bannerLines()) {
-    out("  " + rgb(BLUE[0], BLUE[1], BLUE[2], line));
+    out("  " + rgb(GREEN[0], GREEN[1], GREEN[2], line));
   }
   out("");
   // decentralization motif — a tiny mesh of nodes
   out(
     "  " +
-      rgb(VIOLET[0], VIOLET[1], VIOLET[2], "●━━●━━●━━●━━●━━●") +
+      rgb(GREEN_DIM[0], GREEN_DIM[1], GREEN_DIM[2], "●━━●━━●━━●━━●━━●") +
       "   " +
       rgb(DIM[0], DIM[1], DIM[2], "wallet-native messaging · robinhood chain"),
   );
   out(
     "  " +
-      rgb(VIOLET[0], VIOLET[1], VIOLET[2], " ╲      ╱      ╲ ") +
+      rgb(GREEN_DIM[0], GREEN_DIM[1], GREEN_DIM[2], " ╲      ╱      ╲ ") +
       "   " +
-      rgb(DIM[0], DIM[1], DIM[2], `signa cli v${VERSION} · 0 api keys · 0 mocks`),
+      rgb(DIM[0], DIM[1], DIM[2], `sigda cli v${VERSION} · 0 api keys · 0 mocks`),
   );
   out(
     "  " +
-      rgb(VIOLET[0], VIOLET[1], VIOLET[2], "●━━●━━●━━●━━●━━●") +
+      rgb(GREEN_DIM[0], GREEN_DIM[1], GREEN_DIM[2], "●━━●━━●━━●━━●━━●") +
       "   " +
-      rgb(DIM[0], DIM[1], DIM[2], "partners: aeon · gitlawb · miroshark · bankr"),
+      rgb(DIM[0], DIM[1], DIM[2], "non-custodial · keyless · wallet-signed"),
   );
   out("");
   if (welcome) {
@@ -6658,7 +6659,7 @@ async function loadHistory() {
 async function saveHistory(rl) {
   if (!rl?.history) return;
   try {
-    await mkdir(SIGNA_HOME, { recursive: true });
+    await mkdir(SIGDA_HOME, { recursive: true });
     const lines = [...rl.history].reverse().slice(-200);
     await writeFile(HISTORY_PATH, lines.join("\n") + "\n");
   } catch {
@@ -6710,23 +6711,23 @@ function compareSemver(a, b) {
 }
 
 /**
- * Pull the latest signa.mjs from the configured SIGNA_BASE_URL and
+ * Pull the latest sigda.mjs from the configured SIGDA_BASE_URL and
  * atomically replace this very file on disk. The running process keeps
  * the old code in memory — we surface that explicitly so the user
  * restarts their shell instead of being confused by a partial upgrade.
  *
- *   signa update           — download + atomic-replace, then advise restart
- *   signa update --check   — compare versions only, no write
+ *   sigda update           — download + atomic-replace, then advise restart
+ *   sigda update --check   — compare versions only, no write
  */
 async function cmdUpdate(args) {
   const checkOnly = args.includes("--check");
   const base = await baseUrl();
-  const url = `${base}/signa.mjs`;
+  const url = `${base}/sigda.mjs`;
 
   let res;
   try {
     res = await fetch(url, {
-      headers: { "user-agent": `signa-cli/${VERSION}` },
+      headers: { "user-agent": `sigda-cli/${VERSION}` },
     });
   } catch (e) {
     err(paint(c.red, "✗"), `couldn't reach ${url}: ${e?.message ?? e}`);
@@ -6771,7 +6772,7 @@ async function cmdUpdate(args) {
   out("");
 
   if (cmp === 0) {
-    out(paint(c.green, "✓"), `signa cli is up to date.`);
+    out(paint(c.green, "✓"), `sigda cli is up to date.`);
     return;
   }
   if (cmp > 0) {
@@ -6782,13 +6783,13 @@ async function cmdUpdate(args) {
     return;
   }
   if (checkOnly) {
-    out(paint(c.dim, "run 'signa update' (without --check) to upgrade."));
+    out(paint(c.dim, "run 'sigda update' (without --check) to upgrade."));
     return;
   }
 
   // Atomic write: download → tmp → rename. rename() on the same volume
   // is atomic on every POSIX filesystem and on NTFS, so the user never
-  // sees a torn signa.mjs even if power is cut mid-write.
+  // sees a torn sigda.mjs even if power is cut mid-write.
   const ownPath = fileURLToPath(import.meta.url);
   const tmpPath = ownPath + ".new";
   try {

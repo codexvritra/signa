@@ -16,7 +16,7 @@ test("registerPreimage: canonical, lowercases provider, uppercases method", () =
   const pre = registerPreimage({ ts: 123, name: "myteam.sum", provider: "0xABCdef", endpoint: "https://x.dev/a", method: "post", price: 0 });
   assert.equal(
     pre,
-    "SIGNA capability register v1\nts:123\nname:myteam.sum\nprovider:0xabcdef\nendpoint:https://x.dev/a\nmethod:POST\nprice:0",
+    "SIGDA capability register v1\nts:123\nname:myteam.sum\nprovider:0xabcdef\nendpoint:https://x.dev/a\nmethod:POST\nprice:0",
   );
 });
 

@@ -416,23 +416,23 @@ export function buildMessageToSign(action: SignedAction): string {
   switch (action.kind) {
     case "post": {
       const reply = action.parent_id ? `\nin_reply_to:${action.parent_id}` : "";
-      return `SIGNA post v1\nts:${action.ts}${reply}\nbody:${action.content}`;
+      return `SIGDA post v1\nts:${action.ts}${reply}\nbody:${action.content}`;
     }
     case "like":
-      return `SIGNA like v1\nts:${action.ts}\npost:${action.post_id}`;
+      return `SIGDA like v1\nts:${action.ts}\npost:${action.post_id}`;
     case "unlike":
-      return `SIGNA unlike v1\nts:${action.ts}\npost:${action.post_id}`;
+      return `SIGDA unlike v1\nts:${action.ts}\npost:${action.post_id}`;
     case "delete":
-      return `SIGNA delete v1\nts:${action.ts}\npost:${action.post_id}`;
+      return `SIGDA delete v1\nts:${action.ts}\npost:${action.post_id}`;
     case "register":
-      return `SIGNA register v1\nts:${action.ts}\naddress:${action.address}\nbasename:${action.basename ?? "-"}\nens:${action.ens_name ?? "-"}`;
+      return `SIGDA register v1\nts:${action.ts}\naddress:${action.address}\nbasename:${action.basename ?? "-"}\nens:${action.ens_name ?? "-"}`;
     case "agent_submit":
-      return `SIGNA agent submit v1\nts:${action.ts}\naddress:${action.address}\nname:${action.name}\ntags:${action.tags.join(",")}\ndesc:${action.description}`;
+      return `SIGDA agent submit v1\nts:${action.ts}\naddress:${action.address}\nname:${action.name}\ntags:${action.tags.join(",")}\ndesc:${action.description}`;
     case "agent_delete":
-      return `SIGNA agent delete v1\nts:${action.ts}\naddress:${action.address}`;
+      return `SIGDA agent delete v1\nts:${action.ts}\naddress:${action.address}`;
     case "agent_launch":
       return [
-        `SIGNA agent launch v1`,
+        `SIGDA agent launch v1`,
         `ts:${action.ts}`,
         `address:${action.address}`,
         `name:${action.name}`,
@@ -444,49 +444,49 @@ export function buildMessageToSign(action: SignedAction): string {
       ].join("\n");
     case "agent_runtime_enable":
       return [
-        `SIGNA agent runtime enable v1`,
+        `SIGDA agent runtime enable v1`,
         `ts:${action.ts}`,
         `address:${action.address}`,
-        `I authorize SIGNA to take custody of this agent's private key`,
+        `I authorize SIGDA to take custody of this agent's private key`,
         `and run an XMTP + LLM runtime on its behalf. I can disable`,
         `this at any time.`,
       ].join("\n");
     case "link_gitlawb":
       return [
-        `SIGNA link gitlawb v1`,
+        `SIGDA link gitlawb v1`,
         `ts:${action.ts}`,
         `address:${action.address}`,
         `gitlawb_did:${action.gitlawb_did}`,
-        `I attach this gitlawb DID to my SIGNA profile.`,
+        `I attach this gitlawb DID to my SIGDA profile.`,
       ].join("\n");
     case "watchlist_toggle":
       return [
-        `SIGNA watchlist ${action.op} v1`,
+        `SIGDA watchlist ${action.op} v1`,
         `ts:${action.ts}`,
         `address:${action.address}`,
         `token:${action.token_address}`,
       ].join("\n");
     case "digest_toggle":
       return [
-        `SIGNA digest ${action.enabled ? "subscribe" : "unsubscribe"} v1`,
+        `SIGDA digest ${action.enabled ? "subscribe" : "unsubscribe"} v1`,
         `ts:${action.ts}`,
         `address:${action.address}`,
         action.enabled
-          ? `I subscribe to a daily AI digest DM from SIGNA.`
-          : `I unsubscribe from the daily SIGNA digest.`,
+          ? `I subscribe to a daily AI digest DM from SIGDA.`
+          : `I unsubscribe from the daily SIGDA digest.`,
       ].join("\n");
     case "bankr_connect":
       return [
-        `SIGNA bankr ${action.connect ? "connect" : "disconnect"} v1`,
+        `SIGDA bankr ${action.connect ? "connect" : "disconnect"} v1`,
         `ts:${action.ts}`,
         `address:${action.address}`,
         action.connect
-          ? `I authorize SIGNA to encrypt and store my Bankr Agent API`
-          : `I revoke SIGNA's access to my Bankr Agent API key. Purge it.`,
+          ? `I authorize SIGDA to encrypt and store my Bankr Agent API`
+          : `I revoke SIGDA's access to my Bankr Agent API key. Purge it.`,
         action.connect
           ? `key and use it to execute /trade commands I issue inside`
           : ``,
-        action.connect ? `SIGNA chats. I can disconnect any time.` : ``,
+        action.connect ? `SIGDA chats. I can disconnect any time.` : ``,
       ]
         .filter(Boolean)
         .join("\n");
@@ -511,20 +511,20 @@ export function buildMessageToSign(action: SignedAction): string {
       const authorizationLines =
         action.task_kind === "payment"
           ? [
-              `I authorize SIGNA to broadcast wallet-signed transactions`,
+              `I authorize SIGDA to broadcast wallet-signed transactions`,
               `from this agent on the cadence above, sending the exact`,
               `amount and token specified to the exact address specified,`,
               `until expiry or until I cancel.`,
               `memo:${action.prompt}`,
             ]
           : [
-              `I authorize SIGNA to produce wallet-signed posts from this`,
+              `I authorize SIGDA to produce wallet-signed posts from this`,
               `agent on the cadence above, using the prompt below as the`,
               `text of each post. I can cancel any time.`,
               `prompt:${action.prompt}`,
             ];
       return [
-        `SIGNA agent autonomous create v1`,
+        `SIGDA agent autonomous create v1`,
         `ts:${action.ts}`,
         `agent:${action.agent}`,
         `interval_seconds:${action.interval_seconds}`,
@@ -536,7 +536,7 @@ export function buildMessageToSign(action: SignedAction): string {
     }
     case "agent_autonomous_cancel":
       return [
-        `SIGNA agent autonomous cancel v1`,
+        `SIGDA agent autonomous cancel v1`,
         `ts:${action.ts}`,
         `agent:${action.agent}`,
         `task:${action.task_id}`,
@@ -557,7 +557,7 @@ export function buildMessageToSign(action: SignedAction): string {
         optional.push(`in_reply_to:${action.in_reply_to}`);
       }
       return [
-        `SIGNA agent dm v1`,
+        `SIGDA agent dm v1`,
         `ts:${action.ts}`,
         `from:${action.from.toLowerCase()}`,
         `to:${action.to.toLowerCase()}`,
@@ -571,7 +571,7 @@ export function buildMessageToSign(action: SignedAction): string {
       // sender. Stable preimage so wallets render readable text, and so the
       // universal verifier can rebuild it byte-for-byte.
       return [
-        `SIGNA delivery ack v1`,
+        `SIGDA delivery ack v1`,
         `ts:${action.ts}`,
         `message:${action.message}`,
         `from:${action.from.toLowerCase()}`,
@@ -587,31 +587,31 @@ export function buildMessageToSign(action: SignedAction): string {
         opt.push(`capabilities:${action.capabilities.join(",")}`);
       }
       return [
-        `SIGNA agent bridge register v1`,
+        `SIGDA agent bridge register v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
         `platform:${action.platform.toLowerCase()}`,
         `model:${action.platform_model}`,
         `label:${action.label}`,
         ...opt,
-        `I am operating an agent bridge between SIGNA's DM substrate and`,
-        `the ${action.platform} platform. My wallet receives DMs on SIGNA`,
+        `I am operating an agent bridge between SIGDA's DM substrate and`,
+        `the ${action.platform} platform. My wallet receives DMs on SIGDA`,
         `and forwards them to the model above, then signs the reply and`,
         `posts it back. I can deregister at any time.`,
       ].join("\n");
     }
     case "agent_bridge_heartbeat":
       return [
-        `SIGNA agent bridge heartbeat v1`,
+        `SIGDA agent bridge heartbeat v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
       ].join("\n");
     case "agent_bridge_deregister":
       return [
-        `SIGNA agent bridge deregister v1`,
+        `SIGDA agent bridge deregister v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
-        `I am taking this bridge offline. SIGNA may purge or hide it.`,
+        `I am taking this bridge offline. SIGDA may purge or hide it.`,
       ].join("\n");
     case "signa_room_create": {
       // v0.50: optional hold-to-chat gate. Gate lines are ONLY appended
@@ -631,7 +631,7 @@ export function buildMessageToSign(action: SignedAction): string {
         );
       }
       return [
-        `SIGNA room create v1`,
+        `SIGDA room create v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
         `name:${action.name}`,
@@ -647,7 +647,7 @@ export function buildMessageToSign(action: SignedAction): string {
       }
       if (action.in_reply_to) opt.push(`in_reply_to:${action.in_reply_to}`);
       return [
-        `SIGNA room message v1`,
+        `SIGDA room message v1`,
         `ts:${action.ts}`,
         `from:${action.address.toLowerCase()}`,
         `room:${action.room_slug.toLowerCase()}`,
@@ -657,7 +657,7 @@ export function buildMessageToSign(action: SignedAction): string {
     }
     case "signa_pubkey_register":
       return [
-        `SIGNA pubkey register v1`,
+        `SIGDA pubkey register v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
         `x25519:${action.x25519_pubkey}`,
@@ -668,7 +668,7 @@ export function buildMessageToSign(action: SignedAction): string {
       const opt: string[] = [];
       if (action.in_reply_to) opt.push(`in_reply_to:${action.in_reply_to}`);
       return [
-        `SIGNA room encrypted message v1`,
+        `SIGDA room encrypted message v1`,
         `ts:${action.ts}`,
         `from:${action.address.toLowerCase()}`,
         `room:${action.room_slug.toLowerCase()}`,
@@ -678,7 +678,7 @@ export function buildMessageToSign(action: SignedAction): string {
     }
     case "signa_room_add_member":
       return [
-        `SIGNA room add member v1`,
+        `SIGDA room add member v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
         `room:${action.room_slug.toLowerCase()}`,
@@ -698,7 +698,7 @@ export function buildMessageToSign(action: SignedAction): string {
         );
       }
       return [
-        `SIGNA dm price set v1`,
+        `SIGDA dm price set v1`,
         `ts:${action.ts}`,
         `address:${action.address.toLowerCase()}`,
         `price:${action.price_raw}`,

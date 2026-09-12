@@ -43,11 +43,11 @@ const SYSCALLS: Record<string, Syscall[]> = {
       path: "/install.sh",
       auth: "none",
       brief:
-        "curl-pipe installer — `curl -fsSL signaagent.xyz/install.sh | bash` puts the CLI at ~/.signa/bin/signa",
+        "curl-pipe installer — `curl -fsSL signaagent.xyz/install.sh | bash` puts the CLI at ~/.sigda/bin/sigda",
     },
     {
       method: "GET",
-      path: "/signa.mjs",
+      path: "/sigda.mjs",
       auth: "none",
       brief:
         "the CLI source itself — single-file Node ES module, zero deps",

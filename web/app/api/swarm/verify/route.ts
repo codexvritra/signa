@@ -36,9 +36,9 @@ export function OPTIONS() {
 
 type Msg = { from: string; to: string; ts: number; body: string; signature: string };
 
-// canonical SIGNA DM preimage — must match the node + SDK exactly
+// canonical SIGDA DM preimage — must match the node + SDK exactly
 function dmPreimage(from: string, to: string, body: string, ts: number): string {
-  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
+  return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
 // chain link for a message = first 12 hex of sha256(signature)
 function linkOf(signature: string): string {
@@ -70,11 +70,21 @@ export async function POST(req: NextRequest) {
     const m = messages[i];
     let sigOk = false;
     try {
+      const message = dmPreimage(m.from, m.to, m.body, m.ts);
       sigOk = await verifyMessage({
         address: m.from as `0x${string}`,
-        message: dmPreimage(m.from, m.to, m.body, m.ts),
+        message,
         signature: m.signature as `0x${string}`,
       });
+      // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed
+      // preimage so an older receipt still verifies.
+      if (!sigOk) {
+        sigOk = await verifyMessage({
+          address: m.from as `0x${string}`,
+          message: "SIGNA " + message.slice("SIGDA ".length),
+          signature: m.signature as `0x${string}`,
+        });
+      }
     } catch {
       sigOk = false;
     }

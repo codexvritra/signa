@@ -74,7 +74,7 @@ export interface CouncilTurn {
 
 function roomMessagePreimage(address: string, slug: string, body: string, ts: number): string {
   return [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${ts}`,
     `from:${address.toLowerCase()}`,
     `room:${slug.toLowerCase()}`,

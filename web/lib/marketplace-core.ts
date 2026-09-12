@@ -17,7 +17,7 @@ export function registerPreimage(a: {
   price: number | string;
 }): string {
   return [
-    "SIGNA capability register v1",
+    "SIGDA capability register v1",
     `ts:${a.ts}`,
     `name:${a.name}`,
     `provider:${a.provider.toLowerCase()}`,

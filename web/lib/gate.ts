@@ -67,7 +67,7 @@ export function sanitizeReply(rawReply: string): string {
 /** Canonical preimage a player signs to make a gate attempt. */
 export function gateAttemptPreimage(address: string, message: string, ts: number): string {
   return [
-    "SIGNA gate attempt v1",
+    "SIGDA gate attempt v1",
     `ts:${ts}`,
     `player:${address.toLowerCase()}`,
     `message:${message}`,
@@ -77,7 +77,7 @@ export function gateAttemptPreimage(address: string, message: string, ts: number
 /** Canonical preimage the warden signs over its reply (so refusals are signed too). */
 export function wardenReplyPreimage(attemptId: string, reply: string, ts: number): string {
   return [
-    "SIGNA gate warden reply v1",
+    "SIGDA gate warden reply v1",
     `ts:${ts}`,
     `attempt:${attemptId}`,
     `reply:${reply}`,

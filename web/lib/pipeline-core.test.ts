@@ -55,6 +55,6 @@ test("linkPreimage: canonical, lowercases provider", () => {
   };
   assert.equal(
     linkPreimage("run-1", l),
-    "SIGNA pipeline link v1\nrun:run-1\nstep:0\ncap:root.feargreed\nprovider:0xabc\ninput:ih\noutput:oh\nprev:genesis\nts:1700000000000",
+    "SIGDA pipeline link v1\nrun:run-1\nstep:0\ncap:root.feargreed\nprovider:0xabc\ninput:ih\noutput:oh\nprev:genesis\nts:1700000000000",
   );
 });
