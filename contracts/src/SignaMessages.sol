@@ -6,7 +6,7 @@ pragma solidity ^0.8.24;
  * @notice Wallet-to-wallet messaging that lives on the explorer.
  *
  * A message is recorded as an on-chain EVENT, not buried in raw calldata. Once
- * this contract is verified on Basescan, every message renders as a decoded,
+ * this contract is verified on Blockscout, every message renders as a decoded,
  * human-readable log — `from`, `to`, the actual message text, and a timestamp —
  * under each transaction's Logs tab, and the contract's own page becomes a
  * public, readable feed of all SIGNA messages. Because `from` and `to` are
@@ -21,7 +21,7 @@ pragma solidity ^0.8.24;
  * forged. Each message gets a strictly increasing global id for stable permalinks,
  * and per-wallet sent/received counts make activity readable on-chain too.
  *
- * Designed for Base mainnet (chain id 8453). Identical bytecode redeploys
+ * Designed for Robinhood Chain mainnet (chain id 4663). Identical bytecode redeploys
  * verbatim on any EVM chain.
  */
 contract SignaMessages {

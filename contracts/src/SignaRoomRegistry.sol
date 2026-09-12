@@ -25,7 +25,7 @@ pragma solidity ^0.8.24;
  * all that data, and we anchor a hash of it. Saves gas, keeps the
  * contract bytecode tight.
  *
- * Designed for Base mainnet (chain id 8453). Identical bytecode can
+ * Designed for Robinhood Chain mainnet (chain id 4663). Identical bytecode can
  * be redeployed verbatim on any EVM chain to seed federation there.
  */
 contract SignaRoomRegistry {

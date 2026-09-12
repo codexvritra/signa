@@ -10,7 +10,7 @@ pragma solidity ^0.8.24;
  * off-chain by the transparency-log signer. Signatures prove WHO wrote each
  * message; the Merkle log proves the SET wasn't tampered. This contract adds
  * the final link: it pins each checkpoint root ON CHAIN, so the log's history
- * is settled on Base and cannot be silently rewound even by SIGNA itself —
+ * is settled on Robinhood Chain and cannot be silently rewound even by SIGNA itself —
  * a later off-chain root that contradicts an anchored one is provably a fork.
  *
  * Permissionless and ownerless, exactly like SignaNodeRegistry /
@@ -22,7 +22,7 @@ pragma solidity ^0.8.24;
  * Append-only is enforced on chain: each anchor must strictly advance `seq`
  * and never shrink `treeSize`. A non-zero root is required.
  *
- * Designed for Base mainnet (chain id 8453). Identical bytecode redeploys
+ * Designed for Robinhood Chain mainnet (chain id 4663). Identical bytecode redeploys
  * verbatim on any EVM chain.
  */
 contract SignaLogAnchor {

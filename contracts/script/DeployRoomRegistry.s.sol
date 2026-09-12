@@ -9,12 +9,12 @@ import {SignaRoomRegistry} from "../src/SignaRoomRegistry.sol";
  *
  * Usage:
  *   forge script script/DeployRoomRegistry.s.sol \
- *     --rpc-url base \
+ *     --rpc-url robinhood_mainnet \
  *     --private-key 0x<deployer_key> \
  *     --broadcast \
- *     --verify
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Deployer wallet needs ~0.0002 ETH on Base mainnet for gas.
+ * Deployer wallet needs ~0.0002 ETH on Robinhood Chain for gas.
  *
  * After deploy:
  *   1. Copy the address printed below

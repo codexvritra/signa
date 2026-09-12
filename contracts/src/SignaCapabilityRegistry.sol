@@ -10,7 +10,7 @@ pragma solidity ^0.8.24;
  *
  * The full callable spec lives ON CHAIN (endpoint, method, price, payout),
  * not in any single node's database. That is the point: discovery and the
- * data needed to invoke a capability can be read straight from Base by
+ * data needed to invoke a capability can be read straight from Robinhood Chain by
  * anyone, with no trust in SIGNA's index. A node that serves different
  * capability data than the chain says can be caught and rejected.
  *
@@ -22,7 +22,7 @@ pragma solidity ^0.8.24;
  * admin, no upgrade path, no fee. Same model as SignaRoomRegistry and
  * SignaNodeRegistry, extended to capabilities.
  *
- * Designed for Base mainnet (chain id 8453). Identical bytecode redeploys
+ * Designed for Robinhood Chain mainnet (chain id 4663). Identical bytecode redeploys
  * verbatim on any EVM chain.
  */
 contract SignaCapabilityRegistry {

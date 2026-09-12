@@ -9,16 +9,16 @@ import {SignaLogAnchor} from "../src/SignaLogAnchor.sol";
  *
  * Usage:
  *   forge script script/DeployLogAnchor.s.sol \
- *     --rpc-url base \
+ *     --rpc-url robinhood_mainnet \
  *     --private-key 0x<deployer_key> \
  *     --broadcast \
- *     --verify
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Deployer wallet needs ~0.0002 ETH on Base mainnet for gas. After deploy,
+ * Deployer wallet needs ~0.0002 ETH on Robinhood Chain for gas. After deploy,
  * copy the address into Vercel env as SIGNA_LOG_ANCHOR_ADDRESS, and fund the
  * transparency-log signer wallet (keccak256("signa:transparency-log:v1"),
- * exposed at /api/log → signer) with a little Base ETH so /api/cron/anchor
- * can submit anchor txs.
+ * exposed at /api/log → signer) with a little Robinhood Chain ETH so
+ * /api/cron/anchor can submit anchor txs.
  */
 contract DeployLogAnchor is Script {
     function run() external returns (SignaLogAnchor anchor) {

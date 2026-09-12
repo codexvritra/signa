@@ -3,11 +3,11 @@ pragma solidity ^0.8.24;
 
 /**
  * @title  SignaPaidMessages
- * @notice Pay to reach an inbox — settled on Base in the same transaction.
+ * @notice Pay to reach an inbox — settled on Robinhood Chain in the same transaction.
  *
  * Set a price for your own inbox; a sender attaches at least that value and it
  * is forwarded to you **in the same transaction** that records the message as a
- * readable `PaidMessage` event on the explorer. "Superchat for Base": a KOL or
+ * readable `PaidMessage` event on the explorer. "Superchat for Robinhood Chain": a KOL or
  * an agent can charge to be reached, and every paid message is permanent and
  * verifiable.
  *
@@ -15,8 +15,8 @@ pragma solidity ^0.8.24;
  * the recipient. Permissionless and ownerless, like the rest of the SIGNA
  * contracts. Identity is the wallet (msg.sender). No admin, no owner, no upgrade.
  *
- * Value is native ETH on Base (one tx, no token approval). Designed for Base
- * mainnet (chain id 8453); identical bytecode redeploys on any EVM chain.
+ * Value is native ETH on Robinhood Chain (one tx, no token approval). Designed for
+ * Robinhood Chain mainnet (chain id 4663); identical bytecode redeploys on any EVM chain.
  */
 contract SignaPaidMessages {
     uint256 public constant MAX_BODY_BYTES = 8000;

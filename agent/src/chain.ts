@@ -1,12 +1,22 @@
-import { createPublicClient, formatEther, formatGwei, http } from "viem";
-import { base, mainnet } from "viem/chains";
+import { createPublicClient, defineChain, formatEther, formatGwei, http } from "viem";
+import { mainnet } from "viem/chains";
 
-const baseRpc = process.env.BASE_RPC_URL;
+// Robinhood Chain — Arbitrum Orbit L2, ETH gas, chainId 4663 (verified via eth_chainId).
+const RH_RPC = process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
+const RH_EXPLORER = process.env.ROBINHOOD_EXPLORER_URL || "https://robinhoodchain.blockscout.com";
 const ethRpc = process.env.ETHEREUM_RPC_URL;
 
-export const baseClient = createPublicClient({
-  chain: base,
-  transport: http(baseRpc),
+const robinhoodChain = defineChain({
+  id: 4663,
+  name: "Robinhood Chain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: [RH_RPC] } },
+  blockExplorers: { default: { name: "Explorer", url: RH_EXPLORER } },
+});
+
+export const robinhoodClient = createPublicClient({
+  chain: robinhoodChain,
+  transport: http(RH_RPC),
 });
 
 // Mainnet client used for ENS lookups (ENS lives on Ethereum mainnet).
@@ -16,22 +26,22 @@ export const mainnetClient = createPublicClient({
 });
 
 export async function getEthBalance(address: `0x${string}`) {
-  const wei = await baseClient.getBalance({ address });
+  const wei = await robinhoodClient.getBalance({ address });
   return { wei: wei.toString(), eth: formatEther(wei) };
 }
 
 export async function getNonce(address: `0x${string}`) {
-  return baseClient.getTransactionCount({ address });
+  return robinhoodClient.getTransactionCount({ address });
 }
 
 export async function getNetworkStatus() {
   const [block, gas] = await Promise.all([
-    baseClient.getBlockNumber(),
-    baseClient.getGasPrice(),
+    robinhoodClient.getBlockNumber(),
+    robinhoodClient.getGasPrice(),
   ]);
   return {
-    chain: "base",
-    chainId: base.id,
+    chain: "robinhood",
+    chainId: robinhoodChain.id,
     blockNumber: block.toString(),
     gasPriceWei: gas.toString(),
     gasPriceGwei: formatGwei(gas),
@@ -39,7 +49,7 @@ export async function getNetworkStatus() {
 }
 
 export async function getCode(address: `0x${string}`) {
-  const code = await baseClient.getCode({ address });
+  const code = await robinhoodClient.getCode({ address });
   return {
     isContract: !!code && code !== "0x",
     bytecodeLength: code ? (code.length - 2) / 2 : 0,
@@ -48,10 +58,10 @@ export async function getCode(address: `0x${string}`) {
 
 export async function getTransaction(hash: `0x${string}`) {
   try {
-    const tx = await baseClient.getTransaction({ hash });
-    let receipt: Awaited<ReturnType<typeof baseClient.getTransactionReceipt>> | null = null;
+    const tx = await robinhoodClient.getTransaction({ hash });
+    let receipt: Awaited<ReturnType<typeof robinhoodClient.getTransactionReceipt>> | null = null;
     try {
-      receipt = await baseClient.getTransactionReceipt({ hash });
+      receipt = await robinhoodClient.getTransactionReceipt({ hash });
     } catch {
       // not yet mined
     }

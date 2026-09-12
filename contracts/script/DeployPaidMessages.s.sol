@@ -5,13 +5,14 @@ import {Script, console} from "forge-std/Script.sol";
 import {SignaPaidMessages} from "../src/SignaPaidMessages.sol";
 
 /**
- * Deploy script for SignaPaidMessages (pay-to-reach inboxes, settled on Base).
+ * Deploy script for SignaPaidMessages (pay-to-reach inboxes, settled on Robinhood Chain).
  *
  * Usage:
  *   forge script script/DeployPaidMessages.s.sol \
- *     --rpc-url base --private-key 0x<deployer_key> --broadcast --verify
+ *     --rpc-url robinhood_mainnet --private-key 0x<deployer_key> --broadcast \
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Deployer needs ~0.0002 ETH on Base for gas. After deploy, copy the address
+ * Deployer needs ~0.0002 ETH on Robinhood Chain for gas. After deploy, copy the address
  * into Vercel env as SIGNA_PAID_MESSAGES_ADDRESS (+ NEXT_PUBLIC_…) so the site,
  * SDK, and composer route paid messages through it.
  */

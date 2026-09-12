@@ -9,9 +9,10 @@ import {SignaRooms} from "../src/SignaRooms.sol";
  *
  * Usage:
  *   forge script script/DeployRooms.s.sol \
- *     --rpc-url base --private-key 0x<deployer_key> --broadcast --verify
+ *     --rpc-url robinhood_mainnet --private-key 0x<deployer_key> --broadcast \
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Deployer needs ~0.0003 ETH on Base for gas. After deploy, copy the address
+ * Deployer needs ~0.0003 ETH on Robinhood Chain for gas. After deploy, copy the address
  * into Vercel env as SIGNA_ROOMS_ADDRESS (+ NEXT_PUBLIC_…) so the site + SDK
  * route rooms through it (incl. an auto-room per token launch).
  */

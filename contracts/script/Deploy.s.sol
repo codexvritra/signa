@@ -9,16 +9,16 @@ import {SignaNodeRegistry} from "../src/SignaNodeRegistry.sol";
  *
  * Usage:
  *   forge script script/Deploy.s.sol \
- *     --rpc-url base \
+ *     --rpc-url robinhood_mainnet \
  *     --private-key 0x<deployer_key> \
  *     --broadcast \
- *     --verify
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Verified bytecode will be on basescan automatically when --verify is
- * passed AND BASESCAN_API_KEY is set in env. Otherwise verify manually
- * later with `forge verify-contract <address> SignaNodeRegistry --chain base`.
+ * Verified bytecode will be on Robinhood Chain's Blockscout explorer automatically
+ * when --verify is passed. Otherwise verify manually later with
+ * `forge verify-contract <address> SignaNodeRegistry --chain 4663`.
  *
- * Deployer wallet needs ~0.0002 ETH on Base mainnet for gas.
+ * Deployer wallet needs ~0.0002 ETH on Robinhood Chain for gas.
  *
  * Address is non-deterministic (depends on deployer + nonce). After
  * deploy the broadcast file in broadcast/ contains the deployed

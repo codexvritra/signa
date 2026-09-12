@@ -10,30 +10,15 @@
  * Chain is env-configured. Verified TESTNET params below; set mainnet params in
  * env once confirmed at docs.robinhood.com/chain.
  */
-import { createPublicClient, http, parseAbiItem, encodeFunctionData, defineChain, type Address } from "viem";
+import { parseAbiItem, encodeFunctionData, type Address } from "viem";
+import { rhClient, RH_EXPLORER } from "./chain";
 
-// Robinhood Chain — Arbitrum Orbit L2, ETH gas. Testnet params are verified;
-// override via env for mainnet (NEXT_PUBLIC_RH_CHAIN_ID / _RPC / _EXPLORER).
-// Robinhood Chain MAINNET (verified from the chain: eth_chainId → 0x1237 = 4663).
-// The non-custodial SignaLaunch factory is safe to run on mainnet.
-export const RH_CHAIN_ID = Number(process.env.NEXT_PUBLIC_RH_CHAIN_ID || 4663);
-export const RH_RPC = process.env.NEXT_PUBLIC_RH_RPC || "https://rpc.mainnet.chain.robinhood.com";
-export const RH_EXPLORER = (process.env.NEXT_PUBLIC_RH_EXPLORER || "https://robinhoodchain.blockscout.com").replace(/\/$/, "");
-export const RH_CHAIN_NAME = process.env.NEXT_PUBLIC_RH_CHAIN_NAME || "Robinhood Chain";
-export const RH_CHAIN_ID_HEX = "0x" + RH_CHAIN_ID.toString(16);
+export { RH_CHAIN_ID, RH_RPC, RH_EXPLORER, RH_CHAIN_NAME, RH_CHAIN_ID_HEX, rhChain } from "./chain";
 
 /** SignaLaunch factory address on Robinhood Chain — set after deploy. Empty = not deployed yet. */
 export const SIGNA_LAUNCH_ADDRESS = (process.env.NEXT_PUBLIC_SIGNA_LAUNCH_ADDRESS || process.env.SIGNA_LAUNCH_ADDRESS || "").toLowerCase();
 export const SIGNA_LAUNCH_DEPLOY_BLOCK = BigInt(process.env.SIGNA_LAUNCH_DEPLOY_BLOCK || 0);
 export const launchpadLive = /^0x[0-9a-f]{40}$/.test(SIGNA_LAUNCH_ADDRESS);
-
-export const rhChain = defineChain({
-  id: RH_CHAIN_ID,
-  name: RH_CHAIN_NAME,
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  rpcUrls: { default: { http: [RH_RPC] } },
-  blockExplorers: RH_EXPLORER ? { default: { name: "Explorer", url: RH_EXPLORER } } : undefined,
-});
 
 const LAUNCHED = parseAbiItem("event Launched(address indexed token, address indexed launcher, string name, string symbol, uint256 supply, uint64 timestamp)");
 const LAUNCH_ABI = [parseAbiItem("function launch(string name, string symbol, uint256 supplyWhole) returns (address)")] as const;
@@ -47,17 +32,11 @@ export function explorerToken(addr: string): string { return RH_EXPLORER ? `${RH
 
 export type Launch = { token: string; launcher: string; name: string; symbol: string; supply: string; timestamp: number; tx: string; block: string };
 
-let _client: any = null;
-function client(): any {
-  if (!_client) _client = createPublicClient({ chain: rhChain, transport: http(RH_RPC) });
-  return _client;
-}
-
 /** Recent launches, newest first — read from the factory's Launched events. */
 export async function listLaunches(limit = 60): Promise<Launch[]> {
   if (!launchpadLive) return [];
   try {
-    const logs = await client().getLogs({ address: SIGNA_LAUNCH_ADDRESS as Address, event: LAUNCHED, fromBlock: SIGNA_LAUNCH_DEPLOY_BLOCK, toBlock: "latest" });
+    const logs = await rhClient().getLogs({ address: SIGNA_LAUNCH_ADDRESS as Address, event: LAUNCHED, fromBlock: SIGNA_LAUNCH_DEPLOY_BLOCK, toBlock: "latest" });
     const out: Launch[] = (logs as any[]).map((l) => ({
       token: String(l.args.token).toLowerCase(),
       launcher: String(l.args.launcher).toLowerCase(),

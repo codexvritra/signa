@@ -22,7 +22,7 @@ pragma solidity ^0.8.24;
  * pagination primitive for clients that don't want to enumerate the
  * full set in one call once the registry grows.
  *
- * Deployed first on Base mainnet (chain id 8453). The CLI will
+ * Deployed first on Robinhood Chain mainnet (chain id 4663). The CLI will
  * hard-code the deployed address. Same bytecode can be re-deployed
  * verbatim on any other EVM chain to seed federation on that chain.
  */

@@ -7,12 +7,14 @@ import {SignaLaunch} from "../src/SignaLaunch.sol";
 /**
  * Deploy script for SignaLaunch (verifiable token launchpad).
  *
- * Robinhood Chain TESTNET first (chainId 46646, ETH gas — gas is subsidized):
+ * Robinhood Chain TESTNET (chainId 46646, ETH gas — gas is subsidized):
  *   forge script script/DeployLaunch.s.sol \
  *     --rpc-url robinhood_testnet --private-key 0x<deployer_key> --broadcast
  *
- * (Mainnet: confirm the mainnet RPC/chainId from docs.robinhood.com/chain,
- * add it to foundry.toml, then use --rpc-url robinhood_mainnet.)
+ * Robinhood Chain MAINNET (chainId 4663, confirmed via eth_chainId):
+ *   forge script script/DeployLaunch.s.sol \
+ *     --rpc-url robinhood_mainnet --private-key 0x<deployer_key> --broadcast \
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
  * After deploy, copy the address into Vercel env as SIGNA_LAUNCH_ADDRESS
  * (+ NEXT_PUBLIC_…) so /launch routes token launches through it.

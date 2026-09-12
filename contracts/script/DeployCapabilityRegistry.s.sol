@@ -7,15 +7,16 @@ import {SignaCapabilityRegistry} from "../src/SignaCapabilityRegistry.sol";
 /**
  * Deploy script for SignaCapabilityRegistry.
  *
- * Usage (Base mainnet):
+ * Usage (Robinhood Chain mainnet):
  *   PRIVATE_KEY=0x<deployer_key> forge script script/DeployCapabilityRegistry.s.sol \
- *     --rpc-url base --broadcast --verify
+ *     --rpc-url robinhood_mainnet --broadcast \
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Usage (Base Sepolia testnet — free):
+ * Usage (Robinhood Chain testnet — free):
  *   PRIVATE_KEY=0x<deployer_key> forge script script/DeployCapabilityRegistry.s.sol \
- *     --rpc-url base_sepolia --broadcast
+ *     --rpc-url robinhood_testnet --broadcast
  *
- * Deployer wallet needs a little ETH for gas (~0.0003 ETH on Base mainnet).
+ * Deployer wallet needs a little ETH for gas (~0.0003 ETH on Robinhood Chain mainnet).
  *
  * After deploy:
  *   1. Copy the address printed below.

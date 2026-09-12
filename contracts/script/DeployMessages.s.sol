@@ -5,22 +5,22 @@ import {Script, console} from "forge-std/Script.sol";
 import {SignaMessages} from "../src/SignaMessages.sol";
 
 /**
- * Deploy script for SignaMessages (wallet-to-wallet messages, readable on Basescan).
+ * Deploy script for SignaMessages (wallet-to-wallet messages, readable on Blockscout).
  *
  * Usage:
  *   forge script script/DeployMessages.s.sol \
- *     --rpc-url base \
+ *     --rpc-url robinhood_mainnet \
  *     --private-key 0x<deployer_key> \
  *     --broadcast \
- *     --verify
+ *     --verify --verifier blockscout --verifier-url https://robinhoodchain.blockscout.com/api/
  *
- * Deployer wallet needs ~0.0002 ETH on Base mainnet for gas. After deploy,
+ * Deployer wallet needs ~0.0002 ETH on Robinhood Chain for gas. After deploy,
  * copy the address into Vercel env as SIGNA_MESSAGES_ADDRESS (and
  * NEXT_PUBLIC_SIGNA_MESSAGES_ADDRESS) so the site, SDK, and /onchain.html
- * route messages through it and render them as readable events on Basescan.
+ * route messages through it and render them as readable events on Blockscout.
  *
- * `--verify` uploads the source so Basescan decodes the `Message` event string;
- * it needs BASESCAN_API_KEY in the environment (see foundry.toml [etherscan]).
+ * `--verify` uploads the source so Blockscout decodes the `Message` event
+ * string; no API key is required (see foundry.toml [etherscan]).
  */
 contract DeployMessages is Script {
     function run() external returns (SignaMessages messages) {

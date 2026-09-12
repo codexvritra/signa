@@ -7,7 +7,7 @@ interface IERC20Balance {
 
 /**
  * @title  SignaRooms
- * @notice Token-gated group chat on Base — your bag is your key.
+ * @notice Token-gated group chat on Robinhood Chain — your bag is your key.
  *
  * Anyone can create a room with an optional **token gate** (an ERC-20 + a
  * minimum balance). Posting to a gated room requires holding at least that much
@@ -22,7 +22,7 @@ interface IERC20Balance {
  * gate is fixed at creation (first-come per name); identity is the wallet.
  * No admin, no owner, no upgrade, no fee.
  *
- * Designed for Base mainnet (chain id 8453); identical bytecode redeploys on any
+ * Designed for Robinhood Chain mainnet (chain id 4663); identical bytecode redeploys on any
  * EVM chain.
  */
 contract SignaRooms {
