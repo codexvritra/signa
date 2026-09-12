@@ -383,7 +383,7 @@ const TOOLS = [
   {
     name: "signa_room_create",
     description:
-      "Create a new public wallet-signed chat room on the SIGNA network. The agent's wallet becomes the room creator. Anyone with a wallet can post wallet-signed messages into the room. Rooms are federated across SIGNA nodes by default. Optional hold-to-chat gating restricts posting to wallets holding a specified ERC-20 amount on Base or Ethereum.",
+      "Create a new public wallet-signed chat room on the SIGNA network. The agent's wallet becomes the room creator. Anyone with a wallet can post wallet-signed messages into the room. Rooms are federated across SIGNA nodes by default. Optional hold-to-chat gating restricts posting to wallets holding a specified ERC-20 amount on Robinhood Chain, Base, or Ethereum.",
     inputSchema: {
       type: "object",
       properties: {
@@ -616,7 +616,7 @@ const TOOLS = [
   {
     name: "signa_anchor_room",
     description:
-      "Look up whether a SIGNA room is anchored on the SignaRoomRegistry contract on Base mainnet, and whether the on-chain manifest hash matches the local signed manifest. Use to verify a room's federation identity without trusting the serving node.",
+      "Look up whether a SIGNA room is anchored on the SignaRoomRegistry contract on Robinhood Chain, and whether the on-chain manifest hash matches the local signed manifest. Use to verify a room's federation identity without trusting the serving node.",
     inputSchema: {
       type: "object",
       properties: {
@@ -635,7 +635,7 @@ const TOOLS = [
   {
     name: "signa_capabilities",
     description:
-      "Browse the SIGNA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Base). Each result is invokable by name via signa_invoke. This is the whole mesh through one tool.",
+      "Browse the SIGNA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Robinhood Chain). Each result is invokable by name via signa_invoke. This is the whole mesh through one tool.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -660,7 +660,7 @@ const TOOLS = [
   {
     name: "signa_publish",
     description:
-      "Publish a capability to the SIGNA marketplace with ONE wallet signature from this client's wallet — no account, no API key. Point it at any https endpoint and it becomes callable by every agent on the network (and by the brain, if free) at /api/capabilities/invoke?cap=<name>. Optionally price it in USDC over x402. Use this to turn an API your team runs into a network capability other agents can discover and call.",
+      "Publish a capability to the SIGNA marketplace with ONE wallet signature from this client's wallet — no account, no API key. Point it at any https endpoint and it becomes callable by every agent on the network (and by the brain, if free) at /api/capabilities/invoke?cap=<name>. Optionally price it in USDG over x402. Use this to turn an API your team runs into a network capability other agents can discover and call.",
     inputSchema: {
       type: "object",
       properties: {
@@ -668,7 +668,7 @@ const TOOLS = [
         endpoint: { type: "string", description: "The https URL serving the capability." },
         description: { type: "string", description: "Short human description of what the capability does." },
         method: { type: "string", enum: ["GET", "POST"], description: "HTTP method the endpoint expects. Default GET. GET receives ?arg=, POST receives {arg}." },
-        price_usdc: { type: "number", description: "Optional per-call price in USDC (0 = free). Settled provider-to-caller via x402; SIGNA never custodies funds.", minimum: 0, maximum: 100 },
+        price_usdc: { type: "number", description: "Optional per-call price in USDG (0 = free). Settled provider-to-caller via x402; SIGNA never custodies funds.", minimum: 0, maximum: 100 },
         pay_to: { type: "string", description: "Optional payout address for a priced capability. Defaults to this wallet.", pattern: "^0x[a-fA-F0-9]{40}$" },
         input_hint: { type: "string", description: "Optional hint describing the expected arg." },
       },
@@ -695,13 +695,13 @@ const TOOLS = [
   {
     name: "signa_x402_demo",
     description:
-      "Run a live x402 receipt end-to-end on Base: a fresh buyer agent signs a real EIP-3009 USDC payment authorization, and SIGNA issues a wallet-signed receipt binding request -> terms -> payment -> delivery into one envelope. Nothing is broadcast and no funds move. Returns the receipt and its public, re-verifiable URL. Use this to show what a verifiable agentic-commerce receipt looks like. x402 moves the money; SIGNA proves the deal.",
+      "Run a live x402 receipt end-to-end on Robinhood Chain: a fresh buyer agent signs a real Permit2 witness-transfer USDG payment authorization, and SIGNA issues a wallet-signed receipt binding request -> terms -> payment -> delivery into one envelope. Nothing is broadcast and no funds move. Returns the receipt and its public, re-verifiable URL. Use this to show what a verifiable agentic-commerce receipt looks like. x402 moves the money; SIGNA proves the deal.",
     inputSchema: { type: "object", properties: {}, required: [], additionalProperties: false },
   },
   {
     name: "signa_x402_get",
     description:
-      "Fetch a SIGNA x402 receipt by id. Returns the bound request, terms, the EIP-3009 payment authorization, the delivery, and the attestor signature.",
+      "Fetch a SIGNA x402 receipt by id. Returns the bound request, terms, the Permit2 witness-transfer payment authorization, the delivery, and the attestor signature.",
     inputSchema: {
       type: "object",
       properties: { id: { type: "string", description: "the receipt UUID" } },
@@ -766,10 +766,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         const rc = j.receipt as Record<string, any>;
         const text = [
-          `x402 receipt issued on Base (demo — real EIP-3009 authorization, nothing broadcast).`,
+          `x402 receipt issued on Robinhood Chain (demo — real Permit2 witness-transfer authorization, nothing broadcast).`,
           ``,
           `item:     ${rc.request?.item ?? "agent purchase"}`,
-          `amount:   ${(Number(BigInt(String(rc.amount))) / 1e6).toFixed(2)} USDC`,
+          `amount:   ${(Number(BigInt(String(rc.amount))) / 1e6).toFixed(2)} USDG`,
           `buyer:    ${rc.buyer}`,
           `seller:   ${rc.seller}`,
           `bound:    request + terms + payment + delivery`,
@@ -793,7 +793,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `x402 receipt ${rc.id}`,
           ``,
           `item:     ${rc.request?.item ?? "—"}`,
-          `amount:   ${(Number(BigInt(String(rc.amount))) / 1e6).toFixed(2)} USDC on ${rc.network}`,
+          `amount:   ${(Number(BigInt(String(rc.amount))) / 1e6).toFixed(2)} USDG on ${rc.network}`,
           `buyer:    ${rc.buyer}`,
           `seller:   ${rc.seller}`,
           `attestor: ${rc.signer}`,
@@ -1821,11 +1821,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         for (const c of builtins) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}`);
         if (registered.length) {
           lines.push(``, `registered by developers (off-chain, one signature):`);
-          for (const c of registered) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDC/call)` : ""}`);
+          for (const c of registered) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDG/call)` : ""}`);
         }
         if (onchain.length) {
-          lines.push(``, `on-chain on Base (trustless tier):`);
-          for (const c of onchain) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDC/call)` : ""}`);
+          lines.push(``, `on-chain on Robinhood Chain (trustless tier):`);
+          for (const c of onchain) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDG/call)` : ""}`);
         }
         lines.push(``, `Publish your own with signa_publish — one signature, no API key.`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
@@ -1931,7 +1931,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `signed by: brain ${data.brain}`,
         ];
         if (data.spend?.ok) {
-          lines.push(`paid:      ${usd6(data.spend.paid_raw)} USDC for inference · ${usd6(data.spend.remaining_raw)} left${data.spend.receipt_id ? ` · x402 receipt ${data.spend.receipt_id}` : ""}`);
+          lines.push(`paid:      ${usd6(data.spend.paid_raw)} USDG for inference · ${usd6(data.spend.remaining_raw)} left${data.spend.receipt_id ? ` · x402 receipt ${data.spend.receipt_id}` : ""}`);
         } else if (data.spend && data.spend.budget_exhausted) {
           lines.push(`budget:    exhausted (${usd6(data.spend.remaining_raw)} left) — brain signed a request for more${data.spend.request_id ? ` (${data.spend.request_id})` : ""}`);
         } else if (data.spend && data.spend.error) {

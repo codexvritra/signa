@@ -23,8 +23,8 @@ Wire format spec: https://www.signaagent.xyz/a2a
 """
 
 from .agent import (
-    NETWORK_BASE,
-    USDC_BASE,
+    NETWORK_ROBINHOOD,
+    USDG_ROBINHOOD,
     SignaAgent,
     build_bridge_heartbeat_preimage,
     build_bridge_register_preimage,
@@ -51,8 +51,8 @@ __all__ = [
     "Receipts",
     "Anchor",
     "Nodes",
-    "USDC_BASE",
-    "NETWORK_BASE",
+    "USDG_ROBINHOOD",
+    "NETWORK_ROBINHOOD",
     "build_dm_preimage",
     "build_bridge_register_preimage",
     "build_bridge_heartbeat_preimage",

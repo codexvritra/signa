@@ -31,6 +31,7 @@
 import type { Hex } from "viem";
 import { SignaAgent } from "./index.js";
 import type { SignaDm, SendOptions, RegisterBridgeOptions } from "./types.js";
+import { PERMIT2_ADDRESS, PERMIT2_WITNESS_TYPES, networkToChainId } from "./paid-dm.js";
 
 const SURPLUS_INFERENCE = "https://www.surplusintelligence.ai/x402/api/inference/v1";
 
@@ -410,38 +411,36 @@ export class SignaOS {
     const accept = challenge?.accepts?.[0];
     if (!accept?.payTo || !accept?.maxAmountRequired || !accept?.asset) throw new Error("malformed x402 challenge");
 
-    const decimals = 6; // USDC
+    const decimals = 6; // USDG
     const askUsdc = Number(accept.maxAmountRequired) / 10 ** decimals;
     if (opts?.maxUsdc != null && askUsdc > opts.maxUsdc) {
-      throw new Error(`capability asks ${askUsdc} USDC > maxUsdc ${opts.maxUsdc}; not paying`);
+      throw new Error(`capability asks ${askUsdc} USDG > maxUsdc ${opts.maxUsdc}; not paying`);
     }
 
-    // 2. sign the EIP-3009 authorization to pay the provider
+    // 2. sign the Permit2 witness-transfer authorization to pay the provider
+    // (USDG implements neither EIP-3009 nor EIP-2612, so Permit2 replaces it
+    // here — see sdk/js/src/paid-dm.ts for the same pattern in more detail)
     const account = (this.agent as any).account; // PrivateKeyAccount
-    const chainId = String(accept.network).endsWith("8453") ? 8453 : 84532;
+    const chainId = networkToChainId(accept.network);
     const nowSec = Math.floor(Date.now() / 1000);
-    const authorization = {
-      from: this.agent.address as Hex,
-      to: String(accept.payTo).toLowerCase() as Hex,
-      value: BigInt(accept.maxAmountRequired),
-      validAfter: 0n,
-      validBefore: BigInt(nowSec + (Number(accept.maxTimeoutSeconds) || 300)),
-      nonce: this.randomNonce(),
+    const owner = this.agent.address.toLowerCase() as Hex;
+    const spender = String(accept.payTo).toLowerCase() as Hex; // recipient redeems its own payment
+    const nonce = BigInt(this.randomNonce());
+    const deadline = BigInt(nowSec + (Number(accept.maxTimeoutSeconds) || 300));
+    if (!accept.extra?.serviceId) throw new Error("x402 challenge missing extra.serviceId (required for Permit2 witness)");
+    const serviceId = accept.extra.serviceId as Hex;
+    const message = {
+      permitted: { token: accept.asset as Hex, amount: BigInt(accept.maxAmountRequired) },
+      spender,
+      nonce,
+      deadline,
+      witness: { to: spender, serviceId },
     };
     const signature = await account.signTypedData({
-      domain: { name: accept.extra?.name ?? "USD Coin", version: accept.extra?.version ?? "2", chainId, verifyingContract: accept.asset as Hex },
-      types: {
-        TransferWithAuthorization: [
-          { name: "from", type: "address" },
-          { name: "to", type: "address" },
-          { name: "value", type: "uint256" },
-          { name: "validAfter", type: "uint256" },
-          { name: "validBefore", type: "uint256" },
-          { name: "nonce", type: "bytes32" },
-        ],
-      },
-      primaryType: "TransferWithAuthorization",
-      message: authorization,
+      domain: { name: "Permit2", chainId, verifyingContract: (accept.extra?.permit2 ?? PERMIT2_ADDRESS) as Hex },
+      types: PERMIT2_WITNESS_TYPES,
+      primaryType: "PermitWitnessTransferFrom",
+      message,
     });
     const xPayment = Buffer.from(
       JSON.stringify({
@@ -451,12 +450,13 @@ export class SignaOS {
         payload: {
           signature,
           authorization: {
-            from: authorization.from,
-            to: authorization.to,
-            value: authorization.value.toString(),
-            validAfter: authorization.validAfter.toString(),
-            validBefore: authorization.validBefore.toString(),
-            nonce: authorization.nonce,
+            owner,
+            spender,
+            to: spender,
+            token: String(accept.asset).toLowerCase(),
+            amount: accept.maxAmountRequired,
+            nonce: nonce.toString(),
+            deadline: deadline.toString(),
           },
         },
       }),

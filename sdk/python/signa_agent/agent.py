@@ -21,8 +21,8 @@ DEFAULT_POLL_INTERVAL_S = 5.0
 DEFAULT_HEARTBEAT_INTERVAL_S = 45.0
 
 # Agent spend mandates default to USDC on Base.
-USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"
-NETWORK_BASE = "eip155:8453"
+USDG_ROBINHOOD = "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
+NETWORK_ROBINHOOD = "eip155:4663"
 
 _ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 
@@ -447,8 +447,8 @@ class SignaAgent:
 
         Pass ``mandate_id`` to METER the brain: a human grants it a bounded
         budget (a mandate whose agent is the brain's address) and the brain
-        pays per reasoning run for its own compute (real EIP-3009 USDC auth ->
-        x402 receipt -> a capped spend). When the budget is exhausted the brain
+        pays per reasoning run for its own compute (real Permit2 witness-transfer
+        USDG auth -> x402 receipt -> a capped spend). When the budget is exhausted the brain
         stops and wallet-signs a request for more; the returned ``spend`` field
         carries ``{paid_raw, remaining_raw, receipt_id}`` or
         ``{budget_exhausted, request_id}``. Omit it and the brain runs

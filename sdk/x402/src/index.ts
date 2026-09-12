@@ -1,9 +1,9 @@
 /**
- * signa-x402 — verifiable receipts for x402 agentic commerce on Base.
+ * signa-x402 — verifiable receipts for x402 agentic commerce on Robinhood Chain.
  *
  * x402 moves the money. SIGNA proves the deal: it binds request → terms →
- * the x402 payment authorization (EIP-3009) → delivery into one envelope,
- * signed by the SIGNA attestor and re-verifiable by anyone on Base.
+ * the x402 payment authorization (Permit2 witness-transfer) → delivery into
+ * one envelope, signed by the SIGNA attestor and re-verifiable by anyone.
  *
  * Zero dependencies — just fetch. Drop it into any x402 server: after you
  * verify a payment, issue a receipt and hand the buyer a proof URL.
@@ -16,25 +16,26 @@
 export const DEFAULT_BASE = "https://www.signaagent.xyz";
 
 export type X402Terms = {
-  /** raw base units, e.g. "50000" for 0.05 USDC */
+  /** raw base units, e.g. "50000" for 0.05 USDG */
   amount: string;
   /** token contract address */
   asset: string;
-  /** CAIP-2 network, e.g. "eip155:8453" for Base */
+  /** CAIP-2 network, e.g. "eip155:4663" for Robinhood Chain */
   network: string;
   /** the merchant address the payment authorizes */
   payTo: string;
   description?: string;
 };
 
-/** An x402 "exact" EIP-3009 TransferWithAuthorization + its signature. */
+/** An x402 "exact" Permit2 PermitWitnessTransferFrom authorization + its signature. */
 export type X402Payment = {
-  from: string;
+  owner: string;
+  spender: string;
   to: string;
-  value: string;
-  validAfter: string;
-  validBefore: string;
+  token: string;
+  amount: string;
   nonce: string;
+  deadline: string;
   signature: string;
 };
 
@@ -83,9 +84,9 @@ function f(opts?: Options): typeof fetch {
 }
 
 /**
- * Issue a SIGNA receipt for an x402 deal. The buyer's EIP-3009 authorization
- * is verified server-side before the receipt is signed — throws if it doesn't
- * recover to `payment.from`.
+ * Issue a SIGNA receipt for an x402 deal. The buyer's Permit2 witness-transfer
+ * authorization is verified server-side before the receipt is signed — throws
+ * if it doesn't recover to `payment.owner`.
  */
 export async function issueReceipt(deal: X402Deal, opts: Options = {}): Promise<X402Receipt> {
   const base = opts.baseUrl ?? DEFAULT_BASE;

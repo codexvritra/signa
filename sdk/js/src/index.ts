@@ -45,7 +45,7 @@ import {
   buildDmPreimage,
   buildDmPriceSetPreimage,
 } from "./envelope.js";
-import { buildPaymentHeader, type Challenge402 } from "./paid-dm.js";
+import { buildPaymentHeader, PAID_DM_SERVICE_ID, PERMIT2_ADDRESS, type Challenge402 } from "./paid-dm.js";
 import {
   readOnchainMessage,
   sendOnchainMessage,
@@ -294,7 +294,7 @@ export class SignaAgent {
                 payTo: price.pay_to!,
                 maxTimeoutSeconds: 300,
                 asset: (price as any).asset_address,
-                extra: { name: "USD Coin", version: "2" },
+                extra: { serviceId: PAID_DM_SERVICE_ID, permit2: PERMIT2_ADDRESS },
               },
             ],
           };
