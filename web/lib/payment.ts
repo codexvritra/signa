@@ -1,8 +1,8 @@
 import { parseEther, type Address, type Hex } from "viem";
 import type { Conversation } from "@xmtp/browser-sdk";
-import { base } from "wagmi/chains";
+import { rhChain } from "@/lib/chain";
 
-export const PAYMENT_CHAIN_ID = base.id; // 8453 — Base mainnet
+export const PAYMENT_CHAIN_ID = rhChain.id; // 4663 — Robinhood Chain mainnet
 export const PAYMENT_NAMESPACE = "eip155";
 
 export function parseEthAmount(input: string): bigint | null {

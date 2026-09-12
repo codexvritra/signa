@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useBalance } from "wagmi";
-import { base } from "wagmi/chains";
+import { rhChain } from "@/lib/chain";
 import { useChat } from "@/context/ChatProvider";
 import { PeerAvatar } from "@/components/ui/Avatar";
 import { PeerName } from "@/components/ui/PeerName";
@@ -29,7 +29,7 @@ export function ProfileChip() {
 
   const { data: balance } = useBalance({
     address: ownAddress,
-    chainId: base.id,
+    chainId: rhChain.id,
     query: { enabled: !!ownAddress, refetchInterval: 20000 },
   });
 

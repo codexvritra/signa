@@ -12,6 +12,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { base } from "wagmi/chains";
+import { rhChain } from "@/lib/chain";
 import { toast } from "sonner";
 import { useChat } from "@/context/ChatProvider";
 import { shareTransactionReference } from "@/lib/payment";
@@ -64,16 +65,21 @@ export function PaymentModal({
     reset: resetErc20Tx,
   } = useWriteContract();
   const txHash = ethTxHash ?? erc20TxHash;
-  const { isLoading: isMining, isSuccess: isMined } = useWaitForTransactionReceipt({
-    hash: txHash,
-    chainId: base.id,
-    query: { enabled: !!txHash },
-  });
 
   const token: TokenInfo = useMemo(
     () => getToken(symbol) ?? TOKENS[0],
     [symbol],
   );
+  // Most tokens (ETH, USDG) live on Robinhood Chain, SIGNA's own chain.
+  // BNKR/GITLAWB/MIROSHARK are real third-party tokens that live on Base —
+  // see the `chain` field doc in lib/tokens.ts — so send those there instead.
+  const targetChain = token.chain === "base" ? base : rhChain;
+
+  const { isLoading: isMining, isSuccess: isMined } = useWaitForTransactionReceipt({
+    hash: txHash,
+    chainId: targetChain.id,
+    query: { enabled: !!txHash },
+  });
 
   useEffect(() => {
     if (open) {
@@ -89,7 +95,7 @@ export function PaymentModal({
 
   const parsed = parseTokenAmount(amount, token.decimals);
   const canSend = !!parsed && parsed > 0n && !!from && !!toAddress;
-  const wrongChain = chainId !== base.id;
+  const wrongChain = chainId !== targetChain.id;
 
   async function send() {
     if (!canSend || !from || !toAddress || !parsed) return;
@@ -97,7 +103,7 @@ export function PaymentModal({
     try {
       if (wrongChain) {
         setStep("switching");
-        await switchChainAsync({ chainId: base.id });
+        await switchChainAsync({ chainId: targetChain.id });
       }
       setStep("signing");
       if (token.address === null) {
@@ -105,7 +111,7 @@ export function PaymentModal({
         await sendTransactionAsync({
           to: toAddress as `0x${string}`,
           value: parsed,
-          chainId: base.id,
+          chainId: targetChain.id,
         });
       } else {
         // ERC-20
@@ -114,7 +120,7 @@ export function PaymentModal({
           abi: ERC20_TRANSFER_ABI,
           functionName: "transfer",
           args: [toAddress as `0x${string}`, parsed],
-          chainId: base.id,
+          chainId: targetChain.id,
         });
       }
       setStep("mining");
@@ -204,7 +210,7 @@ export function PaymentModal({
                 </h2>
                 <p className="text-xs text-white/50 mt-0.5">
                   To {peerLabel ?? (toAddress ? shortAddress(toAddress) : "—")}{" "}
-                  on Base
+                  on {targetChain.name}
                 </p>
               </div>
               <button
@@ -278,7 +284,7 @@ export function PaymentModal({
             </div>
 
             <div className="mt-4 text-[11px] text-white/40 leading-relaxed">
-              Real {token.symbol} on Base mainnet. You sign in your wallet —
+              Real {token.symbol} on {targetChain.name}. You sign in your wallet —
               recipient sees a payment card in chat once the tx is mined.
               {token.project && (
                 <>
