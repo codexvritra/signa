@@ -1,6 +1,7 @@
 "use client";
 
-import { base, baseSepolia, mainnet } from "wagmi/chains";
+import { mainnet } from "wagmi/chains";
+import { rhChain, RH_RPC } from "./chain";
 import {
   createConfig,
   http,
@@ -98,7 +99,7 @@ const connectors = connectorsForWallets(
   {
     appName: "SIGNA",
     appDescription:
-      "Wallet-native messaging on Base. Spawn agents, chat, tip.",
+      "Wallet-native messaging on Robinhood Chain. Spawn agents, chat, tip.",
     appUrl: "https://www.signaagent.xyz",
     appIcon: "https://www.signaagent.xyz/icon.png",
     projectId,
@@ -106,7 +107,7 @@ const connectors = connectorsForWallets(
 );
 
 export const clientWagmiConfig = createConfig({
-  chains: [base, baseSepolia, mainnet],
+  chains: [rhChain, mainnet],
   connectors,
   // Explicit CORS-friendly public RPCs — see the comment in `lib/wagmi.ts`.
   // Defaulting to viem's `http()` with no arg falls into a rotating
@@ -114,8 +115,7 @@ export const clientWagmiConfig = createConfig({
   // browser origins, polluting devtools with CORS errors that look
   // like bugs.
   transports: {
-    [base.id]: http("https://mainnet.base.org"),
-    [baseSepolia.id]: http("https://sepolia.base.org"),
+    [rhChain.id]: http(RH_RPC),
     [mainnet.id]: http("https://cloudflare-eth.com"),
   },
   ssr: true,

@@ -1,11 +1,11 @@
 /**
  * Thin client for GeckoTerminal's public API.
  *
- * GeckoTerminal exposes structured Base mainnet token + pool data
- * free and no-key. This is the same data source Bankr routes to
- * internally when you ask it about prices — we go direct so SIGNA's
- * discovery surface doesn't depend on Bankr's natural-language
- * prompt round-trip.
+ * GeckoTerminal exposes structured token + pool data free and no-key,
+ * indexed per network. SIGNA runs on Robinhood Chain (GT network slug
+ * "robinhood") but a few partner tokens (BNKR/GITLAWB/MIROSHARK) are
+ * real Base-native tokens, so every function takes an explicit `network`
+ * slug rather than hardcoding one.
  *
  * Docs: https://api.geckoterminal.com/docs
  *
@@ -15,6 +15,8 @@
 
 const GT = "https://api.geckoterminal.com/api/v2";
 const TTL_MS = 60_000;
+export const DEFAULT_GT_NETWORK = "robinhood";
+export type GtNetwork = "robinhood" | "base";
 
 type CacheEntry<T> = { ts: number; data: T };
 const cache = new Map<string, CacheEntry<unknown>>();
@@ -79,14 +81,14 @@ type GtPoolRel = {
   base_token?: { data?: { id?: string } };
 };
 
-function poolToToken(pool: {
-  attributes: GtPoolAttrs;
-  relationships?: GtPoolRel;
-}): TokenSummary | null {
+function poolToToken(
+  pool: { attributes: GtPoolAttrs; relationships?: GtPoolRel },
+  network: GtNetwork,
+): TokenSummary | null {
   const baseTokenId = pool.relationships?.base_token?.data?.id;
   if (!baseTokenId) return null;
-  // baseTokenId is "base_<address>" — strip the chain prefix
-  const addr = baseTokenId.replace(/^base_/, "").toLowerCase();
+  // baseTokenId is "<network>_<address>" — strip the network prefix
+  const addr = baseTokenId.replace(new RegExp(`^${network}_`), "").toLowerCase();
   if (!/^0x[a-f0-9]{40}$/.test(addr)) return null;
   return {
     address: addr,
@@ -107,9 +109,9 @@ function poolToToken(pool: {
 
 /** GeckoTerminal returns trending POOLS, not trending tokens directly. We
  * extract the base token of each top pool. */
-export async function trendingTokensOnBase(limit = 20): Promise<TokenSummary[]> {
-  const data = await getCached(`trending-${limit}`, async () => {
-    const url = `${GT}/networks/base/trending_pools?include=base_token&page=1`;
+export async function trendingTokens(limit = 20, network: GtNetwork = DEFAULT_GT_NETWORK): Promise<TokenSummary[]> {
+  const data = await getCached(`trending-${network}-${limit}`, async () => {
+    const url = `${GT}/networks/${network}/trending_pools?include=base_token&page=1`;
     const res = await fetch(url, {
       headers: { accept: "application/json" },
       cache: "no-store" as RequestCache,
@@ -134,7 +136,7 @@ export async function trendingTokensOnBase(limit = 20): Promise<TokenSummary[]> 
   const out: TokenSummary[] = [];
   const seen = new Set<string>();
   for (const pool of data.data) {
-    const t = poolToToken(pool);
+    const t = poolToToken(pool, network);
     if (!t) continue;
     if (seen.has(t.address)) continue;
     seen.add(t.address);
@@ -153,10 +155,10 @@ export async function trendingTokensOnBase(limit = 20): Promise<TokenSummary[]> 
   return out;
 }
 
-/** Recently created Base pools — gateway to "new token launches". */
-export async function newPoolsOnBase(limit = 20): Promise<TokenSummary[]> {
-  const data = await getCached(`new-${limit}`, async () => {
-    const url = `${GT}/networks/base/new_pools?include=base_token&page=1`;
+/** Recently created pools — gateway to "new token launches". */
+export async function newPools(limit = 20, network: GtNetwork = DEFAULT_GT_NETWORK): Promise<TokenSummary[]> {
+  const data = await getCached(`new-${network}-${limit}`, async () => {
+    const url = `${GT}/networks/${network}/new_pools?include=base_token&page=1`;
     const res = await fetch(url, {
       headers: { accept: "application/json" },
       cache: "no-store" as RequestCache,
@@ -178,7 +180,7 @@ export async function newPoolsOnBase(limit = 20): Promise<TokenSummary[]> {
   const out: TokenSummary[] = [];
   const seen = new Set<string>();
   for (const pool of data.data) {
-    const t = poolToToken(pool);
+    const t = poolToToken(pool, network);
     if (!t) continue;
     if (seen.has(t.address)) continue;
     seen.add(t.address);
@@ -197,14 +199,14 @@ export async function newPoolsOnBase(limit = 20): Promise<TokenSummary[]> {
   return out;
 }
 
-/** Single-token detail by Base address — for /tokens/[address] pages. */
-export async function tokenOnBase(address: string): Promise<TokenSummary | null> {
+/** Single-token detail by address — for /tokens/[address] pages. */
+export async function tokenInfo(address: string, network: GtNetwork = DEFAULT_GT_NETWORK): Promise<TokenSummary | null> {
   const addr = address.toLowerCase();
   if (!/^0x[a-f0-9]{40}$/.test(addr)) return null;
-  return getCached(`token-${addr}`, async () => {
+  return getCached(`token-${network}-${addr}`, async () => {
     // GT token endpoint includes top_pools, which is what we need for
     // price + volume. /tokens/{address} alone doesn't have volume.
-    const url = `${GT}/networks/base/tokens/${addr}?include=top_pools`;
+    const url = `${GT}/networks/${network}/tokens/${addr}?include=top_pools`;
     const res = await fetch(url, {
       headers: { accept: "application/json" },
       cache: "no-store" as RequestCache,

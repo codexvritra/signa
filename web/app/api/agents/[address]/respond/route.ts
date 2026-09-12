@@ -5,7 +5,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import type { Hex } from "viem";
 import { serverClient } from "@/lib/supabase";
 import { decryptAgentKey, decryptOpaque } from "@/lib/key-vault";
-import { tokenOnBase, formatUsd, formatPct } from "@/lib/geckoterminal";
+import { tokenInfo, formatUsd, formatPct } from "@/lib/geckoterminal";
 import {
   bankrSubmitPrompt,
   bankrPortfolio,
@@ -310,9 +310,9 @@ async function runFacts(
   const sources: Source[] = [];
 
   for (const addr of allAddrs.slice(0, 5)) {
-    const t = await tokenOnBase(addr);
+    const t = await tokenInfo(addr);
     if (!t) {
-      lines.push(`token ${addr} → not indexed on Base`);
+      lines.push(`token ${addr} → not indexed on Robinhood Chain`);
       continue;
     }
     lines.push(

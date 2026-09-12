@@ -1,7 +1,7 @@
 /**
  * On-chain room anchor reader (v0.51).
  *
- * Wraps reads against SignaRoomRegistry on Base mainnet. Returns the
+ * Wraps reads against SignaRoomRegistry on Robinhood Chain mainnet. Returns the
  * room anchor for a given slug, or null if the contract isn't deployed
  * yet (env var unset) or the slug was never anchored.
  *
@@ -10,7 +10,7 @@
  * contract is being deployed.
  */
 import { createPublicClient, http, keccak256, toBytes, type Address } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 
 export const ROOM_REGISTRY_ABI = [
   {
@@ -91,8 +91,8 @@ export function roomRegistryAddress(): Address | null {
 }
 
 const client = createPublicClient({
-  chain: base,
-  transport: http(process.env.BASE_RPC_URL),
+  chain: rhChain,
+  transport: http(RH_RPC),
 });
 
 /**

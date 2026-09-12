@@ -6,7 +6,7 @@
  * alive: on a heartbeat it reasons over live data, SIGNS a thought with its own
  * wallet (re-verifiable, lands in the network ledger), and remembers it. You can
  * talk to it, and it can DM other agents. Funded with a bounded SIGNA mandate it
- * can pay safely; with the B20 endpoints it can launch/pay/attest tokens.
+ * can pay safely.
  *
  * This is VERA generalised into a product. Every thought recovers to the agent —
  * not "trust me it's an agent," but "here's the signature, check it."
@@ -16,10 +16,9 @@ import { keccak256, toBytes, recoverMessageAddress, type Hex } from "viem";
 import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { runBrain2 } from "./brain2";
-import { buildB20Note } from "./b20";
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
-// USDC on Base — the default settlement asset until an agent pays in its own B20 token
+// USDC on Base — the default settlement asset for the agent economy
 const USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
 
 /** Deterministic, keyless wallet for an agent — derived from its slug. */
@@ -39,7 +38,6 @@ const RESERVED = new Set(["vera", "aletheia", "signa", "admin", "api", "new", "c
 export type LaunchAgent = {
   id: string; slug: string; name: string; mission: string; persona: string;
   creator: string; address: string; goals: string[]; created_at: string; last_tick_at: string | null;
-  b20_token?: string | null; b20_symbol?: string | null; b20_variant?: string | null; b20_launched_at?: string | null;
 };
 export type AgentThought = {
   id: string; agent_slug: string; goal: string; answer: string;
@@ -168,14 +166,6 @@ export async function agentSpend(origin: string, agent: LaunchAgent, mandateId: 
   return await fetch(`${origin}/api/mandates/spend`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ mandate_id: mandateId, agent: agent.address, amount, note, ts, signature }) }).then((x) => x.json()).catch(() => ({ ok: false }));
 }
 
-/** The agent autonomously pays with a verifiable B20 money-note (it's the payer; signs the note). */
-export async function agentPayB20(agent: LaunchAgent, args: { token: string; to: string; amount: string; note: string }): Promise<Record<string, unknown>> {
-  const account = agentAccount(agent.slug);
-  const built = buildB20Note({ ts: Date.now(), from: agent.address, to: args.to, token: args.token, amount: String(args.amount), note: args.note });
-  const signature = await account.signMessage({ message: built.preimage });
-  return { memo: built.memo, tx: built.tx, signature, reverify: { ...built.reverify, signature } };
-}
-
 /** The agent's budgets (granted mandates), for the page + autonomous spend checks. */
 export async function agentMandates(origin: string, agent: LaunchAgent): Promise<unknown[]> {
   try {
@@ -184,47 +174,10 @@ export async function agentMandates(origin: string, agent: LaunchAgent): Promise
   } catch { return []; }
 }
 
-/**
- * The agent LAUNCHES ITS OWN B20 token (Base's native standard) — the tokenized-agent
- * primitive. SIGNA builds the createB20 calldata (creator = the agent) + predicts the
- * deterministic token address + a signed launch receipt; the agent then wallet-signs an
- * announcement of its launch (a real signed thought). The creator broadcasts the returned
- * calldata to mint (SIGNA never custodies). Bankr launches tokens; SIGNA's AGENTS launch theirs.
- */
-export async function agentLaunchToken(db: SupabaseClient, origin: string, agent: LaunchAgent, opts: { symbol?: string; variant?: "ASSET" | "STABLECOIN"; decimals?: number; currency?: string }): Promise<Record<string, unknown>> {
-  if (agent.b20_token) return { ok: false, error: "agent already has a token", token: agent.b20_token, symbol: agent.b20_symbol };
-  const symbol = ((opts.symbol || agent.slug.replace(/-/g, "")).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10)) || "AGENT";
-  const variant = opts.variant === "STABLECOIN" ? "STABLECOIN" : "ASSET";
-  const r = await fetch(`${origin}/api/b20`, {
-    method: "POST", headers: { "content-type": "application/json" },
-    body: JSON.stringify({ variant, name: agent.name, symbol, creator: agent.address, decimals: opts.decimals, currency: opts.currency }),
-  }).then((x) => x.json()).catch(() => ({ ok: false }));
-  if (!r?.ok) return { ok: false, error: r?.error ?? "launch_prepare_failed" };
-  const token = (r.predicted_address || "").toLowerCase() || null;
-
-  await db.from("launch_agents").update({ b20_token: token, b20_symbol: symbol, b20_variant: variant, b20_launch_receipt: r.receipt, b20_launched_at: new Date().toISOString() }).eq("slug", agent.slug);
-
-  // the agent wallet-signs an announcement of its own launch (a real signed thought in the ledger)
-  const account = agentAccount(agent.slug);
-  const feed = agentFeed(agent.slug);
-  const ts = Date.now();
-  const answer = `I just launched my own B20 token $${symbol}${token ? ` at ${token}` : ""} on Base — and I'll run it myself. Every action signed and verifiable.`;
-  const pre = dmPreimage(agent.address, feed, answer, ts);
-  const signature = await account.signMessage({ message: pre });
-  let dm_id: string | null = null;
-  try { const { data: dm } = await db.from("agent_dms").insert({ from_address: agent.address, to_address: feed, body: answer, body_type: "text", protocol: "signa.dm.v1", ts, signature, signed_message: pre }).select("id").single(); dm_id = dm?.id ?? null; } catch {}
-  try { await db.from("launch_agent_thoughts").insert({ agent_slug: agent.slug, goal: "launch my own B20 token", answer, steps: [], tools_used: ["b20.launch"], dm_id, signature, ts }); } catch {}
-
-  return {
-    ok: true, symbol, variant, token, factory: r.factory, tx: r.tx, receipt: r.receipt,
-    announcement: { kind: "dm", ts, from: agent.address, to: feed, body: answer, signature },
-  };
-}
-
 // ── the verifiable agent economy: agents post jobs, do the work, and pay each other ──
 // The missing piece: not "an agent that launches a token," but an agent that EARNS.
 // Every step is wallet-signed and re-verifiable — post (poster), result (worker),
-// payment (poster, as a B20 money-note). Money flows for work, and the work is provable.
+// payment (poster, wallet-signed). Money flows for work, and the work is provable.
 export type AgentJob = {
   id: string; created_at: string; poster: string; poster_slug: string; worker: string | null; worker_slug: string | null;
   title: string; brief: string; bounty_raw: string; pay_token: string; pay_symbol: string; mandate_id: string | null;
@@ -237,6 +190,9 @@ function jobPostPreimage(a: { ts: number; poster: string; title: string; brief: 
 }
 function jobResultPreimage(a: { ts: number; worker: string; job_id: string; result: string }) {
   return ["SIGNA agent job result v1", `ts:${a.ts}`, `worker:${a.worker.toLowerCase()}`, `job:${a.job_id}`, `result:${sha256(a.result)}`].join("\n");
+}
+function jobPaymentPreimage(a: { ts: number; from: string; to: string; token: string; amount: string; job_id: string }) {
+  return ["SIGNA agent job payment v1", `ts:${a.ts}`, `from:${a.from.toLowerCase()}`, `to:${a.to.toLowerCase()}`, `token:${a.token.toLowerCase()}`, `amount:${a.amount}`, `job:${a.job_id}`].join("\n");
 }
 
 export async function listJobs(db: SupabaseClient, opts: { status?: string; limit?: number } = {}): Promise<AgentJob[]> {
@@ -257,9 +213,9 @@ export async function postJob(db: SupabaseClient, agent: LaunchAgent, input: { t
   if (!title || !brief) return { ok: false, error: "title and brief required" };
   const bounty = usdcRaw(input.bountyUsdc);
   if (!/^[0-9]{1,30}$/.test(bounty) || bounty === "0") return { ok: false, error: "bounty must be > 0" };
-  // pay in the agent's OWN B20 token if it has one, else USDC on Base
-  const token = (input.token || agent.b20_token || USDC_BASE).toLowerCase();
-  const symbol = (input.symbol || (agent.b20_token ? agent.b20_symbol : "USDC") || "USDC").slice(0, 12);
+  // pay in the requested token, else USDC on Base
+  const token = (input.token || USDC_BASE).toLowerCase();
+  const symbol = (input.symbol || "USDC").slice(0, 12);
   const ts = Date.now();
   const account = agentAccount(agent.slug);
   const post_preimage = jobPostPreimage({ ts, poster: agent.address, title, brief, bounty, token });
@@ -302,7 +258,7 @@ export async function deliverJob(db: SupabaseClient, origin: string, agent: Laun
 }
 
 /** The poster agent VERIFIES the worker's signed result, then PAYS — a capped mandate spend
- *  (if funded) plus a wallet-signed B20 money-note from poster→worker. Settlement, provable. */
+ *  (if funded) plus a wallet-signed payment acknowledgment from poster→worker. Settlement, provable. */
 export async function settleJob(db: SupabaseClient, origin: string, agent: LaunchAgent, jobId: string): Promise<{ ok: boolean; payment?: Record<string, unknown>; spend?: Record<string, unknown>; worker_verified?: boolean; error?: string }> {
   const job = await getJob(db, jobId);
   if (!job) return { ok: false, error: "job not found" };
@@ -326,11 +282,12 @@ export async function settleJob(db: SupabaseClient, origin: string, agent: Launc
     if (spend && spend.ok === false) return { ok: false, error: `payment exceeds budget: ${spend.error ?? "mandate cap"}`, spend };
   }
 
-  // poster wallet-signs a B20 money-note paying the worker (gasless; broadcastable when B20 is live)
+  // poster wallet-signs a payment acknowledgment to the worker
   const account = agentAccount(agent.slug);
-  const built = buildB20Note({ ts: Date.now(), from: agent.address, to: job.worker, token: job.pay_token, amount: job.bounty_raw, note: `payment for job ${jobId}: ${job.title}` });
-  const signature = await account.signMessage({ message: built.preimage });
-  const payment = { ...built.reverify, signature, tx: built.tx };
+  const ts = Date.now();
+  const preimage = jobPaymentPreimage({ ts, from: agent.address, to: job.worker, token: job.pay_token, amount: job.bounty_raw, job_id: jobId });
+  const signature = await account.signMessage({ message: preimage });
+  const payment = { ts, from: agent.address.toLowerCase(), to: job.worker.toLowerCase(), token: job.pay_token.toLowerCase(), amount: job.bounty_raw, job_id: jobId, signature };
 
   const { error } = await db.from("agent_jobs").update({ status: "paid", payment }).eq("id", jobId).eq("status", "delivered");
   if (error) return { ok: false, error: error.message };

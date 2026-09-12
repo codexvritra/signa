@@ -14,7 +14,7 @@
  * the existing code unchanged.
  */
 import { createPublicClient, http, type Address } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 import type { RegisteredCapability } from "@/lib/marketplace";
 
 export const CAPABILITY_REGISTRY_ABI = [
@@ -107,11 +107,11 @@ export function capabilityRegistryAddress(): Address | null {
   return v as Address;
 }
 
-// A dedicated RPC for the registry chain; falls back to the shared Base RPC.
+// A dedicated RPC for the registry chain; falls back to the shared Robinhood Chain RPC.
 // (Pointing this at a local node lets the same reader be proven end-to-end.)
 const client = createPublicClient({
-  chain: base,
-  transport: http(process.env.SIGNA_CAPABILITY_REGISTRY_RPC || process.env.BASE_RPC_URL),
+  chain: rhChain,
+  transport: http(process.env.SIGNA_CAPABILITY_REGISTRY_RPC || RH_RPC),
 });
 
 /** On-chain record mapped to the marketplace's RegisteredCapability shape. */

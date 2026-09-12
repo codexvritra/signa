@@ -1,4 +1,4 @@
-import { base, baseSepolia, mainnet } from "wagmi/chains";
+import { mainnet } from "wagmi/chains";
 import {
   createConfig,
   http,
@@ -6,6 +6,7 @@ import {
   createStorage,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
+import { rhChain, RH_RPC } from "./chain";
 
 /**
  * SIGNA wagmi config — SERVER-SAFE.
@@ -30,10 +31,9 @@ import { injected } from "wagmi/connectors";
  *   that share the same `chains` array.
  */
 export const wagmiConfig = createConfig({
-  // base = primary app chain (real ETH, real txs).
-  // baseSepolia = MiroShark x402 endpoint (testnet today; flips to mainnet when Aaron switches his Railway env).
-  // mainnet = ENS reverse + Basenames (via ENSIP-19 coinType) read from base too.
-  chains: [base, baseSepolia, mainnet],
+  // rhChain (Robinhood Chain, 4663) = primary app chain (real ETH, real txs).
+  // mainnet = ENS reverse lookups only (ENS lives on Ethereum mainnet).
+  chains: [rhChain, mainnet],
   connectors: [injected({ shimDisconnect: true })],
   // Explicit CORS-friendly public RPCs. viem's default `http()` with no
   // arg picks an upstream from a rotating list of public endpoints
@@ -43,8 +43,7 @@ export const wagmiConfig = createConfig({
   // the user's wallet provider), but it clutters logs and looks like
   // a bug to anyone who peeks at the console.
   transports: {
-    [base.id]: http("https://mainnet.base.org"),
-    [baseSepolia.id]: http("https://sepolia.base.org"),
+    [rhChain.id]: http(RH_RPC),
     [mainnet.id]: http("https://cloudflare-eth.com"),
   },
   ssr: true,

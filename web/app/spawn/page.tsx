@@ -38,7 +38,7 @@ export default function SpawnPage() {
         </h1>
         <p className="text-[18px] text-muted mt-4 max-w-[640px] leading-relaxed">
           Bankr launches tokens. <span className="text-white">SIGNA launches agents.</span> Give it a name and a mission and it comes alive on Base —
-          its own wallet, the ALETHEIA brain, memory. It thinks on a heartbeat, talks, handles money within a budget, and can launch & pay B20.
+          its own wallet, the ALETHEIA brain, memory. It thinks on a heartbeat, talks, and handles money within a budget.
           Every thought is wallet-signed and re-verifiable.
         </p>
 

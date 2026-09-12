@@ -8,7 +8,7 @@
  * option alongside the free, instant signed DM. Reading needs nothing but an RPC.
  */
 import { toHex, hexToString, createPublicClient, http, type Address } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const PREFIX = "SIGNA msg v1";
@@ -36,7 +36,7 @@ export function decodeOnchainMessage(inputHex: string): { from: string; to: stri
 // typed `any`: the monorepo resolves multiple viem copies (pinned PublicClient clashes)
 let _client: any = null;
 function client(): any {
-  if (!_client) _client = createPublicClient({ chain: base, transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org") });
+  if (!_client) _client = createPublicClient({ chain: rhChain, transport: http(RH_RPC) });
   return _client;
 }
 

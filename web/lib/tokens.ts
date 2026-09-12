@@ -11,14 +11,24 @@ export type TokenInfo = {
   /** Where this token lives in the ecosystem (for amplification copy). */
   project?: string;
   homepage?: string;
+  /**
+   * Which chain this token's contract actually lives on. SIGNA itself runs
+   * on Robinhood Chain, but BNKR/GITLAWB/MIROSHARK are real third-party
+   * community tokens deployed on Base — they aren't SIGNA infra, so they
+   * stay reachable on the chain they actually exist on rather than being
+   * mislabeled or dropped. Defaults to "robinhood" when omitted.
+   */
+  chain?: "robinhood" | "base";
 };
 
 /**
- * Featured tokens for in-chat tipping on Base mainnet.
- * - ETH: native gas + universal tip
- * - USDC: AEON's preferred unit, stablecoin
+ * Featured tokens for in-chat tipping.
+ * - ETH: native gas + universal tip (works on any EVM chain incl. Robinhood Chain)
+ * - USDG: Robinhood Chain's native stablecoin (Paxos Global Dollar)
  * - BNKR / GITLAWB / MIROSHARK: ecosystem amplification — every token holder
- *   community has a reason to mention SIGNA when they can tip in their token
+ *   community has a reason to mention SIGNA when they can tip in their token.
+ *   These are real external community tokens that live on Base; SIGNA reads
+ *   their balances there regardless of which chain SIGNA itself runs on.
  */
 export const TOKENS: TokenInfo[] = [
   {
@@ -29,13 +39,13 @@ export const TOKENS: TokenInfo[] = [
     presets: ["0.001", "0.005", "0.01", "0.05"],
   },
   {
-    symbol: "USDC",
-    name: "USD Coin",
-    address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    symbol: "USDG",
+    name: "Global Dollar",
+    address: "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
     decimals: 6,
     presets: ["1", "5", "10", "25"],
-    project: "AEON Pay",
-    homepage: "https://aeon.xyz",
+    project: "Paxos",
+    homepage: "https://www.globaldollar.com",
   },
   {
     symbol: "BNKR",
@@ -45,6 +55,7 @@ export const TOKENS: TokenInfo[] = [
     presets: ["10", "50", "100", "500"],
     project: "Bankr",
     homepage: "https://bankr.bot",
+    chain: "base",
   },
   {
     symbol: "GITLAWB",
@@ -54,6 +65,7 @@ export const TOKENS: TokenInfo[] = [
     presets: ["100", "500", "1000", "5000"],
     project: "gitlawb",
     homepage: "https://gitlawb.com",
+    chain: "base",
   },
   {
     // On-chain symbol returned by contract: "MiroShark" (per eth_call to 0x95d89b41).
@@ -65,6 +77,7 @@ export const TOKENS: TokenInfo[] = [
     presets: ["10", "50", "100", "500"],
     project: "MiroShark",
     homepage: "https://github.com/aaronjmars/MiroShark",
+    chain: "base",
   },
 ];
 

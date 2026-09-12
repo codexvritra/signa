@@ -1,21 +1,26 @@
 /**
  * v0.85 — SIGNAL DESK scoring.
  *
- * A live autonomous SIGNA agent reads real on-chain data for a Base
- * watchlist and emits a transparent "momentum reading" per token. This
- * is descriptive on-chain analytics — it reports what already happened
- * (price move, volume, turnover) plus a composite momentum score. It is
- * NOT investment advice and never tells anyone to buy or sell. Same
- * descriptive bull/neutral/bear shape MiroShark uses for its swarm.
+ * A live autonomous SIGNA agent reads real on-chain data for a watchlist
+ * and emits a transparent "momentum reading" per token. This is descriptive
+ * on-chain analytics — it reports what already happened (price move,
+ * volume, turnover) plus a composite momentum score. It is NOT investment
+ * advice and never tells anyone to buy or sell. Same descriptive
+ * bull/neutral/bear shape MiroShark uses for its swarm.
  *
  * Every reading the agent posts is wallet-signed into a public SIGNA
  * room, so its track record is re-verifiable and undeletable. The score
  * formula below is intentionally simple + printed on the card so anyone
  * can recompute it from the same public GeckoTerminal inputs.
  */
-import { tokenOnBase, trendingTokensOnBase, type TokenSummary } from "./geckoterminal";
+import { tokenInfo, trendingTokens, type TokenSummary } from "./geckoterminal";
 
-/** Tokens pinned to the top of the board (partner ecosystem on Base). */
+/**
+ * Tokens pinned to the top of the board — real partner-ecosystem tokens
+ * that live on Base (SIGNA itself runs on Robinhood Chain now, but these
+ * contracts only exist on Base). The trending fill below reads Robinhood
+ * Chain instead.
+ */
 export const PINNED_WATCHLIST: { address: string; tag: string }[] = [
   { address: "0xd7bc6a05a56655fb2052f742b012d1dfd66e1ba3", tag: "MIROSHARK" },
   { address: "0x22af33fe49fd1fa80c7149773dde5890d3c76f3b", tag: "BNKR" },
@@ -95,21 +100,21 @@ function toReading(t: TokenSummary, pinned: boolean, tag?: string): Reading {
 
 /**
  * Build the full board: pinned partner tokens first (always shown), then
- * top trending Base tokens to fill it out. Deduped by address.
+ * top trending Robinhood Chain tokens to fill it out. Deduped by address.
  */
 export async function buildBoard(opts: { trendingCount?: number } = {}): Promise<Reading[]> {
   const trendingCount = opts.trendingCount ?? 6;
 
   const pinnedResults = await Promise.all(
     PINNED_WATCHLIST.map(async (p) => {
-      const t = await tokenOnBase(p.address);
+      const t = await tokenInfo(p.address, "base");
       return t ? toReading(t, true, p.tag) : null;
     }),
   );
   const pinned = pinnedResults.filter((r): r is Reading => r !== null);
 
   const seen = new Set(pinned.map((r) => r.address));
-  const trending = await trendingTokensOnBase(trendingCount + PINNED_WATCHLIST.length);
+  const trending = await trendingTokens(trendingCount + PINNED_WATCHLIST.length);
   const fill: Reading[] = [];
   for (const t of trending) {
     if (fill.length >= trendingCount) break;

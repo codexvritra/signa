@@ -23,7 +23,6 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
     links: [
       { href: "/spawn", label: "Spawn" },
       { href: "/deals", label: "Deals" },
-      { href: "/acp", label: "ACP Evaluator" },
       { href: "/jobs", label: "Jobs" },
       { href: "/social", label: "Takes" },
       { href: "/aletheia", label: "Aletheia" },
@@ -49,8 +48,6 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
       { href: "/rwa", label: "Stock Proof" },
       { href: "/launch", label: "Launchpad" },
       { href: "/pump", label: "Pump" },
-      { href: "/b20", label: "B20" },
-      { href: "/b20live", label: "B20 Live" },
       { href: "/telegram", label: "Telegram Bot" },
       { href: "/gate", label: "The Gate" },
     ],

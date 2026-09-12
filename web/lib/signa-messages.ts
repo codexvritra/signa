@@ -1,25 +1,26 @@
 /**
- * SignaMessages — the on-chain message contract on Base.
+ * SignaMessages — the on-chain message contract on Robinhood Chain.
  *
  * `send(to, body)` records a message as a `Message(id, from, to, body, ts)`
  * event. The chain IS the index: inbox/outbox/threads are read straight from
  * the contract's event logs (no database). Once the contract is verified on
- * Basescan the event renders as readable, decoded activity; either way our app
- * decodes it here with the ABI.
+ * Blockscout the event renders as readable, decoded activity; either way our
+ * app decodes it here with the ABI.
  *
- * Deployed (Base mainnet): 0x142770698171a8e76b6268963a5a531ec4b64ad9
+ * Set SIGNA_MESSAGES_ADDRESS (+ NEXT_PUBLIC_…) once redeployed to Robinhood
+ * Chain — see contracts/script/DeployMessages.s.sol.
  */
 import { createPublicClient, http, parseAbiItem, encodeFunctionData, type Address } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 
 export const SIGNA_MESSAGES_ADDRESS = (
   process.env.NEXT_PUBLIC_SIGNA_MESSAGES_ADDRESS ||
   process.env.SIGNA_MESSAGES_ADDRESS ||
-  "0x142770698171a8e76b6268963a5a531ec4b64ad9"
+  ""
 ).toLowerCase();
 
 /** Block the contract was deployed at — bounds getLogs so reads stay cheap. */
-export const SIGNA_MESSAGES_DEPLOY_BLOCK = 48007737n; // tx 0x98069e…, block 0x2dc8e39
+export const SIGNA_MESSAGES_DEPLOY_BLOCK = BigInt(process.env.SIGNA_MESSAGES_DEPLOY_BLOCK || 0);
 
 export const MESSAGE_EVENT = parseAbiItem(
   "event Message(uint256 indexed id, address indexed from, address indexed to, string body, uint64 timestamp)",
@@ -30,7 +31,7 @@ const SEND_ABI = [parseAbiItem("function send(address to, string body) returns (
 // typed `any`: the monorepo resolves multiple viem copies (pinned client clashes)
 let _client: any = null;
 function client(): any {
-  if (!_client) _client = createPublicClient({ chain: base, transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org") });
+  if (!_client) _client = createPublicClient({ chain: rhChain, transport: http(RH_RPC) });
   return _client;
 }
 

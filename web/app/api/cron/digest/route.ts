@@ -3,7 +3,7 @@ import Groq from "groq-sdk";
 import { serverClient } from "@/lib/supabase";
 import { botPost } from "@/lib/signa-bots";
 import { getPortfolio } from "@/lib/portfolio";
-import { formatUsd, formatPct, tokenOnBase } from "@/lib/geckoterminal";
+import { formatUsd, formatPct, tokenInfo } from "@/lib/geckoterminal";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,7 +73,7 @@ async function gatherFacts(
   const port = await getPortfolio(address, watchlist);
   let mover: DigestFacts["watchlist_mover"] = null;
   for (const addr of watchlist.slice(0, 10)) {
-    const t = await tokenOnBase(addr);
+    const t = await tokenInfo(addr);
     if (!t || t.change_24h_pct == null) continue;
     if (!mover || Math.abs(t.change_24h_pct) > Math.abs(mover.change_24h_pct)) {
       mover = { symbol: t.symbol, change_24h_pct: t.change_24h_pct };

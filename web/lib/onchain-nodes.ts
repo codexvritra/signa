@@ -14,7 +14,7 @@
  * declares — that prevents URL squatting attacks.
  */
 import { createPublicClient, http, type Address } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 
 export const SIGNA_NODE_REGISTRY: Address =
   "0x4316De3847629705C401F8FaF0cecdb40bd68E5A";
@@ -96,8 +96,8 @@ export type FederatedNode = {
 
 function client() {
   return createPublicClient({
-    chain: base,
-    transport: http(process.env.BASE_RPC_URL),
+    chain: rhChain,
+    transport: http(RH_RPC),
   });
 }
 

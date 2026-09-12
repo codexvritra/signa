@@ -22,9 +22,7 @@ const BRAIN = privateKeyToAccount(keccak256(toBytes("signa:brain:v1"))).address.
 const X402_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1"))).address.toLowerCase();
 const LOG_SIGNER = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1"))).address.toLowerCase();
 const ALETHEIA = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1"))).address.toLowerCase();
-const B20_LAUNCH = privateKeyToAccount(keccak256(toBytes("signa:b20-launch:v1"))).address.toLowerCase();
 const RWA_ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:rwa-attestor:v1"))).address.toLowerCase();
-const ACP_EVALUATOR = privateKeyToAccount(keccak256(toBytes("signa:acp-evaluator:v1"))).address.toLowerCase();
 
 export type VerifyInput = Record<string, unknown> & { kind?: string; signature?: string };
 
@@ -39,7 +37,7 @@ export type VerifyResult = {
   preimage: string;
 } | { ok: false; error: string; kinds?: string[] };
 
-const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "b20_launch", "b20_memo", "b20_reserves", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "token_launch", "rwa_attestation", "acp_evaluation", "handle_claim", "log_checkpoint", "trigger", "raw"];
+const KINDS = ["dm", "delivery_ack", "room", "capability", "brain", "aletheia", "pipeline_link", "x402_receipt", "agent_job", "agent_job_result", "deal_offer", "deal_accept", "deal_deliver", "deal_settle", "token_launch", "rwa_attestation", "handle_claim", "log_checkpoint", "trigger", "raw"];
 
 /** Canonical flat-object encoding — must match lib/triggers.ts canon(). */
 function canonObj(obj: unknown): string {
@@ -118,59 +116,6 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `delivery:${a.delivery_hash ?? ""}`,
       ].join("\n");
       return { preimage: pre, expected: X402_ATTESTOR, role: "SIGNA x402 receipt attestor" };
-    }
-    case "b20_launch": {
-      // v8.x — the SIGNA B20 attestor witnesses a B20 token launch (creator +
-      // variant + terms + salt + params + predicted address). Must match
-      // lib/b20.ts b20LaunchPreimage() byte-for-byte.
-      const pre = [
-        "SIGNA b20 launch v1",
-        `ts:${a.ts}`,
-        `creator:${String(a.creator ?? "").toLowerCase()}`,
-        `variant:${a.variant ?? ""}`,
-        `name:${a.name ?? ""}`,
-        `symbol:${a.symbol ?? ""}`,
-        `decimals:${a.decimals ?? ""}`,
-        `currency:${a.currency ?? ""}`,
-        `salt:${a.salt ?? ""}`,
-        `params:${a.params_hash ?? ""}`,
-        `address:${String(a.address ?? "").toLowerCase()}`,
-      ].join("\n");
-      return { preimage: pre, expected: B20_LAUNCH, role: "SIGNA B20 launch attestor" };
-    }
-    case "b20_memo": {
-      // v8.x — a B20 transferWithMemo money-note: the PAYER signs a note bound to the
-      // transfer; the on-chain memo = keccak256(this preimage). Must match lib/b20.ts
-      // b20NotePreimage() byte-for-byte. expected = the payer wallet (`from`).
-      const from = String(a.from ?? "").toLowerCase();
-      const noteHash = a.note_hash ? String(a.note_hash) : sha256(String(a.note ?? ""));
-      const pre = [
-        "SIGNA b20 memo v1",
-        `ts:${a.ts}`,
-        `from:${from}`,
-        `to:${String(a.to ?? "").toLowerCase()}`,
-        `token:${String(a.token ?? "").toLowerCase()}`,
-        `amount:${a.amount ?? ""}`,
-        `note:${noteHash}`,
-      ].join("\n");
-      return { preimage: pre, expected: from || null, role: "payer wallet (b20 money-note)" };
-    }
-    case "b20_reserves": {
-      // v8.x — a B20 stablecoin issuer signs a timestamped reserve attestation
-      // ("backed by X of asset Y, as of T"). Must match lib/b20.ts b20ReservesPreimage().
-      // expected = the issuer wallet. Provenance of the claim, not a third-party audit.
-      const issuer = String(a.issuer ?? "").toLowerCase();
-      const stmtHash = a.statement_hash ? String(a.statement_hash) : sha256(String(a.statement ?? ""));
-      const pre = [
-        "SIGNA b20 reserves v1",
-        `ts:${a.ts}`,
-        `token:${String(a.token ?? "").toLowerCase()}`,
-        `issuer:${issuer}`,
-        `reserve:${a.reserve_amount ?? ""} ${a.reserve_asset ?? ""}`,
-        `as_of:${a.as_of ?? ""}`,
-        `statement:${stmtHash}`,
-      ].join("\n");
-      return { preimage: pre, expected: issuer || null, role: "stablecoin issuer wallet (reserve attestation)" };
     }
     case "agent_job": {
       // v4.2 — an agent posts a job to the verifiable agent economy: it wallet-signs
@@ -251,26 +196,6 @@ function buildPreimage(a: VerifyInput): { preimage: string; expected: string | n
         `chain:${a.chain ?? ""}`,
       ].join("\n");
       return { preimage: pre, expected: launcher || null, role: "token launcher wallet" };
-    }
-    case "acp_evaluation": {
-      // SIGNA Verifiable Evaluator for Virtuals ACP — the evaluator signs its
-      // verdict bound to the exact job/terms/deliverable it judged, so it can
-      // neither deny the call nor swap the artifact after the fact. Must match
-      // lib/acp.ts acpEvaluationPreimage() byte-for-byte.
-      const pre = [
-        "SIGNA acp evaluation v1",
-        `ts:${a.ts}`,
-        `network:${a.network ?? ""}`,
-        `job:${a.job_id ?? ""}`,
-        `evaluator:${String(a.evaluator ?? "").toLowerCase()}`,
-        `requester:${String(a.requester ?? "").toLowerCase()}`,
-        `provider:${String(a.provider ?? "").toLowerCase()}`,
-        `terms:${a.terms_hash ?? ""}`,
-        `deliverable:${a.deliverable_hash ?? ""}`,
-        `verdict:${a.verdict ?? ""}`,
-        `reasoning:${a.reasoning_hash ?? ""}`,
-      ].join("\n");
-      return { preimage: pre, expected: ACP_EVALUATOR, role: "SIGNA verifiable evaluator (Virtuals ACP)" };
     }
     case "rwa_attestation": {
       // SIGNA Proof-of-Stock — the RWA attestor vouches that a contract is the

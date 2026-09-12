@@ -1,9 +1,18 @@
 import { createPublicClient, http, type Address } from "viem";
 import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 import { ERC20_TRANSFER_ABI, TOKENS, type TokenInfo } from "./tokens";
 
-// Server-side viem client for Base mainnet token balance reads.
-// Public RPC is fine for low traffic; swap for a private RPC if rate-limited.
+// Robinhood Chain client for SIGNA's own tokens (ETH, USDG). Public RPC is
+// fine for low traffic; swap for a private RPC if rate-limited.
+const rhClient = createPublicClient({
+  chain: rhChain,
+  transport: http(RH_RPC),
+});
+
+// Base mainnet client — kept only for BNKR/GITLAWB/MIROSHARK, real
+// third-party community tokens that live on Base regardless of which chain
+// SIGNA itself runs on (see the `chain` field in lib/tokens.ts).
 const baseClient = createPublicClient({
   chain: base,
   transport: http(process.env.BASE_RPC_URL),
@@ -33,7 +42,7 @@ export type HolderEntry = {
 export type HolderStatus = {
   address: string;
   holdings: HolderEntry[]; // tokens with non-zero balance only
-  /** number of distinct partner tokens held (non-USDC, non-ETH) */
+  /** number of distinct partner tokens held (non-USDG, non-ETH) */
   partnerCount: number;
   /** Eligibility: holds at least one partner token (BNKR / GITLAWB / MIROSHARK) */
   isEcosystemMember: boolean;
@@ -93,7 +102,8 @@ async function readBalance(
   token: TokenInfo,
 ): Promise<bigint> {
   if (!token.address) return 0n;
-  const result = (await baseClient.readContract({
+  const client = token.chain === "base" ? baseClient : rhClient;
+  const result = (await client.readContract({
     address: token.address,
     abi: BALANCE_OF_ABI,
     functionName: "balanceOf",

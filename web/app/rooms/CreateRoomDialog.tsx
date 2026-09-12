@@ -90,7 +90,7 @@ export function CreateRoomDialog() {
   const [description, setDescription] = useState("");
   const [gateEnabled, setGateEnabled] = useState(false);
   const [gateToken, setGateToken] = useState("");
-  const [gateChain, setGateChain] = useState<"base" | "ethereum">("base");
+  const [gateChain, setGateChain] = useState<"robinhood" | "base" | "ethereum">("robinhood");
   const [gateMin, setGateMin] = useState("1"); // human units, converted to raw using 18 dec default
 
   // v0.80 — encrypted room toggle + member list.
@@ -534,9 +534,10 @@ export function CreateRoomDialog() {
                     </div>
                     <select
                       value={gateChain}
-                      onChange={(e) => setGateChain(e.target.value as "base" | "ethereum")}
+                      onChange={(e) => setGateChain(e.target.value as "robinhood" | "base" | "ethereum")}
                       className="w-full text-[13px] bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-white focus:outline-none focus:border-white/30"
                     >
+                      <option value="robinhood">robinhood</option>
                       <option value="base">base</option>
                       <option value="ethereum">ethereum</option>
                     </select>

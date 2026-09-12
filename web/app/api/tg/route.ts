@@ -14,7 +14,7 @@ export const maxDuration = 30;
  */
 export async function GET() {
   // health check (so you can confirm the route is deployed before setting the webhook)
-  return NextResponse.json({ ok: true, bot: "signa-b20", configured: !!process.env.TELEGRAM_BOT_TOKEN });
+  return NextResponse.json({ ok: true, bot: "signa", configured: !!process.env.TELEGRAM_BOT_TOKEN });
 }
 
 export async function POST(req: NextRequest) {

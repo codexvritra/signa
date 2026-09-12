@@ -1,23 +1,25 @@
 /**
- * SignaPaidMessages — pay-to-reach inboxes, settled on Base in the same tx.
+ * SignaPaidMessages — pay-to-reach inboxes, settled on Robinhood Chain in the same tx.
  *
  * Set a price for your inbox; a sender attaches >= that value and it's forwarded
  * to you in full, in the same transaction that records a readable `PaidMessage`
  * event. SIGNA custodies nothing and takes no fee. The chain is the index —
  * inbox/feed/price are read straight from the contract.
  *
- * Deployed (Base mainnet): 0xe6e8999039ff02d3140daf6427abb55f33cd0501
+ * Set SIGNA_PAID_ADDRESS (+ NEXT_PUBLIC_…) once redeployed to Robinhood Chain —
+ * see contracts/script/DeployPaidMessages.s.sol.
  */
 import { createPublicClient, http, parseAbiItem, encodeFunctionData, formatEther, type Address } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 
 export const SIGNA_PAID_ADDRESS = (
   process.env.NEXT_PUBLIC_SIGNA_PAID_ADDRESS ||
   process.env.SIGNA_PAID_ADDRESS ||
-  "0xe6e8999039ff02d3140daf6427abb55f33cd0501"
+  ""
 ).toLowerCase();
 
-export const SIGNA_PAID_DEPLOY_BLOCK = 48016380n; // tx 0x75793e…
+export const SIGNA_PAID_DEPLOY_BLOCK = BigInt(process.env.SIGNA_PAID_DEPLOY_BLOCK || 0);
+export const SIGNA_PAID_LIVE = /^0x[0-9a-f]{40}$/.test(SIGNA_PAID_ADDRESS);
 
 export const PAID_MESSAGE_EVENT = parseAbiItem(
   "event PaidMessage(uint256 indexed id, address indexed from, address indexed to, uint256 value, string body, uint64 timestamp)",
@@ -30,7 +32,7 @@ const PAID_ABI = [
 
 let _client: any = null;
 function client(): any {
-  if (!_client) _client = createPublicClient({ chain: base, transport: http(process.env.BASE_RPC_URL || "https://mainnet.base.org") });
+  if (!_client) _client = createPublicClient({ chain: rhChain, transport: http(RH_RPC) });
   return _client;
 }
 
@@ -68,6 +70,7 @@ export async function priceOf(address: string): Promise<{ wei: string; eth: stri
 }
 
 async function readPaidLogs(args: Record<string, unknown>, limit: number): Promise<PaidMessage[]> {
+  if (!SIGNA_PAID_LIVE) return [];
   const logs = await client().getLogs({
     address: SIGNA_PAID_ADDRESS as Address,
     event: PAID_MESSAGE_EVENT,

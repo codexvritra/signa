@@ -17,9 +17,9 @@ export const dynamic = "force-dynamic";
  *
  * Accepts:
  *   - 0x address                          (0xabc…123)
- *   - CAIP-10                             (eip155:8453:0xabc…123)
- *   - ENS / Basename                      (vitalik.eth, jesse.base.eth)
- *   - SIGNA handle (basename/ens on file)
+ *   - CAIP-10                             (eip155:4663:0xabc…123)
+ *   - ENS                                 (vitalik.eth)
+ *   - SIGNA handle (ens on file)
  *   - an A2A agent-card URL               (https://…/.well-known/agent-card.json)
  *
  * Returns:
@@ -51,7 +51,7 @@ const CORS = {
 } as const;
 
 const ALIVE_WINDOW_MS = 5 * 60 * 1000;
-const DEFAULT_CHAIN = 8453; // Base mainnet
+const DEFAULT_CHAIN = 4663; // Robinhood Chain mainnet
 
 export function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
   const raw = (req.nextUrl.searchParams.get("id") ?? "").trim();
   if (!raw) {
     return NextResponse.json(
-      { ok: false, error: "missing_id", message: "pass ?id=<address|ens|basename|caip10|agent-card-url>" },
+      { ok: false, error: "missing_id", message: "pass ?id=<address|ens|caip10|agent-card-url>" },
       { status: 400, headers: CORS },
     );
   }
@@ -299,7 +299,7 @@ export async function GET(req: NextRequest) {
         query: raw,
         error: "unresolvable",
         message:
-          "couldn't resolve this to a wallet. accepts 0x address, eip155:<chain>:0x…, ENS, Basename, a SIGNA handle, or an A2A agent-card URL.",
+          "couldn't resolve this to a wallet. accepts 0x address, eip155:<chain>:0x…, ENS, a SIGNA handle, or an A2A agent-card URL.",
       },
       { status: 404, headers: CORS },
     );

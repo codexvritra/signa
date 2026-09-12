@@ -9,21 +9,23 @@ export const dynamic = "force-dynamic";
 // CORS handled centrally by middleware.ts.
 
 /**
- * GET /api/users/resolve?handle=<0x | name.base.eth | name.eth>
+ * GET /api/users/resolve?handle=<0x | name.eth>
  *
  * Single-source-of-truth resolver used by /dm/[handle] and /u/[handle].
  * Returns:
  *
  *   { ok: true, address, basename, ens_name, on_signa: bool, source: ... }
  *
+ * `basename` is a legacy display-name column from when SIGNA also resolved
+ * Base mainnet Basenames (*.base.eth) — no longer actively resolved (SIGNA
+ * runs on Robinhood Chain now), but existing stored values still display.
+ *
  * Resolution strategy:
  *   1. 0x address → use as-is, look up SIGNA metadata for it.
- *   2. *.base.eth → web3.bio /basenames/ (verified working from Vercel
- *      egress, sub-200ms)
- *   3. *.eth     → ensideas.com (verified, ~40ms from Vercel) with
+ *   2. *.eth     → ensideas.com (verified, ~40ms from Vercel) with
  *      web3.bio /ens/ as a second backstop. viem getEnsAddress as a
  *      last-resort tertiary that only works against a CCIP-capable RPC.
- *   4. Any other string → loose match against users.basename or
+ *   3. Any other string → loose match against users.basename or
  *      users.ens_name (exact-match only — no PostgREST OR filter with
  *      dots in values, that was the bug that 404'd vitalik.eth).
  *
@@ -98,7 +100,7 @@ async function tryEnsIdeas(name: string): Promise<RestResult> {
 
 async function tryWeb3Bio(
   name: string,
-  platform: "ens" | "basenames",
+  platform: "ens",
 ): Promise<RestResult> {
   try {
     const url = `https://api.web3.bio/profile/${platform}/${encodeURIComponent(name)}`;
@@ -177,7 +179,8 @@ async function handleResolve(req: NextRequest) {
     });
   }
 
-  // 2 + 3. ENS-shaped (includes .base.eth and .eth).
+  // 2. ENS-shaped (*.eth). Basenames (*.base.eth) are no longer actively
+  // resolved — SIGNA runs on Robinhood Chain, which has no Base dependency.
   if (handle.endsWith(".eth")) {
     // handle is already lowercased; the HTTP resolvers and viem are tolerant
     // of unicode names since we don't accept those from users today. If we
@@ -186,18 +189,10 @@ async function handleResolve(req: NextRequest) {
     // undefined and crashed with "Cannot read properties of undefined").
     const normalized = handle;
 
-    let result: RestResult = null;
-
-    if (normalized.endsWith(".base.eth")) {
-      // Basenames: web3.bio /basenames/ is most reliable
-      result = await tryWeb3Bio(normalized, "basenames");
-      if (!result) result = await tryViem(normalized);
-    } else {
-      // Plain ENS: ensideas is fastest, then web3.bio, then viem
-      result = await tryEnsIdeas(normalized);
-      if (!result) result = await tryWeb3Bio(normalized, "ens");
-      if (!result) result = await tryViem(normalized);
-    }
+    // ensideas is fastest, then web3.bio, then viem
+    let result: RestResult = await tryEnsIdeas(normalized);
+    if (!result) result = await tryWeb3Bio(normalized, "ens");
+    if (!result) result = await tryViem(normalized);
 
     if (!result) {
       return NextResponse.json(

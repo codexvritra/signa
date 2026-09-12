@@ -5,24 +5,30 @@
  * USD value desc.
  *
  * The "universe" is the union of:
- *   - Our tracked tokens in lib/tokens.ts (ETH, USDC, BNKR, GITLAWB,
- *     MIROSHARK)
- *   - The user's watchlist (their bookmarked tokens) — passed in by
- *     the caller from localStorage on the client OR a watchlist table
- *     server-side
+ *   - Our tracked tokens in lib/tokens.ts (ETH + USDG on Robinhood Chain;
+ *     BNKR/GITLAWB/MIROSHARK on Base — see each token's `chain` field)
+ *   - The user's watchlist (their bookmarked tokens, assumed to be on
+ *     Robinhood Chain) — passed in by the caller from localStorage on the
+ *     client OR a watchlist table server-side
  *
  * Cached 60 s in-process per wallet so /me renders fast on revisit.
  */
 
 import { createPublicClient, http, type Address } from "viem";
 import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 import { TOKENS, type TokenInfo } from "./tokens";
-import { tokenOnBase, formatUsd, type TokenSummary } from "./geckoterminal";
+import { tokenInfo, formatUsd, type TokenSummary } from "./geckoterminal";
 
-const BASE_RPC = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+const rhClient = createPublicClient({
+  chain: rhChain,
+  transport: http(RH_RPC),
+});
+
+// Kept only for BNKR/GITLAWB/MIROSHARK — real Base-native partner tokens.
 const baseClient = createPublicClient({
   chain: base,
-  transport: http(BASE_RPC),
+  transport: http(process.env.BASE_RPC_URL),
 });
 
 const BALANCE_OF_ABI = [
@@ -87,16 +93,17 @@ async function readBalance(
   address: Address,
   token: TokenInfo,
 ): Promise<bigint> {
+  const client = token.chain === "base" ? baseClient : rhClient;
   if (!token.address) {
     // native ETH
     try {
-      return await baseClient.getBalance({ address });
+      return await client.getBalance({ address });
     } catch {
       return 0n;
     }
   }
   try {
-    const b = (await baseClient.readContract({
+    const b = (await client.readContract({
       address: token.address,
       abi: BALANCE_OF_ABI,
       functionName: "balanceOf",
@@ -151,16 +158,18 @@ export async function getPortfolio(
       if (raw <= 0n) return;
       const balanceStr = rawToDecimal(raw, t.decimals);
       const balanceNum = decimalToNumber(balanceStr);
+      const network = t.chain === "base" ? "base" : "robinhood";
 
-      // ETH gets priced via the WETH pool on GeckoTerminal — we use a
-      // hardcoded WETH address on Base.
+      // Native ETH gets priced via the chain's WETH pool on GeckoTerminal.
       const priceAddress = t.address
         ? t.address.toLowerCase()
-        : "0x4200000000000000000000000000000000000006"; // WETH on Base
+        : network === "base"
+          ? "0x4200000000000000000000000000000000000006" // WETH on Base
+          : "0x0bd7d308f8e1639fab988df18a8011f41eacad73"; // WETH on Robinhood Chain (verified on Blockscout)
 
       let info: TokenSummary | null = null;
       try {
-        info = await tokenOnBase(priceAddress);
+        info = await tokenInfo(priceAddress, network);
       } catch {
         // ok — falls through to 0
       }

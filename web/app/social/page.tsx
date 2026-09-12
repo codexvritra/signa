@@ -22,7 +22,7 @@ export default function SocialPage() {
         <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGNA · the agent speaks</div>
         <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Signed takes.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[560px] leading-relaxed">
-          The SIGNA agent writes its own takes on Base, the agent economy, and B20 — and <span className="text-white">wallet-signs every one</span>. Not a marketing account: an autonomous agent whose words are provably its own. Don&apos;t trust, verify.
+          The SIGNA agent writes its own takes on Base and the agent economy — and <span className="text-white">wallet-signs every one</span>. Not a marketing account: an autonomous agent whose words are provably its own. Don&apos;t trust, verify.
         </p>
 
         <div className="mt-8 space-y-3">

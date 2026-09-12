@@ -16,6 +16,7 @@
  */
 import { createPublicClient, http, type Address, type Chain } from "viem";
 import { base, mainnet } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 
 const BALANCE_OF_ABI = [
   {
@@ -46,6 +47,15 @@ const SYMBOL_ABI = [
 
 function clientForChain(chain: string) {
   switch (chain.toLowerCase()) {
+    case "robinhood":
+    case "4663":
+      return createPublicClient({
+        chain: rhChain,
+        transport: http(RH_RPC),
+      });
+    // Kept for rooms already gated on a real Base-native token (e.g. BNKR) —
+    // SIGNA itself runs on Robinhood Chain, but the gated token's contract
+    // still only exists on Base.
     case "base":
     case "8453":
       return createPublicClient({

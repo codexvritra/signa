@@ -2,19 +2,19 @@
  * On-chain anchoring for the SIGNA transparency log (pillar #2).
  *
  * The transparency log (lib/transparency.ts) produces signed, append-only
- * Merkle checkpoints. This module pins those checkpoint roots to Base via the
- * SignaLogAnchor contract, so the log's history is settled on-chain — a later
- * off-chain root that contradicts an anchored one is provably a fork, even if
- * SIGNA itself produced it.
+ * Merkle checkpoints. This module pins those checkpoint roots to Robinhood
+ * Chain via the SignaLogAnchor contract, so the log's history is settled
+ * on-chain — a later off-chain root that contradicts an anchored one is
+ * provably a fork, even if SIGNA itself produced it.
  *
  * Reading works as soon as the contract is deployed + SIGNA_LOG_ANCHOR_ADDRESS
  * is set. Writing (broadcasting an anchor) additionally needs the transparency
- * -log signer wallet funded with a little Base ETH for gas; the signer key is
- * deterministic (keccak256("signa:transparency-log:v1")), so no secret to set.
- * Everything degrades gracefully to { configured:false } when unset.
+ * -log signer wallet funded with a little Robinhood Chain ETH for gas; the
+ * signer key is deterministic (keccak256("signa:transparency-log:v1")), so no
+ * secret to set. Everything degrades gracefully to { configured:false } when unset.
  */
 import { createPublicClient, createWalletClient, http, type Address, type Hex } from "viem";
-import { base } from "viem/chains";
+import { rhChain, RH_RPC } from "./chain";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { LOG_SIGNER, LOG_SIGNER_ACCOUNT, latestCheckpoint, type Checkpoint } from "./transparency";
 
@@ -56,7 +56,7 @@ export function logAnchorAddress(): Address | null {
   return v as Address;
 }
 
-const client = createPublicClient({ chain: base, transport: http(process.env.BASE_RPC_URL) });
+const client = createPublicClient({ chain: rhChain, transport: http(RH_RPC) });
 
 const ROOT0 = `0x${"0".repeat(64)}` as Hex;
 
@@ -151,8 +151,8 @@ export async function anchorLatest(db: SupabaseClient): Promise<{
   try {
     const wallet = createWalletClient({
       account: LOG_SIGNER_ACCOUNT,
-      chain: base,
-      transport: http(process.env.BASE_RPC_URL),
+      chain: rhChain,
+      transport: http(RH_RPC),
     });
     const tx = await wallet.writeContract({
       address: addr,
