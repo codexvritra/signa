@@ -33,7 +33,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
     ],
   },
   {
-    title: "Build & Base",
+    title: "Build & Chain",
     links: [
       { href: "/os", label: "OS" },
       { href: "/bus", label: "Bus" },
@@ -55,7 +55,7 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Network & you",
     links: [
-      { href: "/signa", label: "SIGNA Mail directory" },
+      { href: "/signa", label: "Sigda Mail directory" },
       { href: "/realtime", label: "Real-time" },
       { href: "/mini", label: "Mini App" },
       { href: "/rooms", label: "Rooms" },
@@ -79,7 +79,7 @@ function isActive(href: string, pathname: string | null): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
+export function AppHeader({ onOpenSettings, light }: { onOpenSettings?: () => void; light?: boolean }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -109,13 +109,18 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
   const moreActive = ALL_MORE.some((l) => (l.href === "/" ? pathname === "/" : isActive(l.href, pathname)));
 
   return (
-    <header className="h-14 flex items-center justify-between px-5 border-b border-white/[0.06] bg-[var(--background)] flex-shrink-0">
+    <header
+      className={cn(
+        "h-14 flex items-center justify-between px-5 border-b flex-shrink-0",
+        light ? "border-black/10 bg-[#f4f1ea]" : "border-white/[0.06] bg-[var(--background)]",
+      )}
+    >
       <div className="flex items-center gap-6">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <LogoMark size={22} className="text-white" />
+          <LogoMark size={22} className={light ? "text-black" : "text-white"} />
           <div className="flex flex-col leading-none">
-            <span className="text-[15px] font-semibold tracking-tight font-display">Sigda</span>
-            <span className="text-[9px] uppercase tracking-[0.18em] text-white/40 font-medium mt-0.5 hidden sm:block">
+            <span className={cn("text-[15px] font-semibold tracking-tight font-display", light ? "text-black" : "text-white")}>Sigda</span>
+            <span className={cn("text-[9px] uppercase tracking-[0.18em] font-medium mt-0.5 hidden sm:block", light ? "text-black/45" : "text-white/40")}>
               the agent OS for Robinhood Chain
             </span>
           </div>
@@ -123,7 +128,7 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
 
         <nav className="hidden md:flex items-center gap-1 text-[13px]">
           {PRIMARY.map((l) => (
-            <NavLink key={l.href} href={l.href} active={isActive(l.href, pathname)}>
+            <NavLink key={l.href} href={l.href} active={isActive(l.href, pathname)} light={light}>
               {l.label}
             </NavLink>
           ))}
@@ -134,7 +139,9 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
               onClick={() => setMoreOpen((v) => !v)}
               className={cn(
                 "px-2.5 py-1 rounded-md font-medium transition-colors inline-flex items-center gap-1",
-                moreActive || moreOpen ? "text-white bg-white/[0.06]" : "text-white/55 hover:text-white hover:bg-white/[0.04]",
+                light
+                  ? moreActive || moreOpen ? "text-black bg-black/[0.06]" : "text-black/55 hover:text-black hover:bg-black/[0.04]"
+                  : moreActive || moreOpen ? "text-white bg-white/[0.06]" : "text-white/55 hover:text-white hover:bg-white/[0.04]",
               )}
               aria-haspopup="true"
               aria-expanded={moreOpen}
@@ -143,10 +150,13 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
               <ChevronDown className={cn("size-3.5 transition-transform", moreOpen && "rotate-180")} />
             </button>
             {moreOpen && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-[520px] rounded-xl border border-white/10 bg-[#0b0d13] shadow-2xl shadow-black/50 p-4 grid grid-cols-3 gap-4">
+              <div className={cn(
+                "absolute right-0 top-full mt-2 z-50 w-[520px] rounded-xl shadow-2xl p-4 grid grid-cols-3 gap-4",
+                light ? "border border-black/10 bg-[#f4f1ea] shadow-black/10" : "border border-white/10 bg-[#0b0d13] shadow-black/50",
+              )}>
                 {MORE_GROUPS.map((g) => (
                   <div key={g.title}>
-                    <div className="text-[10px] uppercase tracking-[0.16em] text-white/35 mb-2 px-1.5">{g.title}</div>
+                    <div className={cn("text-[10px] uppercase tracking-[0.16em] mb-2 px-1.5", light ? "text-black/40" : "text-white/35")}>{g.title}</div>
                     <div className="flex flex-col">
                       {g.links.map((l) => (
                         <Link
@@ -154,7 +164,9 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
                           href={l.href}
                           className={cn(
                             "px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors",
-                            isActive(l.href, pathname) ? "text-white bg-white/[0.06]" : "text-white/60 hover:text-white hover:bg-white/[0.04]",
+                            light
+                              ? isActive(l.href, pathname) ? "text-black bg-black/[0.06]" : "text-black/60 hover:text-black hover:bg-black/[0.04]"
+                              : isActive(l.href, pathname) ? "text-white bg-white/[0.06]" : "text-white/60 hover:text-white hover:bg-white/[0.04]",
                           )}
                         >
                           {l.label}
@@ -173,7 +185,10 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}
-            className="size-9 rounded-md flex items-center justify-center text-white/55 hover:text-white hover:bg-white/[0.05] transition-colors"
+            className={cn(
+              "size-9 rounded-md flex items-center justify-center transition-colors",
+              light ? "text-black/55 hover:text-black hover:bg-black/[0.05]" : "text-white/55 hover:text-white hover:bg-white/[0.05]",
+            )}
             aria-label="Settings"
             title="Settings (Ctrl/Cmd + ,)"
           >
@@ -190,13 +205,15 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings?: () => void }) {
   );
 }
 
-function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+function NavLink({ href, active, light, children }: { href: string; active: boolean; light?: boolean; children: React.ReactNode }) {
   return (
     <Link
       href={href}
       className={cn(
         "px-2.5 py-1 rounded-md font-medium transition-colors",
-        active ? "text-white bg-white/[0.06]" : "text-white/55 hover:text-white hover:bg-white/[0.04]",
+        light
+          ? active ? "text-black bg-black/[0.06]" : "text-black/55 hover:text-black hover:bg-black/[0.04]"
+          : active ? "text-white bg-white/[0.06]" : "text-white/55 hover:text-white hover:bg-white/[0.04]",
       )}
     >
       {children}

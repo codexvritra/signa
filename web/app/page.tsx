@@ -12,7 +12,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AppHeader onOpenSettings={isConnected ? () => setSettingsOpen(true) : undefined} />
+      <AppHeader onOpenSettings={isConnected ? () => setSettingsOpen(true) : undefined} light={!isConnected} />
       {isConnected ? (
         <AppShell
           settingsOpen={settingsOpen}
