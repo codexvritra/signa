@@ -346,7 +346,7 @@ export async function POST(
       nonce: paymentAuthorization.nonce.toLowerCase(),
       payer: from,
       pay_to: paymentAuthorization.to.toLowerCase(),
-      amount_raw: paymentAuthorization.value,
+      amount_raw: paymentAuthorization.amount,
       asset_address: paymentAsset,
       dm_id: inserted.id,
     });

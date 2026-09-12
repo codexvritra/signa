@@ -177,7 +177,7 @@ export type SignedAction =
       task_kind?: "post" | "miroshark_sim" | "payment";
       // Required when task_kind = "payment", omitted otherwise.
       payment_to?: string;
-      payment_token?: "ETH" | "USDC";
+      payment_token?: "ETH" | "USDG";
       payment_amount_wei?: string;
       ts: number;
     }

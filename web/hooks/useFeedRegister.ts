@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useAccount, useEnsName, useSignMessage } from "wagmi";
 import { mainnet } from "wagmi/chains";
-import { BASE_CHAIN_ID, BASE_COINTYPE } from "@/lib/names";
 import { buildMessageToSign } from "@/lib/feed-types";
 
 /**
@@ -17,12 +16,6 @@ export function useFeedRegister(opts: { xmtpReady: boolean }) {
   const { signMessageAsync } = useSignMessage();
   const fired = useRef<string | null>(null);
 
-  const { data: basename } = useEnsName({
-    address,
-    chainId: BASE_CHAIN_ID,
-    coinType: BASE_COINTYPE,
-    query: { enabled: !!address && opts.xmtpReady },
-  });
   const { data: ensName } = useEnsName({
     address,
     chainId: mainnet.id,
@@ -43,7 +36,7 @@ export function useFeedRegister(opts: { xmtpReady: boolean }) {
         const message = buildMessageToSign({
           kind: "register",
           address: address.toLowerCase(),
-          basename: basename ?? null,
+          basename: null,
           ens_name: ensName ?? null,
           ts,
         });
@@ -53,7 +46,7 @@ export function useFeedRegister(opts: { xmtpReady: boolean }) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             address,
-            basename: basename ?? null,
+            basename: null,
             ens_name: ensName ?? null,
             ts,
             signature,
@@ -67,5 +60,5 @@ export function useFeedRegister(opts: { xmtpReady: boolean }) {
         fired.current = null;
       }
     })();
-  }, [address, basename, ensName, opts.xmtpReady, signMessageAsync]);
+  }, [address, ensName, opts.xmtpReady, signMessageAsync]);
 }
