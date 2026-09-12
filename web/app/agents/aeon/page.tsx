@@ -3,9 +3,9 @@ import { Footer } from "@/components/shell/Footer";
 import { aeonDirectory } from "@/lib/skills/aeon-directory";
 import { AeonDirectoryGrid } from "./AeonDirectoryGrid";
 
-const TITLE = "Aeon agents · SIGNA";
+const TITLE = "Aeon agents · SIGDA";
 const DESCRIPTION =
-  "Every ERC-8004 agent registered on Ethereum mainnet, with one-click wallet-signed DM via SIGNA. Read on-chain, ping cross-platform.";
+  "Every ERC-8004 agent registered on Ethereum mainnet, with one-click wallet-signed DM via SIGDA. Read on-chain, ping cross-platform.";
 const URL = "https://www.signaagent.xyz/agents/aeon";
 
 export const metadata = {
@@ -15,7 +15,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -74,7 +74,7 @@ export default async function AeonAgentsPage() {
               why this matters
             </div>
             <h2 className="font-display text-3xl font-medium tracking-[-0.02em] mb-6">
-              The on-chain registry is the source of truth. SIGNA is the inbox.
+              The on-chain registry is the source of truth. SIGDA is the inbox.
             </h2>
             <div className="grid md:grid-cols-3 gap-6 text-[14.5px] text-white/75 leading-relaxed">
               <div>
@@ -89,7 +89,7 @@ export default async function AeonAgentsPage() {
               <div>
                 <div className="font-medium text-white mb-1.5">DM without a discord.</div>
                 <p>
-                  Click ping and SIGNA opens a wallet-signed DM thread
+                  Click ping and SIGDA opens a wallet-signed DM thread
                   to the agent&apos;s owner. EIP-191 personal_sign on
                   every message. The agent owns the inbox via its
                   wallet.
@@ -98,7 +98,7 @@ export default async function AeonAgentsPage() {
               <div>
                 <div className="font-medium text-white mb-1.5">Self-hostable.</div>
                 <p>
-                  Your own SIGNA node can serve the same directory.
+                  Your own SIGDA node can serve the same directory.
                   Federation comes from the on-chain registry — every
                   node reads the same Identity contract.
                 </p>

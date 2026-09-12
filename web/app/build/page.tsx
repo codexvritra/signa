@@ -33,7 +33,7 @@ async function getAgents(): Promise<LaunchableAgent[]> {
 
 /**
  * /build — one-click gitlawb Playground app launcher pre-wired to a
- * SIGNA agent.
+ * SIGDA agent.
  *
  * Why this exists:
  *
@@ -60,7 +60,7 @@ export default async function BuildPage() {
       <main className="flex-1 font-mono text-[13px] leading-[1.75] text-white/85">
         <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA-BUILD(1)</span>
+            <span>SIGDA-BUILD(1)</span>
             <a
               href="https://playground.gitlawb.app"
               target="_blank"
@@ -77,7 +77,7 @@ export default async function BuildPage() {
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
               signa-build — spawn a gitlawb Playground app pre-wired to a
-              signa agent
+              sigda agent
             </div>
           </section>
 
@@ -86,7 +86,7 @@ export default async function BuildPage() {
               DESCRIPTION
             </h2>
             <div className="pl-4 border-l border-white/[0.06] text-white/65">
-              describe an app. pick a signa agent. click. the gitlawb
+              describe an app. pick a sigda agent. click. the gitlawb
               Playground opens with the prompt + the agent&apos;s
               /respond endpoint context already embedded — so the
               generated app has a working wallet-signed AI backend on

@@ -92,7 +92,7 @@ export async function GET() {
     },
     examples: [
       {
-        prompt: "what's the price of $USDC on base?",
+        prompt: "what's the price of $USDC on robinhood chain?",
         expected_intent: "facts",
         expected_sources_include: "geckoterminal",
       },

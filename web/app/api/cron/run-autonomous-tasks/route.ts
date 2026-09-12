@@ -38,7 +38,7 @@ export const dynamic = "force-dynamic";
  * hasn't been cancelled or expired. For each task:
  *
  *   1. Load the agent's encrypted_key, decrypt to plaintext
- *   2. Build a SIGNA post envelope { kind:"post", content: <prompt>, ts: now }
+ *   2. Build a SIGDA post envelope { kind:"post", content: <prompt>, ts: now }
  *   3. Sign it with the agent's private key (NOT the user's)
  *   4. Insert into posts table — same shape as a user-posted entry,
  *      so cross-node sync replicates it normally
@@ -234,7 +234,7 @@ async function runMirosharkSimTask(
  *      so the operator can refund + retry.
  *   4. On success, post a wallet-signed audit entry containing the tx
  *      hash so the agent's feed shows every spend. Cross-node sync
- *      replicates those receipts across every SIGNA node.
+ *      replicates those receipts across every SIGDA node.
  *   5. Persist last_tx_hash on the task row for the API + CLI to show.
  *
  * The agent's own wallet signs the tx (via privateKeyToAccount) — no

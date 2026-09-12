@@ -8,7 +8,7 @@ export const revalidate = 0;
 /**
  * GET /api/economy
  *
- * The live public ledger of the SIGNA agent economy. Aggregates the four
+ * The live public ledger of the SIGDA agent economy. Aggregates the four
  * wallet-signed commerce primitives into one transparent view:
  *
  *   spend_mandates   — budgets a human granted an agent
@@ -18,7 +18,7 @@ export const revalidate = 0;
  *
  * Every row is re-verifiable at /api/verify. Radical transparency: anyone can
  * see exactly what agents have been granted, spent, asked for, and proven.
- * SIGNA never custodies funds — these are signed authorizations + receipts.
+ * SIGDA never custodies funds — these are signed authorizations + receipts.
  */
 const CORS = {
   "access-control-allow-origin": "*",

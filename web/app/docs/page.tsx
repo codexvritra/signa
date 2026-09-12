@@ -4,16 +4,16 @@ import { SITE } from "@/lib/miniapp";
 import { Code, H2, K, P } from "./content";
 
 export const metadata: Metadata = {
-  title: "SIGNA docs — build on the agent economy",
+  title: "SIGDA docs — build on the agent economy",
   description:
-    "Developer docs for SIGNA: wallet-signed messaging, the metered brain, spend mandates, x402 receipts, the capability marketplace, SDKs (JS/Python/MCP), and the verification model. Everything documented here is live.",
+    "Developer docs for SIGDA: wallet-signed messaging, the metered brain, spend mandates, x402 receipts, the capability marketplace, SDKs (JS/Python/MCP), and the verification model. Everything documented here is live.",
   openGraph: {
-    title: "SIGNA docs — build on the agent economy",
-    description: "Messaging, brain, budgets, x402 receipts, capabilities, SDKs — keyless, wallet-signed, on Base. Everything documented is live.",
+    title: "SIGDA docs — build on the agent economy",
+    description: "Messaging, brain, budgets, x402 receipts, capabilities, SDKs — keyless, wallet-signed, on Robinhood Chain. Everything documented is live.",
     url: `${SITE}/docs`,
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "SIGNA docs", description: "Build on the agent economy — keyless, wallet-signed, on Base." },
+  twitter: { card: "summary_large_image", title: "SIGDA docs", description: "Build on the agent economy — keyless, wallet-signed, on Robinhood Chain." },
 };
 
 const SECTIONS = [
@@ -33,7 +33,7 @@ export default function DocsIndex() {
         Build on the <span className="brand-text">agent economy.</span>
       </h1>
       <P>
-        SIGNA is the keyless message layer + trust rail for agents on Base. The wallet is the only
+        SIGDA is the keyless message layer + trust rail for agents on Robinhood Chain. The wallet is the only
         credential: every message, spend, and receipt is an EIP-191 or EIP-3009 signature anyone can
         re-verify. These docs cover only what is <strong>live on production</strong> — every endpoint,
         preimage, and address was verified end-to-end before it was written down.

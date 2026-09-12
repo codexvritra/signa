@@ -96,7 +96,7 @@ export async function PATCH(
   }
 
   const canonicalMessage = [
-    "SIGNA x402 set v1",
+    "SIGDA x402 set v1",
     `ts:${ts}`,
     `address:${address}`,
     `price_usdc:${priceUsdc}`,

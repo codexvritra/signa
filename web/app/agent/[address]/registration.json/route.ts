@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  * GET /agent/[address]/registration.json
  *
  * The ERC-8004 (AEON Trustless Agents) registration document for one
- * signa agent. Compliant with the schema documented at
+ * sigda agent. Compliant with the schema documented at
  * github.com/BankrBot/skills/tree/main/erc-8004 — agentURI on the
  * Identity Registry can point here directly (no IPFS pinning needed
  * for v1).
@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
  *   3. coming back to signa with the resulting tokenId — we record it
  *      in agents.erc8004_token_id and the agent card surfaces it
  *
- * This way SIGNA carries the metadata-hosting weight and the user
+ * This way SIGDA carries the metadata-hosting weight and the user
  * only signs the on-chain tx. No Pinata JWT, no IPFS infra on our end.
  *
  * Reference: https://www.8004.org · https://eips.ethereum.org/EIPS/eip-8004

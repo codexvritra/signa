@@ -80,7 +80,7 @@ export function MarketplaceDirectory() {
         <div>
           <div className="flex items-baseline justify-between mb-4">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)]">
-              registered on Base · trustless tier · read straight from chain
+              registered on Robinhood Chain · trustless tier · read straight from chain
             </div>
             <div className="text-[12px] font-mono text-white/45">{dir.counts?.onchain ?? 0} onchain</div>
           </div>
@@ -114,7 +114,7 @@ export function MarketplaceDirectory() {
       <div>
         <div className="flex items-baseline justify-between mb-4">
           <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">
-            built-in · fulfilled by the SIGNA gateway from partner sources
+            built-in · fulfilled by the SIGDA gateway from partner sources
           </div>
           <div className="text-[12px] font-mono text-white/45">{dir.counts?.builtin ?? 0}</div>
         </div>

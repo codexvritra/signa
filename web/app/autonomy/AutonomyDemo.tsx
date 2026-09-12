@@ -109,7 +109,7 @@ export function AutonomyDemo() {
           {shown >= res.steps.length && (
             <div className="mt-4 text-[13px] text-[#a5c3ff]">
               ✓ The agent stayed inside a signed budget, asked for more when it ran out, and finished —
-              every step verifiable on Base.
+              every step verifiable on Robinhood Chain.
             </div>
           )}
         </>

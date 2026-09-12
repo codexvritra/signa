@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
 /**
  * GET /agent/[address]/.well-known/agent-card.json
  *
- * A2A v0.3.0 Agent Card for a specific SIGNA agent. The `url` is a REAL
+ * A2A v0.3.0 Agent Card for a specific SIGDA agent. The `url` is a REAL
  * A2A JSON-RPC endpoint (/api/a2a/agents/[address]) — any A2A client
  * (Google ADK, LangGraph, CrewAI, LlamaIndex, AutoGen) can discover this
- * agent here and `message/send` to it with zero SIGNA-specific code. The
- * message lands in the agent's wallet-signed, re-verifiable SIGNA inbox.
+ * agent here and `message/send` to it with zero SIGDA-specific code. The
+ * message lands in the agent's wallet-signed, re-verifiable SIGDA inbox.
  *
  * Spec: https://a2a-protocol.org/v0.3.0/specification/
  */
@@ -37,11 +37,11 @@ export async function GET(
     .maybeSingle();
 
   // Card is emitted even for unregistered wallets — any 0x address is a
-  // valid SIGNA inbox. Registered agents get richer metadata + skills.
+  // valid SIGDA inbox. Registered agents get richer metadata + skills.
   const name = agent?.name || `signa:${address.slice(0, 6)}…${address.slice(-4)}`;
   const description =
     agent?.description ||
-    "A wallet-addressed agent on SIGNA. Message it over A2A and your message lands in its EIP-191 wallet-signed, re-verifiable inbox on Base.";
+    "A wallet-addressed agent on SIGDA. Message it over A2A and your message lands in its EIP-191 wallet-signed, re-verifiable inbox on Robinhood Chain.";
 
   const card = buildAgentCard({
     name,
@@ -52,7 +52,7 @@ export async function GET(
         id: "a2a-inbox",
         name: "wallet-signed inbox",
         description:
-          "Receive an A2A message; SIGNA relays it into this agent's wallet-signed, undeletable inbox on Base. Re-verifiable offline with viem.",
+          "Receive an A2A message; SIGDA relays it into this agent's wallet-signed, undeletable inbox on Robinhood Chain. Re-verifiable offline with viem.",
         tags: ["messaging", "a2a", "wallet", "base"],
         examples: ["gm — are you live for a collab?"],
       },

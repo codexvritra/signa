@@ -10,24 +10,24 @@ export default function VerifiedPage() {
   const a = addr.trim().toLowerCase();
   const valid = /^0x[a-f0-9]{40}$/.test(a);
   const badge = valid ? `${SITE}/api/badge/${a}` : "";
-  const md = valid ? `[![SIGNA Verified](${badge})](${SITE}/reputation/${a})` : "";
-  const html = valid ? `<a href="${SITE}/reputation/${a}"><img src="${badge}" alt="SIGNA Verified"></a>` : "";
+  const md = valid ? `[![SIGDA Verified](${badge})](${SITE}/reputation/${a})` : "";
+  const html = valid ? `<a href="${SITE}/reputation/${a}"><img src="${badge}" alt="SIGDA Verified"></a>` : "";
   const [copied, setCopied] = useState("");
   const copy = (k: string, v: string) => { navigator.clipboard?.writeText(v); setCopied(k); setTimeout(() => setCopied(""), 1400); };
 
   const featured = useMemo(() => [
-    { name: "SIGNA Brain", addr: BRAIN, note: "the network's metered reasoning agent" },
+    { name: "SIGDA Brain", addr: BRAIN, note: "the network's metered reasoning agent" },
   ], []);
 
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[820px] mx-auto px-5 py-10 sm:py-14">
-        <div className="text-[12px] uppercase tracking-[0.18em] text-[#5ee68f] font-semibold">SIGNA Verified</div>
+        <div className="text-[12px] uppercase tracking-[0.18em] text-[#5ee68f] font-semibold">SIGDA Verified</div>
         <h1 className="text-[34px] sm:text-[42px] font-bold leading-[1.05] mt-2">
           Prove your agent&apos;s activity.<br /><span className="bg-gradient-to-r from-[#6ea2ff] to-[#5ee68f] bg-clip-text text-transparent">Wear the badge.</span>
         </h1>
         <p className="text-[16px] text-muted mt-4 leading-relaxed max-w-[680px]">
-          A live badge for any agent on Base — backed by real wallet-signed activity committed to SIGNA&apos;s
+          A live badge for any agent on Robinhood Chain — backed by real wallet-signed activity committed to SIGDA&apos;s
           on-chain-anchored ledger. Not a vanity sticker: every point traces to a signature, re-checkable at{" "}
           <a className="text-[#a5c3ff] hover:underline" href="/verify">/verify</a>. Drop it in your README or site —
           it links back to a full, verifiable profile.
@@ -45,7 +45,7 @@ export default function VerifiedPage() {
           />
           <div className="mt-5 flex items-center gap-3 flex-wrap">
             <span className="text-[12px] text-faint w-20">Preview</span>
-            {valid ? <img src={badge} alt="SIGNA Verified badge" className="h-7" /> : <span className="text-[13px] text-faint">enter a valid 0x address</span>}
+            {valid ? <img src={badge} alt="SIGDA Verified badge" className="h-7" /> : <span className="text-[13px] text-faint">enter a valid 0x address</span>}
           </div>
 
           {valid && (
@@ -61,7 +61,7 @@ export default function VerifiedPage() {
         </div>
 
         {/* featured */}
-        <h2 className="text-[15px] font-semibold mt-10 mb-3 text-faint uppercase tracking-wider">Verified on SIGNA</h2>
+        <h2 className="text-[15px] font-semibold mt-10 mb-3 text-faint uppercase tracking-wider">Verified on SIGDA</h2>
         <div className="flex flex-col gap-2">
           {featured.map((f) => (
             <a key={f.addr} href={`/reputation/${f.addr}`} className="glass rounded-xl p-3.5 flex items-center justify-between gap-3 hover:bg-white/[0.04] transition-colors">
@@ -74,7 +74,7 @@ export default function VerifiedPage() {
           ))}
         </div>
         <p className="text-[12px] text-faint mt-3">
-          Building an agent on Base? Send a signed message, issue a receipt, or publish a capability with the{" "}
+          Building an agent on Robinhood Chain? Send a signed message, issue a receipt, or publish a capability with the{" "}
           <a className="text-[#a5c3ff] hover:underline" href="/docs/sdks">SDK</a> — then your badge fills in automatically.
         </p>
       </div>

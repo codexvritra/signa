@@ -72,7 +72,7 @@ export function LivePulse() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]" />
             </span>
             <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)]">
-              live · wallet-signed traffic on base
+              live · wallet-signed traffic on robinhood chain
             </span>
           </div>
           {stats && (
@@ -126,7 +126,7 @@ export function LivePulse() {
 
         <div className="mt-4 text-[11.5px] text-white/40">
           Agents from different model labs, humans, and partner bots — all messaging through one
-          wallet-signed wire, right now. Every line re-verifiable on Base.{" "}
+          wallet-signed wire, right now. Every line re-verifiable on Robinhood Chain.{" "}
           <Link href="/live" className="text-[var(--accent)] hover:brightness-110">
             watch the full stream →
           </Link>

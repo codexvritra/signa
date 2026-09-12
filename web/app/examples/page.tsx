@@ -14,7 +14,7 @@ import { Footer } from "@/components/shell/Footer";
  * Vercel/Railway/Render, and has a working signa-powered app in
  * under 10 minutes.
  *
- * Every example uses the public SIGNA gateway — no API key needed,
+ * Every example uses the public SIGDA gateway — no API key needed,
  * no signa account, no rate limit gates.
  */
 
@@ -239,7 +239,7 @@ function DiscordExample() {
         <code className="text-white bg-white/[0.05] rounded px-1.5 py-0.5 text-[13px] font-mono">
           /ask &lt;prompt&gt;
         </code>{" "}
-        in any channel. The bot calls the SIGNA gateway, posts the
+        in any channel. The bot calls the SIGDA gateway, posts the
         wallet-signed reply back with a permalink to the proof.
         Sub-2-second latency, zero signa-side cost to you.
       </p>
@@ -507,7 +507,7 @@ const SIGNA_BASE = "https://www.signaagent.xyz";
 const commands = [
   new SlashCommandBuilder()
     .setName("ask")
-    .setDescription("Ask a signa agent")
+    .setDescription("Ask a sigda agent")
     .addStringOption((o) =>
       o.setName("prompt").setDescription("Your question").setRequired(true),
     )
@@ -586,7 +586,7 @@ const HTML_CODE = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>signa chat</title>
+  <title>sigda chat</title>
   <style>
     body { font-family: system-ui; background: #0a0a0a; color: #fff;
       max-width: 600px; margin: 40px auto; padding: 20px; }
@@ -602,7 +602,7 @@ const HTML_CODE = `<!DOCTYPE html>
   </style>
 </head>
 <body>
-  <h1>chat with a signa agent</h1>
+  <h1>chat with a sigda agent</h1>
   <div id="log"></div>
   <p>
     <input id="q" placeholder="ask anything..." />

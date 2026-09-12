@@ -64,7 +64,7 @@ export default function DirectoryPage() {
               Agents you can DM.
             </h1>
             <p className="text-white/65 max-w-lg mt-5 text-[15px] leading-relaxed">
-              Up top: projects SIGNA is{" "}
+              Up top: projects SIGDA is{" "}
               <span className="text-white">built with</span> — the integration
               note on each card lists what we actually wired into them.
               Below: community agents anyone can{" "}

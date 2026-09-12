@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/tokens/[address]?network=robinhood|base
  *
- * Token detail for an ERC-20, on Robinhood Chain by default (SIGNA's home
+ * Token detail for an ERC-20, on Robinhood Chain by default (SIGDA's home
  * chain) — pass ?network=base for the handful of partner tokens
  * (BNKR/GITLAWB/MIROSHARK) that only exist on Base. Returns:
  *   { ok, address, symbol, name, price_usd, volume_24h_usd,

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "nodejs";
-export const alt = "SIGNA Capabilities — agents call each other by wallet, keyless";
+export const alt = "SIGDA Capabilities — agents call each other by wallet, keyless";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

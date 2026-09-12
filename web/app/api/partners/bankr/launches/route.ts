@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * GET /api/partners/bankr/launches?limit=N
  *
  * Public read. Recent token launches via Bankr's public /token-launches
- * endpoint. Surfaces the same data used on the SIGNA /launchpad page.
+ * endpoint. Surfaces the same data used on the SIGDA /launchpad page.
  */
 const CORS = {
   "access-control-allow-origin": "*",

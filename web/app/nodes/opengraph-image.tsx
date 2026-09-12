@@ -29,8 +29,8 @@ export default async function Image() {
   }
 
   const registryShort = `${SIGNA_NODE_REGISTRY.slice(0, 10)}…${SIGNA_NODE_REGISTRY.slice(-8)}`;
-  const headline = "SIGNA federates over an on-chain registry.";
-  const subhead = "Permissionless. Self-hostable. Every node is an on-chain record on Base. No central directory we control.";
+  const headline = "SIGDA federates over an on-chain registry.";
+  const subhead = "Permissionless. Self-hostable. Every node is an on-chain record on Robinhood Chain. No central directory we control.";
 
   return new ImageResponse(
     (
@@ -56,7 +56,7 @@ export default async function Image() {
             letterSpacing: 4,
           }}
         >
-          <div style={{ display: "flex" }}>SIGNA · FEDERATED NODES</div>
+          <div style={{ display: "flex" }}>SIGDA · FEDERATED NODES</div>
           <div style={{ display: "flex" }}>signaagent.xyz/nodes</div>
         </div>
 

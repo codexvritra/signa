@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * The SIGNA network — a live hub-and-spoke status board. Each node pings a real
- * SIGNA surface and flips to ONLINE when it responds. Not a mockup: the lines
+ * The SIGDA network — a live hub-and-spoke status board. Each node pings a real
+ * SIGDA surface and flips to ONLINE when it responds. Not a mockup: the lines
  * animate, the counters are live from /api/stats, and Root shows its live read.
  */
 
@@ -60,7 +60,7 @@ export function NetworkMap() {
       setCaps(n);
       setSt((s) => ({ ...s, core: r ? "online" : "down" }));
     });
-    // MCP surface (Claude Code / Cursor / Windsurf reach SIGNA through this)
+    // MCP surface (Claude Code / Cursor / Windsurf reach SIGDA through this)
     reachable("/api/mcp").then((r) => setSt((s) => ({ ...s, mcp: r && r.status < 500 ? "online" : "down" })));
     // A2A transport
     reachable("/api/a2a").then((r) => setSt((s) => ({ ...s, a2a: r && r.status < 500 ? "online" : "down" })));
@@ -144,7 +144,7 @@ export function NetworkMap() {
         .signa-hubglow { transform-origin:center; animation: signa-hub 3.2s ease-in-out infinite; }
       `}</style>
 
-      <svg viewBox="0 0 1000 660" className="w-full h-auto block" role="img" aria-label="SIGNA live network">
+      <svg viewBox="0 0 1000 660" className="w-full h-auto block" role="img" aria-label="SIGDA live network">
         <defs>
           <linearGradient id="signa-line" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#6ea2ff" /><stop offset="1" stopColor="#a98bff" />

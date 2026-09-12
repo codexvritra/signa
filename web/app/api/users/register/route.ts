@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Idempotent register. Called when a user enables XMTP via SIGNA so they
+ * Idempotent register. Called when a user enables XMTP via SIGDA so they
  * become tag-able in @mention autocomplete. Updates basename + ens_name
  * on subsequent calls. Requires a signature to prevent random scripts
  * filling the users table.

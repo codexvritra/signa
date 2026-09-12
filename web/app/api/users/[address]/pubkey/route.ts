@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
  *                                       { address, x25519_pubkey, ts, signature }
  *
  * The pubkey is deterministically derived client-side from an EIP-191
- * signature over the fixed preimage "SIGNA encryption key v1" — same
+ * signature over the fixed preimage "SIGDA encryption key v1" — same
  * wallet on any device produces the same X25519 keypair. The server
  * never sees the secret key.
  */

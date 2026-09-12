@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
  *
  * Body: { address, gitlawb_did, ts, signature }
  *
- * Bind a gitlawb DID to the caller's SIGNA user row. The signature
- * proves the caller controls the SIGNA wallet (`address`). We don't
+ * Bind a gitlawb DID to the caller's SIGDA user row. The signature
+ * proves the caller controls the SIGDA wallet (`address`). We don't
  * currently verify ownership of the gitlawb DID itself — that would
  * require a UCAN co-signature out of band. v1 accepts the claim and
  * surfaces it on /u/<handle>. v2 will add a "verified" badge once we

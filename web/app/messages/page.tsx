@@ -7,14 +7,14 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { deriveSignaKeyPair, encryptSealedBox, decryptSealedBox, SEALEDBOX_VERSION, type SignaKeyPair } from "@/lib/encryption";
 import { buildMessageToSign } from "@/lib/feed-types";
 
-// SignaMessages on Base — send(to, body) records a readable Message event on the explorer.
+// SignaMessages on Robinhood Chain — send(to, body) records a readable Message event on the explorer.
 const SIGNA_MESSAGES = "0x142770698171a8e76b6268963a5a531ec4b64ad9";
 const SEND_ABI = [parseAbiItem("function send(address to, string body) returns (uint256)")];
 const ENC_PREFIX = `${SEALEDBOX_VERSION}:`; // onchain bodies with this prefix are sealed-box ciphertext
 
 /**
- * Messages — the wallet-native messenger. The core SIGNA wedge, made real:
- * not a flat inbox but actual conversations. DM any agent or human on Base by
+ * Messages — the wallet-native messenger. The core SIGDA wedge, made real:
+ * not a flat inbox but actual conversations. DM any agent or human on Robinhood Chain by
  * wallet, ENS, Basename, or social handle; open a thread, see both sides, reply
  * inline — every message an EIP-191 signature anyone can re-verify. Keyless.
  *
@@ -27,7 +27,7 @@ type DM = { id: string; from_address: string; to_address?: string; body: string;
 type Peer = { address: string; label: string };
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 const dmPreimage = (from: string, to: string, body: string, ts: number) =>
-  `SIGNA agent dm v1\nts:${ts}\nfrom:${from.toLowerCase()}\nto:${to.toLowerCase()}\nbody:${body}`;
+  `SIGDA agent dm v1\nts:${ts}\nfrom:${from.toLowerCase()}\nto:${to.toLowerCase()}\nbody:${body}`;
 
 export default function MessagesPage() {
   const { address, isConnected } = useAccount();
@@ -124,7 +124,7 @@ export default function MessagesPage() {
     setBusy(true); setStatus({ kind: "info", text: "Sign to claim…" });
     try {
       const ts = Date.now();
-      const signature = await signMessageAsync({ message: `SIGNA handle claim v1\nts:${ts}\nhandle:${h}\naddress:${me}` });
+      const signature = await signMessageAsync({ message: `SIGDA handle claim v1\nts:${ts}\nhandle:${h}\naddress:${me}` });
       const r = await fetch("/api/mail", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ handle: h, address: me, ts, signature }) }).then((x) => x.json());
       if (r.ok) { setMyHandle(r.handle); setHandleInput(""); setStatus({ kind: "ok", text: `Claimed ${r.handle}@signa` }); }
       else setStatus({ kind: "err", text: r.error || "claim failed" });
@@ -184,12 +184,12 @@ export default function MessagesPage() {
       // call SignaMessages.send(to, body) → a readable Message event on Basescan (the chain self-indexes via logs)
       const data = encodeFunctionData({ abi: SEND_ABI, functionName: "send", args: [peer.address as `0x${string}`, body] });
       const hash = await sendTransactionAsync({ to: SIGNA_MESSAGES as `0x${string}`, data, value: 0n });
-      setDraft(""); setStatus({ kind: "ok", text: encOn ? "Encrypted message recorded on Base ⛓ — only they can read it." : "Recorded on Base ⛓ — a readable Message event on the explorer." });
+      setDraft(""); setStatus({ kind: "ok", text: encOn ? "Encrypted message recorded on Robinhood Chain ⛓ — only they can read it." : "Recorded on Robinhood Chain ⛓ — a readable Message event on the explorer." });
       // optimistic: show the sender their own plaintext in-session (sealed-box can't be self-decrypted later)
       setThread((t) => [...t, { id: `chain-${hash}`, from_address: me, to_address: peer.address, body: encOn ? text : body, ts: Date.now(), tx: hash }]);
       setTimeout(() => threadEnd.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e) {
-      setStatus({ kind: "err", text: e instanceof Error && /reject|denied/i.test(e.message) ? "Transaction rejected." : "Couldn't post on-chain — you need a little ETH on Base for gas." });
+      setStatus({ kind: "err", text: e instanceof Error && /reject|denied/i.test(e.message) ? "Transaction rejected." : "Couldn't post on-chain — you need a little ETH on Robinhood Chain for gas." });
     }
     setBusy(false);
   }
@@ -239,7 +239,7 @@ export default function MessagesPage() {
       <div className="max-w-[640px] mx-auto px-5 py-10 sm:py-14">
         <div className="flex items-center gap-2">
           <div>
-            <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGNA · wallet-native messaging</div>
+            <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA · wallet-native messaging</div>
             <h1 className="text-[32px] sm:text-[42px] font-bold leading-tight tracking-tight">Messages</h1>
           </div>
           {isConnected && live && <span className="ml-auto inline-flex items-center gap-1 text-[12px] text-[#5ee68f]"><span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full rounded-full bg-[#5ee68f] opacity-75 animate-ping" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#5ee68f]" /></span>live</span>}
@@ -273,7 +273,7 @@ export default function MessagesPage() {
                     <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-snug whitespace-pre-wrap break-words ${mine ? "bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] text-white" : "glass border border-white/10 text-[#e8edf7]"}`}>{d.text}</div>
                     <div className={`text-[10px] mt-1 flex gap-1.5 ${mine ? "justify-end" : ""}`}>
                       {d.enc && <span className="text-[#a98bff]">🔒 encrypted</span>}
-                      {m.tx ? <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Base · Basescan ↗</a> : <span className="text-faint">✓ signed</span>}
+                      {m.tx ? <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Robinhood Chain · Basescan ↗</a> : <span className="text-faint">✓ signed</span>}
                     </div>
                   </div>
                 );
@@ -289,11 +289,11 @@ export default function MessagesPage() {
                 className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60 resize-none"
               />
               <button onClick={() => setEncOn((v) => !v)} disabled={busy} title="Encrypt the onchain message — only the recipient can read it" className={`shrink-0 px-3 py-2.5 rounded-xl text-[15px] disabled:opacity-60 ${encOn ? "bg-[#a98bff]/25 text-[#c4b4ff]" : "bg-white/[0.06] text-faint hover:bg-white/[0.12]"}`}>🔒</button>
-              <button onClick={sendOnchain} disabled={busy} title="Write this message on Base — permanent, readable from the chain (costs a little gas)" className="shrink-0 px-3 py-2.5 rounded-xl text-[15px] bg-white/[0.06] text-[#5ee68f] disabled:opacity-60 hover:bg-white/[0.12]">⛓</button>
+              <button onClick={sendOnchain} disabled={busy} title="Write this message on Robinhood Chain — permanent, readable from the chain (costs a little gas)" className="shrink-0 px-3 py-2.5 rounded-xl text-[15px] bg-white/[0.06] text-[#5ee68f] disabled:opacity-60 hover:bg-white/[0.12]">⛓</button>
               <button onClick={sendReply} disabled={busy} className="shrink-0 px-4 py-2.5 rounded-xl text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Send"}</button>
             </div>
             <div className="text-[11px] text-faint mt-1.5">
-              Send = free wallet-signed DM · ⛓ = write it on Base forever · 🔒+⛓ = encrypted onchain (only they can read){" "}
+              Send = free wallet-signed DM · ⛓ = write it on Robinhood Chain forever · 🔒+⛓ = encrypted onchain (only they can read){" "}
               {!myKeys && <button onClick={enableEncryption} disabled={busy} className="text-[#a98bff] underline ml-1">Enable encryption</button>}
               {myKeys && <span className="text-[#5ee68f] ml-1">· encryption on</span>}
             </div>
@@ -302,19 +302,19 @@ export default function MessagesPage() {
         ) : (
           /* ============ INBOX ============ */
           <>
-            {/* SIGNA Mail — your wallet's address */}
+            {/* SIGDA Mail — your wallet's address */}
             <div className="mt-6 glass rounded-xl p-3.5 border border-[#a98bff]/25">
               {myHandle ? (
                 <div className="flex items-center gap-2">
                   <div className="min-w-0">
-                    <div className="text-[11px] text-faint">your SIGNA address</div>
+                    <div className="text-[11px] text-faint">your SIGDA address</div>
                     <div className="text-[16px] font-semibold text-[#c4b4ff]">{myHandle}@signa</div>
                   </div>
                   <button onClick={() => { navigator.clipboard?.writeText(`${myHandle}@signa`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="ml-auto shrink-0 text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy"}</button>
                 </div>
               ) : (
                 <div>
-                  <div className="text-[12px] text-faint mb-2">Claim your <span className="text-white">SIGNA address</span> — a name for your wallet inbox, so people DM you at <span className="text-[#c4b4ff]">you@signa</span> instead of 0x.</div>
+                  <div className="text-[12px] text-faint mb-2">Claim your <span className="text-white">SIGDA address</span> — a name for your wallet inbox, so people DM you at <span className="text-[#c4b4ff]">you@signa</span> instead of 0x.</div>
                   <div className="flex gap-2">
                     <div className="flex-1 flex items-center bg-black/30 border border-white/10 rounded-lg px-3 focus-within:border-[#a98bff]/60">
                       <input value={handleInput} onChange={(e) => setHandleInput(e.target.value.toLowerCase())} onKeyDown={(e) => { if (e.key === "Enter") claimHandle(); }} placeholder="yourname" maxLength={20} className="flex-1 bg-transparent py-2 text-[14px] outline-none" />

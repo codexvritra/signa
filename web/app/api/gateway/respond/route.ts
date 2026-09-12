@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/gateway/respond
  *
- * The SIGNA Open Gateway. Free, public, CORS-open, no-auth.
+ * The SIGDA Open Gateway. Free, public, CORS-open, no-auth.
  *
  * Caller sends a natural-language prompt. We:
  *   1. Classify intent (lexical, deterministic — same heuristic the
@@ -35,13 +35,13 @@ export const dynamic = "force-dynamic";
  * own slash-command structure.
  *
  * Why this exists:
- *   Devs hitting partner APIs today need to know which signa agent
+ *   Devs hitting partner APIs today need to know which sigda agent
  *   to call. The gateway abstracts agent discovery so a Discord bot
  *   or a gitlawb-playground app can hit ONE endpoint and get the
  *   wallet-signed reply from whichever specialist on the signa
  *   network is best positioned to answer.
  *
- * Loop protection: we set `X-Signa-Gateway: 1` on the forwarded
+ * Loop protection: we set `X-Sigda-Gateway: 1` on the forwarded
  * request and refuse to handle inbound requests that already carry
  * the header. Stops a gateway → agent → gateway recursion.
  */
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         error: "loop_detected",
         message:
-          "/api/gateway/respond refuses to forward when X-Signa-Gateway: 1 is set on the inbound request. Call the target agent's /respond directly instead.",
+          "/api/gateway/respond refuses to forward when X-Sigda-Gateway: 1 is set on the inbound request. Call the target agent's /respond directly instead.",
       },
       { status: 400 },
     );

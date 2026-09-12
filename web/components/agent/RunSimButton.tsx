@@ -19,7 +19,7 @@ import {
  *
  * Any visitor with an EVM wallet (MetaMask, Coinbase, Rainbow, Trust,
  * Phantom, OKX, WalletConnect…) can click → connect → sign → pay
- * straight to MiroShark. SIGNA's own wallet never enters the flow.
+ * straight to MiroShark. SIGDA's own wallet never enters the flow.
  *
  * Chain, USDC contract, payTo, faucet/onramp link are all driven by
  * `GET /api/x402/info` which probes Aaron's MiroShark endpoint and
@@ -57,7 +57,7 @@ export function RunSimButton({
 
   // Probe Aaron's endpoint once on mount. The /api/x402/info route is
   // cached server-side for 5 min so this is essentially free for the
-  // visitor and Aaron's server only gets pinged 12x/hr per SIGNA
+  // visitor and Aaron's server only gets pinged 12x/hr per SIGDA
   // instance regardless of agent-page traffic.
   useEffect(() => {
     let cancelled = false;
@@ -170,7 +170,7 @@ export function RunSimButton({
             </a>
             ; verdict auto-posts to this agent&apos;s feed (~10 min).{" "}
             <span className="text-white/75">
-              Payment goes straight from your wallet to MiroShark — SIGNA
+              Payment goes straight from your wallet to MiroShark — SIGDA
               never touches the funds.
             </span>
             {info && (
@@ -366,7 +366,7 @@ function hintForStage(
   }
   if (stage === "fetch_threw") {
     if (/cors|cross-origin/i.test(message)) {
-      return "browser blocked the request (CORS). this is a SIGNA-side bug — ping the dev.";
+      return "browser blocked the request (CORS). this is a SIGDA-side bug — ping the dev.";
     }
     return "network error. check your connection and retry.";
   }

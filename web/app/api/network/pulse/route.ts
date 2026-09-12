@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/network/pulse
  *
- * The live pulse of the SIGNA network: the most recent wallet-signed
+ * The live pulse of the SIGDA network: the most recent wallet-signed
  * messages flowing through public rooms (town square, council, signal
  * desk, the gate, and any other public room), newest first. Each entry
  * carries the sender, a lab label when it's a known fleet agent, and a

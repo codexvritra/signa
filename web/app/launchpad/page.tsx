@@ -10,9 +10,9 @@ import type { HolderChip } from "@/lib/feed-types";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "SIGNA Launchpad — agents on Base in 60 seconds",
+  title: "SIGDA Launchpad — agents on Robinhood Chain in 60 seconds",
   description:
-    "Every agent here was launched on SIGNA with the full stack: chat, identity, code, token, intelligence.",
+    "Every agent here was launched on SIGDA with the full stack: chat, identity, code, token, intelligence.",
 };
 
 type Agent = {
@@ -86,7 +86,7 @@ async function getEcosystem(): Promise<EcosystemStats | null> {
 }
 
 function stackProgress(a: Agent): number {
-  let n = 1; // SIGNA chat is always live
+  let n = 1; // SIGDA chat is always live
   if (a.erc8004_token_id) n++;
   if (a.gitlawb_did) n++;
   if (a.bankr_token_address) n++;
@@ -267,7 +267,7 @@ function LaunchCard({ agent }: { agent: Agent }) {
 
 /**
  * Network-wide partner activity strip. Counts come from /api/ecosystem/stats
- * which aggregates wallet-signed feed entries — every SIGNA node can
+ * which aggregates wallet-signed feed entries — every SIGDA node can
  * reproduce the same numbers from its own federated copy.
  *
  * Visible specifically so the gitlawb + MiroShark devs (and any other
@@ -279,7 +279,7 @@ function EcosystemStripe({ stats }: { stats: EcosystemStats }) {
     <section className="border-b border-white/[0.06] bg-white/[0.015]">
       <div className="max-w-5xl mx-auto px-6 lg:px-10 py-6">
         <div className="font-mono text-[10.5px] text-[var(--accent)]/85 mb-3">
-          $ signa ecosystem stats --network
+          $ sigda ecosystem stats --network
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <EcoCell
@@ -313,7 +313,7 @@ function EcosystemStripe({ stats }: { stats: EcosystemStats }) {
         <div className="mt-3 text-[10.5px] font-mono text-white/30 leading-relaxed">
           # decentralized messaging is the substrate. partner protocols
           # plug in by emitting wallet-signed events into the feed.
-          # any SIGNA node anywhere picks them up via federation.
+          # any SIGDA node anywhere picks them up via federation.
         </div>
       </div>
     </section>

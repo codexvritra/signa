@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/me/bankr-status?address=0x...
  *
- * Lightweight read used by the CLI (`signa bankr status`) and the
+ * Lightweight read used by the CLI (`sigda bankr status`) and the
  * web settings panel to tell whether a wallet has connected a Bankr
  * Agent API key.
  *

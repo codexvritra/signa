@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  *   - 0x address                          (0xabc…123)
  *   - CAIP-10                             (eip155:4663:0xabc…123)
  *   - ENS                                 (vitalik.eth)
- *   - SIGNA handle (ens on file)
+ *   - SIGDA handle (ens on file)
  *   - an A2A agent-card URL               (https://…/.well-known/agent-card.json)
  *
  * Returns:
@@ -37,7 +37,7 @@ export const dynamic = "force-dynamic";
  *     source
  *   }
  *
- * The core truth this encodes: on SIGNA, EVERY wallet is reachable — by a
+ * The core truth this encodes: on SIGDA, EVERY wallet is reachable — by a
  * wallet-signed DM and by A2A — with no API key. So resolving any
  * identifier to an address is the same as making it messageable.
  *
@@ -132,7 +132,7 @@ async function resolveAgentCard(
     });
     if (!r.ok) return null;
     const card: Record<string, unknown> = await r.json();
-    // SIGNA cards carry the wallet under metadata; any card carries `.url`.
+    // SIGDA cards carry the wallet under metadata; any card carries `.url`.
     const meta = (card.metadata ?? card) as Record<string, unknown>;
     const addrRaw =
       (meta["signa.address"] as string) ||
@@ -211,8 +211,8 @@ export async function GET(req: NextRequest) {
 
   // 4. social handle via Bankr — @handle, twitter:, x:, farcaster:, fc:
   //    This is the Bankr on-ramp: any social identity Bankr knows becomes
-  //    addressable on the SIGNA wire. Resolve the handle to a wallet and
-  //    every wallet already has a SIGNA inbox + A2A card.
+  //    addressable on the SIGDA wire. Resolve the handle to a wallet and
+  //    every wallet already has a SIGDA inbox + A2A card.
   if (!address) {
     let sType: "twitter" | "farcaster" | null = null;
     let sHandle: string | null = null;
@@ -254,7 +254,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 4.5 SIGNA Mail handle — you@signa / you.signa / a bare claimed handle.
+  // 4.5 SIGDA Mail handle — you@signa / you.signa / a bare claimed handle.
   //     Re-verified against the claim signature inside resolveHandle().
   if (!address) {
     const h = await resolveHandle(supabase, raw);
@@ -265,7 +265,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 5. name → reuse the battle-tested SIGNA resolver (ENS / Basename / handle)
+  // 5. name → reuse the battle-tested SIGDA resolver (ENS / Basename / handle)
   if (!address) {
     try {
       const r = await fetch(
@@ -299,7 +299,7 @@ export async function GET(req: NextRequest) {
         query: raw,
         error: "unresolvable",
         message:
-          "couldn't resolve this to a wallet. accepts 0x address, eip155:<chain>:0x…, ENS, a SIGNA handle, or an A2A agent-card URL.",
+          "couldn't resolve this to a wallet. accepts 0x address, eip155:<chain>:0x…, ENS, a SIGDA handle, or an A2A agent-card URL.",
       },
       { status: 404, headers: CORS },
     );
@@ -324,12 +324,12 @@ export async function GET(req: NextRequest) {
       on_signa: meta.on_signa,
       reachable_via,
       routes: {
-        // every wallet is reachable on SIGNA — no API key, no signup
+        // every wallet is reachable on SIGDA — no API key, no signup
         signa: {
           dm_url: `${origin}/api/agents/${address}/dm`,
           inbox_url: `${origin}/api/agents/${address}/inbox`,
         },
-        // and via A2A — SIGNA serves an agent card for any address
+        // and via A2A — SIGDA serves an agent card for any address
         a2a: {
           card_url: `${origin}/agent/${address}/.well-known/agent-card.json`,
           endpoint: `${origin}/api/a2a/agents/${address}`,

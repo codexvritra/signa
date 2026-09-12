@@ -31,11 +31,11 @@ const STEPS: Step[] = [
       href: "/me",
       icon: <ArrowRight className="size-3.5" />,
     },
-    prompt: "$ signa whoami",
+    prompt: "$ sigda whoami",
   },
   {
     num: 2,
-    title: "Find what's trending on Base.",
+    title: "Find what's trending on Robinhood Chain.",
     body:
       "Live trending + new-launch tokens from GeckoTerminal. Click any → see price, holders, recent activity, one-click trade via Bankr. Bookmark with ✦ — your watchlist follows you across devices.",
     cta: {
@@ -55,7 +55,7 @@ const STEPS: Step[] = [
       href: "/feed",
       icon: <Newspaper className="size-3.5" />,
     },
-    prompt: "$ signa feed",
+    prompt: "$ sigda feed",
   },
 ];
 

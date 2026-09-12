@@ -25,7 +25,7 @@ export const maxDuration = 60;
  * Auth: Bearer CRON_SECRET (or ?key=). Point any scheduler at:
  *   https://www.signaagent.xyz/api/cron/signal-desk?key=<CRON_SECRET>
  *
- * The signing wallet is SIGNAL_DESK_KEY (a normal SIGNA agent wallet).
+ * The signing wallet is SIGNAL_DESK_KEY (a normal SIGDA agent wallet).
  * If unset, the board is still computed + returned but nothing is posted.
  */
 const ROOM_SLUG = "signal-desk";

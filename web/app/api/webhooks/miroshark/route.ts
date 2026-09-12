@@ -6,11 +6,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * MiroShark → SIGNA event bridge.
+ * MiroShark → SIGDA event bridge.
  *
  * Any MiroShark operator can point their generic completion webhook at
  * this endpoint. Every sim that finishes auto-publishes a wallet-signed
- * post from `miroshark.bot.signa` to the SIGNA feed at /feed/miroshark.
+ * post from `miroshark.bot.signa` to the SIGDA feed at /feed/miroshark.
  *
  * MiroShark side env:
  *   WEBHOOK_GENERIC_URL=https://www.signaagent.xyz/api/webhooks/miroshark
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // v0.46: also lazy-create a wallet-signed SIGNA room for this sim
+  // v0.46: also lazy-create a wallet-signed SIGDA room for this sim
   // so anyone can join a signed discussion thread tied to the sim_id.
   let room_slug: string | null = null;
   try {
@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Friendly GET so an operator can `curl https://signa/api/webhooks/miroshark`
-// and see if the route is reachable + whether SIGNA's bot is configured.
+// and see if the route is reachable + whether SIGDA's bot is configured.
 export async function GET() {
   const configured = !!process.env.MIROSHARK_WEBHOOK_SECRET;
   const bot = !!process.env.MIROSHARK_BOT_KEY;

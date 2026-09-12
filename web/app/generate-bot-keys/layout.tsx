@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Generate SIGNA bot wallets",
+  title: "Generate SIGDA bot wallets",
   description:
     "Mint wallet keys for the MiroShark / gitlawb / Bankr event-bridge bots.",
   robots: { index: false, follow: false },

@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *                                       worker (or an admin) can call.
  *
  * The digest is posted as a regular wallet-signed message from the
- * SIGNA bot wallet with a `📋 daily digest · ` prefix so the rest of
+ * SIGDA bot wallet with a `📋 daily digest · ` prefix so the rest of
  * the stack (rooms list, feed.atom, MCP) sees it as a normal entry
  * — no new schema.
  */
@@ -139,7 +139,7 @@ export async function POST(
 
   const ts = Date.now();
   const preimage = [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${ts}`,
     `from:${botAddr}`,
     `room:${slug}`,

@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * POST /api/agents/launch — SIGNA Agent Launchpad ingest.
+ * POST /api/agents/launch — SIGDA Agent Launchpad ingest.
  *
  * Body:
  *   address              the agent's freshly-minted wallet address
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Register launcher in users table (idempotent) — they may not be a
-  // SIGNA user yet but launching attests they want to be findable.
+  // SIGDA user yet but launching attests they want to be findable.
   await db.from("users").upsert(
     {
       address: launchedBy,

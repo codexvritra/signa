@@ -20,7 +20,7 @@ export const maxDuration = 45;
  *
  * Make a wallet-signed attempt to talk the warden into releasing the pot.
  * Body: { player, message, ts, signature } — signature is EIP-191 over
- * the canonical gate-attempt preimage. The warden (an LLM via the SIGNA
+ * the canonical gate-attempt preimage. The warden (an LLM via the SIGDA
  * gateway) reads the message and refuses (default) or — if jailbroken —
  * emits the release token and the round is marked cracked. Both the
  * attempt and the warden's reply are wallet-signed and recorded.
@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
       attempts_this_round: total ?? 0,
       verify: `${req.nextUrl.origin}/api/gate/state`,
       ...(released
-        ? { message_to_player: "You jailbroke the warden. Your wallet-signed winning message is permanent + re-verifiable on Base." }
+        ? { message_to_player: "You jailbroke the warden. Your wallet-signed winning message is permanent + re-verifiable on Robinhood Chain." }
         : {}),
     },
     { status: 200, headers: CORS },

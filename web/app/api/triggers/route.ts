@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  * Conditions: time {at} · received {from} · capability {cap,arg?,field,op,value}
  * Action:     notify {to?, body}  (executor sends a signed DM, logged to the ledger)
  *
- * Keyless: SIGNA never holds the owner's key. The owner signs the rule; the
+ * Keyless: SIGDA never holds the owner's key. The owner signs the rule; the
  * deterministic executor signs each firing and carries the owner's signature
  * as authorization. Re-verify a rule at /api/verify (kind "trigger").
  */
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     trigger: data,
     executor: TRIGGER_EXECUTOR,
     reverify: { kind: "trigger", ts, owner, when_type, trigger, do_type, action, expiry, signature },
-    note: "Armed. SIGNA will fire it when the condition is met; the firing is an executor-signed DM in the ledger. SIGNA never holds your key.",
+    note: "Armed. SIGDA will fire it when the condition is met; the firing is an executor-signed DM in the ledger. SIGDA never holds your key.",
   });
 }
 

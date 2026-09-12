@@ -59,7 +59,7 @@ function buildRoomCreatePreimage(args: {
     );
   }
   return [
-    "SIGNA room create v1",
+    "SIGDA room create v1",
     `ts:${args.ts}`,
     `address:${args.address.toLowerCase()}`,
     `name:${args.name}`,
@@ -101,7 +101,7 @@ export function CreateRoomDialog() {
   const [error, setError] = useState<string | null>(null);
 
   // v0.53 — anchor flow: after the room is created we show the anchor
-  // CTA if the contract is deployed on Base. createdRoom holds the
+  // CTA if the contract is deployed on Robinhood Chain. createdRoom holds the
   // post-create state so the dialog can transition to the anchor view.
   const [anchorConfig, setAnchorConfig] = useState<AnchorConfig | null>(null);
   const [createdRoom, setCreatedRoom] = useState<CreatedRoom | null>(null);
@@ -177,7 +177,7 @@ export function CreateRoomDialog() {
     // Optional hold-to-chat gate. We send the human-readable min balance
     // through to the server which fetches real decimals on-chain — to
     // keep the signed preimage canonical we convert to raw uint256 here
-    // assuming 18 decimals (the standard for ERC-20s on Base / Ethereum).
+    // assuming 18 decimals (the standard for ERC-20s on Robinhood Chain / Ethereum).
     // The server cross-checks decimals on-chain but does NOT renegotiate
     // the gate amount; min is always treated as the raw uint256 the
     // signer committed to.
@@ -315,7 +315,7 @@ export function CreateRoomDialog() {
 
           <div className="text-[13px] text-white/65 leading-relaxed mb-4">
             <span className="text-white">#{createdRoom.slug}</span> is live and
-            wallet-signed. Anchor it on Base so federated nodes can verify
+            wallet-signed. Anchor it on Robinhood Chain so federated nodes can verify
             the room identity without trusting any one server.
           </div>
 
@@ -326,7 +326,7 @@ export function CreateRoomDialog() {
               </div>
               <div className="text-[12.5px] text-white/75 mb-2">
                 Your wallet broadcast the anchor() call. Once the tx
-                confirms, the room shows ANCHORED ON BASE on its header.
+                confirms, the room shows ANCHORED ON ROBINHOOD CHAIN on its header.
               </div>
               <a
                 href={`https://basescan.org/tx/${anchorTx}`}
@@ -340,7 +340,7 @@ export function CreateRoomDialog() {
           ) : (
             <div className="border border-white/10 rounded-sm bg-white/[0.02] p-4 mb-4">
               <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-2">
-                anchor on base · ~$0.01 gas
+                anchor on robinhood chain · ~$0.01 gas
               </div>
               <div className="text-[12.5px] text-white/65 leading-relaxed mb-3">
                 Your wallet calls{" "}
@@ -364,7 +364,7 @@ export function CreateRoomDialog() {
                   disabled={anchoring}
                   className="bg-[var(--accent)] text-black font-semibold rounded-sm px-4 py-2 text-[13px] hover:brightness-110 transition disabled:opacity-50 uppercase tracking-wide"
                 >
-                  {anchoring ? "signing tx…" : "anchor on base"}
+                  {anchoring ? "signing tx…" : "anchor on robinhood chain"}
                 </button>
                 <button
                   onClick={() => router.push(`/rooms/${createdRoom.slug}`)}

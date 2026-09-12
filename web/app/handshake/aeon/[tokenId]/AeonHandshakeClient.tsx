@@ -20,7 +20,7 @@ function buildAgentDmPreimage(args: {
   body: string;
 }) {
   return [
-    "SIGNA agent dm v1",
+    "SIGDA agent dm v1",
     `ts:${args.ts}`,
     `from:${args.from.toLowerCase()}`,
     `to:${args.to.toLowerCase()}`,
@@ -106,7 +106,7 @@ export function AeonHandshakeClient({ tokenId, recipient, defaultBody }: Props) 
         </div>
         <div className="text-[14.5px] text-white/85 mb-3">
           Wallet-signed DM delivered to ERC-8004 agent #{tokenId}. Their
-          owner wallet will see it in their SIGNA inbox.
+          owner wallet will see it in their SIGDA inbox.
         </div>
         <div className="text-[11px] font-mono text-white/45 break-all mb-4">
           dm id: {sentDm.id}
@@ -143,7 +143,7 @@ export function AeonHandshakeClient({ tokenId, recipient, defaultBody }: Props) 
         <div className="mb-4 p-3 border border-white/10 rounded-sm bg-white/[0.02] text-[12.5px] text-white/65">
           Connect a wallet to sign the handshake. The wallet that signs
           becomes the <code className="text-white/85">from</code>{" "}
-          address — your identity on SIGNA.
+          address — your identity on SIGDA.
           <div className="mt-2">
             <ConnectButton showBalance={false} />
           </div>

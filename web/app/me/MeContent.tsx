@@ -67,7 +67,7 @@ export function MeContent() {
       <section className="border-b border-white/[0.06]">
         <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-16 pb-16">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-            $ signa whoami
+            $ sigda whoami
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.035em] leading-[1.02]">
             connect to see your crypto.
@@ -354,7 +354,7 @@ export function MeContent() {
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-            $ signa watchlist
+            $ sigda watchlist
           </div>
           {watchlist.length === 0 ? (
             <div className="font-mono text-[12px] text-white/55">
@@ -407,7 +407,7 @@ export function MeContent() {
               <ActionRow
                 href="/tokens"
                 title="/tokens"
-                hint="trending + new launches on base"
+                hint="trending + new launches on robinhood chain"
               />
               <ActionRow
                 href="/holders/BNKR"

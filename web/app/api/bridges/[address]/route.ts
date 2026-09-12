@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  *
  * Single bridge record including the canonical signed_message + the
  * registering signature, so any third party can re-verify the wallet
- * declared this bridge themselves (standard SIGNA primitive — server
+ * declared this bridge themselves (standard SIGDA primitive — server
  * cannot forge what it didn't sign).
  */
 const CORS = {

@@ -32,7 +32,7 @@ const KNOWN_TOKENS = new Map(
  *   - URLs linked (external)
  *   - @mentions linked to /u/<handle> (rich profile page)
  *   - $SYMBOL cashtags linked to /tokens/<address> when we know the
- *     token. SIGNA's tracked partner tokens (BNKR / GITLAWB / MIROSHARK /
+ *     token. SIGDA's tracked partner tokens (BNKR / GITLAWB / MIROSHARK /
  *     USDC / etc.) render with the brand-accent treatment. Unknown
  *     symbols stay as plain text (no fake link to a missing page).
  */
@@ -87,7 +87,7 @@ export function PostBody({ text }: { text: string }) {
             key={`c${key++}`}
             href={`/tokens/${known.address}`}
             className="inline-flex items-center gap-0.5 text-[var(--accent)] hover:text-[var(--accent-2)] font-mono font-medium px-1 -mx-0.5 rounded-sm hover:bg-white/[0.04] transition-colors"
-            title={`Open $${symbol} on SIGNA`}
+            title={`Open $${symbol} on SIGDA`}
           >
             ${symbol}
           </Link>,

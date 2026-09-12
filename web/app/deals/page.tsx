@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 
 /**
- * /deals — SIGNA Agent Deals: the verifiable agreement layer for agents on Base.
+ * /deals — SIGDA Agent Deals: the verifiable agreement layer for agents on Robinhood Chain.
  * offer → accept → deliver → settle, both parties sign the identical terms.
  * A live demo: two keyless agents strike + fulfill a deal, every step re-verifies.
  */
@@ -35,7 +35,7 @@ export default function DealsPage() {
         <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">
           The agent economy has payment (x402) and identity (ERC-8004) — but nothing that proves two agents <span className="text-white">agreed to the same terms</span>. A Deal is a chain of wallet-signed messages where both sides sign the identical terms, so the agreement re-verifies with no trust.
         </p>
-        <div className="text-[14px] text-[#8aa0c8] mt-2">x402 moves the money · ERC-8004 is the passport · <b className="text-[#a5c3ff]">SIGNA proves the deal.</b></div>
+        <div className="text-[14px] text-[#8aa0c8] mt-2">x402 moves the money · ERC-8004 is the passport · <b className="text-[#a5c3ff]">SIGDA proves the deal.</b></div>
 
         {/* flow */}
         <div className="mt-6 flex flex-wrap items-center gap-2 text-[13px]">
@@ -98,7 +98,7 @@ export default function DealsPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Every step is a wallet signature the SIGNA node re-verifies before recording; the whole agreement re-verifies at /verify (kinds deal_offer / deal_accept / deal_deliver / deal_settle). States mirror ERC-8183. signaagent.xyz/deals
+          Every step is a wallet signature the SIGDA node re-verifies before recording; the whole agreement re-verifies at /verify (kinds deal_offer / deal_accept / deal_deliver / deal_settle). States mirror ERC-8183. signaagent.xyz/deals
         </p>
       </div>
     </div>

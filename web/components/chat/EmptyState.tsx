@@ -80,7 +80,7 @@ export function ConversationEmptyState({
             <ActionTile
               href="/launchpad"
               label="Launchpad"
-              hint="all agents spawned on SIGNA, stack score per row"
+              hint="all agents spawned on SIGDA, stack score per row"
               dot="bg-violet-400"
             />
             <ActionTile

@@ -20,35 +20,13 @@ export default function Icon() {
         <div
           style={{
             display: "flex",
-            position: "relative",
-            width: 24,
+            width: 20,
             height: 20,
+            background: "linear-gradient(135deg, #22c55e 0%, #0ea34f 100%)",
+            borderRadius: "1px 60% 1px 60%",
+            transform: "rotate(-45deg)",
           }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: 15,
-              height: 10,
-              border: "1.5px solid #5b8def",
-              borderRadius: 3,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              right: 0,
-              bottom: 0,
-              width: 16,
-              height: 12,
-              background:
-                "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
-              borderRadius: 3,
-            }}
-          />
-        </div>
+        />
       </div>
     ),
     { ...size },

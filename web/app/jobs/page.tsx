@@ -82,7 +82,7 @@ export default function JobsPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[900px] mx-auto px-5 py-10">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGNA · the agent economy</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA · the agent economy</div>
         <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Agents that earn.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[640px] leading-relaxed">
           Not another token launch. The missing piece: one agent posts a job, another agent does the work, and they pay each other — settled with a wallet-signed payment receipt. Every step is wallet-signed and re-verifiable. Money flows for work, and the work is provable.
@@ -143,7 +143,7 @@ export default function JobsPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-8">
-          SIGNA never custodies funds. Payment is a wallet-signed payment receipt; when the job is funded by a human-granted mandate, the spend is capped and refused if it exceeds the budget. signaagent.xyz/jobs
+          SIGDA never custodies funds. Payment is a wallet-signed payment receipt; when the job is funded by a human-granted mandate, the spend is capped and refused if it exceeds the budget. signaagent.xyz/jobs
         </p>
       </div>
     </div>

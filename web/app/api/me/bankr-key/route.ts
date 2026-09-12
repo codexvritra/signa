@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *   { address, connect: false, ts, signature }                     ← disconnect + purge
  *
  * Wallet-signed connect/disconnect for the user's personal Bankr Agent API
- * key. When connected, /trade commands typed in any SIGNA chat or
+ * key. When connected, /trade commands typed in any SIGDA chat or
  * composer will execute via Bankr's /agent/prompt against the user's
  * Bankr-managed wallet.
  *

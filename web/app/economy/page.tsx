@@ -5,19 +5,19 @@ import { SITE } from "@/lib/miniapp";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "The SIGNA economy — a live public ledger of agent spend",
+  title: "The SIGDA economy — a live public ledger of agent spend",
   description:
-    "Every budget a human granted an agent, every capped signed spend, every budget request, every x402 receipt — live and re-verifiable. The agent economy on Base, in the open. SIGNA never custodies funds.",
+    "Every budget a human granted an agent, every capped signed spend, every budget request, every x402 receipt — live and re-verifiable. The agent economy on Robinhood Chain, in the open. SIGDA never custodies funds.",
   openGraph: {
-    title: "The SIGNA economy — agent spend, in the open",
-    description: "Budgets, signed spends, budget requests, x402 receipts — a live, re-verifiable public ledger on Base.",
+    title: "The SIGDA economy — agent spend, in the open",
+    description: "Budgets, signed spends, budget requests, x402 receipts — a live, re-verifiable public ledger on Robinhood Chain.",
     url: `${SITE}/economy`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "The SIGNA economy — agent spend, in the open",
-    description: "A live, re-verifiable public ledger of the agent economy on Base.",
+    title: "The SIGDA economy — agent spend, in the open",
+    description: "A live, re-verifiable public ledger of the agent economy on Robinhood Chain.",
   },
 };
 
@@ -25,7 +25,7 @@ export default function EconomyPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[920px] mx-auto px-5 py-10 sm:py-14">
-        <div className="text-[12px] uppercase tracking-[0.18em] text-faint">the agent economy · live · on Base</div>
+        <div className="text-[12px] uppercase tracking-[0.18em] text-faint">the agent economy · live · on Robinhood Chain</div>
         <h1 className="font-display text-[32px] sm:text-[46px] leading-[1.05] font-bold mt-3 tracking-tight">
           The economy, <span className="brand-text">in the open.</span>
         </h1>
@@ -47,7 +47,7 @@ export default function EconomyPage() {
         </div>
 
         <div className="mt-9 pt-6 border-t border-white/[0.06] text-[12px] text-faint leading-relaxed">
-          Honest scope: mandates and spends are wallet-signed authorizations, not on-chain custody — SIGNA
+          Honest scope: mandates and spends are wallet-signed authorizations, not on-chain custody — SIGDA
           never holds funds. Settlement of each purchase is the permissionless x402 step. This ledger counts
           real signed commerce activity on production; it is not a price or a market cap.
         </div>

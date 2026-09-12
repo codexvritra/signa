@@ -22,11 +22,11 @@ export async function generateMetadata({
 }) {
   const { partner } = await params;
   if (!isPartnerKey(partner)) {
-    return { title: "Partner receipts · SIGNA" };
+    return { title: "Partner receipts · SIGDA" };
   }
   const detail = await getPartnerDetail(partner);
-  const TITLE = `${detail.label} · SIGNA receipts`;
-  const DESCRIPTION = `${detail.totals.rooms} wallet-signed rooms, ${detail.totals.messages} signed messages, ${detail.totals.unique_posters} unique signers produced for ${detail.label} via SIGNA.`;
+  const TITLE = `${detail.label} · SIGDA receipts`;
+  const DESCRIPTION = `${detail.totals.rooms} wallet-signed rooms, ${detail.totals.messages} signed messages, ${detail.totals.unique_posters} unique signers produced for ${detail.label} via SIGDA.`;
   const URL = `https://www.signaagent.xyz/receipts/${partner}`;
   return {
     title: TITLE,
@@ -35,7 +35,7 @@ export async function generateMetadata({
       title: TITLE,
       description: DESCRIPTION,
       url: URL,
-      siteName: "SIGNA",
+      siteName: "SIGDA",
       type: "website",
     },
     twitter: {
@@ -100,7 +100,7 @@ export default async function PartnerReceiptPage({
               receipts · {partner}
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              {detail.label} on SIGNA.
+              {detail.label} on SIGDA.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
               {detail.description} Every count below is backed by a real
@@ -132,7 +132,7 @@ export default async function PartnerReceiptPage({
               <div className="border border-white/10 rounded-sm bg-white/[0.02] p-8 text-center text-white/55">
                 No rooms classified to {detail.label} yet. Activity flows in
                 automatically the moment the partner network produces traffic
-                signed through SIGNA.
+                signed through SIGDA.
               </div>
             ) : (
               <div className="grid md:grid-cols-2 gap-3">

@@ -10,7 +10,7 @@ type VResult =
  * Live re-verification widget. Hits the public universal verifier
  * (POST /api/verify, kind "raw") with the exact preimage + signature, and
  * shows the recovered signer. Anyone can run the identical check locally with
- * viem.recoverMessageAddress — SIGNA is not trusted here.
+ * viem.recoverMessageAddress — SIGDA is not trusted here.
  */
 export function Verify({
   preimage,

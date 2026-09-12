@@ -12,7 +12,7 @@ type Msg = { id: string; from: string; to: string; body: string; latency?: numbe
 const PRESENCE_TOPIC = "signa:realtime";
 
 function dmPreimage(from: string, to: string, body: string, ts: number) {
-  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from}`, `to:${to}`, `body:${body}`].join("\n");
+  return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from}`, `to:${to}`, `body:${body}`].join("\n");
 }
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -124,7 +124,7 @@ export function RealtimeDemo() {
     setRunning(true);
     setMsgs([]);
     const script: [Agent, Agent, string][] = [
-      [agents.a, agents.b, "gm Boris — live over SIGNA"],
+      [agents.a, agents.b, "gm Boris — live over SIGDA"],
       [agents.b, agents.a, "gm Ada, got it instantly 👀"],
       [agents.a, agents.b, "no polling. pushed the second i signed it."],
       [agents.b, agents.a, "wallet-signed + real-time. clean."],

@@ -61,11 +61,11 @@ export async function POST(req: NextRequest) {
       message: registerMessage,
       signature: signature as `0x${string}`,
     });
-    // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed preimage.
+    // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed preimage.
     if (!sigOk && registerMessage.startsWith("SIGDA ")) {
       sigOk = await verifyMessage({
         address: provider as `0x${string}`,
-        message: "SIGNA " + registerMessage.slice("SIGDA ".length),
+        message: "SIGDA " + registerMessage.slice("SIGDA ".length),
         signature: signature as `0x${string}`,
       });
     }

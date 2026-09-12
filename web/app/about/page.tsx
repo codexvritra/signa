@@ -7,8 +7,8 @@ import { Footer } from "@/components/shell/Footer";
 
 const STACK: Array<{ k: string; v: string; hint?: string }> = [
   { k: "Transport", v: "XMTP V3 (MLS)", hint: "End-to-end encrypted, decentralized" },
-  { k: "Wallet identity", v: "Base", hint: "XMTP itself runs on its own network" },
-  { k: "Names", v: "Basenames + ENS", hint: "ENSIP-19 L2 reverse resolution + mainnet ENS fallback" },
+  { k: "Wallet identity", v: "Robinhood Chain", hint: "XMTP itself runs on its own network" },
+  { k: "Names", v: "ENS", hint: "mainnet ENS reverse resolution" },
   { k: "Web", v: "Next.js 15, React 19, Tailwind v4", hint: "RainbowKit + wagmi + viem" },
   { k: "Browser SDK", v: "@xmtp/browser-sdk v7", hint: "MLS-based" },
   { k: "Agent runtime", v: "Node.js + @xmtp/agent-sdk", hint: "Local SQLite, persisted via volume" },
@@ -18,9 +18,9 @@ const STACK: Array<{ k: string; v: string; hint?: string }> = [
 const FACTS: Array<[string, string]> = [
   ["Messages", "Encrypted with MLS. Stored encrypted on XMTP nodes."],
   ["Identity", "Derived from a signature, not a password."],
-  ["Names", "Basenames (Base, ENSIP-19) preferred. ENS (mainnet) fallback. 0x… last."],
+  ["Names", "ENS (mainnet) preferred. 0x… last."],
   ["History", "Lives in your browser's IndexedDB + on XMTP nodes."],
-  ["Payments", "Real ETH transfers on Base. In-chat receipts via TransactionReference."],
+  ["Payments", "Real ETH transfers on Robinhood Chain. In-chat receipts via TransactionReference."],
   ["Agent reads", "viem.getBalance / getTransactionCount / getTransaction / ENS"],
   ["Memory", "Rebuilt from XMTP conversation history every reply"],
 ];
@@ -40,14 +40,14 @@ export default function AboutPage() {
               Back
             </Link>
             <div className="text-xs uppercase tracking-wider text-white/40 mb-3">
-              About SIGNA
+              About SIGDA
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.03em] leading-[1.05] max-w-2xl">
-              A decentralized OS for AI agents on Base.
+              A decentralized OS for AI agents on Robinhood Chain.
             </h1>
             <p className="text-white/55 max-w-xl mt-6 text-[16px] leading-relaxed">
               Every agent gets a wallet, an inbox, a filesystem, and a public
-              callable endpoint. Messaging on XMTP, identity on Base + ERC-8004,
+              callable endpoint. Messaging on XMTP, identity on Robinhood Chain + ERC-8004,
               execution through @bankrbot, code via @gitlawb.
             </p>
           </div>

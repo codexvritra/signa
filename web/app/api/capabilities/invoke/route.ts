@@ -27,19 +27,19 @@ export const maxDuration = 30;
  * Invoke a capability and get back a WALLET-SIGNED, verifiable result. Two
  * kinds of capability resolve through the same endpoint:
  *
- *  - built-ins SIGNA fulfils from real partner sources (Bankr, Root Edge)
+ *  - built-ins SIGDA fulfils from real partner sources (Bankr, Root Edge)
  *  - capabilities any developer registered with one wallet-signed call
  *    (the open marketplace) — proxied through an SSRF-guarded fetch
  *
- * Either way the SIGNA capability gateway signs an attestation over
+ * Either way the SIGDA capability gateway signs an attestation over
  * (cap, input, provider, ts, sha256(output)). Anyone re-verifies it against
  * the gateway address with viem — the result is tamper-evident; no trust in
- * SIGNA required. Keyless: the caller needs no API key.
+ * SIGDA required. Keyless: the caller needs no API key.
  *
  * Optional pricing rides x402: a provider may price a registered capability,
  * in which case this endpoint behaves as a non-custodial x402 resource server
  * — it returns a 402 challenge, verifies the presented Permit2 witness-transfer
- * authorization pays the provider, then fulfils. SIGNA never settles and never
+ * authorization pays the provider, then fulfils. SIGDA never settles and never
  * holds funds.
  */
 const CORS = {
@@ -57,7 +57,7 @@ const gateway = privateKeyToAccount(keccak256(toBytes("signa:capability-gateway:
 
 function resultPreimage(cap: string, input: string, provider: string, ts: number, output: unknown): string {
   const outHash = createHash("sha256").update(JSON.stringify(output)).digest("hex");
-  return ["SIGNA capability result v1", `cap:${cap}`, `input:${input}`, `provider:${provider}`, `ts:${ts}`, `output:${outHash}`].join("\n");
+  return ["SIGDA capability result v1", `cap:${cap}`, `input:${input}`, `provider:${provider}`, `ts:${ts}`, `output:${outHash}`].join("\n");
 }
 
 async function signedResult(cap: string, input: string, provider: string, source: string, output: unknown, extra: Record<string, unknown> = {}) {
@@ -103,7 +103,7 @@ function capPrice(payTo: string, priceUsdc: number): InboxPrice {
 }
 
 async function run(cap: string, arg: string, paymentHeader: string | null, resource: string) {
-  // 1. built-in capability — fulfilled by the SIGNA gateway from a real source
+  // 1. built-in capability — fulfilled by the SIGDA gateway from a real source
   const meta = CAPABILITY_CATALOG.find((c) => c.name === cap);
   if (meta) {
     let output: unknown;
@@ -117,10 +117,10 @@ async function run(cap: string, arg: string, paymentHeader: string | null, resou
 
   // 2. registered capability — off-chain (one signature) OR on-chain (trustless,
   //    read straight from Base). Off-chain is checked first; on-chain is the
-  //    fallback so a capability registered only on Base is still callable here.
+  //    fallback so a capability registered only on Robinhood Chain is still callable here.
   const rec = (await getRegistered(cap)) ?? (await getOnchainCapability(cap));
   if (rec) {
-    // optional x402 pricing — non-custodial. SIGNA verifies, never settles.
+    // optional x402 pricing — non-custodial. SIGDA verifies, never settles.
     let payment: { payer: string; amount_raw: string; asset: string } | undefined;
     if (rec.price_usdc > 0) {
       const payTo = rec.pay_to ?? rec.provider_address;
@@ -146,7 +146,7 @@ async function run(cap: string, arg: string, paymentHeader: string | null, resou
     void bumpCalls(cap); // best-effort usage counter
     return signedResult(cap, arg, rec.provider_address, new URL(rec.endpoint).host, output, {
       kind: "registered",
-      ...(payment ? { payment, settlement: "the provider settles the x402 authorization out of band; SIGNA does not custody funds" } : {}),
+      ...(payment ? { payment, settlement: "the provider settles the x402 authorization out of band; SIGDA does not custody funds" } : {}),
     });
   }
 

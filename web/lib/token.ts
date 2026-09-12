@@ -1,9 +1,12 @@
 /**
- * Canonical SIGNA links + token contract. One source of truth so the X handle
- * and the $SIGNA contract address render identically everywhere (footer,
- * metadata, etc.). The contract is shown factually — not financial advice.
+ * Canonical Sigda links + the real $SIGNA token contract. One source of
+ * truth so the X handle and the $SIGNA contract address render identically
+ * everywhere (footer, metadata, etc.). The contract is shown factually —
+ * not financial advice. The token's own symbol/chain are immutable facts
+ * about an already-deployed contract, not brand text — they stay as-is
+ * regardless of the Sigda product rebrand.
  */
-export const SIGNA = {
+export const SIGDA = {
   x: {
     handle: "@Signa_Agent",
     url: "https://x.com/Signa_Agent",
@@ -17,4 +20,4 @@ export const SIGNA = {
 } as const;
 
 /** Short form for compact display, e.g. footers. */
-export const SIGNA_CA_SHORT = `${SIGNA.token.address.slice(0, 6)}…${SIGNA.token.address.slice(-4)}`;
+export const SIGDA_CA_SHORT = `${SIGDA.token.address.slice(0, 6)}…${SIGDA.token.address.slice(-4)}`;

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SIGNA } from "@/lib/token";
+import { SIGDA } from "@/lib/token";
 import { ContractBadge } from "@/components/shell/ContractBadge";
 
 export function Footer() {
@@ -8,8 +8,8 @@ export function Footer() {
       <div className="max-w-5xl mx-auto px-6 lg:px-10 py-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 text-xs text-white/40">
         <div className="flex items-center gap-4">
           <span>© {new Date().getFullYear()} Sigda</span>
-          <a href={SIGNA.x.url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-            {SIGNA.x.handle}
+          <a href={SIGDA.x.url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+            {SIGDA.x.handle}
           </a>
         </div>
         <ContractBadge />

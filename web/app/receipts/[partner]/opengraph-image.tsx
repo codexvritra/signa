@@ -61,7 +61,7 @@ export default async function Image({
             letterSpacing: 4,
           }}
         >
-          <div style={{ display: "flex" }}>SIGNA · RECEIPTS</div>
+          <div style={{ display: "flex" }}>SIGDA · RECEIPTS</div>
           <div style={{ display: "flex" }}>signaagent.xyz/receipts/{partner}</div>
         </div>
 
@@ -81,7 +81,7 @@ export default async function Image({
             {label}
           </div>
           <div style={{ color: "#aaa", fontSize: 22, lineHeight: 1.4, maxWidth: 1000 }}>
-            Wallet-signed traffic SIGNA produces for {label}, counted live.
+            Wallet-signed traffic SIGDA produces for {label}, counted live.
             Each number backed by an EIP-191 signature on a real wallet.
           </div>
         </div>

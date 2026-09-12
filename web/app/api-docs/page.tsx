@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
 /**
- * /api-docs — developer portal for the SIGNA public API.
+ * /api-docs — developer portal for the SIGDA public API.
  *
  * Polished, scrollable docs page. Distinct from /syscalls (which stays
  * as the dense manpage registry). /api-docs is the front door for
@@ -25,7 +25,7 @@ const ENDPOINTS = [
   {
     group: "MCP — Model Context Protocol",
     intro:
-      "Install SIGNA as a native tool palette in Claude Desktop, Cursor, Cline, or any MCP-aware AI client. One config line and every signa-launched agent becomes callable from the IDE.",
+      "Install SIGDA as a native tool palette in Claude Desktop, Cursor, Cline, or any MCP-aware AI client. One config line and every signa-launched agent becomes callable from the IDE.",
     rows: [
       {
         method: "POST",
@@ -44,7 +44,7 @@ const ENDPOINTS = [
   {
     group: "OpenAI-compat (v1)",
     intro:
-      "Drop-in replacement for the OpenAI SDK. Set your client baseURL to /api/v1 and SIGNA becomes the model provider — no API key needed. Streaming (stream: true) and tool/function-calling (tools[]) are supported. Wallet-signed replies + source citations are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Real-time SSE event stream available at /api/v1/events.",
+      "Drop-in replacement for the OpenAI SDK. Set your client baseURL to /api/v1 and SIGDA becomes the model provider — no API key needed. Streaming (stream: true) and tool/function-calling (tools[]) are supported. Wallet-signed replies + source citations are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Real-time SSE event stream available at /api/v1/events.",
     rows: [
       {
         method: "POST",
@@ -105,7 +105,7 @@ const ENDPOINTS = [
         method: "POST",
         path: "/api/gateway/respond",
         summary: "Open natural-language router",
-        body: '{ "prompt": "what is the price of $USDC on base?" }',
+        body: '{ "prompt": "what is the price of $USDC on robinhood chain?" }',
       },
       {
         method: "GET",
@@ -175,7 +175,7 @@ const ENDPOINTS = [
       {
         method: "GET",
         path: "/api/users/search",
-        summary: "Search SIGNA-registered users",
+        summary: "Search SIGDA-registered users",
         query: "?q=v",
       },
     ],
@@ -253,7 +253,7 @@ export default function ApiDocsPage() {
     null,
   );
   const [tryPrompt, setTryPrompt] = useState(
-    "price of $USDC on base 0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    "price of $USDC on robinhood chain 0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
   );
   const [tryReply, setTryReply] = useState<string | null>(null);
   const [tryBusy, setTryBusy] = useState(false);
@@ -331,7 +331,7 @@ export default function ApiDocsPage() {
             <p className="mt-6 text-white/65 max-w-xl text-[17px] leading-relaxed">
               Every mutating endpoint is gated by an EIP-191 wallet
               signature. Every read is CORS-open. Spin up a wallet on
-              Base in 30 seconds and you can build on SIGNA from any
+              Base in 30 seconds and you can build on SIGDA from any
               backend, any browser, any agent runtime. The same spec
               powers Claude Desktop, Cursor, Windsurf, and every
               partner integration on this network.
@@ -638,13 +638,13 @@ const BROWSER_SNIPPET = `<!-- Drop the SDK into any HTML page with one script ta
   <title>my signa app</title>
 </head>
 <body>
-  <input id="q" placeholder="ask a signa agent..." />
+  <input id="q" placeholder="ask a sigda agent..." />
   <button onclick="ask()">send</button>
   <pre id="out"></pre>
 
   <script src="https://www.signaagent.xyz/signa.js"></script>
   <script>
-    // window.signa is a default Signa() instance pointing at production.
+    // window.signa is a default Sigda() instance pointing at production.
     async function ask() {
       const reply = await signa.gateway.respond({
         prompt: document.getElementById("q").value,
@@ -670,7 +670,7 @@ const BROWSER_SNIPPET = `<!-- Drop the SDK into any HTML page with one script ta
   };
 </script>`;
 
-const MCP_SNIPPET = `// SIGNA ships an MCP (Model Context Protocol) server.
+const MCP_SNIPPET = `// SIGDA ships an MCP (Model Context Protocol) server.
 // Install once, every signa-launched agent becomes callable from
 // Claude Desktop, Cursor, Cline, or any MCP-aware AI client.
 
@@ -691,7 +691,7 @@ const MCP_SNIPPET = `// SIGNA ships an MCP (Model Context Protocol) server.
   "transport": "http"
 }
 
-// Restart the client. SIGNA's tools appear in the tool palette:
+// Restart the client. SIGDA's tools appear in the tool palette:
 //   signa_ask              — query the agent network
 //   signa_ask_agent        — call one specific agent
 //   signa_list_agents      — enumerate the network
@@ -704,7 +704,7 @@ const MCP_SNIPPET = `// SIGNA ships an MCP (Model Context Protocol) server.
 // from signa_ask carry the EIP-191 signature so the client can
 // verify the agent actually said what they're showing the user.`;
 
-const OPENAI_SNIPPET = `// SIGNA is OpenAI-API-compatible. Use the official SDK, swap one line.
+const OPENAI_SNIPPET = `// SIGDA is OpenAI-API-compatible. Use the official SDK, swap one line.
 import OpenAI from "openai";
 
 const ai = new OpenAI({
@@ -715,13 +715,13 @@ const ai = new OpenAI({
 const completion = await ai.chat.completions.create({
   model: "signa-gateway",   // auto-routes to the best specialist agent
   messages: [
-    { role: "user", content: "what is the price of $USDC on base?" },
+    { role: "user", content: "what is the price of $USDC on robinhood chain?" },
   ],
 });
 
 console.log(completion.choices[0].message.content);
 
-// SIGNA extension — verifiable proof + cited sources, attached to
+// SIGDA extension — verifiable proof + cited sources, attached to
 // every response. Strict OpenAI clients ignore unknown top-level fields,
 // so this is purely additive.
 console.log(completion.signa.signed);          // true
@@ -733,14 +733,14 @@ console.log(completion.signa.permalink);       // shareable URL with OG card
 const direct = await ai.chat.completions.create({
   model: "signa-agent",
   messages: [{ role: "user", content: "build me a dashboard" }],
-  // @ts-expect-error — SIGNA extension. OpenAI SDKs forward unknown fields.
+  // @ts-expect-error — SIGDA extension. OpenAI SDKs forward unknown fields.
   agent_address: "0x000000000000000000000000000000000000a9e1",
 });
 
 // Streaming works (SSE per OpenAI spec):
 const stream = await ai.chat.completions.create({
   model: "signa-gateway",
-  messages: [{ role: "user", content: "price of $USDC on base?" }],
+  messages: [{ role: "user", content: "price of $USDC on robinhood chain?" }],
   stream: true,
 });
 for await (const chunk of stream) {
@@ -774,7 +774,7 @@ const res = await fetch("https://www.signaagent.xyz/api/gateway/respond", {
   method: "POST",
   headers: { "content-type": "application/json" },
   body: JSON.stringify({
-    prompt: "what is the price of $USDC on base?",
+    prompt: "what is the price of $USDC on robinhood chain?",
   }),
 });
 
@@ -787,7 +787,7 @@ console.log("permalink:", data.gateway.permalink);`;
 const CURL_SNIPPET = `# No auth. No API key. CORS open.
 curl -X POST https://www.signaagent.xyz/api/gateway/respond \\
   -H "content-type: application/json" \\
-  -d '{"prompt":"what is the price of $USDC on base?"}'
+  -d '{"prompt":"what is the price of $USDC on robinhood chain?"}'
 
 # Returns:
 # {
@@ -806,12 +806,12 @@ curl -X POST https://www.signaagent.xyz/api/gateway/respond \\
 
 const SDK_SNIPPET = `// First-party typed SDK. Copy lib/sdk.ts into your project — no
 // dependencies. Soon to be on npm as @signa/sdk.
-import { Signa } from "./signa-sdk";
+import { Sigda } from "./signa-sdk";
 
-const signa = new Signa();
+const signa = new Sigda();
 
 const reply = await signa.gateway.respond({
-  prompt: "what is the price of $USDC on base?",
+  prompt: "what is the price of $USDC on robinhood chain?",
 });
 
 console.log(reply.response);

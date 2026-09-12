@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "nodejs";
-export const alt = "SIGNA Brain — an agent's own brain, decentralized and keyless";
+export const alt = "SIGDA Brain — an agent's own brain, decentralized and keyless";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -127,7 +127,7 @@ export function DmAgentPanel({
       // buildMessageToSign("agent_dm") exactly. Common path: text body,
       // default protocol, no reply, no body_type override.
       const message = [
-        "SIGNA agent dm v1",
+        "SIGDA agent dm v1",
         `ts:${ts}`,
         `from:${from}`,
         `to:${to}`,
@@ -176,7 +176,7 @@ export function DmAgentPanel({
       >
         <div className="flex items-baseline gap-3">
           <span className="font-mono text-[11px] text-violet-300/90">
-            $ signa a2a send
+            $ sigda a2a send
           </span>
           <span className="text-[12.5px] text-white/80">
             Message {agentName} directly · wallet-signed
@@ -190,16 +190,16 @@ export function DmAgentPanel({
       {open && (
         <div className="border-t border-white/[0.06] px-4 py-3 space-y-3">
           <div className="text-[11px] text-white/55 leading-relaxed">
-            Send a wallet-signed DM to this agent over the SIGNA{" "}
+            Send a wallet-signed DM to this agent over the SIGDA{" "}
             <a
               href="/a2a"
               className="text-violet-300/95 hover:underline underline-offset-4"
             >
               A2A protocol
             </a>
-            . No SIGNA account needed — your wallet is your identity.
+            . No SIGDA account needed — your wallet is your identity.
             The DM lands in the agent&apos;s inbox immediately and federates
-            across every SIGNA node.
+            across every SIGDA node.
           </div>
 
           {!isConnected && (

@@ -12,11 +12,11 @@ export const dynamic = "force-dynamic";
  * Body: { address, prompt, ts, signature }
  *
  * Executes a natural-language trade via the user's connected Bankr
- * Agent API key. SIGNA acts only as the relay — Bankr handles the
+ * Agent API key. SIGDA acts only as the relay — Bankr handles the
  * actual swap against the user's Bankr-managed wallet.
  *
  * Flow:
- *   1. Verify the SIGNA wallet signature (proves the caller is the
+ *   1. Verify the SIGDA wallet signature (proves the caller is the
  *      account-holder, not someone spoofing the address field)
  *   2. Decrypt the stored Bankr key via the AES-256-GCM vault
  *   3. POST { prompt } to https://api.bankr.bot/agent/prompt → jobId
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   // Verify a fresh signature over the prompt + ts so a stolen request
   // can't be replayed against a different prompt.
   const message = [
-    `SIGNA trade v1`,
+    `SIGDA trade v1`,
     `ts:${ts}`,
     `address:${address}`,
     `prompt:${prompt}`,
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
       {
         error: "bankr_not_connected",
         message:
-          "Connect your Bankr Agent API key on /me first. Without it, SIGNA has nothing to send to Bankr.",
+          "Connect your Bankr Agent API key on /me first. Without it, SIGDA has nothing to send to Bankr.",
       },
       { status: 412 },
     );

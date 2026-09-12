@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  *   ?parent=<post id>    fetch replies for a given post
  *   ?viewer=<addr>       optional, populates liked_by_me
  *   ?mentions=<addr>     posts that text-mention this 0x address — the
- *                         "inbox" primitive used by `signa inbox`. Matches
+ *                         "inbox" primitive used by `sigda inbox`. Matches
  *                         on content ILIKE '%<addr>%' (case-insensitive)
  *                         so both `@0xABC` and `0xabc` style mentions hit.
  */
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Resolve mentions → registered addresses. Skip ones that aren't on SIGNA.
+  // Resolve mentions → registered addresses. Skip ones that aren't on SIGDA.
   const { rawTokens } = extractMentions(content);
   if (rawTokens.length > 0) {
     const { data: matched } = await db

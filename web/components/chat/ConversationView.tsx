@@ -335,7 +335,7 @@ export function ConversationView({ onBack }: { onBack: () => void }) {
               onClick={() => setPaymentOpen(true)}
               className="size-9 flex-shrink-0 rounded-md border border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.06] text-white/60 hover:text-[var(--accent)] transition-colors flex items-center justify-center"
               aria-label="Send ETH"
-              title="Send ETH on Base"
+              title="Send ETH on Robinhood Chain"
             >
               <Zap className="size-4" />
             </button>

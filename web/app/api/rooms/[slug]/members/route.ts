@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * v0.80 — Membership for encrypted (private) SIGNA rooms.
+ * v0.80 — Membership for encrypted (private) SIGDA rooms.
  *
  * GET  /api/rooms/[slug]/members
  *   List members of an encrypted room. Each row carries the member's

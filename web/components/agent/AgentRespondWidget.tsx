@@ -36,7 +36,7 @@ const PRESETS: { cmd: string; prompt: string }[] = [
   {
     cmd: "/facts",
     prompt:
-      "price of $USDC on base 0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "price of $USDC on robinhood chain 0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
   },
   { cmd: "/code", prompt: "build me a single-html dashboard for base trending tokens" },
   { cmd: "/swarm", prompt: "simulate 1000 wallets buying $AEON over 24h" },
@@ -71,7 +71,7 @@ export function AgentRespondWidget({
     try {
       const ts = Date.now();
       const messageToSign = [
-        "SIGNA rate v1",
+        "SIGDA rate v1",
         `ts:${ts}`,
         `interaction:${reply.interaction_id}`,
         `rating:${next}`,
@@ -242,7 +242,7 @@ export function AgentRespondWidget({
                 </a>
 
                 {/* Rating row — only visible to wallet-connected raters.
-                    Signed with a `SIGNA rate v1` envelope so anyone can
+                    Signed with a `SIGDA rate v1` envelope so anyone can
                     audit the rater later (PATCH /api/interactions/:id). */}
                 {connectedAddress ? (
                   <span className="ml-auto flex items-center gap-3">

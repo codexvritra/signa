@@ -13,7 +13,7 @@ export default function OG() {
           height: "100%",
           background: "#0a0a0f",
           backgroundImage:
-            "radial-gradient(ellipse 60% 50% at 90% 0%, rgba(91, 141, 239, 0.18), transparent 60%), radial-gradient(ellipse 50% 40% at 10% 110%, rgba(139, 92, 246, 0.14), transparent 60%)",
+            "radial-gradient(ellipse 60% 50% at 90% 0%, rgba(34, 197, 94, 0.18), transparent 60%), radial-gradient(ellipse 50% 40% at 10% 110%, rgba(14, 163, 79, 0.14), transparent 60%)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
@@ -26,35 +26,13 @@ export default function OG() {
           <div
             style={{
               display: "flex",
-              position: "relative",
-              width: 36,
+              width: 30,
               height: 30,
+              background: "linear-gradient(135deg, #22c55e 0%, #0ea34f 100%)",
+              borderRadius: "2px 60% 2px 60%",
+              transform: "rotate(-45deg)",
             }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: 23,
-                height: 15,
-                border: "2px solid #5b8def",
-                borderRadius: 4,
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                right: 0,
-                bottom: 0,
-                width: 25,
-                height: 18,
-                background:
-                  "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
-                borderRadius: 4,
-              }}
-            />
-          </div>
+          />
           <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.4 }}>
             Sigda
           </div>
@@ -88,7 +66,7 @@ export default function OG() {
               <span
                 style={{
                   background:
-                    "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
+                    "linear-gradient(135deg, #22c55e 0%, #0ea34f 100%)",
                   backgroundClip: "text",
                   color: "transparent",
                 }}

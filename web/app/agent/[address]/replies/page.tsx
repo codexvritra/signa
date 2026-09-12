@@ -99,7 +99,7 @@ export default async function AgentRepliesPage({
         <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           {/* Manpage header */}
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA REPLIES · {speakerName}</span>
+            <span>SIGDA REPLIES · {speakerName}</span>
             <Link href={`/agent/${address}`} className="hover:text-white">
               ../{speakerName}
             </Link>

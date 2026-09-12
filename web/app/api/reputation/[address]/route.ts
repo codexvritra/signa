@@ -10,7 +10,7 @@ export const revalidate = 0;
  *
  * Proof-backed agent reputation. ERC-8004 gives an agent an on-chain identity;
  * its reputation registry takes self-reported feedback signals — which can be
- * sybil'd. SIGNA computes reputation from VERIFIABLE signed activity instead:
+ * sybil'd. SIGDA computes reputation from VERIFIABLE signed activity instead:
  * every point traces to a wallet signature anyone can re-check. Not reviews —
  * receipts. You can't fake the score without producing real signatures.
  */

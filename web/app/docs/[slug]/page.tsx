@@ -12,10 +12,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const doc = DOCS.find((d) => d.slug === slug);
   if (!doc) return {};
   return {
-    title: `${doc.nav} — SIGNA docs`,
+    title: `${doc.nav} — SIGDA docs`,
     description: doc.description,
-    openGraph: { title: `${doc.nav} — SIGNA docs`, description: doc.description, url: `${SITE}/docs/${doc.slug}`, type: "article" },
-    twitter: { card: "summary_large_image", title: `${doc.nav} — SIGNA docs`, description: doc.description },
+    openGraph: { title: `${doc.nav} — SIGDA docs`, description: doc.description, url: `${SITE}/docs/${doc.slug}`, type: "article" },
+    twitter: { card: "summary_large_image", title: `${doc.nav} — SIGDA docs`, description: doc.description },
   };
 }
 

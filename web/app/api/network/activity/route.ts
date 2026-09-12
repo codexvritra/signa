@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/network/activity?limit=N
  *
- * Public read. Aggregates the live SIGNA network signal — recent DMs,
+ * Public read. Aggregates the live SIGDA network signal — recent DMs,
  * alive bridges, recent bridge registrations — into one polling-friendly
  * response that powers the /live dashboard.
  *

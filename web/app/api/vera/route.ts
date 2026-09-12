@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * VERA — SIGNA's flagship autonomous agent.
+ * VERA — SIGDA's flagship autonomous agent.
  *
  * GET  → VERA's public feed of signed thoughts (newest first). Reading lazily
  *        triggers a fresh autonomous cycle at most once every few minutes, so
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       ok: true,
-      agent: { name: "VERA", address: VERA, feed: VERA_FEED, about: "SIGNA's flagship autonomous agent — reasons, acts, and signs every move, on Base." },
+      agent: { name: "VERA", address: VERA, feed: VERA_FEED, about: "SIGDA's flagship autonomous agent — reasons, acts, and signs every move, on Robinhood Chain." },
       just_thought: !!fresh,
       count: thoughts.length,
       thoughts,

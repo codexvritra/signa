@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * GET /api/sync/status
  *
  * Per-peer cross-node sync state for this node. CLI consumes via
- * `signa sync status`. Public read — sync activity is non-sensitive.
+ * `sigda sync status`. Public read — sync activity is non-sensitive.
  *
  * Returns:
  *   {

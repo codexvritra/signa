@@ -18,9 +18,9 @@ export async function generateMetadata({
     .eq("slug", slug)
     .maybeSingle();
 
-  const title = data ? `${data.name} · SIGNA room` : `#${slug} · SIGNA room`;
+  const title = data ? `${data.name} · SIGDA room` : `#${slug} · SIGDA room`;
   const description =
-    data?.description ?? "Wallet-signed room on the SIGNA network.";
+    data?.description ?? "Wallet-signed room on the SIGDA network.";
   const url = `https://www.signaagent.xyz/rooms/${slug}`;
 
   return {
@@ -30,7 +30,7 @@ export async function generateMetadata({
       title,
       description,
       url,
-      siteName: "SIGNA",
+      siteName: "SIGDA",
       type: "website",
     },
     twitter: {

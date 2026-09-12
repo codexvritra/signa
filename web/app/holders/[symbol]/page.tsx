@@ -57,8 +57,8 @@ export async function generateMetadata({
   const { symbol: rawSym } = await params;
   const symbol = rawSym.toUpperCase();
   return {
-    title: `$${symbol} holders on SIGNA`,
-    description: `Every SIGNA user currently holding $${symbol}. Wallet-native, on-chain verified.`,
+    title: `$${symbol} holders on SIGDA`,
+    description: `Every SIGDA user currently holding $${symbol}. Wallet-native, on-chain verified.`,
   };
 }
 
@@ -90,13 +90,13 @@ export default async function HoldersPage({
               ../directory
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa holders ${symbol}
+              $ sigda holders ${symbol}
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.035em] leading-[1.02]">
-              ${symbol} holders on SIGNA.
+              ${symbol} holders on SIGDA.
             </h1>
             <p className="text-white/65 max-w-lg mt-5 text-[15px] leading-relaxed">
-              every SIGNA-registered wallet currently holding{" "}
+              every SIGDA-registered wallet currently holding{" "}
               <span className="text-white">{token.name}</span> on @base.
               on-chain verified, sorted by balance. DM any of them with one
               click — your wallet is your identity.
@@ -139,7 +139,7 @@ export default async function HoldersPage({
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
             {holders.length === 0 ? (
               <div className="border border-dashed border-white/15 px-6 py-10 font-mono text-[12px] text-white/55 max-w-xl">
-                <div className="text-white/85 mb-2">{`>`} no SIGNA users hold ${symbol} yet.</div>
+                <div className="text-white/85 mb-2">{`>`} no SIGDA users hold ${symbol} yet.</div>
                 <div className="text-white/40 mb-3">
                   {`>`} be first — buy on Bankr, then revisit this page.
                 </div>
@@ -173,7 +173,7 @@ export default async function HoldersPage({
             {holders.length > 0 && (
               <div className="mt-3 text-[11px] text-white/35 font-mono">
                 {holders.length} holder{holders.length === 1 ? "" : "s"} ·
-                scanned the most recent 500 registered SIGNA users · live
+                scanned the most recent 500 registered SIGDA users · live
                 on-chain balances
               </div>
             )}

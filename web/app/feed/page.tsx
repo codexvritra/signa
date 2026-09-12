@@ -35,7 +35,7 @@ export default function FeedPage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-10 pb-14">
           {/* Manpage header */}
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA FEED</span>
+            <span>SIGDA FEED</span>
             <Link href="/" className="hover:text-white">
               ..
             </Link>
@@ -47,7 +47,7 @@ export default function FeedPage() {
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-feed — wallet-signed posts on base
+              signa-feed — wallet-signed posts on robinhood chain
             </div>
           </section>
 

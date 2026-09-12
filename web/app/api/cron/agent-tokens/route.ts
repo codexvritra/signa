@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 /**
  * Agent → token auto-detector.
  *
- * For every launched SIGNA agent whose `bankr_token_address` is still
- * null, look at the agent's tx history on Base. If we find a contract
+ * For every launched SIGDA agent whose `bankr_token_address` is still
+ * null, look at the agent's tx history on Robinhood Chain. If we find a contract
  * creation, verify it looks like an ERC-20 (has `symbol()` + `decimals()`
  * + `totalSupply()`), then record the token contract on the agent row.
  *

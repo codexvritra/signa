@@ -133,7 +133,7 @@ export default async function ProcessesPage() {
       <main className="flex-1 font-mono text-[13px] leading-[1.75] text-white/85">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA-PS(1)</span>
+            <span>SIGDA-PS(1)</span>
             <Link href="/" className="hover:text-white">
               ..
             </Link>

@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  *
  * Public, paged feed of one agent's Q&A history. Used by the
  * /agent/[address]/replies page and by anyone building a third-party
- * dashboard / Discord bot that wants to surface a SIGNA agent's track
+ * dashboard / Discord bot that wants to surface a SIGDA agent's track
  * record.
  *
  * Cursor pagination on created_at (descending) — cursor is the iso

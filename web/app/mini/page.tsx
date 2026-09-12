@@ -5,11 +5,11 @@ import { HOME_EMBED_IMAGE, MINIAPP, miniAppEmbedMeta } from "@/lib/miniapp";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sign a message on Base",
+  title: "Sign a message on Robinhood Chain",
   description:
-    "One tap, no account. Sign a message on Base with your wallet — re-verifiable by anyone. The SIGNA message layer, made simple.",
+    "One tap, no account. Sign a message on Robinhood Chain with your wallet — re-verifiable by anyone. The SIGDA message layer, made simple.",
   openGraph: {
-    title: "SIGNA — sign a message on Base",
+    title: "SIGDA — sign a message on Robinhood Chain",
     description: "Wallet-signed, re-verifiable messages. One tap, no account.",
     url: MINIAPP.homeUrl,
     images: [{ url: HOME_EMBED_IMAGE, width: 1200, height: 800 }],
@@ -17,12 +17,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SIGNA — sign a message on Base",
+    title: "SIGDA — sign a message on Robinhood Chain",
     description: "Wallet-signed, re-verifiable messages. One tap, no account.",
     images: [HOME_EMBED_IMAGE],
   },
   // The Mini App embed: makes this URL render as an interactive card in-feed.
-  other: miniAppEmbedMeta(HOME_EMBED_IMAGE, MINIAPP.homeUrl, "Sign on Base"),
+  other: miniAppEmbedMeta(HOME_EMBED_IMAGE, MINIAPP.homeUrl, "Sign on Robinhood Chain"),
 };
 
 export default function MiniPage() {

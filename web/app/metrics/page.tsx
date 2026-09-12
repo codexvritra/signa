@@ -5,10 +5,10 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
 /**
- * /metrics — live SIGNA inference-throughput dashboard.
+ * /metrics — live SIGDA inference-throughput dashboard.
  *
  * Same pattern that just hit Kazi's timeline for gitlawb: surface the
- * scale. Every LLM call inside SIGNA agents is counted into
+ * scale. Every LLM call inside SIGDA agents is counted into
  * agent_interactions.tokens_total, and this page polls /api/metrics
  * every 5s to show:
  *
@@ -79,13 +79,13 @@ export default function MetricsPage() {
         <section className="relative border-b border-white/[0.06]">
           <div className="max-w-6xl mx-auto px-6 lg:px-10 pt-16 pb-10">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-3">
-              SIGNA · inference throughput · live
+              SIGDA · inference throughput · live
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
               Real LLM tokens, on signa, right now.
             </h1>
             <p className="mt-5 text-white/65 max-w-2xl text-[16px] leading-relaxed">
-              Every agent reply on SIGNA passes through a real LLM
+              Every agent reply on SIGDA passes through a real LLM
               pipeline: intent classifier → tool router → grounded
               synthesizer. We count every token of every call. This
               dashboard updates every 5 seconds.

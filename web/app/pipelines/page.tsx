@@ -3,23 +3,23 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { PipelineDemo } from "./PipelineDemo";
 
-const TITLE = "SIGNA Signed Pipelines · verifiable multi-provider agent runs on Base";
+const TITLE = "SIGDA Signed Pipelines · verifiable multi-provider agent runs on Robinhood Chain";
 const DESCRIPTION =
-  "Compose capabilities from different providers into one run that emits a single wallet-signed, hash-chained provenance chain — every step's provider, input, and output linked and independently re-verifiable with viem. Provenance, not correctness. Keyless, on Base.";
+  "Compose capabilities from different providers into one run that emits a single wallet-signed, hash-chained provenance chain — every step's provider, input, and output linked and independently re-verifiable with viem. Provenance, not correctness. Keyless, on Robinhood Chain.";
 const URL = "https://www.signaagent.xyz/pipelines";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
 
-// honest competitive read (research-validated). Each is real; none ships our exact thing on Base.
+// honest competitive read (research-validated). Each is real; none ships our exact thing on Robinhood Chain.
 const NEAREST = [
   { sys: "Virtuals ACP", note: "job chaining with per-job, trust-based human/agent evaluation — not a cryptographic re-verifiable chain", color: "#ffd84d" },
-  { sys: "Microsoft Agent Toolkit", note: "Ed25519 hash-chained receipts across handoffs — off-chain, enterprise, no wallet or payment binding, not on Base", color: "#9ad7ff" },
+  { sys: "Microsoft Agent Toolkit", note: "Ed25519 hash-chained receipts across handoffs — off-chain, enterprise, no wallet or payment binding, not on Robinhood Chain", color: "#9ad7ff" },
   { sys: "IETF intent-chain draft", note: "specifies a Merkle output→input chain — draft only, unimplemented, not blockchain", color: "#7af0a8" },
 ];
 
@@ -57,7 +57,7 @@ export default function PipelinesPage() {
             </p>
             <p className="mt-4 text-[13px] text-white/45 max-w-2xl mx-auto">
               As far as we can tell this is the first wallet-signed (EIP-191), viem-re-verifiable provenance chain across
-              independent capability providers on Base. It proves <span className="text-white/70">provenance, not
+              independent capability providers on Robinhood Chain. It proves <span className="text-white/70">provenance, not
               correctness</span>: who answered and in what order, not that the answer is true.
             </p>
           </div>
@@ -131,13 +131,13 @@ export default function PipelinesPage() {
               </div>
               <div className="border border-white/10 rounded-lg bg-white/[0.02] p-5">
                 <div className="text-white font-medium mb-1.5">Keyless + non-custodial, not &quot;decentralized&quot;</div>
-                SIGNA orchestrates the run, so this is not trustless consensus. What is trustless is the proof: every
-                link is wallet-signed and re-verifiable by anyone with viem, no trust in SIGNA required. Priced steps go
+                SIGDA orchestrates the run, so this is not trustless consensus. What is trustless is the proof: every
+                link is wallet-signed and re-verifiable by anyone with viem, no trust in SIGDA required. Priced steps go
                 through x402 directly; the pipeline never custodies funds.
               </div>
             </div>
             <div className="mt-5 text-[12.5px] text-white/45 leading-relaxed max-w-2xl">
-              Nearest analogs, named honestly — none ships this on Base:
+              Nearest analogs, named honestly — none ships this on Robinhood Chain:
               <div className="mt-3 space-y-2">
                 {NEAREST.map((n) => (
                   <div key={n.sys} className="flex gap-3"><span className="font-mono text-[12px] shrink-0" style={{ color: n.color }}>{n.sys}</span><span>{n.note}</span></div>

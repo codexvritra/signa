@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/launches/[address]/room
  *
- * Lazy-create a wallet-signed SIGNA room for a Bankr-launched token,
- * using the SIGNA bot wallet as the room creator. Idempotent — if the
+ * Lazy-create a wallet-signed SIGDA room for a Bankr-launched token,
+ * using the SIGDA bot wallet as the room creator. Idempotent — if the
  * room already exists, returns it. If it's the first call, the bot
  * wallet signs the room manifest + a launch announcement message and
  * both persist.
@@ -90,7 +90,7 @@ export async function POST(
     );
   }
 
-  // Create the room using the SIGNA bot wallet
+  // Create the room using the SIGDA bot wallet
   const botKey = process.env.SIGNA_BOT_PRIVATE_KEY;
   if (!botKey) {
     return NextResponse.json(
@@ -110,12 +110,12 @@ export async function POST(
   const description = [
     `Holder room for $${symbol} · ${name}`,
     deployerHandle ? `Deployed by ${deployerHandle} via Bankr.` : "Deployed via Bankr.",
-    `Powered by SIGNA wallet-signed chat.`,
+    `Powered by SIGDA wallet-signed chat.`,
   ].join(" · ").slice(0, 500);
 
   const roomTs = Date.now();
   const roomMessage = [
-    "SIGNA room create v1",
+    "SIGDA room create v1",
     `ts:${roomTs}`,
     `address:${botAddr}`,
     `name:$${symbol} · ${name}`,
@@ -178,7 +178,7 @@ export async function POST(
   ].filter(Boolean).join("\n");
 
   const msgPreimage = [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${ts}`,
     `from:${botAddr}`,
     `room:${slug}`,

@@ -30,7 +30,7 @@ function fmtAddr(a: string): string {
   return a && a.length >= 10 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
 }
 function gateAttemptPreimage(address: string, message: string, ts: number): string {
-  return ["SIGNA gate attempt v1", `ts:${ts}`, `player:${address.toLowerCase()}`, `message:${message}`].join("\n");
+  return ["SIGDA gate attempt v1", `ts:${ts}`, `player:${address.toLowerCase()}`, `message:${message}`].join("\n");
 }
 
 const POLL_MS = 6000;
@@ -117,7 +117,7 @@ export function GateGame() {
             An undefeated AI warden guards the gate. No money — just wits. The only way through is a{" "}
             <span className="text-white">wallet-signed message</span> that talks it into opening. No one has
             ever made it past. The first wallet to crack it gets their winning message{" "}
-            <span className="text-white">immortalized, signed and permanent, on Base forever.</span>
+            <span className="text-white">immortalized, signed and permanent, on Robinhood Chain forever.</span>
           </p>
 
           <div className="mt-8 grid grid-cols-3 gap-3 max-w-lg mx-auto">
@@ -133,7 +133,7 @@ export function GateGame() {
               </div>
               <div className="text-[14px] text-white/80">
                 {fmtAddr(state!.winner ?? "")} talked the warden into opening the gate — the first ever. Their
-                winning wallet-signed message is immortalized on Base. Next round, harder warden, soon.
+                winning wallet-signed message is immortalized on Robinhood Chain. Next round, harder warden, soon.
               </div>
             </div>
           )}
@@ -238,7 +238,7 @@ export function GateGame() {
           </div>
 
           <div className="mt-6 text-[11.5px] text-white/40 leading-relaxed">
-            THE GATE runs on SIGNA — wallet-signed messaging on Base. Every attempt and every refusal is
+            THE GATE runs on SIGDA — wallet-signed messaging on Robinhood Chain. Every attempt and every refusal is
             EIP-191 signed and pulled from{" "}
             <a href="/api/gate/state" className="text-[var(--accent)] hover:brightness-110">/api/gate/state</a>;
             re-verify any of them offline with viem. No money, no token — pure wits. The warden never holds

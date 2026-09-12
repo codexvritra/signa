@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  *
  * Read one DM by uuid. Returns the full record including the canonical
  * signed_message + signature so any third party can re-verify the
- * wallet signature locally (the standard SIGNA primitive — server
+ * wallet signature locally (the standard SIGDA primitive — server
  * cannot forge what it didn't sign).
  *
  * Public, CORS-open.

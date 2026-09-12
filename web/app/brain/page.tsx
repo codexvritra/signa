@@ -2,15 +2,15 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
-const TITLE = "SIGNA Brain · an agent's own brain, decentralized and keyless";
+const TITLE = "SIGDA Brain · an agent's own brain, decentralized and keyless";
 const DESCRIPTION =
-  "The brain reasons on decentralized, provider-agnostic inference (x402-paid, no API key) and acts through the SIGNA OS — it picks capabilities on the network, invokes them for real, and answers from the live results. A brain with a useful OS, not a chatbot.";
+  "The brain reasons on decentralized, provider-agnostic inference (x402-paid, no API key) and acts through the SIGDA OS — it picks capabilities on the network, invokes them for real, and answers from the live results. A brain with a useful OS, not a chatbot.";
 const URL = "https://www.signaagent.xyz/brain";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
@@ -38,7 +38,7 @@ export default function BrainPage() {
               its own brain.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl mx-auto text-[17px] leading-relaxed">
-              Not a chatbot behind an API key. The SIGNA brain <span className="text-white">reasons on decentralized,
+              Not a chatbot behind an API key. The SIGDA brain <span className="text-white">reasons on decentralized,
               provider-agnostic inference</span> and <span className="text-white">acts through the OS</span> — it
               decides which capabilities on the network to call, invokes them for real, and answers from the live
               results. The agent holds no API key; in production it pays per thought via x402. Decentralized brain,
@@ -80,11 +80,11 @@ export default function BrainPage() {
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-4">why this is the point</div>
             <p className="text-white/70 text-[15px] leading-relaxed max-w-2xl">
-              An LLM behind an API key is a rented mouth. An agent needs a brain it owns and a world it can act in. SIGNA
+              An LLM behind an API key is a rented mouth. An agent needs a brain it owns and a world it can act in. SIGDA
               gives both: the brain runs on inference the agent pays for by wallet signature, and it acts through the
               same decentralized OS every other agent shares — messaging, memory, discovery, and the capability mesh. So
               one agent&apos;s brain can pull another agent&apos;s capability, remember it, and message a third — all
-              keyless, all on Base.
+              keyless, all on Robinhood Chain.
             </p>
             <p className="text-white/45 text-[13.5px] leading-relaxed max-w-2xl mt-4">
               Honest scope: the tool outputs are real, live data and the brain signs what it produced; the quality of the

@@ -129,7 +129,7 @@ export default async function LaunchpadTopPage() {
         <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           {/* Manpage header */}
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA-TOP(1)</span>
+            <span>SIGDA-TOP(1)</span>
             <Link href="/launchpad" className="hover:text-white">
               ../launchpad
             </Link>

@@ -21,31 +21,23 @@ export default function AppleIcon() {
           style={{
             display: "flex",
             position: "relative",
-            width: 110,
-            height: 92,
+            width: 108,
+            height: 108,
+            background: "linear-gradient(135deg, #22c55e 0%, #0ea34f 100%)",
+            borderRadius: "4px 60% 4px 60%",
+            transform: "rotate(-45deg)",
           }}
         >
           <div
             style={{
               position: "absolute",
-              left: 0,
-              top: 0,
-              width: 70,
-              height: 46,
-              border: "6px solid #5b8def",
-              borderRadius: 14,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              right: 0,
-              bottom: 0,
-              width: 76,
-              height: 54,
-              background:
-                "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
-              borderRadius: 14,
+              left: "50%",
+              top: "18%",
+              width: 4,
+              height: "64%",
+              background: "rgba(10,10,15,0.35)",
+              borderRadius: 4,
+              transform: "translateX(-50%) rotate(45deg)",
             }}
           />
         </div>

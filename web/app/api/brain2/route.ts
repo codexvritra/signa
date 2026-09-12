@@ -11,9 +11,9 @@ export const maxDuration = 60;
  * GET/POST { goal, max_steps? } → a multi-step ReAct run: the brain thinks,
  * picks one tool from the keyless capability mesh, observes, and repeats toward
  * the goal, then answers. Returns the full step trace + the answer. Reasons on
- * SIGNA's decentralized inference; acts through real, live capabilities.
+ * SIGDA's decentralized inference; acts through real, live capabilities.
  *
- * This powers VERA (/api/vera), SIGNA's flagship autonomous agent.
+ * This powers VERA (/api/vera), SIGDA's flagship autonomous agent.
  */
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "GET, POST, OPTIONS", "access-control-allow-headers": "content-type" } as const;
 export function OPTIONS() { return new NextResponse(null, { status: 204, headers: CORS }); }

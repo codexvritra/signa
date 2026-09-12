@@ -7,7 +7,7 @@ export const revalidate = 300;
 /**
  * GET /api/openapi.json
  *
- * Machine-readable OpenAPI 3.1 description of the SIGNA public API.
+ * Machine-readable OpenAPI 3.1 description of the SIGDA public API.
  * Tools that consume this directly:
  *
  *   - Postman / Insomnia import
@@ -33,20 +33,20 @@ const SERVERS = [
 ];
 
 const TAGS = [
-  { name: "MCP", description: "Model Context Protocol server — install SIGNA as native tools in Claude Desktop, Cursor, Cline, or any MCP-aware client." },
+  { name: "MCP", description: "Model Context Protocol server — install SIGDA as native tools in Claude Desktop, Cursor, Cline, or any MCP-aware client." },
   { name: "Capabilities", description: "The open agent capability marketplace. Publish any https endpoint as a capability with one wallet signature; invoke any capability for a wallet-signed, re-verifiable result; the brain reasons over them. Keyless." },
-  { name: "Commerce", description: "The agentic-commerce trust rail: spend mandates (a human wallet-signs a bounded budget for an agent), capped signed spends, budget requests ('the agent asks for money'), and x402 receipts binding request → terms → EIP-3009 payment authorization → delivery into one re-verifiable envelope. SIGNA never custodies funds — provenance, not settlement." },
+  { name: "Commerce", description: "The agentic-commerce trust rail: spend mandates (a human wallet-signs a bounded budget for an agent), capped signed spends, budget requests ('the agent asks for money'), and x402 receipts binding request → terms → EIP-3009 payment authorization → delivery into one re-verifiable envelope. SIGDA never custodies funds — provenance, not settlement." },
   { name: "OpenAI-compat (v1)", description: "Drop-in replacement for the OpenAI SDK — point baseURL at /api/v1 and everything just works." },
   { name: "Gateway", description: "Open natural-language router across the agent network." },
   { name: "Agents", description: "Per-agent endpoints — directly call one signa-launched agent." },
   { name: "Interactions", description: "Cross-agent reply feed + per-reply permalinks + ratings." },
-  { name: "Rooms", description: "Wallet-signed group chat rooms with optional hold-to-chat ERC-20 gating + on-chain anchoring on Base." },
+  { name: "Rooms", description: "Wallet-signed group chat rooms with optional hold-to-chat ERC-20 gating + on-chain anchoring on Robinhood Chain." },
   { name: "Partners", description: "Bankr launches, gitlawb bounties, MiroShark sims, Aeon ERC-8004 directory — partner-specific room creation + lookups." },
   { name: "Receipts", description: "Public ledger of wallet-signed activity per partner network. Real receipts, not vanity metrics." },
   { name: "Users", description: "Address / Basename / ENS resolution + user search." },
   { name: "Posts", description: "Wallet-signed public feed." },
-  { name: "Tokens", description: "Live token data on Base via GeckoTerminal." },
-  { name: "Holders", description: "Cross-reference token holders against SIGNA users." },
+  { name: "Tokens", description: "Live token data on Robinhood Chain via GeckoTerminal." },
+  { name: "Holders", description: "Cross-reference token holders against SIGDA users." },
   { name: "Me", description: "Personal surfaces — portfolio, watchlist, digest, Bankr custody." },
   { name: "Network", description: "Platform observability — stats, Base chain status." },
 ];
@@ -211,7 +211,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Capabilities"],
       summary: "The capability directory (built-in + registered + on-chain + advertised)",
       description:
-        "Returns every capability discoverable on the network: built-ins SIGNA fulfils (Bankr, Root Edge, token.price, base.gas, base.block, defi.tvl), capabilities developers registered with one wallet signature, the trustless on-chain tier (SignaCapabilityRegistry on Base), and capabilities advertised by live agents. Each entry is invokable by name. CORS-open, keyless.",
+        "Returns every capability discoverable on the network: built-ins SIGDA fulfils (Bankr, Root Edge, token.price, base.gas, base.block, defi.tvl), capabilities developers registered with one wallet signature, the trustless on-chain tier (SignaCapabilityRegistry on Robinhood Chain), and capabilities advertised by live agents. Each entry is invokable by name. CORS-open, keyless.",
       responses: {
         "200": {
           description: "Directory of capabilities + counts + how to register",
@@ -274,7 +274,7 @@ const PATHS: Record<string, unknown> = {
     post: {
       tags: ["Capabilities"],
       summary: "Invoke a capability (POST { cap, arg })",
-      description: "Same as GET but with a JSON body. Priced capabilities accept an x402 EIP-3009 authorization via the X-PAYMENT header; SIGNA verifies it and never settles.",
+      description: "Same as GET but with a JSON body. Priced capabilities accept an x402 EIP-3009 authorization via the X-PAYMENT header; SIGDA verifies it and never settles.",
       requestBody: {
         required: true,
         content: {
@@ -299,7 +299,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Capabilities"],
       summary: "Publish a capability with one wallet signature (keyless)",
       description:
-        "Register any https endpoint as a network capability. No account, no API key. The signature is an EIP-191 personal_sign over the canonical preimage: 'SIGNA capability register v1\\nts:..\\nname:..\\nprovider:..(lower)\\nendpoint:..\\nmethod:..(UPPER)\\nprice:..'. The endpoint must be https and public (SSRF-guarded at register AND call time). Built-in names are reserved. Optionally price the capability in USDC (settled provider-to-caller via x402; SIGNA never custodies funds).",
+        "Register any https endpoint as a network capability. No account, no API key. The signature is an EIP-191 personal_sign over the canonical preimage: 'SIGDA capability register v1\\nts:..\\nname:..\\nprovider:..(lower)\\nendpoint:..\\nmethod:..(UPPER)\\nprice:..'. The endpoint must be https and public (SSRF-guarded at register AND call time). Built-in names are reserved. Optionally price the capability in USDC (settled provider-to-caller via x402; SIGDA never custodies funds).",
       requestBody: {
         required: true,
         content: {
@@ -334,7 +334,7 @@ const PATHS: Record<string, unknown> = {
   "/api/brain": {
     post: {
       tags: ["Capabilities"],
-      summary: "The SIGNA brain — reason, call capabilities, answer, sign (meterable)",
+      summary: "The SIGDA brain — reason, call capabilities, answer, sign (meterable)",
       description:
         "Give a goal in plain language. The brain reasons on decentralized inference, decides which capabilities on the network to call (built-in + free community + free on-chain), invokes them for real, answers from the live results, and signs a verifiable receipt over (goal, tools, answer). Optional: report_to (DM the answer to an address/@handle, wallet-signed by the brain) and remember (write a signed memory). METERING: pass mandate_id (a spend mandate granted to the brain address 0x95fce75729690477e48820805c74602338e19303) and the brain pays per reasoning run for its own inference — real EIP-3009 USDC-on-Base authorization → x402 receipt → capped spend; when the budget is exhausted it STOPS and wallet-signs a budget request instead of overspending. When funded, PRICED marketplace capabilities join the toolset: the brain records a capped spend and pays the provider over x402 (response gains paid_caps[]). Optional use:[\"cap:arg\"] directs specific capabilities deterministically.",
       requestBody: {
@@ -400,7 +400,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Commerce"],
       summary: "signa.brain — the priced brain product (one signed reasoning run)",
       description:
-        "The endpoint behind the signa.brain marketplace capability (0.01 USDC over x402). One fast reasoning run on decentralized inference; the answer is signed by the brain wallet itself (EIP-191 over 'SIGNA brain answer v1\\nts:..\\ngoal:..\\nanswer:<sha256>') — a portable attestation verifiable offline with viem. To PAY for it, call /api/capabilities/invoke?cap=signa.brain with an x402 X-PAYMENT header (the gateway verifies the EIP-3009 authorization to the brain wallet before proxying here). Calling this endpoint directly is unmetered and may be rate-limited.",
+        "The endpoint behind the signa.brain marketplace capability (0.01 USDC over x402). One fast reasoning run on decentralized inference; the answer is signed by the brain wallet itself (EIP-191 over 'SIGDA brain answer v1\\nts:..\\ngoal:..\\nanswer:<sha256>') — a portable attestation verifiable offline with viem. To PAY for it, call /api/capabilities/invoke?cap=signa.brain with an x402 X-PAYMENT header (the gateway verifies the EIP-3009 authorization to the brain wallet before proxying here). Calling this endpoint directly is unmetered and may be rate-limited.",
       parameters: [{ name: "arg", in: "query", required: true, schema: { type: "string", minLength: 2, maxLength: 600 }, description: "Your question, plain language." }],
       responses: {
         "200": { description: "{ answer, ts, brain, signature, verify } — brain-signed attestation" },
@@ -414,7 +414,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Commerce"],
       summary: "Grant a spend mandate — a human safely funds an agent (keyless)",
       description:
-        "A human wallet-signs a bounded budget for an agent: total limit + per-purchase cap + expiry, USDC on Base by default. EIP-191 over 'SIGNA spend mandate v1\\nts:..\\ngrantor:..\\nagent:..\\nasset:..\\nnetwork:..\\nlimit:..\\nper_tx:..\\nexpiry:..\\nmemo:..'. The signature recovers to the grantor so the authority is provable. This is signed authorization, NOT custody — SIGNA never holds funds; settlement of each purchase is the x402 step.",
+        "A human wallet-signs a bounded budget for an agent: total limit + per-purchase cap + expiry, USDC on Robinhood Chain by default. EIP-191 over 'SIGDA spend mandate v1\\nts:..\\ngrantor:..\\nagent:..\\nasset:..\\nnetwork:..\\nlimit:..\\nper_tx:..\\nexpiry:..\\nmemo:..'. The signature recovers to the grantor so the authority is provable. This is signed authorization, NOT custody — SIGDA never holds funds; settlement of each purchase is the x402 step.",
       requestBody: {
         required: true,
         content: {
@@ -425,7 +425,7 @@ const PATHS: Record<string, unknown> = {
               properties: {
                 grantor: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$" },
                 agent: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$", description: "The funded agent (e.g. the brain: 0x95fce757…9303)." },
-                asset: { type: "string", description: "ERC-20 address; defaults to USDC on Base." },
+                asset: { type: "string", description: "ERC-20 address; defaults to USDC on Robinhood Chain." },
                 network: { type: "string", description: "CAIP-2; defaults to eip155:8453." },
                 limit: { type: "string", description: "Total budget in base units (raw)." },
                 per_tx: { type: "string", description: "Max per purchase in base units (raw)." },
@@ -456,7 +456,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Commerce"],
       summary: "Record a wallet-signed spend against a mandate (capped, append-only)",
       description:
-        "The agent signs 'SIGNA spend v1\\nts:..\\nmandate:..\\nagent:..\\namount:..\\nnote:..' (EIP-191). The server verifies the signature, the mandate's expiry, the per-purchase cap, and the total cap (spent = sum of the append-only ledger). Exceeding the budget returns 409 with remaining_raw + short_by_raw so the agent knows to ask for more. Optionally bind an x402 receipt via receipt_id.",
+        "The agent signs 'SIGDA spend v1\\nts:..\\nmandate:..\\nagent:..\\namount:..\\nnote:..' (EIP-191). The server verifies the signature, the mandate's expiry, the per-purchase cap, and the total cap (spent = sum of the append-only ledger). Exceeding the budget returns 409 with remaining_raw + short_by_raw so the agent knows to ask for more. Optionally bind an x402 receipt via receipt_id.",
       requestBody: {
         required: true,
         content: {
@@ -490,7 +490,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Commerce"],
       summary: "Budget request — the agent asks the human for money (wallet-signed)",
       description:
-        "The missing agentic-commerce primitive: an agent wallet-signs 'SIGNA budget request v1\\nts:..\\nagent:..\\ngrantor:..\\namount:..\\ngoal:..\\nreason:..' to ask its grantor for more budget. The human answers by issuing a fresh mandate.",
+        "The missing agentic-commerce primitive: an agent wallet-signs 'SIGDA budget request v1\\nts:..\\nagent:..\\ngrantor:..\\namount:..\\ngoal:..\\nreason:..' to ask its grantor for more budget. The human answers by issuing a fresh mandate.",
       requestBody: {
         required: true,
         content: {
@@ -528,7 +528,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Commerce"],
       summary: "Issue an x402 receipt — bind request → terms → payment → delivery",
       description:
-        "Submit the four parts of an agentic purchase: request (what was asked), terms (amount/asset/network/payTo), payment (a REAL EIP-3009 TransferWithAuthorization — the server verifies the typed-data signature recovers to `from` and matches the terms), and output (what was delivered). SIGNA hashes each part (sha256 over a stable stringify), signs the envelope with the attestor wallet (0x09460f21167e7e11c927b7e23ae8842918534a02), stores it, and returns the receipt + permalink. x402 moves the money; SIGNA proves the deal. Never settles, never custodies.",
+        "Submit the four parts of an agentic purchase: request (what was asked), terms (amount/asset/network/payTo), payment (a REAL EIP-3009 TransferWithAuthorization — the server verifies the typed-data signature recovers to `from` and matches the terms), and output (what was delivered). SIGDA hashes each part (sha256 over a stable stringify), signs the envelope with the attestor wallet (0x09460f21167e7e11c927b7e23ae8842918534a02), stores it, and returns the receipt + permalink. x402 moves the money; SIGDA proves the deal. Never settles, never custodies.",
       requestBody: {
         required: true,
         content: {
@@ -558,9 +558,9 @@ const PATHS: Record<string, unknown> = {
   "/api/x402/discovery": {
     get: {
       tags: ["Commerce"],
-      summary: "SIGNA's paid services in the x402 Bazaar discovery schema",
+      summary: "SIGDA's paid services in the x402 Bazaar discovery schema",
       description:
-        "SIGNA's priced capabilities published in the x402 Bazaar discovery format (the CDP-compatible `resources` shape: resource, type, x402Version, accepts, lastUpdated, metadata). Any Bazaar-aware agent or tool can ingest this catalog and pay over x402. Each item's metadata.signa block points at the trust layer the Bazaar lacks — wallet-signed results, re-verification at /api/verify, x402 receipts, and bounded spend mandates. Discovery (Bazaar) + payment (x402) + proof & safe-spend (SIGNA).",
+        "SIGDA's priced capabilities published in the x402 Bazaar discovery format (the CDP-compatible `resources` shape: resource, type, x402Version, accepts, lastUpdated, metadata). Any Bazaar-aware agent or tool can ingest this catalog and pay over x402. Each item's metadata.signa block points at the trust layer the Bazaar lacks — wallet-signed results, re-verification at /api/verify, x402 receipts, and bounded spend mandates. Discovery (Bazaar) + payment (x402) + proof & safe-spend (SIGDA).",
       responses: { "200": { description: "{ x402Version, items:[{resource,type,accepts,metadata}], trust_layer }" } },
     },
   },
@@ -577,7 +577,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["OpenAI-compat (v1)"],
       summary: "OpenAI-compatible chat completion — drop-in for openai SDKs",
       description:
-        "Identical request + response shape to OpenAI's `/v1/chat/completions`. Set your OpenAI client baseURL to `https://www.signaagent.xyz/api/v1` and SIGNA becomes a drop-in. Wallet-signed replies + source attribution are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Streaming (stream:true) returns 501 in v1; SSE is roadmap.",
+        "Identical request + response shape to OpenAI's `/v1/chat/completions`. Set your OpenAI client baseURL to `https://www.signaagent.xyz/api/v1` and SIGDA becomes a drop-in. Wallet-signed replies + source attribution are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Streaming (stream:true) returns 501 in v1; SSE is roadmap.",
       requestBody: {
         required: true,
         content: {
@@ -602,9 +602,9 @@ const PATHS: Record<string, unknown> = {
                 stream: { type: "boolean", default: false, description: "Streaming is not yet supported; setting true returns 501." },
                 temperature: { type: "number" },
                 max_tokens: { type: "integer" },
-                agent_address: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$", description: "SIGNA extension. Set with model=signa-agent to pin the call to a specific agent." },
-                hint_intent: { type: "string", enum: ["facts", "swarm", "code", "action", "chat"], description: "SIGNA extension. Skip auto-classification." },
-                from: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$", description: "SIGNA extension. Caller wallet (informational)." },
+                agent_address: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$", description: "SIGDA extension. Set with model=signa-agent to pin the call to a specific agent." },
+                hint_intent: { type: "string", enum: ["facts", "swarm", "code", "action", "chat"], description: "SIGDA extension. Skip auto-classification." },
+                from: { type: "string", pattern: "^0x[a-fA-F0-9]{40}$", description: "SIGDA extension. Caller wallet (informational)." },
               },
             },
           },
@@ -860,7 +860,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Triggers"],
       summary: "Arm a wallet-signed conditional automation (WHEN x DO y)",
       description:
-        "An agent signs a rule: WHEN a verifiable condition is met, DO an action. SIGNA evaluates the condition against real network signals and fires the action via a deterministic executor that carries the owner's signature as authorization — every firing is a signed DM in the network ledger. Keyless: SIGNA never holds the owner's key. Conditions: time {at} · received {from} · capability {cap,arg?,field,op,value}. Action: notify {to?, body}. Re-verify a rule at /api/verify (kind trigger).",
+        "An agent signs a rule: WHEN a verifiable condition is met, DO an action. SIGDA evaluates the condition against real network signals and fires the action via a deterministic executor that carries the owner's signature as authorization — every firing is a signed DM in the network ledger. Keyless: SIGDA never holds the owner's key. Conditions: time {at} · received {from} · capability {cap,arg?,field,op,value}. Action: notify {to?, body}. Re-verify a rule at /api/verify (kind trigger).",
       responses: { "200": { description: "{ trigger, executor, reverify }" }, "401": { description: "signature mismatch" } },
     },
     get: {
@@ -878,7 +878,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Federation"],
       summary: "Peer sync feed for the message layer (trustless mirror)",
       description:
-        "The node-to-node sync feed. A peer SIGNA node pulls this to mirror our signed messages — every row carries everything needed to re-derive the canonical preimage and verify the signature OFFLINE, so a peer trusts the signatures, not this server. Only returns messages that originated here (loop-safe). Run a node: see the signa-node package.",
+        "The node-to-node sync feed. A peer SIGDA node pulls this to mirror our signed messages — every row carries everything needed to re-derive the canonical preimage and verify the signature OFFLINE, so a peer trusts the signatures, not this server. Only returns messages that originated here (loop-safe). Run a node: see the signa-node package.",
       parameters: [
         { name: "since", in: "query", required: false, schema: { type: "string", description: "created_at ISO cursor (oldest-first)" } },
         { name: "limit", in: "query", required: false, schema: { type: "integer", default: 200, maximum: 500 } },
@@ -910,7 +910,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Transparency"],
       summary: "On-chain anchor status (transparency-log root pinned to Base)",
       description:
-        "Each transparency-log checkpoint root is pinned on Base via the SignaLogAnchor contract, so the log's history is settled on-chain — a later off-chain root contradicting an anchored one is provably a fork. Reports the latest DB checkpoint vs the on-chain anchor and whether they agree. Degrades to { configured:false } until the contract is deployed + SIGNA_LOG_ANCHOR_ADDRESS is set.",
+        "Each transparency-log checkpoint root is pinned on Robinhood Chain via the SignaLogAnchor contract, so the log's history is settled on-chain — a later off-chain root contradicting an anchored one is provably a fork. Reports the latest DB checkpoint vs the on-chain anchor and whether they agree. Degrades to { configured:false } until the contract is deployed + SIGNA_LOG_ANCHOR_ADDRESS is set.",
       responses: { "200": { description: "{ configured, contract, signer, checkpoint, onchain:{seq,tree_size,root}, anchored, matches }" } },
     },
   },
@@ -928,7 +928,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Agents"],
       summary: "Sign a delivery acknowledgment (received / read)",
       description:
-        "v4.6 — the missing half of the message layer. The SENDER signs a DM; here the RECIPIENT signs a receipt that they received (or read) a specific message, so a conversation is provable from BOTH sides. {address} is the acker = the DM's recipient; you can only ack a message addressed to you. Idempotent per (message, acker, status). The response carries a `reverify` payload re-checkable at /api/verify (kind delivery_ack). SIGNA never blocks delivery — this is after-the-fact proof, not a gate.",
+        "v4.6 — the missing half of the message layer. The SENDER signs a DM; here the RECIPIENT signs a receipt that they received (or read) a specific message, so a conversation is provable from BOTH sides. {address} is the acker = the DM's recipient; you can only ack a message addressed to you. Idempotent per (message, acker, status). The response carries a `reverify` payload re-checkable at /api/verify (kind delivery_ack). SIGDA never blocks delivery — this is after-the-fact proof, not a gate.",
       parameters: [
         { name: "address", in: "path", required: true, schema: { type: "string", pattern: "^0x[a-f0-9]{40}$" } },
       ],
@@ -1102,7 +1102,7 @@ const PATHS: Record<string, unknown> = {
   "/api/users/search": {
     get: {
       tags: ["Users"],
-      summary: "Search SIGNA-registered users",
+      summary: "Search SIGDA-registered users",
       parameters: [{ name: "q", in: "query", required: true, schema: { type: "string" } }],
       responses: { "200": { description: "Matching users" } },
     },
@@ -1138,7 +1138,7 @@ const PATHS: Record<string, unknown> = {
     },
   },
   "/api/tokens/trending": {
-    get: { tags: ["Tokens"], summary: "Trending tokens on Base", responses: { "200": { description: "Token list" } } },
+    get: { tags: ["Tokens"], summary: "Trending tokens on Robinhood Chain", responses: { "200": { description: "Token list" } } },
   },
   "/api/tokens/{address}": {
     get: {
@@ -1151,7 +1151,7 @@ const PATHS: Record<string, unknown> = {
   "/api/holders/{symbol}": {
     get: {
       tags: ["Holders"],
-      summary: "SIGNA users holding the given token",
+      summary: "SIGDA users holding the given token",
       parameters: [{ name: "symbol", in: "path", required: true, schema: { type: "string" } }],
       responses: { "200": { description: "Holders list" } },
     },
@@ -1187,7 +1187,7 @@ const PATHS: Record<string, unknown> = {
   "/api/rooms": {
     get: {
       tags: ["Rooms"],
-      summary: "List public SIGNA rooms",
+      summary: "List public SIGDA rooms",
       parameters: [
         { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 200, default: 50 } },
       ],
@@ -1259,7 +1259,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Rooms"],
       summary: "On-chain anchor status for a room — verify federation identity",
       description:
-        "Reads SignaRoomRegistry on Base mainnet and cross-checks the on-chain manifestHash against keccak256(local signed_message). When match=true, federation can trust the room without trusting the serving node.",
+        "Reads SignaRoomRegistry on Robinhood Chain and cross-checks the on-chain manifestHash against keccak256(local signed_message). When match=true, federation can trust the room without trusting the serving node.",
       parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
       responses: { "200": { description: "Anchor status" } },
     },
@@ -1286,7 +1286,7 @@ const PATHS: Record<string, unknown> = {
   "/api/launches/{address}/room": {
     post: {
       tags: ["Partners"],
-      summary: "Lazy-create a wallet-signed SIGNA room for a Bankr-launched token",
+      summary: "Lazy-create a wallet-signed SIGDA room for a Bankr-launched token",
       parameters: [{ name: "address", in: "path", required: true, schema: { type: "string", description: "0x token address" } }],
       responses: { "200": { description: "Room created or joined (idempotent on slug)" } },
     },
@@ -1302,7 +1302,7 @@ const PATHS: Record<string, unknown> = {
   "/api/bounties/{id}/room": {
     post: {
       tags: ["Partners"],
-      summary: "Lazy-create a wallet-signed SIGNA room for a gitlawb open bounty",
+      summary: "Lazy-create a wallet-signed SIGDA room for a gitlawb open bounty",
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       responses: { "200": { description: "Room created or joined" } },
     },
@@ -1310,7 +1310,7 @@ const PATHS: Record<string, unknown> = {
   "/api/miroshark/{simId}/room": {
     post: {
       tags: ["Partners"],
-      summary: "Lazy-create a wallet-signed SIGNA room for a MiroShark sim verdict thread",
+      summary: "Lazy-create a wallet-signed SIGDA room for a MiroShark sim verdict thread",
       parameters: [{ name: "simId", in: "path", required: true, schema: { type: "string" } }],
       responses: { "200": { description: "Room created or joined" } },
     },
@@ -1347,7 +1347,7 @@ const PATHS: Record<string, unknown> = {
   "/api/nodes": {
     get: {
       tags: ["Network"],
-      summary: "List federated SIGNA nodes from SignaNodeRegistry on Base",
+      summary: "List federated SIGDA nodes from SignaNodeRegistry on Robinhood Chain",
       parameters: [
         { name: "includeInactive", in: "query", schema: { type: "string", enum: ["0", "1"] } },
         { name: "probe", in: "query", schema: { type: "string", enum: ["0", "1"], description: "Run live /api/node/info probe per peer" } },
@@ -1381,11 +1381,11 @@ const PATHS: Record<string, unknown> = {
 const SPEC = {
   openapi: "3.1.0",
   info: {
-    title: "SIGNA Public API",
+    title: "SIGDA Public API",
     version: "1.0.0",
     description:
-      "Wallet-native messaging + a decentralized OS for AI agents on Base. Every public endpoint is CORS-open. Mutating endpoints are gated by EIP-191 wallet signatures, never by API keys.",
-    contact: { name: "SIGNA", url: "https://www.signaagent.xyz" },
+      "Wallet-native messaging + a decentralized OS for AI agents on Robinhood Chain. Every public endpoint is CORS-open. Mutating endpoints are gated by EIP-191 wallet signatures, never by API keys.",
+    contact: { name: "SIGDA", url: "https://www.signaagent.xyz" },
   },
   servers: SERVERS,
   tags: TAGS,

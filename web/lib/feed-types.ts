@@ -153,11 +153,11 @@ export type SignedAction =
        *   "miroshark_sim"   — posts a wallet-signed "sim fired: <prompt>"
        *                       AND kicks off a MiroShark swarm-intelligence
        *                       sim with the prompt as the scenario. The
-       *                       miroshark.bot.signa wallet auto-posts the
+       *                       miroshark.bot.sigda wallet auto-posts the
        *                       sim verdict via the existing webhook
        *                       (/api/webhooks/miroshark) when it lands.
        *   "payment"         — every tick the agent wallet signs + broad-
-       *                       casts an EIP-1559 tx on Base mainnet
+       *                       casts an EIP-1559 tx on Robinhood Chain
        *                       sending payment_amount_wei of payment_token
        *                       to payment_to. The agent also posts a
        *                       wallet-signed audit entry with the tx hash.

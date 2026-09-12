@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * homepage / launchpad without auth or caching.
  *
  * Source of truth in every case is the federated, wallet-signed feed —
- * which means any SIGNA node anywhere can reproduce these numbers by
+ * which means any SIGDA node anywhere can reproduce these numbers by
  * counting its own copy of the gossiped data.
  *
  * Returns:

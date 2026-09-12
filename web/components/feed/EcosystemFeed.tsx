@@ -68,7 +68,7 @@ export function EcosystemFeed(props: EcosystemFeedProps) {
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.03em] leading-tight">
             {props.emoji ? `${props.emoji} ` : ""}
-            {props.projectName} on SIGNA
+            {props.projectName} on SIGDA
           </h1>
           <p className="text-white/65 max-w-lg mt-3 text-[14px] leading-relaxed">
             {props.tagline}

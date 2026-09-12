@@ -61,7 +61,7 @@ export function DmLanding({
     <section className="border-b border-white/[0.06]">
       <div className="max-w-2xl mx-auto px-6 lg:px-10 pt-16 pb-16">
         <div className="font-mono text-[11px] text-[var(--accent)] mb-5">
-          $ signa dm {display}
+          $ sigda dm {display}
         </div>
 
         <div className="flex items-start gap-5">

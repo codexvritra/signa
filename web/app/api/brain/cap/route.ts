@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
 
   const origin = req.nextUrl.origin;
   const prompt =
-    `You are the SIGNA Brain answering a paid, single-shot reasoning request. ` +
+    `You are the SIGDA Brain answering a paid, single-shot reasoning request. ` +
     `Answer concisely and concretely in plain text (no markdown headers), 1-4 sentences.\n\nQuestion: ${goal}`;
 
   // one retry inside the gateway-proxy window — paid calls should not flake
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 
   const ts = Date.now();
   const answerHash = createHash("sha256").update(answer).digest("hex");
-  const preimage = ["SIGNA brain answer v1", `ts:${ts}`, `goal:${goal}`, `answer:${answerHash}`].join("\n");
+  const preimage = ["SIGDA brain answer v1", `ts:${ts}`, `goal:${goal}`, `answer:${answerHash}`].join("\n");
   const signature = await brain.signMessage({ message: preimage });
 
   return NextResponse.json(

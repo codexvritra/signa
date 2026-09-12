@@ -5,7 +5,7 @@ import { MeContent } from "./MeContent";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Your crypto · SIGNA",
+  title: "Your crypto · SIGDA",
   description:
     "One tab for your crypto. Portfolio, watchlist, agents, DMs, social — all wallet-native.",
 };

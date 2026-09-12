@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
  * GET /rooms/[slug]/feed.json
  *
  * JSON Feed 1.1 (https://jsonfeed.org/version/1.1) of a public
- * SIGNA room's wallet-signed messages. Pairs with the Atom feed at
+ * SIGDA room's wallet-signed messages. Pairs with the Atom feed at
  * /rooms/[slug]/feed.atom for readers that prefer JSON.
  *
  * Each item includes the signature + signed_message preimage so
- * subscribers can re-verify offline without hitting the SIGNA node
+ * subscribers can re-verify offline without hitting the SIGDA node
  * again.
  *
  * Cached for 60s, public, no auth.
@@ -86,11 +86,11 @@ export async function GET(
 
   const feed = {
     version: "https://jsonfeed.org/version/1.1",
-    title: `SIGNA · #${room.slug}`,
+    title: `SIGDA · #${room.slug}`,
     home_page_url: homepageUrl,
     feed_url: feedUrl,
     description:
-      room.description ?? "Wallet-signed room on the SIGNA network.",
+      room.description ?? "Wallet-signed room on the SIGDA network.",
     icon: `${base}/icon.png`,
     favicon: `${base}/favicon.ico`,
     authors: [

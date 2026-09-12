@@ -152,7 +152,7 @@ export function Composer({
       )}
       <div className="mt-2 flex items-center justify-between">
         <div className="text-[10px] text-white/35">
-          @ tag SIGNA users · ⌘/Ctrl+Enter to post
+          @ tag SIGDA users · ⌘/Ctrl+Enter to post
           <span className="ml-3">
             {text.length}/{MAX_POST_LENGTH}
           </span>

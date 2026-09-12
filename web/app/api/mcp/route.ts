@@ -4,10 +4,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * SIGNA MCP Server — Model Context Protocol over HTTP+JSON-RPC 2.0.
+ * SIGDA MCP Server — Model Context Protocol over HTTP+JSON-RPC 2.0.
  *
  * One config line in claude_desktop_config.json (or the equivalent in
- * Cursor, Cline, any MCP-aware tool) installs SIGNA's full agent
+ * Cursor, Cline, any MCP-aware tool) installs SIGDA's full agent
  * surface as a native tool palette in their AI client:
  *
  *   {
@@ -80,7 +80,7 @@ const TOOLS: Tool[] = [
         prompt: {
           type: "string",
           description:
-            "Plain-English question or instruction. Examples: 'what is the price of $USDC on base?', 'build me a single-html dashboard for base trending tokens', 'simulate 1000 wallets buying $AEON over 24h'.",
+            "Plain-English question or instruction. Examples: 'what is the price of $USDC on robinhood chain?', 'build me a single-html dashboard for base trending tokens', 'simulate 1000 wallets buying $AEON over 24h'.",
         },
         hint_intent: {
           type: "string",
@@ -115,7 +115,7 @@ const TOOLS: Tool[] = [
   {
     name: "signa_list_agents",
     description:
-      "List every launched agent on the SIGNA network with name, address, tags, and partner-stack metadata (gitlawb DID, ERC-8004 token, Bankr token).",
+      "List every launched agent on the SIGDA network with name, address, tags, and partner-stack metadata (gitlawb DID, ERC-8004 token, Bankr token).",
     inputSchema: { type: "object", properties: {} },
   },
   {
@@ -136,7 +136,7 @@ const TOOLS: Tool[] = [
   {
     name: "signa_search_replies",
     description:
-      "Browse cross-agent top-rated wallet-signed replies on the SIGNA network. Sort by `top` (rating signal) or `new` (chronological). Optional intent filter.",
+      "Browse cross-agent top-rated wallet-signed replies on the SIGDA network. Sort by `top` (rating signal) or `new` (chronological). Optional intent filter.",
     inputSchema: {
       type: "object",
       properties: {
@@ -172,13 +172,13 @@ const TOOLS: Tool[] = [
   {
     name: "signa_capabilities",
     description:
-      "Browse the SIGNA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier registered directly on Base. Invoke any by name with signa_invoke.",
+      "Browse the SIGDA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier registered directly on Robinhood Chain. Invoke any by name with signa_invoke.",
     inputSchema: { type: "object", properties: {} },
   },
   {
     name: "signa_invoke",
     description:
-      "Invoke any capability on the SIGNA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. e.g. cap='root.market', or cap='bankr.resolve' with arg='@jesse'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. Priced capabilities return their x402 challenge instead of charging you.",
+      "Invoke any capability on the SIGDA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. e.g. cap='root.market', or cap='bankr.resolve' with arg='@jesse'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. Priced capabilities return their x402 challenge instead of charging you.",
     inputSchema: {
       type: "object",
       properties: {
@@ -191,7 +191,7 @@ const TOOLS: Tool[] = [
   {
     name: "signa_brain",
     description:
-      "Ask the SIGNA brain a goal in plain language. It reasons on decentralized inference, decides which network capabilities to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'.",
+      "Ask the SIGDA brain a goal in plain language. It reasons on decentralized inference, decides which network capabilities to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'.",
     inputSchema: {
       type: "object",
       properties: {

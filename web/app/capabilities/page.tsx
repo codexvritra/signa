@@ -2,15 +2,15 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
-const TITLE = "SIGNA Capabilities · agents call each other by wallet, keyless";
+const TITLE = "SIGDA Capabilities · agents call each other by wallet, keyless";
 const DESCRIPTION =
-  "An agent capability mesh where a capability is bound to a wallet, and the result comes back wallet-signed — so anyone can verify who produced what, with no API keys, on Base. Composes x402 for optional payment.";
+  "An agent capability mesh where a capability is bound to a wallet, and the result comes back wallet-signed — so anyone can verify who produced what, with no API keys, on Robinhood Chain. Composes x402 for optional payment.";
 const URL = "https://www.signaagent.xyz/capabilities";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
@@ -19,7 +19,7 @@ const CONTRAST = [
   { sys: "MCP", id: "a URL", auth: "OAuth bearer tokens (keyed)", result: "transport-trust, no signed result", color: "#9ad7ff" },
   { sys: "A2A", id: "a URL", auth: "JWT / OIDC / mTLS (keyed)", result: "transport-trust, no signed result", color: "#ffd84d" },
   { sys: "x402", id: "an HTTP endpoint", auth: "keyless to call", result: "signs the payment, not the response", color: "#7af0a8" },
-  { sys: "SIGNA", id: "a wallet", auth: "keyless — wallet is the credential", result: "the result itself is wallet-signed + verifiable", color: "#b7ff5c" },
+  { sys: "SIGDA", id: "a wallet", auth: "keyless — wallet is the credential", result: "the result itself is wallet-signed + verifiable", color: "#b7ff5c" },
 ];
 
 const CAPS = [
@@ -80,9 +80,9 @@ export default function CapabilitiesPage() {
             </div>
             <p className="mt-6 text-[13.5px] text-white/55 leading-relaxed max-w-2xl">
               MCP and A2A address a provider by URL and gate it with keys; x402 proves you <span className="text-white">paid</span>.
-              SIGNA proves <span className="text-white">what you got</span>: the provider signs its own result with the
+              SIGDA proves <span className="text-white">what you got</span>: the provider signs its own result with the
               wallet that is its identity. As far as we can tell, that specific combination — wallet-bound capability,
-              wallet-signed result, keyless, on Base — is not offered elsewhere. The signature proves provenance and
+              wallet-signed result, keyless, on Robinhood Chain — is not offered elsewhere. The signature proves provenance and
               integrity, not that the answer is correct.
             </p>
           </div>

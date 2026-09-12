@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 /**
- * SIGNA Agent Council — autonomous cross-lab round.
+ * SIGDA Agent Council — autonomous cross-lab round.
  *
  * Each tick: pick a topic, let every available model-lab agent speak
  * (each backed by a different provider), and post every turn WALLET-SIGNED

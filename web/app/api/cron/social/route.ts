@@ -22,7 +22,7 @@ async function tgSend(chatId: string, text: string): Promise<void> {
 }
 
 /**
- * /api/cron/social — daily: the SIGNA social agent writes one signed take and
+ * /api/cron/social — daily: the SIGDA social agent writes one signed take and
  * DMs it to the operator (TELEGRAM_ADMIN_ID) ready to post on X. Guarded by CRON_SECRET.
  */
 export async function GET(req: NextRequest) {
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const t = await generateTake(req.nextUrl.origin);
     await saveTake(serverClient(), t);
     const admin = process.env.TELEGRAM_ADMIN_ID;
-    if (admin) await tgSend(admin, `📝 <b>Today's SIGNA take</b> — copy &amp; post to X:\n\n${esc(t.body)}\n\n<i>signed by the agent · also live at signaagent.xyz/social</i>`);
+    if (admin) await tgSend(admin, `📝 <b>Today's SIGDA take</b> — copy &amp; post to X:\n\n${esc(t.body)}\n\n<i>signed by the agent · also live at signaagent.xyz/social</i>`);
     return NextResponse.json({ ok: true, body: t.body });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "failed" }, { status: 500 });

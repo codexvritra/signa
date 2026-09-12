@@ -3,9 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 
 /**
- * /rwa — SIGNA Proof-of-Stock: the verifiable registry for Robinhood Chain
+ * /rwa — SIGDA Proof-of-Stock: the verifiable registry for Robinhood Chain
  * Stock Tokens. Robinhood tokenized the equities; the chain is permissionless,
- * so every real ticker has impostors. SIGNA signs which contract is canonical
+ * so every real ticker has impostors. SIGDA signs which contract is canonical
  * and what its onchain supply was at a block — re-checkable two ways.
  */
 type Market = { price_usd: number | null; market_cap: number | null; holders: number | null };
@@ -68,7 +68,7 @@ export default function RwaPage() {
         <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Proof-of-Stock · Robinhood Chain</div>
         <h1 className="text-[34px] sm:text-[46px] font-bold leading-tight mt-1 tracking-tight">
           Robinhood tokenizes the stock.<br />
-          <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">SIGNA proves it&apos;s real.</span>
+          <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">SIGDA proves it&apos;s real.</span>
         </h1>
         <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[660px]">
           Robinhood Chain went live with tokenized equities — NVDA, TSLA, SpaceX, Circle. But the chain is permissionless: for every
@@ -76,7 +76,7 @@ export default function RwaPage() {
           explorer and the real one sits beside five fakes.
         </p>
         <p className="text-[15px] text-muted mt-2 leading-relaxed max-w-[660px]">
-          SIGNA settles it with a signature, not a promise. For each ticker the SIGNA attestor wallet signs a canonical envelope:
+          SIGDA settles it with a signature, not a promise. For each ticker the SIGDA attestor wallet signs a canonical envelope:
           <span className="text-white"> this contract is the real one, and at block N its supply was S</span>. Anyone re-checks it two
           independent ways — recover the signature, and replay the read onchain.
         </p>
@@ -84,7 +84,7 @@ export default function RwaPage() {
         {/* the two legs */}
         <div className="mt-6 grid sm:grid-cols-2 gap-2 text-[13px]">
           <div className="glass rounded-lg px-3 py-2.5 border border-white/[0.07]">
-            <b className="text-[#c4b4ff]">Leg 1 — the vouch.</b> <span className="text-muted">The signature recovers to SIGNA&apos;s RWA attestor. That&apos;s SIGNA staking its key on which contract is canonical.</span>
+            <b className="text-[#c4b4ff]">Leg 1 — the vouch.</b> <span className="text-muted">The signature recovers to SIGDA&apos;s RWA attestor. That&apos;s SIGDA staking its key on which contract is canonical.</span>
           </div>
           <div className="glass rounded-lg px-3 py-2.5 border border-white/[0.07]">
             <b className="text-[#7ee2b8]">Leg 2 — the state.</b> <span className="text-muted">Replay the eth_call at that block yourself. The supply matches, or the attestation is worthless.</span>
@@ -131,7 +131,7 @@ export default function RwaPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="text-[11px] text-faint mt-1.5">SIGNA&apos;s signature is what tells a wallet, an agent, or an index which of these is the real one.</div>
+                  <div className="text-[11px] text-faint mt-1.5">SIGDA&apos;s signature is what tells a wallet, an agent, or an index which of these is the real one.</div>
                 </div>
               )}
               {demo.attestation?.preimage && (
@@ -165,7 +165,7 @@ export default function RwaPage() {
                   <div className="flex items-center gap-2">
                     <div className="text-[15px] font-bold tracking-tight">{t.ticker}</div>
                     <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-faint uppercase tracking-wider">{t.asset_class}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#22c98a]/15 text-[#5ee68f]">SIGNA-signed</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#22c98a]/15 text-[#5ee68f]">SIGDA-signed</span>
                     <div className="ml-auto text-[14px] font-semibold">{px(t.market.price_usd)}</div>
                   </div>
                   <div className="text-[12px] text-muted mt-0.5 truncate">{t.company}</div>
@@ -194,11 +194,11 @@ export default function RwaPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10 leading-relaxed">
-          Each attestation is an EIP-191 signature by SIGNA&apos;s RWA attestor over the canonical contract and its onchain supply at a
+          Each attestation is an EIP-191 signature by SIGDA&apos;s RWA attestor over the canonical contract and its onchain supply at a
           named block, re-verifiable at /verify (kind <span className="font-mono">rwa_attestation</span>) or locally with
           viem.recoverMessageAddress. Price, market cap and holder counts are read from the Robinhood Chain explorer for context and are
           deliberately <span className="text-white/70">not</span> part of the signed claim — only what is checkable onchain is signed.
-          SIGNA is not affiliated with Robinhood; it mints nothing and custodies nothing. Not investment advice. signaagent.xyz/rwa
+          SIGDA is not affiliated with Robinhood; it mints nothing and custodies nothing. Not investment advice. signaagent.xyz/rwa
         </p>
       </div>
     </div>

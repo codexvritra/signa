@@ -44,16 +44,16 @@ export async function generateMetadata({
   const handle = decodeURIComponent(raw);
   const display = handle.length > 30 ? `${handle.slice(0, 30)}…` : handle;
   return {
-    title: `DM ${display} on SIGNA`,
-    description: `Wallet-native, end-to-end encrypted DM with ${display} over XMTP on Base. No accounts. No phone numbers. Just connect your wallet.`,
+    title: `DM ${display} on SIGDA`,
+    description: `Wallet-native, end-to-end encrypted DM with ${display} over XMTP on Robinhood Chain. No accounts. No phone numbers. Just connect your wallet.`,
     openGraph: {
-      title: `DM ${display} on SIGNA`,
+      title: `DM ${display} on SIGDA`,
       description: `Wallet-native DM. Encrypted. Signed. On Base.`,
       type: "website",
     },
     twitter: {
       card: "summary",
-      title: `DM ${display} on SIGNA`,
+      title: `DM ${display} on SIGDA`,
       description: `Wallet-native DM. Encrypted. Signed. On Base.`,
     },
   };
@@ -86,7 +86,7 @@ export default async function DmHandlePage({
               </h1>
               <p className="text-white/65 mt-5 text-[15px] leading-relaxed max-w-lg">
                 <span className="font-mono text-white">{handle}</span> doesn&apos;t
-                resolve to a wallet on SIGNA, Basenames, or ENS. send them this
+                resolve to a wallet on SIGDA or ENS. send them this
                 link and they can enable messaging in 2 clicks — their wallet
                 becomes their inbox.
               </p>

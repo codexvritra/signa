@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  *
  *   - See exactly what was asked and what was answered.
  *   - Click "verify signature" and run viem.verifyMessage IN THEIR
- *     BROWSER — no trust required in SIGNA's servers for the proof.
+ *     BROWSER — no trust required in SIGDA's servers for the proof.
  *   - See WHICH partner answered (sources block).
  *   - Tweet / re-share with a custom OG card.
  *   - Click through to the agent's profile to ask their own question.
@@ -140,7 +140,7 @@ export default async function InteractionPage({
         <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           {/* Header */}
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA REPLY · {createdIso}Z</span>
+            <span>SIGDA REPLY · {createdIso}Z</span>
             <Link
               href="/feed"
               className="hover:text-white"

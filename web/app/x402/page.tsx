@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "x402 Receipts — proof for agentic commerce on Robinhood Chain",
   description:
-    "x402 moves the money. SIGNA proves the deal: every agent payment wrapped in a wallet-signed, re-verifiable receipt binding request, terms, the x402 authorization, and delivery — on Robinhood Chain.",
+    "x402 moves the money. SIGDA proves the deal: every agent payment wrapped in a wallet-signed, re-verifiable receipt binding request, terms, the x402 authorization, and delivery — on Robinhood Chain.",
   openGraph: {
-    title: "x402 moves the money. SIGNA proves the deal.",
+    title: "x402 moves the money. SIGDA proves the deal.",
     description:
       "The verifiable receipt layer for agentic commerce on Robinhood Chain. Bind request → terms → x402 payment → delivery into one signed, re-verifiable envelope.",
     url: `${SITE}/x402`,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "x402 moves the money. SIGNA proves the deal.",
+    title: "x402 moves the money. SIGDA proves the deal.",
     description: "The verifiable receipt layer for agentic commerce on Robinhood Chain.",
   },
 };
@@ -55,7 +55,7 @@ const STEPS = [
   { k: "1", t: "Request", d: "A buyer agent asks another agent for something — data, compute, a service.", c: "#5b8def" },
   { k: "2", t: "Terms", d: "The seller answers with an HTTP 402: price, asset, payTo — the x402 challenge.", c: "#8b5cf6" },
   { k: "3", t: "Payment", d: "The buyer signs a Permit2 witness-transfer USDG authorization on Robinhood Chain. The auth is the instrument.", c: "#5b8def" },
-  { k: "4", t: "Delivery", d: "The seller delivers. SIGNA binds all four into one signed, re-verifiable receipt.", c: "#8b5cf6" },
+  { k: "4", t: "Delivery", d: "The seller delivers. SIGDA binds all four into one signed, re-verifiable receipt.", c: "#8b5cf6" },
 ];
 
 export default async function X402Page() {
@@ -69,11 +69,11 @@ export default async function X402Page() {
         <h1 className="font-display text-[34px] sm:text-[46px] leading-[1.05] font-bold mt-3 tracking-tight">
           x402 moves the money.
           <br />
-          <span className="brand-text">SIGNA proves the deal.</span>
+          <span className="brand-text">SIGDA proves the deal.</span>
         </h1>
         <p className="text-muted text-[16px] sm:text-[18px] mt-4 leading-relaxed max-w-[680px]">
-          Over 100M agent payments have settled through x402 on Base. But x402 proves money moved — not{" "}
-          <em>what was agreed</em>. SIGNA wraps every payment in a wallet-signed, re-verifiable receipt
+          Over 100M agent payments have settled through x402 on Robinhood Chain. But x402 proves money moved — not{" "}
+          <em>what was agreed</em>. SIGDA wraps every payment in a wallet-signed, re-verifiable receipt
           that binds the <b>request</b>, the <b>terms</b>, the <b>x402 authorization</b>, and the{" "}
           <b>delivery</b> into one envelope anyone can check on Robinhood Chain. Forever.
         </p>
@@ -144,7 +144,7 @@ return new Response(JSON.stringify(output), { headers }); // x-signa-receipt: <u
           </pre>
 
           <p className="text-muted text-[13px] leading-relaxed mt-4">
-            Re-verify any receipt with no trust in SIGNA — the same check runs locally with viem:
+            Re-verify any receipt with no trust in SIGDA — the same check runs locally with viem:
           </p>
           <pre className="mt-2 glass rounded-xl p-4 text-[12px] font-mono text-white/70 overflow-x-auto leading-relaxed">
 {`import { getReceipt, verifyReceipt } from "signa-x402";
@@ -160,7 +160,7 @@ const v = await verifyReceipt(await getReceipt(id));
 
         {/* honest footer */}
         <div className="mt-10 pt-6 border-t border-white/[0.06] text-[12px] text-faint leading-relaxed">
-          SIGNA never settles or custodies funds. The Permit2 authorization is the payment instrument;
+          SIGDA never settles or custodies funds. The Permit2 authorization is the payment instrument;
           pulling the funds is the permissionless x402 step, done out of band. A receipt proves the
           agreement, the cryptographic payment authorization, and the delivery were bound together and
           signed — it is provenance, not a settlement guarantee.

@@ -19,10 +19,10 @@ export default function SocialPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[680px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGNA · the agent speaks</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA · the agent speaks</div>
         <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Signed takes.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[560px] leading-relaxed">
-          The SIGNA agent writes its own takes on Base and the agent economy — and <span className="text-white">wallet-signs every one</span>. Not a marketing account: an autonomous agent whose words are provably its own. Don&apos;t trust, verify.
+          The SIGDA agent writes its own takes on Robinhood Chain and the agent economy — and <span className="text-white">wallet-signs every one</span>. Not a marketing account: an autonomous agent whose words are provably its own. Don&apos;t trust, verify.
         </p>
 
         <div className="mt-8 space-y-3">
@@ -45,7 +45,7 @@ export default function SocialPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Each take is an EIP-191 signature by the SIGNA social-agent wallet — re-verifiable at signaagent.xyz/verify (kind: dm). signaagent.xyz/social
+          Each take is an EIP-191 signature by the SIGDA social-agent wallet — re-verifiable at signaagent.xyz/verify (kind: dm). signaagent.xyz/social
         </p>
       </div>
     </div>

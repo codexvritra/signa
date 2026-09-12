@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 /**
  * Peer avatar with this priority:
  *   1. ENS avatar (if address has a primary ENS name + an avatar record)
- *   2. Deterministic SIGNA-palette gradient avatar (always works)
+ *   2. Deterministic SIGDA-palette gradient avatar (always works)
  */
 export function PeerAvatar({
   address,

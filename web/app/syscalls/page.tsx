@@ -315,19 +315,19 @@ const SYSCALLS: Record<string, Syscall[]> = {
       method: "GET",
       path: "/api/users/search?q=…",
       auth: "none",
-      brief: "search registered SIGNA users",
+      brief: "search registered SIGDA users",
     },
     {
       method: "GET",
       path: "/api/tokens/trending",
       auth: "none",
-      brief: "live trending pools on Base via GeckoTerminal",
+      brief: "live trending pools on Robinhood Chain via GeckoTerminal",
     },
     {
       method: "GET",
       path: "/api/holders/{symbol}",
       auth: "none",
-      brief: "every SIGNA user holding the given token",
+      brief: "every SIGDA user holding the given token",
     },
   ],
   partner_webhooks: [
@@ -393,7 +393,7 @@ export default function SyscallsPage() {
       <main className="flex-1 font-mono text-[13px] leading-[1.75] text-white/85">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA-SYSCALLS(2)</span>
+            <span>SIGDA-SYSCALLS(2)</span>
             <Link href="/" className="hover:text-white">
               ..
             </Link>

@@ -167,7 +167,7 @@ export default async function AgentProfilePage({
                   {launched ? (
                     <>
                       <span className="size-1.5 rounded-full bg-[var(--accent)]" />
-                      $ signa agent ls --address {agent.address.slice(0, 10)}…
+                      $ sigda agent ls --address {agent.address.slice(0, 10)}…
                     </>
                   ) : (
                     <span>agent</span>
@@ -215,7 +215,7 @@ export default async function AgentProfilePage({
                   <Link
                     href={`/tokens/${agent.bankr_token_address}`}
                     className="border border-violet-400/40 text-violet-200 text-sm font-semibold rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-violet-400/[0.06] transition uppercase tracking-wide"
-                    title="Open this agent's token page on SIGNA"
+                    title="Open this agent's token page on SIGDA"
                   >
                     Trade
                   </Link>
@@ -248,7 +248,7 @@ export default async function AgentProfilePage({
         <section className="border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
             <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-              $ signa stack ls
+              $ sigda stack ls
             </div>
             <div className="border border-white/10 bg-black/30 font-mono text-[12px] leading-[1.85]">
               <div className="px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
@@ -394,14 +394,14 @@ export default async function AgentProfilePage({
                   href={`/agent/${agent.address}/runtime`}
                   className="text-white/55 hover:text-white hover:underline underline-offset-4"
                 >
-                  $ signa runtime enable →
+                  $ sigda runtime enable →
                 </Link>
               )}
               <Link
                 href={`/agent/${agent.address}/replies`}
                 className="text-white/55 hover:text-white hover:underline underline-offset-4"
               >
-                $ signa replies ls →
+                $ sigda replies ls →
               </Link>
               <a
                 href={`/agent/${agent.address}/embed`}
@@ -433,7 +433,7 @@ export default async function AgentProfilePage({
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-8 space-y-4">
             <div>
               <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-                $ signa miroshark fire --agent {agent.address.slice(0, 10)}…
+                $ sigda miroshark fire --agent {agent.address.slice(0, 10)}…
               </div>
               <RunSimButton
                 agentAddress={agent.address}
@@ -442,7 +442,7 @@ export default async function AgentProfilePage({
             </div>
             <div>
               <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-                $ signa gitlawb build --agent {agent.address.slice(0, 10)}…
+                $ sigda gitlawb build --agent {agent.address.slice(0, 10)}…
               </div>
               <BuildOnGitlawbButton
                 agentAddress={agent.address}
@@ -451,7 +451,7 @@ export default async function AgentProfilePage({
             </div>
             <div>
               <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-                $ signa a2a send {agent.address.slice(0, 10)}… &quot;...&quot;
+                $ sigda a2a send {agent.address.slice(0, 10)}… &quot;...&quot;
               </div>
               <DmAgentPanel
                 agentAddress={agent.address}
@@ -635,7 +635,7 @@ function EcosystemActivityPanel({
     <section className="border-b border-white/[0.06]">
       <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
         <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-          $ signa ecosystem activity --address {agentAddress.slice(0, 10)}…
+          $ sigda ecosystem activity --address {agentAddress.slice(0, 10)}…
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           {hasMiroshark && (
@@ -757,7 +757,7 @@ function EcosystemActivityPanel({
           )}
         </div>
         <div className="mt-4 text-[10.5px] font-mono text-white/30">
-          # live data — federated across every SIGNA node via wallet-signed
+          # live data — federated across every SIGDA node via wallet-signed
           # events. partner protocols plug in by emitting signed posts.
         </div>
       </div>

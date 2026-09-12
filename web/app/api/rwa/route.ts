@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * /api/rwa — SIGNA Proof-of-Stock: the verifiable canonical registry of
+ * /api/rwa — SIGDA Proof-of-Stock: the verifiable canonical registry of
  * Robinhood Chain Stock Tokens.
  *
  *   GET (no args)      → every canonical Stock Token, each with a fresh signed attestation
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  *   GET ?market=0      → skip the explorer market lookup (faster, onchain-only)
  *
  * Each attestation is read live from Robinhood Chain, pinned to a block, and
- * signed by the SIGNA RWA attestor. Re-verify at /api/verify (kind
+ * signed by the SIGDA RWA attestor. Re-verify at /api/verify (kind
  * `rwa_attestation`) and independently by replaying the eth_call at that block.
  */
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "GET, OPTIONS", "access-control-allow-headers": "content-type" } as const;
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       const token = findStock(q);
       if (!token) {
         return NextResponse.json(
-          { ok: false, error: "not_in_canonical_registry", hint: "SIGNA only attests contracts it has verified as the official Robinhood Stock Token", tickers: STOCK_TOKENS.map((t) => t.ticker) },
+          { ok: false, error: "not_in_canonical_registry", hint: "SIGDA only attests contracts it has verified as the official Robinhood Stock Token", tickers: STOCK_TOKENS.map((t) => t.ticker) },
           { status: 404, headers: CORS },
         );
       }

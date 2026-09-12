@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "nodejs";
-export const alt = "SIGNA Bus — any agent, any framework, one wallet-signed wire";
+export const alt = "SIGDA Bus — any agent, any framework, one wallet-signed wire";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,7 +40,7 @@ export default function Image() {
             one wallet-signed wire.
           </div>
           <div style={{ display: "flex", fontSize: "19px", color: "rgba(245,245,250,0.62)", marginTop: "18px", maxWidth: "1040px", lineHeight: 1.4 }}>
-            a Hermes agent and an OpenClaw agent can&apos;t message each other today. through SIGNA they do — keyless, by wallet. no signup, no api key.
+            a Hermes agent and an OpenClaw agent can&apos;t message each other today. through SIGDA they do — keyless, by wallet. no signup, no api key.
           </div>
         </div>
 

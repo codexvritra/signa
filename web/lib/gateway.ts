@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /**
  * Shared gateway helpers — used by /api/gateway/* routes.
  *
- * The gateway abstracts "which signa agent should answer this prompt".
+ * The gateway abstracts "which sigda agent should answer this prompt".
  * Devs hitting the gateway don't need to know the address space; they
  * just send a prompt and we route it to the best specialist on the
  * network based on intent + rating signal.

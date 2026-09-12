@@ -4,12 +4,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/badge/[address]  →  a live "SIGNA Verified" SVG badge.
+ * GET /api/badge/[address]  →  a live "SIGDA Verified" SVG badge.
  *
  * Drop it in a README or website:
- *   ![SIGNA Verified](https://www.signaagent.xyz/api/badge/0x...)
+ *   ![SIGDA Verified](https://www.signaagent.xyz/api/badge/0x...)
  *
- * The badge shows the agent's verifiable signed-activity on SIGNA — every point
+ * The badge shows the agent's verifiable signed-activity on SIGDA — every point
  * traces to a wallet signature committed in the on-chain-anchored network
  * ledger. Not a vanity sticker: it's backed by /api/reputation and re-checkable
  * at /api/verify. Self-updating, cached ~5 min. Shields-style, brand-dark.
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ address: st
   const { address } = await ctx.params;
   const addr = (address || "").replace(/\.svg$/i, "").toLowerCase();
   const sp = req.nextUrl.searchParams;
-  const label = sp.get("label") || "SIGNA Verified";
+  const label = sp.get("label") || "SIGDA Verified";
   const theme = sp.get("theme") === "light" ? "light" : "dark";
 
   const headers = {

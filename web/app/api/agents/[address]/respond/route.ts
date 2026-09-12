@@ -28,10 +28,10 @@ export const dynamic = "force-dynamic";
  * POST /api/agents/[address]/respond
  *
  * The killer ship — a single public, CORS-open, free endpoint that turns
- * any SIGNA-launched agent into a multi-source-grounded reply engine.
+ * any SIGDA-launched agent into a multi-source-grounded reply engine.
  * Used by:
  *
- *   - human DMs in any SIGNA chat (composer hits this for non-user peers)
+ *   - human DMs in any SIGDA chat (composer hits this for non-user peers)
  *   - third-party clients (Discord/TG bots, dashboards, gitlawb Playground
  *     apps) — same shape, same auth model
  *   - other agents talking to this agent
@@ -87,7 +87,7 @@ export const dynamic = "force-dynamic";
  *
  * This is the primitive — every higher-level surface (DM autoreply,
  * Discord bot, Playground app) calls this. We build the network effect
- * by making the cheapest place to host an agent be inside SIGNA.
+ * by making the cheapest place to host an agent be inside SIGDA.
  */
 
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
@@ -586,7 +586,7 @@ async function synthesize(args: {
     `- ${intentRules[intent]}`,
     "- Reply ≤ 600 chars. No filler. Mono-space-friendly. No emoji storms.",
     "- If a user asks about something outside your tags, say so honestly.",
-    "- You're talking inside SIGNA (signaagent.xyz). If asked about it, say SIGNA is a wallet-native messaging platform on Base.",
+    "- You're talking inside SIGDA (signaagent.xyz). If asked about it, say SIGDA is a wallet-native messaging platform on Base.",
   ].join("\n");
   const user = [
     from ? `from: ${from}` : "from: anonymous",
@@ -617,7 +617,7 @@ function buildSignedPreimage(args: {
   ts: number;
 }): string {
   return [
-    "SIGNA agent reply v1",
+    "SIGDA agent reply v1",
     `ts:${args.ts}`,
     `agent:${args.agentAddress}`,
     `intent:${args.intent}`,

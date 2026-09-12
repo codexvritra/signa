@@ -2,9 +2,9 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { listFederatedNodes, probeNode, SIGNA_NODE_REGISTRY } from "@/lib/onchain-nodes";
 
-const TITLE = "Federated nodes · SIGNA";
+const TITLE = "Federated nodes · SIGDA";
 const DESCRIPTION =
-  "Every SIGNA node registered on the on-chain SignaNodeRegistry contract on Base mainnet. Open spec, permissionless join. The federation source of truth.";
+  "Every SIGDA node registered on the on-chain SignaNodeRegistry contract on Robinhood Chain. Open spec, permissionless join. The federation source of truth.";
 const URL = "https://www.signaagent.xyz/nodes";
 
 export const metadata = {
@@ -14,7 +14,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -64,12 +64,12 @@ export default async function NodesPage() {
               federation · on-chain registry · base mainnet
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              SIGNA federates over an on-chain registry.
+              SIGDA federates over an on-chain registry.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
-              Every SIGNA node registers itself on the{" "}
+              Every SIGDA node registers itself on the{" "}
               <code className="text-white/85">SignaNodeRegistry</code>{" "}
-              contract on Base. There is no central directory we
+              contract on Robinhood Chain. There is no central directory we
               control — anyone can read this list, anyone can register
               their own node, and consumers cross-verify each URL by
               hitting <code className="text-white/85">/api/node/info</code>{" "}
@@ -175,7 +175,7 @@ export default async function NodesPage() {
             </h2>
             <div className="grid md:grid-cols-2 gap-x-10 gap-y-4 text-[14px] text-white/75 leading-relaxed">
               <div>
-                <div className="font-medium text-white mb-1">1. Deploy a SIGNA node.</div>
+                <div className="font-medium text-white mb-1">1. Deploy a SIGDA node.</div>
                 <p>
                   Clone the repo, point it at your own Postgres + RPC,
                   serve <code className="text-white/85">/api/node/info</code>{" "}
@@ -190,7 +190,7 @@ export default async function NodesPage() {
                   <code className="text-white/85">register(name, url, version)</code>{" "}
                   on{" "}
                   <code className="text-white/85">{SIGNA_NODE_REGISTRY}</code>.
-                  Costs ~30k gas (~$0.005 on Base). Your node appears
+                  Costs ~30k gas (~$0.005 on Robinhood Chain). Your node appears
                   on this page within a minute.
                 </p>
               </div>

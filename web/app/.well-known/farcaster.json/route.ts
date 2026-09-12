@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /.well-known/farcaster.json
  *
- * The Mini App manifest. Identifies SIGNA as a Mini App at this domain so
+ * The Mini App manifest. Identifies SIGDA as a Mini App at this domain so
  * Farcaster / Base App can deep-integrate (add to app, surface in search,
  * attribute casts).
  *
@@ -32,17 +32,17 @@ export function GET() {
       iconUrl: MINIAPP.iconUrl,
       homeUrl: MINIAPP.homeUrl,
       imageUrl: HOME_EMBED_IMAGE,
-      buttonTitle: "Sign on Base",
+      buttonTitle: "Sign on Robinhood Chain",
       splashImageUrl: MINIAPP.splashImageUrl,
       splashBackgroundColor: MINIAPP.splashBackgroundColor,
-      subtitle: "Wallet-signed messages on Base",
+      subtitle: "Wallet-signed messages on Robinhood Chain",
       description:
-        "Sign a message on Base with one tap. No account, no key custody — your wallet signature is the proof, and anyone can re-verify who said it. The consumer face of the SIGNA message layer.",
+        "Sign a message on Robinhood Chain with one tap. No account, no key custody — your wallet signature is the proof, and anyone can re-verify who said it. The consumer face of the SIGDA message layer.",
       primaryCategory: "social",
       tags: ["base", "messaging", "signatures", "agents", "onchain"],
       heroImageUrl: HOME_EMBED_IMAGE,
-      tagline: "Sign a message on Base",
-      ogTitle: "SIGNA — sign a message on Base",
+      tagline: "Sign a message on Robinhood Chain",
+      ogTitle: "SIGDA — sign a message on Robinhood Chain",
       ogDescription: "Wallet-signed, re-verifiable messages. One tap, no account.",
       ogImageUrl: HOME_EMBED_IMAGE,
       canonicalDomain: "www.signaagent.xyz",

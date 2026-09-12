@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
  * GET /widget.js
  *
  * The drop-in JavaScript embed. Partners include one script tag +
- * one container element on their site and a SIGNA room widget
+ * one container element on their site and a SIGDA room widget
  * boots automatically:
  *
  *   <div data-signa-room="vorxis-164ba3" style="height:560px"></div>
@@ -27,7 +27,7 @@ export const dynamic = "force-dynamic";
  * partners get fast reloads.
  */
 
-const SCRIPT = `/*! SIGNA widget.js · MIT */
+const SCRIPT = `/*! SIGDA widget.js · MIT */
 (function(){
   var BASE = "https://www.signaagent.xyz";
   var MOUNT_ATTR = "data-signa-room";
@@ -37,7 +37,7 @@ const SCRIPT = `/*! SIGNA widget.js · MIT */
     if (el.getAttribute(MOUNTED) === "1") return;
     var slug = (el.getAttribute(MOUNT_ATTR) || "").toLowerCase().trim();
     if (!/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug)) {
-      el.innerHTML = '<div style="font-family:monospace;color:#888;padding:1em">SIGNA: invalid slug "'+slug+'"</div>';
+      el.innerHTML = '<div style="font-family:monospace;color:#888;padding:1em">SIGDA: invalid slug "'+slug+'"</div>';
       el.setAttribute(MOUNTED, "1");
       return;
     }
@@ -47,7 +47,7 @@ const SCRIPT = `/*! SIGNA widget.js · MIT */
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox");
     iframe.style.cssText = "width:100%;height:100%;border:0;display:block";
     iframe.loading = "lazy";
-    iframe.title = "SIGNA room #" + slug;
+    iframe.title = "SIGDA room #" + slug;
     // Honour the container's height — fallback to 560px if not set.
     var cs = getComputedStyle(el);
     if (!cs.height || cs.height === "auto" || cs.height === "0px") {

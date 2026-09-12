@@ -7,7 +7,7 @@ type V =
   | { ok: false; error: string };
 
 /** Re-verify the receipt against the universal verifier (kind x402_receipt).
- * The attestor's signature recovers to the fixed SIGNA attestor address — the
+ * The attestor's signature recovers to the fixed SIGDA attestor address — the
  * same check anyone can run locally with viem.recoverMessageAddress. */
 export function X402Verify({ fields }: { fields: Record<string, unknown> }) {
   const [state, setState] = useState<"idle" | "loading" | "done">("idle");
@@ -51,7 +51,7 @@ export function X402Verify({ fields }: { fields: Record<string, unknown> }) {
           {res.ok ? (
             <>
               <div className={`font-semibold ${good ? "text-[#a5c3ff]" : "text-[var(--error)]"}`}>
-                {good ? "✓ Receipt valid — signed by the SIGNA attestor" : "✗ Does not verify"}
+                {good ? "✓ Receipt valid — signed by the SIGDA attestor" : "✗ Does not verify"}
               </div>
               <div className="mt-2 font-mono text-[11px] text-faint break-all leading-relaxed">
                 recovered: {res.recovered ?? "—"}

@@ -157,7 +157,7 @@ function buildRoomMessagePreimage(args: {
   body: string;
 }) {
   return [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${args.ts}`,
     `from:${args.address.toLowerCase()}`,
     `room:${args.room_slug.toLowerCase()}`,
@@ -252,7 +252,7 @@ const SLASH: SlashCommand[] = [
   {
     name: "miroshark",
     syntax: "/miroshark <0x address>",
-    desc: "MiroShark sim activity for any SIGNA wallet (sims fired + verdicts).",
+    desc: "MiroShark sim activity for any SIGDA wallet (sims fired + verdicts).",
     async run(args) {
       const addr = args.trim().toLowerCase();
       if (!/^0x[a-f0-9]{40}$/.test(addr)) return "/miroshark — usage: /miroshark <0x address>";
@@ -820,10 +820,10 @@ export function RoomChat({
           )}
           {anchor.anchored && anchor.match && (
             <span
-              title="Room manifest hash is anchored on Base mainnet and matches what this node serves. Federation can verify this room without trusting our server."
+              title="Room manifest hash is anchored on Robinhood Chain and matches what this node serves. Federation can verify this room without trusting our server."
               className={`text-[10px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-sm border font-mono ${TONE_STYLE.green}`}
             >
-              anchored on base
+              anchored on robinhood chain
             </span>
           )}
           {anchor.anchored && !anchor.match && (

@@ -1,14 +1,14 @@
 import { cn } from "@/lib/cn";
 
 /**
- * "Built with" pill for entries SIGNA integrates on top of (Bankr, gitlawb,
+ * "Built with" pill for entries SIGDA integrates on top of (Bankr, gitlawb,
  * AEON, MiroShark). Deliberately NOT called "Partner" — they haven't
- * signed anything with us; SIGNA is built using their primitives.
+ * signed anything with us; SIGDA is built using their primitives.
  *
  * Visual lineage:
  *   - AgentBadge    → registered XMTP agent (violet pill)
  *   - VerifiedBadge → admin-vouched community agent (blue scalloped ✓)
- *   - <this>        → integration SIGNA ships on top of (purple "BUILT WITH" pill)
+ *   - <this>        → integration SIGDA ships on top of (purple "BUILT WITH" pill)
  */
 export function PartnerBadge({
   className,
@@ -29,7 +29,7 @@ export function PartnerBadge({
         dims,
         className,
       )}
-      title="SIGNA is built using this project's primitives — see the integration note below"
+      title="SIGDA is built using this project's primitives — see the integration note below"
     >
       Built with
     </span>

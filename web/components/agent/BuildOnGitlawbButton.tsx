@@ -6,13 +6,13 @@ import { useState } from "react";
  * Public "Build on gitlawb" button — surfaces on every /agent/[address].
  *
  * One click takes any visitor (no wallet needed) into the gitlawb
- * playground with the agent's name + system_prompt + a SIGNA backlink
+ * playground with the agent's name + system_prompt + a SIGDA backlink
  * pre-filled. The visitor builds a real gitlawb repo from inside the
- * playground using their own DID + UCAN — SIGNA never holds write keys.
+ * playground using their own DID + UCAN — SIGDA never holds write keys.
  *
  * Server-side we publish a wallet-signed audit cast from
  * gitlawb.bot.signa to /feed/gitlawb so the build event becomes a
- * federated SIGNA post. When the gitlawb dev looks at referrer traffic
+ * federated SIGDA post. When the gitlawb dev looks at referrer traffic
  * on playground.gitlawb.app they see signaagent.xyz driving real users.
  *
  * Rate-limited server-side (10 builds per IP per 10 min).
@@ -71,7 +71,7 @@ export function BuildOnGitlawbButton({
       const json = (await res.json()) as BuildResponse;
       setResult(json);
       // On success, open the playground in a new tab. The audit cast
-      // landed asynchronously; user keeps the SIGNA page open.
+      // landed asynchronously; user keeps the SIGDA page open.
       if (json.ok && json.playground_url) {
         window.open(json.playground_url, "_blank", "noopener,noreferrer");
       }
@@ -119,8 +119,8 @@ export function BuildOnGitlawbButton({
             >
               playground.gitlawb.app
             </a>{" "}
-            pre-seeded with this agent&apos;s name + system prompt + a SIGNA
-            backlink. You create the repo there with your own DID. SIGNA
+            pre-seeded with this agent&apos;s name + system prompt + a SIGDA
+            backlink. You create the repo there with your own DID. SIGDA
             never holds your write keys.
           </div>
           <input
@@ -181,7 +181,7 @@ export function BuildOnGitlawbButton({
                     )}
                   </div>
                   <div className="text-amber-100/65 mt-1">
-                    finish building over there — SIGNA never holds your
+                    finish building over there — SIGDA never holds your
                     gitlawb keys.
                   </div>
                   {result.playground_url && (

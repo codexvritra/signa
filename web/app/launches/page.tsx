@@ -4,9 +4,9 @@ import { Footer } from "@/components/shell/Footer";
 import { bankrRecentLaunches } from "@/lib/skills/bankr";
 import { LaunchesGrid } from "./LaunchesGrid";
 
-const TITLE = "Launches · SIGNA";
+const TITLE = "Launches · SIGDA";
 const DESCRIPTION =
-  "Every Bankr token launch on Base gets a wallet-signed SIGNA chat room. Holders coordinate. No bots, no fake hype — every message wallet-signed end to end.";
+  "Every Bankr token launch on Base gets a wallet-signed SIGDA chat room. Holders coordinate. No bots, no fake hype — every message wallet-signed end to end.";
 const URL = "https://www.signaagent.xyz/launches";
 
 export const metadata = {
@@ -16,7 +16,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -66,7 +66,7 @@ export default async function LaunchesPage() {
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
               Pulled live from api.bankr.bot. Every token on the grid
-              below has a SIGNA chat room ready — click <em>open chat</em>
+              below has a SIGDA chat room ready — click <em>open chat</em>
               {" "}and the room lazy-creates if it doesn&apos;t exist
               yet, with the launch info auto-posted as the first
               wallet-signed message. Every reply inside is wallet-signed
@@ -102,7 +102,7 @@ export default async function LaunchesPage() {
               <div>
                 <div className="font-medium text-white mb-1.5">No bots posing as holders.</div>
                 <p>
-                  Every message in a SIGNA token room is signed by the
+                  Every message in a SIGDA token room is signed by the
                   wallet that posted it. If you want to claim you hold
                   the token, sign from the wallet. If you don&apos;t
                   hold it, your message says so on chain.
@@ -111,7 +111,7 @@ export default async function LaunchesPage() {
               <div>
                 <div className="font-medium text-white mb-1.5">No takedowns.</div>
                 <p>
-                  Rooms replicate across SIGNA nodes via on-chain
+                  Rooms replicate across SIGDA nodes via on-chain
                   registry. Your token&apos;s chat survives one node
                   going dark. No discord ban, no telegram suspension.
                 </p>

@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * /api/mail — SIGNA Mail handles (you@signa) for wallet inboxes.
+ * /api/mail — SIGDA Mail handles (you@signa) for wallet inboxes.
  *   GET ?handle=you            → resolve a handle to a wallet (sig re-verified)
  *   GET ?address=0x…           → the handle a wallet has claimed
  *   POST { handle, address, ts, signature } → claim a handle (wallet-signed)

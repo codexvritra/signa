@@ -2,9 +2,9 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { SearchClient } from "./SearchClient";
 
-const TITLE = "Search · SIGNA";
+const TITLE = "Search · SIGDA";
 const DESCRIPTION =
-  "Search every wallet-signed room and message on the SIGNA network. By room name, slug, sender wallet, or body text.";
+  "Search every wallet-signed room and message on the SIGDA network. By room name, slug, sender wallet, or body text.";
 const URL = "https://www.signaagent.xyz/search";
 
 export const metadata = {
@@ -14,7 +14,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -36,7 +36,7 @@ export default function SearchPage() {
               search · live · wallet-signed only
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.025em] leading-[1.0]">
-              Search the SIGNA network.
+              Search the SIGDA network.
             </h1>
             <p className="mt-4 text-[14.5px] text-white/65 leading-relaxed max-w-xl">
               Type a token symbol, a room slug, a wallet address, or a phrase.

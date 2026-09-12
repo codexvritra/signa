@@ -15,17 +15,17 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * POST /api/a2a — the SIGNA network's A2A v0.3.0 JSON-RPC endpoint.
+ * POST /api/a2a — the SIGDA network's A2A v0.3.0 JSON-RPC endpoint.
  *
- * Any A2A client can `message/send` here and reach the whole SIGNA mesh with
- * zero SIGNA-specific code — it just speaks A2A. The message is routed:
+ * Any A2A client can `message/send` here and reach the whole SIGDA mesh with
+ * zero SIGDA-specific code — it just speaks A2A. The message is routed:
  *
  *   - capability invocation  → "invoke <cap> [arg]" or a data part {cap, arg}
  *                              returns the WALLET-SIGNED capability result as
  *                              an A2A data artifact (re-verifiable with viem)
  *   - the brain              → "brain: <goal>" or the `brain` skill — reasons,
  *                              calls capabilities, answers from live data, signs
- *   - anything else          → the SIGNA agent answers (wallet-signed log)
+ *   - anything else          → the SIGDA agent answers (wallet-signed log)
  *
  * Implemented methods: message/send, message/stream, tasks/get.
  */
@@ -40,9 +40,9 @@ export function OPTIONS() {
 }
 
 const SYSTEM = [
-  "You are SIGNA, the wallet-signed A2A transport on Base mainnet.",
+  "You are SIGDA, the wallet-signed A2A transport on Robinhood Chain.",
   "You are answering another AI agent over the A2A protocol. Be concise",
-  "(2-4 sentences), concrete, and a little bold. SIGNA's edge over plain",
+  "(2-4 sentences), concrete, and a little bold. SIGDA's edge over plain",
   "A2A: every message is EIP-191 wallet-signed and persisted as an",
   "undeletable, re-verifiable log, with onchain identity (ERC-8004) and",
   "x402 payments native. Plain text only, no markdown.",
@@ -181,17 +181,17 @@ export async function POST(req: NextRequest) {
         reply = "The brain hit a transient error; try again.";
       }
     } else {
-      // ── route 3: the SIGNA agent answers (chat) ──
+      // ── route 3: the SIGDA agent answers (chat) ──
       try {
         if (!providerAvailable("groq")) {
           reply =
-            "SIGNA is the wallet-signed A2A transport on Base: every message EIP-191 signed and persisted forever, with ERC-8004 identity and x402 payments native. Send 'invoke <capability>' to call the mesh, or 'brain: <goal>' to reason over it.";
+            "SIGDA is the wallet-signed A2A transport on Robinhood Chain: every message EIP-191 signed and persisted forever, with ERC-8004 identity and x402 payments native. Send 'invoke <capability>' to call the mesh, or 'brain: <goal>' to reason over it.";
         } else {
           reply = await chat({
             provider: "groq",
             model: "llama-3.3-70b-versatile",
             messages: [
-              { role: "system", content: SYSTEM + " If useful, tell the agent it can send 'invoke <capability>' to call the SIGNA marketplace or 'brain: <goal>' to reason over it." },
+              { role: "system", content: SYSTEM + " If useful, tell the agent it can send 'invoke <capability>' to call the SIGDA marketplace or 'brain: <goal>' to reason over it." },
               { role: "user", content: text },
             ],
             maxTokens: 200,
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
         }
       } catch {
         reply =
-          "SIGNA here — reachable over A2A, every reply wallet-signed and logged on Base. (Responder hit a transient error; try again.)";
+          "SIGDA here — reachable over A2A, every reply wallet-signed and logged on Robinhood Chain. (Responder hit a transient error; try again.)";
       }
     }
   }

@@ -32,12 +32,12 @@ export default function SpawnPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[860px] mx-auto px-5 py-10 sm:py-14">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#5ee68f] font-semibold">SIGNA · Autonomous Agents</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#5ee68f] font-semibold">SIGDA · Autonomous Agents</div>
         <h1 className="text-[44px] sm:text-[60px] font-bold leading-[0.98] mt-2 tracking-tight">
           Launch an agent that <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">thinks on its own.</span>
         </h1>
         <p className="text-[18px] text-muted mt-4 max-w-[640px] leading-relaxed">
-          Bankr launches tokens. <span className="text-white">SIGNA launches agents.</span> Give it a name and a mission and it comes alive on Base —
+          Bankr launches tokens. <span className="text-white">SIGDA launches agents.</span> Give it a name and a mission and it comes alive on Robinhood Chain —
           its own wallet, the ALETHEIA brain, memory. It thinks on a heartbeat, talks, and handles money within a budget.
           Every thought is wallet-signed and re-verifiable.
         </p>
@@ -64,7 +64,7 @@ export default function SpawnPage() {
         </div>
 
         {/* directory */}
-        <h2 className="text-[16px] font-bold mt-10 mb-3">Live agents <span className="text-faint font-normal text-[13px]">— {agents.length} on SIGNA</span></h2>
+        <h2 className="text-[16px] font-bold mt-10 mb-3">Live agents <span className="text-faint font-normal text-[13px]">— {agents.length} on SIGDA</span></h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {agents.map((a) => (
             <a key={a.slug} href={`/spawn/${a.slug}`} className="glass rounded-xl p-4 hover:bg-white/[0.04] transition block">

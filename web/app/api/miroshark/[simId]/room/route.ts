@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/miroshark/[simId]/room
  *
- * Lazy-create a wallet-signed SIGNA room for a MiroShark simulation.
+ * Lazy-create a wallet-signed SIGDA room for a MiroShark simulation.
  * Bot wallet signs the room manifest + an intro message with the
  * sim's topic. Idempotent — slug is derived from simId.
  *
@@ -100,12 +100,12 @@ export async function POST(
   const title = scenario ? scenario.slice(0, 60) : `sim ${simId.slice(0, 8)}`;
   const description = [
     `MiroShark sim thread · ${title}`,
-    `Powered by SIGNA wallet-signed chat.`,
+    `Powered by SIGDA wallet-signed chat.`,
   ].join(" · ").slice(0, 500);
 
   // v0.83 — optional $MIROSHARK hold-to-chat gate on the sim room.
   // Reads stay open. Posts require the holder. Server-enforced via
-  // viem.balanceOf on Base mainnet (existing gating machinery).
+  // viem.balanceOf on Robinhood Chain (existing gating machinery).
   const gateTokenRaw = process.env.MIROSHARK_TOKEN_ADDRESS;
   const gateChain = process.env.MIROSHARK_TOKEN_CHAIN ?? "base";
   const gateMinRaw =
@@ -126,7 +126,7 @@ export async function POST(
 
   const roomTs = Date.now();
   const roomMessage = [
-    "SIGNA room create v1",
+    "SIGDA room create v1",
     `ts:${roomTs}`,
     `address:${botAddr}`,
     `name:sim · ${title}`,
@@ -187,7 +187,7 @@ export async function POST(
   ].filter(Boolean).join("\n");
 
   const msgPreimage = [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${ts}`,
     `from:${botAddr}`,
     `room:${slug}`,
@@ -214,8 +214,8 @@ export async function POST(
 /**
  * GET /api/miroshark/[simId]/room
  *
- * Returns the SIGNA room (if any) attached to this sim id. Lets the
- * MiroShark share page drop a single "Discuss this sim on SIGNA" link
+ * Returns the SIGDA room (if any) attached to this sim id. Lets the
+ * MiroShark share page drop a single "Discuss this sim on SIGDA" link
  * without needing to call the POST creator.
  */
 export async function GET(

@@ -83,16 +83,16 @@ export async function generateMetadata({
   const handle = decodeURIComponent(raw);
   const display = handle.length > 30 ? `${handle.slice(0, 30)}…` : handle;
   return {
-    title: `${display} on SIGNA`,
-    description: `Wallet-native profile for ${display}. DM them encrypted over XMTP on Base.`,
+    title: `${display} on SIGDA`,
+    description: `Wallet-native profile for ${display}. DM them encrypted over XMTP on Robinhood Chain.`,
     openGraph: {
-      title: `${display} on SIGNA`,
+      title: `${display} on SIGDA`,
       description: `Wallet-native profile. Encrypted DMs. On Base.`,
       type: "profile",
     },
     twitter: {
       card: "summary",
-      title: `${display} on SIGNA`,
+      title: `${display} on SIGDA`,
     },
   };
 }
@@ -251,7 +251,7 @@ export default async function UserProfilePage({
         <section className="border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
             <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-              $ signa feed --author {display}
+              $ sigda feed --author {display}
             </div>
             {posts.length === 0 ? (
               <div className="border border-dashed border-white/15 px-4 py-6 font-mono text-[12px] text-white/55">

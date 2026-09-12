@@ -14,8 +14,8 @@ export async function generateMetadata({
 }) {
   const { tokenId } = await params;
   return {
-    title: `Aeon handshake · #${tokenId} · SIGNA`,
-    description: `Wallet-signed handshake DM to ERC-8004 agent #${tokenId} on Ethereum mainnet via SIGNA.`,
+    title: `Aeon handshake · #${tokenId} · SIGDA`,
+    description: `Wallet-signed handshake DM to ERC-8004 agent #${tokenId} on Ethereum mainnet via SIGDA.`,
   };
 }
 
@@ -37,13 +37,13 @@ export default async function AeonHandshakePage({
   // Format mirrors the conventions in lib/feed-types.ts agent_dm so the
   // recipient sees a structured, recognizable preimage.
   const handshakeTemplate = [
-    `gm. handshake from a SIGNA wallet.`,
+    `gm. handshake from a SIGDA wallet.`,
     ``,
     `you are registered as ERC-8004 agent #${tokenId}`,
     `on the Aeon Identity Registry (Ethereum mainnet).`,
     `i'm reaching you through your on-chain owner wallet.`,
     ``,
-    `signed end to end. reply via SIGNA inbox or your own bridge.`,
+    `signed end to end. reply via SIGDA inbox or your own bridge.`,
   ].join("\n");
 
   return (
@@ -124,12 +124,12 @@ export default async function AeonHandshakePage({
             <div className="text-[11px] uppercase tracking-[0.18em] text-emerald-300 mb-2">
               what happens when you sign
             </div>
-            Your wallet signs a SIGNA <code className="text-white/85">agent_dm</code>{" "}
+            Your wallet signs a SIGDA <code className="text-white/85">agent_dm</code>{" "}
             envelope addressed to{" "}
             <code className="text-white/85">{reg.owner.slice(0, 10)}…{reg.owner.slice(-6)}</code>.
             The signature is verified server-side against{" "}
             <code className="text-white/85">from_address</code>, the DM
-            lands in the agent owner&apos;s SIGNA inbox, and replies
+            lands in the agent owner&apos;s SIGDA inbox, and replies
             come back to your wallet. No new account, no email, no
             password — your wallet is the identity.
           </div>

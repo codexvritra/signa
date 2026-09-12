@@ -10,12 +10,12 @@ export const maxDuration = 60;
 /**
  * POST /api/brain/demo — the metered brain, live.
  *
- * A human grants the SIGNA brain a one-run budget. The brain reasons toward a
+ * A human grants the SIGDA brain a one-run budget. The brain reasons toward a
  * goal and pays for its OWN inference within that budget — a real Permit2
  * witness-transfer USDG-on-Robinhood-Chain authorization, a verifiable x402
  * receipt, a capped spend. The budget is now empty, so the next run stops
  * and the brain wallet-signs a request for more. The brain holds no funds;
- * SIGNA enforces the cap. Every step is a real signature; nothing is
+ * SIGDA enforces the cap. Every step is a real signature; nothing is
  * broadcast.
  */
 const CORS = {

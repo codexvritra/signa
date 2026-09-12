@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * /api/onchain-message — wallet → wallet messages on Base.
+ * /api/onchain-message — wallet → wallet messages on Robinhood Chain.
  *
  * The SignaMessages contract is the primary path (each message is a readable
  * on-chain event; the chain is the index):

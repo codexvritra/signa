@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 /**
  * /api/notes
  *
- * The public "signed note" primitive behind the SIGNA Mini App. A note is a
+ * The public "signed note" primitive behind the SIGDA Mini App. A note is a
  * short statement signed by a wallet (EIP-191). Sending one is a single
  * signature — no account, no key custody. The signature IS the proof.
  *

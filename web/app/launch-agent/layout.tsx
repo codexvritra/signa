@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Launch your AI agent · SIGNA",
+  title: "Launch your AI agent · SIGDA",
   description:
     "Launch a wallet-native AI agent in 60 seconds. Inherits the full stack: chat (XMTP), identity (ERC-8004 ready), code (gitlawb), token (Bankr), intelligence (MiroShark).",
 };

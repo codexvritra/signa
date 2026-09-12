@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "nodejs";
-export const alt = "SIGNA Signed Pipelines — verifiable multi-provider agent runs on Base";
+export const alt = "SIGDA Signed Pipelines — verifiable multi-provider agent runs on Robinhood Chain";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

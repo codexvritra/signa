@@ -322,7 +322,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Persist sync_state regardless of outcome — operators want to see
-    // ongoing failure trails in `signa sync status`.
+    // ongoing failure trails in `sigda sync status`.
     const now = new Date().toISOString();
     const errorString = res.errors.length > 0 ? res.errors.join("; ").slice(0, 500) : null;
     await db.from("sync_state").upsert(

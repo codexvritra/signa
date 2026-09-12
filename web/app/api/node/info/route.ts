@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
  * The advertising endpoint every signa-node operator exposes. The CLI
  * uses this to:
  *   - validate that a URL actually serves the signa protocol
- *     (`signa node verify <url>`)
- *   - render node metadata in the `signa nodes` table
+ *     (`sigda node verify <url>`)
+ *   - render node metadata in the `sigda nodes` table
  *   - decide whether to talk to this node based on its capabilities
  *
  * Public, CORS-open. No auth — node metadata is the FIRST thing other
@@ -54,7 +54,7 @@ export async function GET() {
   // ---- operator attestation (v0.13) ----
   //
   // Optional. When the operator has pre-signed the canonical descriptor
-  // locally (via `signa node sign-attestation` on their dev machine) and
+  // locally (via `sigda node sign-attestation` on their dev machine) and
   // pasted the signature + timestamp into env, we serve it here so any
   // CLI can re-verify cryptographically that the wallet at `operator`
   // actually attested THIS node configuration.
@@ -77,7 +77,7 @@ export async function GET() {
   ) {
     const sortedCaps = [...capabilities].sort().join(",");
     const preimage = [
-      "SIGNA node v1",
+      "SIGDA node v1",
       `url:${publicUrl.replace(/\/$/, "")}`,
       `name:${name}`,
       `operator:${operator}`,
@@ -139,6 +139,6 @@ export async function GET() {
       seed_peers: [],
     },
     notes:
-      "signa nodes are federable. point your CLI at any node with `signa node use <url>`. signatures verify the same on every node — the wallet is the source of truth. operator attestation is optional but recommended — see `signa node sign-attestation`.",
+      "sigda nodes are federable. point your CLI at any node with `sigda node use <url>`. signatures verify the same on every node — the wallet is the source of truth. operator attestation is optional but recommended — see `sigda node sign-attestation`.",
   });
 }

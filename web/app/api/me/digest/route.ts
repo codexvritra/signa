@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * POST /api/me/digest — toggle the daily-digest opt-in for a SIGNA user.
+ * POST /api/me/digest — toggle the daily-digest opt-in for a SIGDA user.
  *
  * Body: { address, enabled, ts, signature }
  *   Signature is the wallet's attestation of intent (see

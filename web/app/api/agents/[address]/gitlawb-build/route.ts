@@ -9,20 +9,20 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/agents/[address]/gitlawb-build
  *
- * Public, no-auth endpoint. Any visitor on a SIGNA agent profile can
+ * Public, no-auth endpoint. Any visitor on a SIGDA agent profile can
  * click "Build on gitlawb", type a repo name + short pitch, and we
  * compose a deeplink to playground.gitlawb.app pre-seeded with the
- * agent's name, system_prompt, and a SIGNA backlink.
+ * agent's name, system_prompt, and a SIGDA backlink.
  *
  * Server-side we also publish a wallet-signed audit cast from
- * gitlawb.bot.signa to /feed/gitlawb so the SIGNA network sees that a
+ * gitlawb.bot.signa to /feed/gitlawb so the SIGDA network sees that a
  * gitlawb-build was triggered against this agent. That makes the agent
  * profile a real funnel into gitlawb — when the gitlawb dev looks at
  * referrer traffic on playground.gitlawb.app they see signaagent.xyz
  * driving real users.
  *
  * No write access to gitlawb is needed — the user does the actual
- * repo creation in the playground using their own DID + UCAN. SIGNA
+ * repo creation in the playground using their own DID + UCAN. SIGDA
  * just plants the seed.
  *
  * Body: { repo_name: string, pitch?: string }
@@ -161,7 +161,7 @@ export async function POST(
   const seedPrompt = [
     `Repo: ${repo_name}`,
     pitch ? `Pitch: ${pitch}` : null,
-    `Seeded from SIGNA agent: ${agentRow.name}`,
+    `Seeded from SIGDA agent: ${agentRow.name}`,
     agentRow.description ? `Agent description: ${agentRow.description}` : null,
     agentRow.system_prompt
       ? `Agent system prompt: ${agentRow.system_prompt}`
@@ -181,7 +181,7 @@ export async function POST(
   // /feed/gitlawb and cross-node federates. Soft-fail if the bot
   // wallet isn't configured — the playground URL is still useful.
   const auditBody =
-    `🛠 proposed gitlawb repo "${repo_name}" seeded from SIGNA agent ${agentRow.name} (${agent}). ` +
+    `🛠 proposed gitlawb repo "${repo_name}" seeded from SIGDA agent ${agentRow.name} (${agent}). ` +
     `open the playground: ${playground_url}`;
   let audit_post_id: string | null = null;
   const post = await botPost("gitlawb", auditBody);

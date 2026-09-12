@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Bankr → SIGNA whale-watch poller.
+ * Bankr → SIGDA whale-watch poller.
  *
  * Scans Base mainnet for $BNKR (Bankr's native token) Transfer events
  * above a configurable whale threshold and publishes a wallet-signed

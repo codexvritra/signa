@@ -3,9 +3,9 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { supabase } from "@/lib/supabase";
 
-const TITLE = "Bankr leaderboard · SIGNA";
+const TITLE = "Bankr leaderboard · SIGDA";
 const DESCRIPTION =
-  "Bankr-launched tokens ranked by signed chat activity on their SIGNA holder room. Real wallet-signed receipts, no vanity metrics.";
+  "Bankr-launched tokens ranked by signed chat activity on their SIGDA holder room. Real wallet-signed receipts, no vanity metrics.";
 const URL = "https://www.signaagent.xyz/launches/leaderboard";
 
 export const metadata = {
@@ -15,7 +15,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -163,7 +163,7 @@ export default async function LaunchesLeaderboardPage() {
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
               Bankr-launched tokens ranked by wallet-signed chat activity
-              on their SIGNA holder room. 7-day signed-message count
+              on their SIGDA holder room. 7-day signed-message count
               drives the order. Vanity metrics get filtered out — every
               count is backed by a real signature on a real wallet.
             </p>

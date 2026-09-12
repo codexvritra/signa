@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * POST /api/x402/demo — run a full x402 receipt flow end to end, live.
  *
  * Generates a fresh buyer agent, has it sign a REAL Permit2 witness-transfer
- * payment authorization for a tiny amount of USDG, then issues a SIGNA
+ * payment authorization for a tiny amount of USDG, then issues a SIGDA
  * receipt binding the request, terms, that authorization, and the delivered
  * output. The authorization is genuine and verifiable; it is NOT broadcast —
  * no funds move. This is the agentic-commerce loop made provable in one
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
   };
   const output = {
     delivered: true,
-    snapshot: { pair: "SIGNA/ETH", gas_gwei: 0.012, note: "sample deliverable returned to the buyer agent" },
+    snapshot: { pair: "SIGDA/ETH", gas_gwei: 0.012, note: "sample deliverable returned to the buyer agent" },
     delivered_at: new Date(nowSec * 1000).toISOString(),
   };
 

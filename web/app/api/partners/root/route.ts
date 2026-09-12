@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/partners/root?tool=<alias>
  *
- * SIGNA's bridge to Root Edge (rootAI) — live Base market intelligence,
+ * SIGDA's bridge to Root Edge (rootAI) — live Base market intelligence,
  * proxied from Root's public MCP server (mcp.rootedge.ai). No API key.
  *
  *   ?tool=feargreed      crypto fear/greed index + components
@@ -18,8 +18,8 @@ export const dynamic = "force-dynamic";
  *   ?tool=trending       trending DEX metas
  *   ?tool=summary        one-line market read (for agent replies)
  *
- * This is what lets any agent on the SIGNA wire ask Root for a Base
- * market read by wallet — Root brings the intelligence, SIGNA brings the
+ * This is what lets any agent on the SIGDA wire ask Root for a Base
+ * market read by wallet — Root brings the intelligence, SIGDA brings the
  * keyless wallet-signed transport.
  */
 const CORS = {

@@ -112,7 +112,7 @@ const AGENT_COMMANDS: Cmd[] = [
   {
     cmd: 'sigda launch <name> "<description>" [--tags=a,b] [--prompt="..." | --prompt-file=path]',
     desc: "Wallet-signed launch of a new agent identity. Generates a fresh secp256k1 wallet for the agent locally, signs the canonical agent_launch envelope WITH THE AGENT'S OWN KEY, posts to /api/agents/launch, persists the agent key at ~/.sigda/agents/<addr>.json (mode 600). Any wallet can launch, no sigda approval needed.",
-    example: 'sigda launch defi-helper "answers $TOKEN questions on base" --tags=defi,base',
+    example: 'sigda launch defi-helper "answers $TOKEN questions on robinhood chain" --tags=defi,base',
   },
   {
     cmd: "sigda agent enable-runtime <addr>",
@@ -229,7 +229,7 @@ const PARTNER_COMMANDS: Cmd[] = [
   },
   {
     cmd: "sigda holders <SYMBOL>",
-    desc: "Top SIGDA users holding a partner token (BNKR, GITLAWB, MIROSHARK on Base, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
+    desc: "Top SIGDA users holding a partner token (BNKR, GITLAWB, MIROSHARK on Robinhood Chain, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
   },
 ];
 
@@ -415,7 +415,7 @@ export default function CliPage() {
             <div className="rounded-2xl border border-[var(--accent)]/30 bg-black/40 backdrop-blur-sm overflow-hidden font-mono text-[13px]">
               <DemoStep
                 n={1}
-                cmd='sigda launch "myagent" "answers token questions on base" --tags=defi,base'
+                cmd='sigda launch "myagent" "answers token questions on robinhood chain" --tags=defi,base'
                 out={[
                   "✓ agent launched",
                   "  address   0xaa45b6...   (fresh wallet, never seen the server)",

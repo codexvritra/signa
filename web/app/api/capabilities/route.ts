@@ -11,12 +11,12 @@ export const dynamic = "force-dynamic";
  * GET /api/capabilities
  *
  * The capability directory. Returns three layers:
- *  - built-ins SIGNA fulfils for partner agents (Bankr, Root Edge)
+ *  - built-ins SIGDA fulfils for partner agents (Bankr, Root Edge)
  *  - registered: the open marketplace — any developer published these with one
  *    wallet-signed call; each is callable now and (optionally) priced in USDC
  *  - advertised: capabilities live agents announce via the bridge registry
  *
- * This is how any agent that speaks the SIGNA protocol discovers what the
+ * This is how any agent that speaks the SIGDA protocol discovers what the
  * network can do — keyless, no account. Registration is permissionless (one
  * signature); calls are gateway-mediated (SSRF-guarded, revocable).
  */
@@ -33,7 +33,7 @@ export function OPTIONS() {
 }
 
 export async function GET(_req: NextRequest) {
-  // built-ins fulfilled by the SIGNA capability gateway
+  // built-ins fulfilled by the SIGDA capability gateway
   const builtins = CAPABILITY_CATALOG.map((c) => ({ ...c, kind: "builtin", invoke: `/api/capabilities/invoke?cap=${encodeURIComponent(c.name)}` }));
 
   // the open marketplace — capabilities developers registered with one signature
@@ -56,7 +56,7 @@ export async function GET(_req: NextRequest) {
     /* marketplace read best-effort */
   }
 
-  // the trustless tier — capabilities registered directly on Base (read from chain)
+  // the trustless tier — capabilities registered directly on Robinhood Chain (read from chain)
   let onchain: Array<Record<string, unknown>> = [];
   try {
     const rows = await listOnchainCapabilities(100);
@@ -108,10 +108,10 @@ export async function GET(_req: NextRequest) {
       register: {
         offchain: { endpoint: "/api/capabilities/register", how: "POST a wallet-signed envelope — one signature, no account, no API key" },
         onchain: capabilityRegistryAddress()
-          ? { contract: capabilityRegistryAddress(), how: "call register(name,endpoint,method,description,priceUsdc,payTo) on Base — discovery reads straight from chain, no trust in this index" }
+          ? { contract: capabilityRegistryAddress(), how: "call register(name,endpoint,method,description,priceUsdc,payTo) on Robinhood Chain — discovery reads straight from chain, no trust in this index" }
           : { contract: null, how: "on-chain registry not yet configured on this node" },
       },
-      note: "Invoke any capability at /api/capabilities/invoke?cap=<name>&arg=<input>. Results are wallet-signed and re-verifiable against the gateway. Off-chain registration is permissionless; the on-chain tier is fully trustless (the callable spec lives on Base). Calls are gateway-mediated and SSRF-guarded.",
+      note: "Invoke any capability at /api/capabilities/invoke?cap=<name>&arg=<input>. Results are wallet-signed and re-verifiable against the gateway. Off-chain registration is permissionless; the on-chain tier is fully trustless (the callable spec lives on Robinhood Chain). Calls are gateway-mediated and SSRF-guarded.",
     },
     { headers: CORS },
   );

@@ -63,13 +63,13 @@ export default async function AgentRuntimePage({
               ../agent/{shortAddress(address)}
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa runtime enable --agent {shortAddress(address)}
+              $ sigda runtime enable --agent {shortAddress(address)}
             </div>
             <div className="flex items-start gap-4 mb-7">
               <PeerAvatar address={agent.avatar_seed || agent.address} size={56} />
               <div className="min-w-0">
                 <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.035em] leading-tight">
-                  Run {agent.name} on SIGNA.
+                  Run {agent.name} on SIGDA.
                 </h1>
                 <p className="text-white/55 text-[12px] font-mono mt-1.5 break-all">
                   {address}
@@ -77,7 +77,7 @@ export default async function AgentRuntimePage({
               </div>
             </div>
             <p className="text-white/65 text-[15px] leading-relaxed max-w-xl">
-              Hand SIGNA the agent&apos;s private key once. We encrypt it with
+              Hand SIGDA the agent&apos;s private key once. We encrypt it with
               AES-256-GCM using a server-side master key and run an XMTP
               listener + Groq inference loop on its behalf. Anyone DMing this
               agent gets a real reply using the system prompt from launch.

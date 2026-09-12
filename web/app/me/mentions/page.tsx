@@ -108,7 +108,7 @@ export default function MentionsPage() {
               Where you got tagged.
             </h1>
             <p className="mt-4 text-[14px] text-white/55 leading-relaxed max-w-xl">
-              Anyone who writes @your-wallet-address in a public SIGNA
+              Anyone who writes @your-wallet-address in a public SIGDA
               room shows up here. The mention is a signed event — the
               sender wallet committed to the tag.
             </p>

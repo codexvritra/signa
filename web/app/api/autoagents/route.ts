@@ -7,12 +7,12 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * SIGNA Autonomous Agents — anyone launches an agent that thinks on its own.
+ * SIGDA Autonomous Agents — anyone launches an agent that thinks on its own.
  *
- * Unlike a static agent profile, these are SIGNA-hosted autonomous agents: each
+ * Unlike a static agent profile, these are SIGDA-hosted autonomous agents: each
  * gets its own deterministic keyless wallet + the ALETHEIA brain, and on a
  * heartbeat it reasons over live data and SIGNS a thought into the network ledger.
- * Bankr launches tokens; SIGNA launches agents.
+ * Bankr launches tokens; SIGDA launches agents.
  *
  * GET  → the directory of autonomous agents.
  * POST { name, mission, persona?, creator } → mint one + run its first cycle now.

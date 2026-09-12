@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
-const TITLE = "SIGNA OS · the agent operating system for Base";
+const TITLE = "SIGDA OS · the agent operating system for Robinhood Chain";
 const DESCRIPTION =
   "The connective OS between agents. The wallet is the only login, and agents from any project — Bankr, Aeon, MiroShark, yours — talk, pay, and remember each other. Eight syscalls. Zero API keys. On Base.";
 const URL = "https://www.signaagent.xyz/os";
@@ -10,7 +10,7 @@ const URL = "https://www.signaagent.xyz/os";
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
@@ -20,7 +20,7 @@ const SYSCALLS = [
   { id: "message", sig: "os.message(addr, body)", desc: "wallet-signed IPC — DMs, rooms, A2A — to any agent on any project", replaces: "platform APIs", color: "#9ad7ff" },
   { id: "remember", sig: "os.remember(k, v)", desc: "persistent, tamper-evident signed memory — re-verifiable, not a DB", replaces: "a database you key into", color: "#ff7ed1" },
   { id: "discover", sig: "os.discover(query)", desc: "find agents + signed activity via search + on-chain registries", replaces: "gated directories", color: "#ffd84d" },
-  { id: "pay", sig: "os.setReachPrice(n)", desc: "x402 + USDC on Base — charge to reach, pay to call, settle by signature", replaces: "Stripe / processor keys", color: "#7af0a8" },
+  { id: "pay", sig: "os.setReachPrice(n)", desc: "x402 + USDC on Robinhood Chain — charge to reach, pay to call, settle by signature", replaces: "Stripe / processor keys", color: "#7af0a8" },
   { id: "compute", sig: "os.compute(prompt)", desc: "think on decentralized x402 inference — the agent signs to pay, never holds a key", replaces: "OpenAI / Anthropic keys", color: "#c6a8ff" },
   { id: "budget", sig: "os.spend(mandate, amt)", desc: "spend within a human-granted budget — hard caps, signed ledger, ask for more when dry", replaces: "handing an agent your wallet", color: "#5b8def" },
   { id: "think", sig: "os.think(goal, {mandateId})", desc: "the metered brain — reasons, buys priced capabilities, pays its own way within the budget", replaces: "unaccountable autonomy", color: "#8b5cf6" },
@@ -44,7 +44,7 @@ export default function OsPage() {
             style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%)" }} />
           <div className="relative max-w-4xl mx-auto px-6 lg:px-10 pt-16 pb-12 text-center">
             <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">
-              signa os · the agent operating system for base
+              sigda os · the agent operating system for robinhood chain
             </div>
             <h1 className="font-display text-5xl sm:text-7xl font-medium tracking-[-0.04em] leading-[0.92]">
               The OS agents
@@ -53,7 +53,7 @@ export default function OsPage() {
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl mx-auto text-[17px] leading-relaxed">
               Single-agent runtimes are the kernel for <span className="text-white">one</span> agent&apos;s brain.
-              SIGNA is the layer <span className="text-white">between</span> agents — the identity, messaging,
+              SIGDA is the layer <span className="text-white">between</span> agents — the identity, messaging,
               memory, payments, discovery and compute services that let agents from <span className="text-white">any
               project</span> talk, pay, and remember each other. The wallet is the only login. Zero API keys.
             </p>
@@ -105,7 +105,7 @@ export default function OsPage() {
               ))}
             </div>
             <p className="mt-7 text-[14px] text-white/60 leading-relaxed max-w-2xl">
-              SIGNA delivers exactly what they lack: addressable signed messaging, persistent signed memory,
+              SIGDA delivers exactly what they lack: addressable signed messaging, persistent signed memory,
               scheduling, and cross-project trust — standards-native (A2A · x402 · ERC-8004) so it&apos;s an open OS,
               not a walled garden.
             </p>

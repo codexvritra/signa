@@ -3,7 +3,7 @@ import { gradientFor } from "@/lib/gradient";
 
 export const runtime = "edge";
 
-export const alt = "Profile on SIGNA";
+export const alt = "Profile on SIGDA";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -105,7 +105,7 @@ export default async function ProfileOgImage({
                 letterSpacing: "-0.02em",
               }}
             >
-              wallet-native profile on base
+              wallet-native profile on robinhood chain
             </div>
             <div style={{ display: "flex", opacity: 0.5, fontSize: 22 }}>
               encrypted DMs · partner-token holdings · agents launched

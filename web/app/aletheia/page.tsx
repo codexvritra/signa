@@ -11,7 +11,7 @@ type Result = {
 
 const SAMPLES = [
   "Read the Base market and give me a sharp one-line take with a number.",
-  "Is now a cheap moment to transact on Base? Check gas and the latest block.",
+  "Is now a cheap moment to transact on Robinhood Chain? Check gas and the latest block.",
   "What's the fear & greed index right now and the contrarian move it implies?",
 ];
 const cleanObs = (o: string) => { try { const j = JSON.parse(o); return Object.entries(j).slice(0, 3).map(([k, v]) => `${k}: ${String(v).slice(0, 22)}`).join(" · "); } catch { return o.slice(0, 90); } };
@@ -45,11 +45,11 @@ export default function AletheiaPage() {
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[880px] mx-auto px-5 py-10 sm:py-14">
         {/* hero */}
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#5ee68f] font-semibold">SIGNA · model release</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#5ee68f] font-semibold">SIGDA · model release</div>
         <h1 className="text-[52px] sm:text-[72px] font-bold leading-[0.98] mt-2 tracking-tight">
           <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">ALETHEIA</span>
         </h1>
-        <div className="text-[16px] text-muted mt-1">Aletheia 1.0 — SIGNA&apos;s verifiable reasoning model</div>
+        <div className="text-[16px] text-muted mt-1">Aletheia 1.0 — SIGDA&apos;s verifiable reasoning model</div>
         <p className="text-[20px] mt-4 max-w-[680px] leading-relaxed">
           Greek for <span className="italic">truth made visible</span>. The first reasoning model where every answer is
           <span className="text-[#6ea2ff]"> grounded in live data</span>,
@@ -115,7 +115,7 @@ export default function AletheiaPage() {
         {/* model card */}
         <h2 className="text-[18px] font-bold mt-12 mb-3">Model card</h2>
         <p className="text-[14px] text-muted leading-relaxed">
-          Aletheia is a <span className="text-white">verifiable reasoning model</span>: it reasons on SIGNA&apos;s
+          Aletheia is a <span className="text-white">verifiable reasoning model</span>: it reasons on SIGDA&apos;s
           decentralized inference and acts through the keyless capability mesh (live market, prices, gas, launches,
           TVL), then commits to its answer with a wallet signature. Its edge isn&apos;t parameter count — it&apos;s
           that <span className="text-white">you never have to trust the output</span>. Every answer ships with a
@@ -125,7 +125,7 @@ export default function AletheiaPage() {
           {[
             ["Signed", "Every answer is wallet-signed by the model key. Recover the signer at /api/verify.", "#5ee68f"],
             ["Grounded", "Cites live tool data, not training memory — no hallucinated numbers.", "#6ea2ff"],
-            ["Anchored", "Answers land in SIGNA's on-chain-anchored ledger on Base — tamper-evident.", "#a98bff"],
+            ["Anchored", "Answers land in SIGDA's on-chain-anchored ledger on Robinhood Chain — tamper-evident.", "#a98bff"],
           ].map(([h, d, c]) => (
             <div key={h} className="glass rounded-xl p-4">
               <div className="text-[15px] font-bold" style={{ color: c }}>{h}</div>
@@ -137,7 +137,7 @@ export default function AletheiaPage() {
 
         <p className="text-[12px] text-faint mt-8 leading-relaxed">
           Aletheia powers <a className="text-[#a5c3ff] hover:underline" href="/vera">VERA</a> (the autonomous agent) and the
-          SIGNA <a className="text-[#a5c3ff] hover:underline" href="/brain">brain</a>. API: <span className="font-mono">POST /api/brain2 {`{ goal }`}</span>.
+          SIGDA <a className="text-[#a5c3ff] hover:underline" href="/brain">brain</a>. API: <span className="font-mono">POST /api/brain2 {`{ goal }`}</span>.
           Re-verify any answer at <a className="text-[#a5c3ff] hover:underline" href="/verify">/verify</a> (kind <span className="font-mono">aletheia</span>). Don&apos;t trust — verify.
         </p>
       </div>

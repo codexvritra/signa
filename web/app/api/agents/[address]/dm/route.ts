@@ -222,7 +222,7 @@ export async function POST(
   // attach a valid x402 payment, the DM is flagged paid=true (priority)
   // and a payment receipt is recorded. If no/invalid payment is
   // attached, the message is STILL delivered as a normal free DM.
-  // Delivery is never blocked. SIGNA never holds funds (the Permit2
+  // Delivery is never blocked. SIGDA never holds funds (the Permit2
   // authorization settles out of band, permissionlessly).
   let paid = false;
   let paymentAuthorization: Permit2Authorization | null = null;

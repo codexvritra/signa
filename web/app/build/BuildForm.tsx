@@ -14,17 +14,17 @@ const PRESET_IDEAS: Array<{ label: string; prompt: string }> = [
   {
     label: "base trending dashboard",
     prompt:
-      "single-html dashboard showing the top 10 trending tokens on Base. live prices, 24h change, sparkline chart for each.",
+      "single-html dashboard showing the top 10 trending tokens on Robinhood Chain. live prices, 24h change, sparkline chart for each.",
   },
   {
     label: "agent chat embed",
     prompt:
-      "single-html page that lets visitors chat with a SIGNA agent. textarea + reply pane, no other chrome.",
+      "single-html page that lets visitors chat with a SIGDA agent. textarea + reply pane, no other chrome.",
   },
   {
     label: "wallet portfolio viewer",
     prompt:
-      "paste a 0x address, see the wallet's base-mainnet token balances + total USD value. uses the SIGNA agent for natural-language summary.",
+      "paste a 0x address, see the wallet's base-mainnet token balances + total USD value. uses the SIGDA agent for natural-language summary.",
   },
   {
     label: "token launch alerter",
@@ -49,7 +49,7 @@ function buildUrl(args: {
     ctx.push("");
     ctx.push("=== AI BACKEND ===");
     ctx.push(
-      `This app talks to SIGNA agent "${args.agent.name}" — a free, CORS-open, wallet-signed AI reply endpoint.`,
+      `This app talks to SIGDA agent "${args.agent.name}" — a free, CORS-open, wallet-signed AI reply endpoint.`,
     );
     ctx.push(
       `Endpoint: POST https://www.signaagent.xyz/api/agents/${args.agent.address}/respond`,

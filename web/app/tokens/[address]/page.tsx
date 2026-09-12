@@ -41,11 +41,11 @@ export async function generateMetadata({
   const { address: raw } = await params;
   const t = await fetchToken(raw.toLowerCase());
   if (!t) {
-    return { title: "Token · SIGNA" };
+    return { title: "Token · SIGDA" };
   }
   return {
-    title: `$${t.symbol} on SIGNA`,
-    description: `${t.name} on Base. Price ${formatUsd(t.price_usd)} · 24h ${formatPct(t.change_24h_pct)}. Discover + trade via SIGNA.`,
+    title: `$${t.symbol} on SIGDA`,
+    description: `${t.name} on Base. Price ${formatUsd(t.price_usd)} · 24h ${formatPct(t.change_24h_pct)}. Discover + trade via SIGDA.`,
   };
 }
 
@@ -62,7 +62,7 @@ export default async function TokenDetailPage({
   if (!t) notFound();
 
   // If this is one of our tracked partner tokens, show a link to its
-  // SIGNA holders community page.
+  // SIGDA holders community page.
   const knownPartner = getKnownToken(t.symbol);
   const holdersHref =
     knownPartner?.project &&
@@ -188,7 +188,7 @@ export default async function TokenDetailPage({
               {holdersHref && (
                 <LinkTile
                   href={holdersHref}
-                  label={`SIGNA holders of $${t.symbol}`}
+                  label={`SIGDA holders of $${t.symbol}`}
                   hint="DM any of them by basename / ENS / 0x"
                 />
               )}

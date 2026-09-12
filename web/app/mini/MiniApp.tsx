@@ -170,8 +170,8 @@ export function MiniApp() {
     if (!result) return;
     const url = `${origin()}/n/${result.id}`;
     const text = result.to_label
-      ? `just sent @${result.to_label} a wallet-signed message on Base 👇 send your own:`
-      : `${result.body}\n\nwallet-signed on Base · re-verifiable · sign your own 👇`;
+      ? `just sent @${result.to_label} a wallet-signed message on Robinhood Chain 👇 send your own:`
+      : `${result.body}\n\nwallet-signed on Robinhood Chain · re-verifiable · sign your own 👇`;
     const sdk = sdkRef.current;
     if (inMini && sdk?.actions?.composeCast) {
       try {
@@ -221,8 +221,8 @@ export function MiniApp() {
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/signa-logo.png" alt="SIGNA" className="size-8 rounded-full" />
-          <div className="font-display font-semibold tracking-tight">SIGNA</div>
+          <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+          <div className="font-display font-semibold tracking-tight">SIGDA</div>
         </div>
         {user ? (
           <div className="flex items-center gap-2 text-[12px] text-white/60">
@@ -245,7 +245,7 @@ export function MiniApp() {
                 </>
               ) : (
                 <>
-                  Sign a message <span className="brand-text">on Base</span>
+                  Sign a message <span className="brand-text">on Robinhood Chain</span>
                 </>
               )}
             </h1>
@@ -253,7 +253,7 @@ export function MiniApp() {
               {to ? (
                 <>
                   One tap, no account. Your wallet signature proves it&apos;s really from you —
-                  @{to} and anyone else can re-verify it on Base.
+                  @{to} and anyone else can re-verify it on Robinhood Chain.
                 </>
               ) : (
                 <>
@@ -291,13 +291,13 @@ export function MiniApp() {
               disabled={phase === "signing" || body.trim().length === 0}
               className="mt-4 h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6] disabled:opacity-40 transition-opacity"
             >
-              {phase === "signing" ? "Signing…" : "Sign on Base"}
+              {phase === "signing" ? "Signing…" : "Sign on Robinhood Chain"}
             </button>
           </>
         ) : (
           <div className="mt-3 flex flex-col">
             <div className="inline-flex self-start items-center gap-2 text-[12px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">
-              ✓ SIGNED ON BASE
+              ✓ SIGNED ON ROBINHOOD CHAIN
             </div>
             <div className="glass rounded-2xl p-4 mt-4">
               {result?.to_label ? (
@@ -327,7 +327,7 @@ export function MiniApp() {
             <div className="mt-5 glass rounded-2xl p-4">
               <div className="text-[13px] font-medium">Get signed messages sent to you</div>
               <div className="text-[12px] text-muted mt-1 leading-relaxed">
-                Share your inbox link — anyone can send you a wallet-signed message on Base.
+                Share your inbox link — anyone can send you a wallet-signed message on Robinhood Chain.
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <code className="flex-1 text-[12px] text-[#a5c3ff] font-mono truncate bg-black/30 rounded-lg px-3 py-2">
@@ -352,7 +352,7 @@ export function MiniApp() {
         {/* live wall */}
         <div className="mt-9">
           <div className="text-[11px] uppercase tracking-[0.16em] text-faint mb-3">
-            {to ? `@${to}'s signed inbox` : "latest signed on Base"}
+            {to ? `@${to}'s signed inbox` : "latest signed on Robinhood Chain"}
           </div>
           <div className="flex flex-col gap-2">
             {recent.length === 0 ? (

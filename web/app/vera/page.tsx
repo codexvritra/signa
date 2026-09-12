@@ -60,7 +60,7 @@ export default function VeraPage() {
           VERA
         </h1>
         <p className="text-[18px] text-muted mt-2 max-w-[640px] leading-relaxed">
-          SIGNA&apos;s flagship autonomous agent. She reasons in multiple steps on a live capability mesh, acts on
+          SIGDA&apos;s flagship autonomous agent. She reasons in multiple steps on a live capability mesh, acts on
           Base, and <span className="text-white">wallet-signs every thought</span> — committed to the on-chain-anchored
           ledger. The first autonomous agent you can <span className="text-[#5ee68f]">prove is real</span>.
         </p>

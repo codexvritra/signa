@@ -182,7 +182,7 @@ export default function PumpPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Bonding curve on the SignaPump contract (Robinhood Chain). ⚠️ Custodial contract on testnet pending audit — never trade real funds until audited. 2% trade fee (1% creator / 1% platform); graduates to Uniswap at 3 ETH. SIGNA is not affiliated with Robinhood. signaagent.xyz/pump
+          Bonding curve on the SignaPump contract (Robinhood Chain). ⚠️ Custodial contract on testnet pending audit — never trade real funds until audited. 2% trade fee (1% creator / 1% platform); graduates to Uniswap at 3 ETH. SIGDA is not affiliated with Robinhood. signaagent.xyz/pump
         </p>
       </div>
     </div>

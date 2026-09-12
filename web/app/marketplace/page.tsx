@@ -3,22 +3,22 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { MarketplaceDirectory } from "./MarketplaceDirectory";
 
-const TITLE = "SIGNA Marketplace · publish an agent capability with one signature";
+const TITLE = "SIGDA Marketplace · publish an agent capability with one signature";
 const DESCRIPTION =
-  "Register any https endpoint as an agent capability with one wallet-signed call — no signup, no API key. It becomes callable by any agent and by the autonomous brain instantly, with every result wallet-signed and re-verifiable. Optional pricing rides x402 on Base.";
+  "Register any https endpoint as an agent capability with one wallet-signed call — no signup, no API key. It becomes callable by any agent and by the autonomous brain instantly, with every result wallet-signed and re-verifiable. Optional pricing rides x402 on Robinhood Chain.";
 const URL = "https://www.signaagent.xyz/marketplace";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
 
 // honest competitive read (from primary-source research) — register-weight is the wedge.
 const COMPARE = [
-  { sys: "SIGNA", reg: "one wallet signature", live: "instantly — any agent + the brain", result: "wallet-signed, re-verifiable", color: "#b7ff5c" },
+  { sys: "SIGDA", reg: "one wallet signature", live: "instantly — any agent + the brain", result: "wallet-signed, re-verifiable", color: "#b7ff5c" },
   { sys: "x402 Bazaar", reg: "needs CDP API keys; listed after first settlement", live: "after a payment settles through the facilitator", result: "signs the payment, not the response", color: "#7af0a8" },
   { sys: "Olas Mechs", reg: "on-chain NFT mint + IPFS metadata", live: "after the mint confirms", result: "on-chain request/deliver", color: "#9ad7ff" },
   { sys: "Virtuals ACP", reg: "platform account + manual graduation review", live: "after 10 sandbox tx + human approval", result: "evaluator-verified", color: "#ffd84d" },
@@ -27,7 +27,7 @@ const COMPARE = [
 const STEPS = [
   { k: "sign", t: "Sign one envelope with your wallet — the canonical register preimage. The wallet is the only credential; no account, no API key." },
   { k: "register", t: "POST it. The node re-verifies the signature with viem and lists the capability. Your wallet is the provider of record — and you can update or revoke it any time." },
-  { k: "callable", t: "It is live immediately: any agent that speaks the SIGNA protocol can invoke it by name, and the autonomous brain can plan around it (free capabilities)." },
+  { k: "callable", t: "It is live immediately: any agent that speaks the SIGDA protocol can invoke it by name, and the autonomous brain can plan around it (free capabilities)." },
   { k: "signed", t: "Every call returns a gateway-signed attestation over (capability, input, provider, sha256(output)). Anyone re-verifies it with viem — provenance, not vibes." },
 ];
 
@@ -72,7 +72,7 @@ export default function MarketplacePage() {
             <p className="text-[19px] sm:text-[22px] leading-snug text-white/90 max-w-3xl">
               The wedge is the <span className="text-[var(--accent)]">bundle</span>: register in one signature, be callable
               the same second by agents and an autonomous brain, and hand back results anyone can re-verify against the
-              provider — keyless, on Base.
+              provider — keyless, on Robinhood Chain.
             </p>
           </div>
         </section>
@@ -88,9 +88,9 @@ export default function MarketplacePage() {
                 re-verifiable by anyone. Fast path for shipping a capability in seconds.
               </div>
               <div className="border border-[var(--accent)]/25 rounded-lg bg-[var(--accent)]/[0.05] p-5">
-                <div className="text-white font-medium mb-1.5">On-chain — trustless on Base</div>
+                <div className="text-white font-medium mb-1.5">On-chain — trustless on Robinhood Chain</div>
                 Call <span className="font-mono text-[12.5px]">register(...)</span> on the SignaCapabilityRegistry
-                contract. The full callable spec (endpoint, method, price, payout) lives on Base, so discovery reads
+                contract. The full callable spec (endpoint, method, price, payout) lives on Robinhood Chain, so discovery reads
                 straight from chain — no trust in any index, this one included.
               </div>
             </div>
@@ -178,7 +178,7 @@ export default function MarketplacePage() {
             </div>
             <p className="mt-6 text-[13px] text-white/55 leading-relaxed max-w-2xl">
               Each of these is real and worth studying — Olas Mechs in particular shares the keyless, cryptographic-signature
-              ethos and is permissionless on Base. The difference SIGNA leans on is <span className="text-white">registration
+              ethos and is permissionless on Robinhood Chain. The difference SIGDA leans on is <span className="text-white">registration
               weight</span>: one signature versus an NFT mint, a first settlement, or a manual review — and a{" "}
               <span className="text-white">signed result</span> as a first-class part of every call.
             </p>
@@ -197,15 +197,15 @@ export default function MarketplacePage() {
                 abusive endpoint — every capability maps to the wallet that signed it, so attribution is built in.
               </div>
               <div className="border border-white/10 rounded-lg bg-white/[0.02] p-5">
-                <div className="text-white font-medium mb-1.5">Optional pricing rides x402 — SIGNA never settles</div>
+                <div className="text-white font-medium mb-1.5">Optional pricing rides x402 — SIGDA never settles</div>
                 A provider may price a capability in USDC. The invoke endpoint then acts as a non-custodial x402 resource
                 server: it returns a 402 challenge and verifies the EIP-3009 authorization pays the provider. Settlement
-                is the provider&apos;s (or a facilitator&apos;s) action — SIGNA holds no funds and pays no gas.
+                is the provider&apos;s (or a facilitator&apos;s) action — SIGDA holds no funds and pays no gas.
               </div>
             </div>
             <p className="mt-5 text-[12.5px] text-white/45 leading-relaxed max-w-2xl">
-              Scope, honestly: &quot;callable by any agent&quot; means any agent that speaks the SIGNA protocol or has the
-              drop-in skill — not literally every agent on earth. The registry index and proxy are operated by SIGNA;
+              Scope, honestly: &quot;callable by any agent&quot; means any agent that speaks the SIGDA protocol or has the
+              drop-in skill — not literally every agent on earth. The registry index and proxy are operated by SIGDA;
               what is trustless is the <span className="text-white/70">signature on every registration and every result</span>,
               which you can re-verify yourself with viem.
             </p>

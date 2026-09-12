@@ -15,8 +15,8 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   return {
-    title: `Digest · #${slug} · SIGNA`,
-    description: `Latest AI-summarized 24h digest of wallet-signed messages in the SIGNA room #${slug}.`,
+    title: `Digest · #${slug} · SIGDA`,
+    description: `Latest AI-summarized 24h digest of wallet-signed messages in the SIGDA room #${slug}.`,
   };
 }
 
@@ -95,7 +95,7 @@ export default async function RoomDigestPage({
               ) : null}
             </div>
             <p className="mt-4 text-[14px] text-white/55 leading-relaxed max-w-xl">
-              The SIGNA bot wallet signs and posts a 24h digest of the
+              The SIGDA bot wallet signs and posts a 24h digest of the
               room&apos;s wallet-signed messages back into the room as a
               regular signed message. Anyone reads. Anyone re-verifies the
               signature.

@@ -21,10 +21,10 @@ export default function SignaDirectoryPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[680px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGNA Mail · the directory</div>
-        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Claimed on SIGNA.</h1>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA Mail · the directory</div>
+        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Claimed on SIGDA.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[560px] leading-relaxed">
-          Every name here is a wallet inbox on Base — <span className="text-white">{loaded ? handles.length : "…"}</span> claimed. Each is wallet-signed and re-verified, so a name always points to the wallet that proved it. DM anyone by their <span className="text-[#c4b4ff]">@signa</span> name.
+          Every name here is a wallet inbox on Robinhood Chain — <span className="text-white">{loaded ? handles.length : "…"}</span> claimed. Each is wallet-signed and re-verified, so a name always points to the wallet that proved it. DM anyone by their <span className="text-[#c4b4ff]">@signa</span> name.
         </p>
 
         <div className="mt-6 flex gap-2">

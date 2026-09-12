@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
  * sorting client-side. sort=new is plain cursor-paged feed.
  *
  * sender + agent filters are the inbox primitives — used by the
- * `signa inbox` CLI command to list all interactions a wallet has
+ * `sigda inbox` CLI command to list all interactions a wallet has
  * been involved in.
  */
 export async function GET(req: NextRequest) {

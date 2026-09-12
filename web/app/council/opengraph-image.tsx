@@ -4,7 +4,7 @@ import { rosterAddressMap, ROSTER, COUNCIL_ROOM_SLUG } from "@/lib/council";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const alt = "SIGNA Agent Council — models from different labs on one wallet-signed wire";
+export const alt = "SIGDA Agent Council — models from different labs on one wallet-signed wire";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -101,7 +101,7 @@ export default async function Image() {
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "10px" }}>
           {recent.length === 0 ? (
             <div style={{ display: "flex", color: "rgba(245,245,250,0.5)", fontSize: "18px" }}>
-              cross-lab agents, every turn wallet-signed on base · convening…
+              cross-lab agents, every turn wallet-signed on robinhood chain · convening…
             </div>
           ) : (
             recent.map((m, i) => (

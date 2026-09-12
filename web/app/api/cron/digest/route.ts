@@ -103,7 +103,7 @@ async function groqDigest(facts: DigestFacts): Promise<string | null> {
   try {
     const client = new Groq({ apiKey: key });
     const system =
-      "You write short daily digests for crypto wallets on Base. Tone: terse, factual, no hype, no emoji storms. Mono-space-friendly format. " +
+      "You write short daily digests for crypto wallets on Robinhood Chain. Tone: terse, factual, no hype, no emoji storms. Mono-space-friendly format. " +
       "Output exactly 3 lines: line 1 the headline including net worth + 24h change, line 2 the top hold, line 3 the watchlist mover or a closing line. " +
       "Use $X.XX for prices ≥$1, $0.0001 for fractions, +X.XX%/-X.XX% for change. Reference symbols with a leading $. " +
       "Do not invent numbers — only use the facts provided. If a field is missing, omit that line.";

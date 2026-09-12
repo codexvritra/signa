@@ -51,7 +51,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={LOGO} width={56} height={56} style={{ borderRadius: 999 }} alt="" />
-            <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>SIGNA · x402 receipt</div>
+            <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>SIGDA · x402 receipt</div>
           </div>
           <div
             style={{
@@ -65,7 +65,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
               padding: "10px 22px",
             }}
           >
-            ✓ VERIFIED ON BASE
+            ✓ VERIFIED ON ROBINHOOD CHAIN
           </div>
         </div>
 

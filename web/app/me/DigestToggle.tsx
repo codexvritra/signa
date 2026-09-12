@@ -9,7 +9,7 @@ import { buildMessageToSign } from "@/lib/feed-types";
 /**
  * Opt-in toggle for the daily AI digest. When enabled, the
  * /api/cron/digest run posts a personalized portfolio + watchlist
- * summary to the SIGNA feed authored by bankr.bot.signa once per 24h.
+ * summary to the SIGDA feed authored by bankr.bot.signa once per 24h.
  *
  * Toggling requires a wallet signature — the digest cron will only
  * send to wallets that have explicitly opted in. Renders nothing for
@@ -103,7 +103,7 @@ export function DigestToggle({ address }: { address: string }) {
               Daily AI digest
             </div>
             <p className="text-[12px] text-white/55 mt-1.5 leading-relaxed max-w-md">
-              Once per 24h, SIGNA posts a wallet-signed digest to the feed
+              Once per 24h, SIGDA posts a wallet-signed digest to the feed
               with your portfolio change, top hold, biggest watchlist
               mover. Generated server-side, posted by{" "}
               <span className="font-mono text-white/75">bankr.bot.signa</span>.

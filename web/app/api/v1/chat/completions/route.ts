@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
  * OpenAI-compatible chat completion endpoint. The exact response shape
  * OpenAI returns, so any framework that speaks `/v1/chat/completions`
  * (LangChain, LlamaIndex, Vercel AI SDK, Mastra, Cursor MCP, the
- * OpenAI npm/python SDKs, etc.) can use SIGNA as a drop-in by
+ * OpenAI npm/python SDKs, etc.) can use SIGDA as a drop-in by
  * overriding baseURL:
  *
  *   import OpenAI from "openai";
@@ -30,7 +30,7 @@ export const dynamic = "force-dynamic";
  *   });
  *   const r = await ai.chat.completions.create({
  *     model: "signa-gateway",
- *     messages: [{ role: "user", content: "price of $USDC on base" }],
+ *     messages: [{ role: "user", content: "price of $USDC on robinhood chain" }],
  *   });
  *
  * Internally we route through the same intent classifier + specialist
@@ -45,7 +45,7 @@ export const dynamic = "force-dynamic";
  *                       standard field; OpenAI SDKs forward unknown
  *                       fields untouched)
  *
- * SIGNA extension: every response carries a top-level `signa` block
+ * SIGDA extension: every response carries a top-level `signa` block
  * with the interaction_id (permalink), signature, sources cited,
  * intent classification, and routing decision. Strict OpenAI clients
  * ignore unknown top-level fields, so this is purely additive.
@@ -97,7 +97,7 @@ type ChatCompletionsBody = {
   tools?: ToolDefinition[];
   tool_choice?: ToolChoice;
   response_format?: { type: "text" | "json_object" };
-  // SIGNA-specific extensions (OpenAI SDKs forward unknown fields
+  // SIGDA-specific extensions (OpenAI SDKs forward unknown fields
   // untouched, so these come through transparent)
   agent_address?: string;
   from?: string;
@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
   // (LangChain agents, OpenAI assistants API, Mastra, etc.) expects.
   //
   // The signa extension is omitted in tools mode because we didn't
-  // route through a signa agent — the caller opted into the
+  // route through a sigda agent — the caller opted into the
   // raw-LLM-with-tools workflow. They can still get signed replies
   // by calling the endpoint without tools, which uses our agent
   // routing path below.
@@ -261,7 +261,7 @@ export async function POST(req: NextRequest) {
         {
           error: {
             message:
-              "Tools/function-calling requires GROQ_API_KEY on the SIGNA deployment. Without it, omit `tools` and the endpoint will use the intent router instead.",
+              "Tools/function-calling requires GROQ_API_KEY on the SIGDA deployment. Without it, omit `tools` and the endpoint will use the intent router instead.",
             type: "service_unavailable",
             code: "groq_not_configured",
           },
@@ -298,7 +298,7 @@ export async function POST(req: NextRequest) {
         model: body.model ?? "signa-gateway",
         choices: groqRes.choices,
         usage: groqRes.usage,
-        // SIGNA extension still present, but minimal — flags that
+        // SIGDA extension still present, but minimal — flags that
         // this response came from the tools path so consumers know
         // there's no signed reply attached.
         signa: {
@@ -309,7 +309,7 @@ export async function POST(req: NextRequest) {
           interaction_id: null,
           sources: [],
           notice:
-            "Tools mode bypasses the signa agent router — call without `tools` to get a wallet-signed reply with source attribution.",
+            "Tools mode bypasses the sigda agent router — call without `tools` to get a wallet-signed reply with source attribution.",
         },
       });
     } catch (e) {

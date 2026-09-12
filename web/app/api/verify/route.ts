@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
  * POST /api/verify   { kind, ...fields, signature }
  * GET  /api/verify   (schema)
  *
- * The universal verifier for the SIGNA message layer. Re-verify ANY wallet-
- * signed SIGNA artifact and RECOVER the signer, with no trust in SIGNA:
+ * The universal verifier for the SIGDA message layer. Re-verify ANY wallet-
+ * signed SIGDA artifact and RECOVER the signer, with no trust in SIGDA:
  *
  *   kind: "dm"            { ts, from, to, body, in_reply_to?, signature }
  *   kind: "delivery_ack" { ts, message, from, to, status, signature }
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  *   kind: "pipeline_link" { runId, step, cap, provider, input_hash, output_hash, prev, ts, signature }
  *   kind: "raw"           { preimage, expected?, signature }
  *
- * Returns the recovered signer, the expected signer (where SIGNA knows it),
+ * Returns the recovered signer, the expected signer (where SIGDA knows it),
  * whether they match, and the exact preimage so you can re-run it locally with
  * viem.verifyMessage / recoverMessageAddress. The signature IS the receipt.
  */
@@ -37,8 +37,8 @@ export function GET() {
   return NextResponse.json(
     {
       ok: true,
-      verifier: "SIGNA universal message verifier",
-      how: "POST { kind, ...fields, signature }. Re-verifies the EIP-191 signature and recovers the signer. No trust in SIGNA — the same check runs locally with viem.recoverMessageAddress over the returned preimage.",
+      verifier: "SIGDA universal message verifier",
+      how: "POST { kind, ...fields, signature }. Re-verifies the EIP-191 signature and recovers the signer. No trust in SIGDA — the same check runs locally with viem.recoverMessageAddress over the returned preimage.",
       kinds: VERIFY_KINDS,
     },
     { headers: CORS },

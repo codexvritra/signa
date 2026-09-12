@@ -239,7 +239,7 @@ export async function POST(
     return NextResponse.json(
       {
         error: "runtime_required",
-        hint: "enable the SIGNA runtime for this agent first — autonomous tasks need the server-side key to sign each post on schedule.",
+        hint: "enable the SIGDA runtime for this agent first — autonomous tasks need the server-side key to sign each post on schedule.",
       },
       { status: 412 },
     );

@@ -12,11 +12,11 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/holders/[symbol]
  *
- * Returns the list of registered SIGNA users who currently hold a
+ * Returns the list of registered SIGDA users who currently hold a
  * non-zero balance of the given partner token, sorted by balance desc.
  *
  * We don't have a chain indexer, so the surface is bounded: we scan
- * the SIGNA users table (typically <1000 rows in this phase) and do
+ * the SIGDA users table (typically <1000 rows in this phase) and do
  * one ERC-20 balanceOf call per wallet. Results cached in-process 5
  * minutes per symbol.
  *
@@ -95,7 +95,7 @@ export async function GET(
     });
   }
 
-  // Pull all SIGNA users (recently active first, capped at 500 for cost).
+  // Pull all SIGDA users (recently active first, capped at 500 for cost).
   const { data: users, error } = await supabase
     .from("users")
     .select("address, basename, ens_name, registered_at")

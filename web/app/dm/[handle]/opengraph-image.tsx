@@ -4,7 +4,7 @@ import { gradientFor } from "@/lib/gradient";
 // Edge runtime is faster for OG images and avoids cold-start issues.
 export const runtime = "edge";
 
-export const alt = "DM on SIGNA";
+export const alt = "DM on SIGDA";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -48,7 +48,7 @@ export default async function DmOgImage({
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {/* TOP: SIGNA wordmark + prompt */}
+        {/* TOP: SIGDA wordmark + prompt */}
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <div style={{ display: "flex", fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em" }}>
             <span style={{ color: "#5b8def" }}>S</span>
@@ -56,7 +56,7 @@ export default async function DmOgImage({
           </div>
           <div style={{ display: "flex", opacity: 0.35, fontSize: 22 }}>·</div>
           <div style={{ display: "flex", color: "#5b8def", fontSize: 22 }}>
-            $ signa dm {display}
+            $ sigda dm {display}
           </div>
         </div>
 
@@ -115,10 +115,10 @@ export default async function DmOgImage({
                 letterSpacing: "-0.02em",
               }}
             >
-              DM them on SIGNA →
+              DM them on SIGDA →
             </div>
             <div style={{ display: "flex", opacity: 0.5, fontSize: 22 }}>
-              encrypted · wallet-signed · on base
+              encrypted · wallet-signed · on robinhood chain
             </div>
           </div>
           <div

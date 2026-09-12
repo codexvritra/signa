@@ -17,9 +17,9 @@ export const maxDuration = 60;
 /**
  * POST /api/brain   { goal: string }   (or GET ?goal=)
  *
- * THE SIGNA BRAIN. An agent's own brain: it reasons on decentralized,
+ * THE SIGDA BRAIN. An agent's own brain: it reasons on decentralized,
  * provider-agnostic inference (x402-paid in production — the agent signs to
- * pay, holds no API key), and it ACTS through the SIGNA OS — it decides which
+ * pay, holds no API key), and it ACTS through the SIGDA OS — it decides which
  * capabilities on the network to call, invokes them for real, and synthesizes
  * an answer from the live results. A brain with a useful OS, not a chatbot.
  *
@@ -66,7 +66,7 @@ async function reason(origin: string, prompt: string): Promise<string> {
 
 // the brain acts on the network with its own wallet — signed, keyless
 function dmPreimage(from: string, to: string, body: string, ts: number) {
-  return ["SIGNA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
+  return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
 async function brainSend(origin: string, to: string, body: string): Promise<string | null> {
   const from = brain.address.toLowerCase();
@@ -100,10 +100,10 @@ async function resolveAddr(origin: string, id: string): Promise<string | null> {
 // The brain runs on paid, decentralized inference; it holds no funds of its own.
 // When a human grants it a bounded mandate (agent = the brain's address), the
 // brain pays per reasoning run for its own compute: it signs a REAL EIP-3009
-// USDG-on-Robinhood-Chain authorization -> SIGNA issues a verifiable x402 receipt -> the
+// USDG-on-Robinhood-Chain authorization -> SIGDA issues a verifiable x402 receipt -> the
 // spend is recorded against the mandate, capped per-run and in total. When the
 // budget is exhausted the brain STOPS (it won't burn compute it can't pay for)
-// and wallet-signs a request for more. The model decides; SIGNA enforces the
+// and wallet-signs a request for more. The model decides; SIGDA enforces the
 // cap and proves the spend. Nothing is broadcast.
 const COMPUTE = privateKeyToAccount(keccak256(toBytes("signa:inference:v1"))).address.toLowerCase() as `0x${string}`;
 const INFERENCE_PRICE = "10000"; // 0.01 USDG per reasoning run
@@ -166,7 +166,7 @@ async function mintComputeReceipt(origin: string, amount: string): Promise<strin
     const r = await (await fetch(`${origin}/api/x402/receipt`, {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        request: { item: "SIGNA brain inference", buyer_agent: brain.address.toLowerCase() },
+        request: { item: "SIGDA brain inference", buyer_agent: brain.address.toLowerCase() },
         terms: { amount, asset: USDG_ROBINHOOD, network: NETWORK_ROBINHOOD, payTo: COMPUTE },
         payment,
         output: { delivered: true, item: "inference" },
@@ -285,7 +285,7 @@ async function run(
           `I've spent the budget you granted me — only ${usd(remaining)} USDG is left and each reasoning run costs ${usd(INFERENCE_PRICE)}. ` +
           `I've wallet-signed a request for 0.05 USDG more so I can keep working. Approve it and I'll finish the job.`;
         const answerHash = createHash("sha256").update(answer).digest("hex");
-        const preimage = ["SIGNA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:`, `answer:${answerHash}`].join("\n");
+        const preimage = ["SIGDA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:`, `answer:${answerHash}`].join("\n");
         const signature = await brain.signMessage({ message: preimage });
         return {
           ok: true,
@@ -299,7 +299,7 @@ async function run(
           signature,
           verify: { scheme: "eip191", preimage, how: "sha256 the answer, rebuild the preimage, verifyMessage against `brain`" },
           spend: { ok: false as const, error: paid?.error ?? "exceeds_mandate", budget_exhausted: true, remaining_raw: remaining, request_id: requestId },
-          note: "The brain runs on paid inference and holds no funds of its own. It stopped because the human-granted budget is exhausted, and wallet-signed a request for more. SIGNA enforces the cap; the model never spends past it.",
+          note: "The brain runs on paid inference and holds no funds of its own. It stopped because the human-granted budget is exhausted, and wallet-signed a request for more. SIGDA enforces the cap; the model never spends past it.",
         };
       }
     }
@@ -359,7 +359,7 @@ async function run(
 
   // 1. PLAN — the brain decides which real capabilities to call
   const planPrompt =
-    `You are the SIGNA Brain. You can call these capabilities to gather REAL live data before answering:\n${toolsDoc}\n\n` +
+    `You are the SIGDA Brain. You can call these capabilities to gather REAL live data before answering:\n${toolsDoc}\n\n` +
     `Given the user's goal, output ONLY a compact JSON array of the calls to make, e.g. [{"cap":"root.market","arg":""},{"cap":"bankr.resolve","arg":"@jesse"}]. ` +
     `Use [] if no data is needed. Max 3 calls. No prose.\n\nGoal: ${goal}`;
   let planRaw = "";
@@ -394,7 +394,7 @@ async function run(
   // 3. SYNTHESIZE — answer from the real results
   const dataBlock = tools.length ? JSON.stringify(tools.map((t) => ({ cap: t.cap, arg: t.arg, output: t.output }))) : "(no tools were needed)";
   const answerPrompt =
-    `You are the SIGNA Brain. Answer the user's goal concisely and concretely using ONLY the real data below. ` +
+    `You are the SIGDA Brain. Answer the user's goal concisely and concretely using ONLY the real data below. ` +
     `If data is present, ground every claim in it. Plain text, no markdown headers.\n\nGoal: ${goal}\n\nReal data: ${dataBlock}`;
   let answer = "";
   try { answer = await reason(origin, answerPrompt); } catch { /* */ }
@@ -403,7 +403,7 @@ async function run(
   // 4. SIGN — a verifiable brain receipt
   const ts = Date.now();
   const answerHash = createHash("sha256").update(answer).digest("hex");
-  const preimage = ["SIGNA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:${tools.map((t) => t.cap).join(",")}`, `answer:${answerHash}`].join("\n");
+  const preimage = ["SIGDA brain receipt v1", `ts:${ts}`, `goal:${goal}`, `tools:${tools.map((t) => t.cap).join(",")}`, `answer:${answerHash}`].join("\n");
   const signature = await brain.signMessage({ message: preimage });
 
   // 5. ACT ON THE NETWORK — remember what it learned, report to another agent.
@@ -422,8 +422,8 @@ async function run(
     ? `This run was paid from a bounded mandate: ${usd(INFERENCE_PRICE)} USDG for inference` +
       `${spend.receipt_id ? ` (x402 receipt ${spend.receipt_id})` : ""}` +
       `${paidCaps.length ? ` + ${usd(capsPaidRaw)} USDG for ${paidCaps.length} priced capabilit${paidCaps.length === 1 ? "y" : "ies"} (${paidCaps.map((c) => c.cap).join(", ")})` : ""}. ` +
-      `The brain holds no funds of its own — a human granted the budget; SIGNA enforced the per-tx + total caps and proved every spend. The model decides; it cannot spend past the cap.`
-    : "The brain reasons on decentralized inference, acts through the SIGNA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.";
+      `The brain holds no funds of its own — a human granted the budget; SIGDA enforced the per-tx + total caps and proved every spend. The model decides; it cannot spend past the cap.`
+    : "The brain reasons on decentralized inference, acts through the SIGDA capability mesh, and can remember + message other agents — all wallet-signed. Tool outputs are real, live partner data. In production the agent pays per inference via x402 and holds no API key.";
 
   return {
     ok: true,

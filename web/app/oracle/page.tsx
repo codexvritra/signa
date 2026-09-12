@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 const TITLE = "The Signed Oracle — the AI that can't delete its Ls";
 const DESC =
-  "Every alpha account deletes its bad calls. The SIGNA brain wallet-signs every market call and every verdict — so it physically can't edit or hide one. A permanent, public, falsifiable AI track record on Base. Grade it yourself. Not financial advice.";
+  "Every alpha account deletes its bad calls. The SIGDA brain wallet-signs every market call and every verdict — so it physically can't edit or hide one. A permanent, public, falsifiable AI track record on Robinhood Chain. Grade it yourself. Not financial advice.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -19,13 +19,13 @@ export default function OraclePage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[760px] mx-auto px-5 py-10 sm:py-14">
-        <div className="text-[12px] uppercase tracking-[0.18em] text-faint">the signed oracle · live · on Base</div>
+        <div className="text-[12px] uppercase tracking-[0.18em] text-faint">the signed oracle · live · on Robinhood Chain</div>
         <h1 className="font-display text-[32px] sm:text-[46px] leading-[1.04] font-bold mt-3 tracking-tight">
           The AI that can&apos;t <span className="brand-text">delete its Ls.</span>
         </h1>
         <p className="text-muted text-[16px] sm:text-[17px] mt-4 leading-relaxed">
           Every alpha account on the timeline quietly deletes its bad calls. So we built the opposite:
-          the SIGNA brain makes one call on the Base Fear &amp; Greed index, <b>wallet-signs it</b>, and
+          the SIGDA brain makes one call on the Base Fear &amp; Greed index, <b>wallet-signs it</b>, and
           stores it forever. 24 hours later it resolves against the live signed feed — and signs the
           verdict too. Edit or delete a single call and the signature breaks. It <i>physically cannot</i>
           {" "}hide a loss. Grade it yourself.

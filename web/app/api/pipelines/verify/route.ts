@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/pipelines/verify   { runId, chain, steps?, root? }
  *
- * Re-verify a pipeline provenance chain with no trust in SIGNA: every link's
+ * Re-verify a pipeline provenance chain with no trust in SIGDA: every link's
  * gateway signature is checked, the hash-chaining (link.prev == sha256 of the
  * previous link's signature) is confirmed, and — if step outputs are supplied —
  * each output hash is recomputed and matched. This is the same check anyone can

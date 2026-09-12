@@ -3,9 +3,9 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { getPartnerReceipts, type PartnerKey } from "@/lib/receipts";
 
-const TITLE = "Receipts · SIGNA";
+const TITLE = "Receipts · SIGDA";
 const DESCRIPTION =
-  "Public ledger of wallet-signed activity SIGNA produces for Bankr, gitlawb, Aeon, and MiroShark. Counts the rooms, messages, and unique signers per partner network.";
+  "Public ledger of wallet-signed activity SIGDA produces for Bankr, gitlawb, Aeon, and MiroShark. Counts the rooms, messages, and unique signers per partner network.";
 const URL = "https://www.signaagent.xyz/receipts";
 
 export const metadata = {
@@ -15,7 +15,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -84,11 +84,11 @@ export default async function ReceiptsPage() {
               Receipts.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
-              Every wallet-signed room and message SIGNA produces for the
+              Every wallet-signed room and message SIGDA produces for the
               Bankr, gitlawb, Aeon, and MiroShark networks, counted live.
               Each row classifies by partner so the team behind each one
               can see exactly what cross-network identity their users
-              show up with on SIGNA. No tracking pixels, no analytics
+              show up with on SIGDA. No tracking pixels, no analytics
               vendor — just rows in the database, each one signed by a
               real wallet.
             </p>
@@ -162,14 +162,14 @@ export default async function ReceiptsPage() {
                 <div className="font-medium text-white mb-1.5">No vendor lock-in.</div>
                 <p>
                   The dataset is the signa_rooms and signa_room_messages
-                  tables. Run your own SIGNA node, query the same data,
+                  tables. Run your own SIGDA node, query the same data,
                   derive the same receipts. No Mixpanel, no Segment.
                 </p>
               </div>
               <div>
                 <div className="font-medium text-white mb-1.5">No middleman.</div>
                 <p>
-                  When SIGNA introduces a partner to their own community,
+                  When SIGDA introduces a partner to their own community,
                   the proof of traffic is here, signed by real wallets,
                   not a screenshot we control.
                 </p>

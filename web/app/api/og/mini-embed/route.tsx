@@ -26,7 +26,7 @@ export function GET() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={LOGO} width={68} height={68} style={{ borderRadius: 999 }} alt="" />
           <div style={{ color: "#fff", fontSize: 34, fontWeight: 700, letterSpacing: -1 }}>
-            SIGNA
+            SIGDA
           </div>
         </div>
 
@@ -41,7 +41,7 @@ export function GET() {
               maxWidth: 980,
             }}
           >
-            Sign a message on Base.
+            Sign a message on Robinhood Chain.
           </div>
           <div style={{ color: "#a5c3ff", fontSize: 38, fontWeight: 500 }}>
             One tap. No account. Your wallet signature is the proof.
@@ -62,7 +62,7 @@ export function GET() {
             <span>·</span>
             <span style={{ color: "#8b5cf6" }}>re-verifiable</span>
             <span>·</span>
-            <span>on Base</span>
+            <span>on Robinhood Chain</span>
           </div>
           <div>signaagent.xyz</div>
         </div>

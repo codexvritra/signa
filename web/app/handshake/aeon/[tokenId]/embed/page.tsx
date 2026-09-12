@@ -47,13 +47,13 @@ export default async function AeonHandshakeEmbedPage({
   const r = reg.registration ?? {};
 
   const handshakeTemplate = [
-    `gm. handshake from a SIGNA wallet.`,
+    `gm. handshake from a SIGDA wallet.`,
     ``,
     `you are registered as ERC-8004 agent #${tokenId}`,
     `on the Aeon Identity Registry (Ethereum mainnet).`,
     `i'm reaching you through your on-chain owner wallet.`,
     ``,
-    `signed end to end. reply via SIGNA inbox or your own bridge.`,
+    `signed end to end. reply via SIGDA inbox or your own bridge.`,
   ].join("\n");
 
   return (

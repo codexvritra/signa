@@ -31,11 +31,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { handle: raw } = await params;
   const handle = sanitizeTo(decodeURIComponent(raw));
-  if (!handle) return { title: "inbox · SIGNA" };
+  if (!handle) return { title: "inbox · SIGDA" };
   const name = display(handle);
   const img = inboxEmbedImage(handle);
-  const title = `Send ${name} a signed message on Base`;
-  const desc = `Send ${name} a wallet-signed message on Base — one tap, no account, re-verifiable by anyone.`;
+  const title = `Send ${name} a signed message on Robinhood Chain`;
+  const desc = `Send ${name} a wallet-signed message on Robinhood Chain — one tap, no account, re-verifiable by anyone.`;
   return {
     title,
     description: desc,
@@ -73,15 +73,15 @@ export default async function InboxPage({
       <div className="max-w-[600px] mx-auto px-5 py-7">
         <Link href="/mini" className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/signa-logo.png" alt="SIGNA" className="size-8 rounded-full" />
-          <div className="font-display font-semibold tracking-tight">SIGNA</div>
+          <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+          <div className="font-display font-semibold tracking-tight">SIGDA</div>
         </Link>
 
         <h1 className="font-display text-[28px] leading-tight font-bold mt-6">
           Send <span className="brand-text">{name}</span> a signed message
         </h1>
         <p className="text-muted text-[14px] mt-2 leading-relaxed">
-          A wallet-signed message on Base — one tap, no account. The signature proves who really
+          A wallet-signed message on Robinhood Chain — one tap, no account. The signature proves who really
           sent it, and anyone can re-verify it. {notes.length > 0 ? `${notes.length} so far.` : ""}
         </p>
 
@@ -130,7 +130,7 @@ export default async function InboxPage({
         </div>
 
         <div className="mt-8 text-center text-[11px] text-faint">
-          signaagent.xyz · the wallet-signed message layer on Base
+          signaagent.xyz · the wallet-signed message layer on Robinhood Chain
         </div>
       </div>
     </div>

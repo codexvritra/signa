@@ -32,7 +32,7 @@ export async function GET(
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={LOGO} width={60} height={60} style={{ borderRadius: 999 }} alt="" />
-          <div style={{ color: "#fff", fontSize: 30, fontWeight: 700 }}>SIGNA</div>
+          <div style={{ color: "#fff", fontSize: 30, fontWeight: 700 }}>SIGDA</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -50,7 +50,7 @@ export async function GET(
           >
             wallet-signed message
           </div>
-          <div style={{ color: "#8a8aa0", fontSize: 32 }}>on Base · one tap · no account</div>
+          <div style={{ color: "#8a8aa0", fontSize: 32 }}>on Robinhood Chain · one tap · no account</div>
         </div>
 
         <div

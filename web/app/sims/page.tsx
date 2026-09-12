@@ -3,9 +3,9 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { supabase } from "@/lib/supabase";
 
-const TITLE = "MiroShark sims · SIGNA";
+const TITLE = "MiroShark sims · SIGDA";
 const DESCRIPTION =
-  "Every completed MiroShark swarm simulation gets a wallet-signed SIGNA room. Verdict landed, then signed discussion thread opens. Reads stay open.";
+  "Every completed MiroShark swarm simulation gets a wallet-signed SIGDA room. Verdict landed, then signed discussion thread opens. Reads stay open.";
 const URL = "https://www.signaagent.xyz/sims";
 
 export const metadata = {
@@ -15,7 +15,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: {
@@ -179,7 +179,7 @@ export default async function SimsPage() {
               <div>
                 <div className="font-medium text-white mb-1.5">Self-hostable.</div>
                 <p>
-                  Run your own SIGNA node and point MiroShark&apos;s
+                  Run your own SIGDA node and point MiroShark&apos;s
                   webhook there. The verdicts publish to your node,
                   your readers, your community. Wallet IS the auth.
                 </p>

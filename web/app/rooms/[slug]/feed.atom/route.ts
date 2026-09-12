@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * partners needing to write a single line of code.
  *
  * Each entry carries the message body + a re-verify URL pointing
- * back to the SIGNA node's signed message endpoint. Updated stamp
+ * back to the SIGDA node's signed message endpoint. Updated stamp
  * mirrors the latest message ts so readers know when to re-fetch.
  *
  * Cached for 60s via Cache-Control. Public, no auth.
@@ -95,12 +95,12 @@ export async function GET(
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>${feedId}</id>
-  <title type="text">SIGNA · #${esc(room.slug)}</title>
-  <subtitle type="text">${esc(room.description ?? "Wallet-signed room on the SIGNA network.")}</subtitle>
+  <title type="text">SIGDA · #${esc(room.slug)}</title>
+  <subtitle type="text">${esc(room.description ?? "Wallet-signed room on the SIGDA network.")}</subtitle>
   <link rel="alternate" type="text/html" href="${esc(feedId)}"/>
   <link rel="self" type="application/atom+xml" href="${esc(`${feedId}/feed.atom`)}"/>
   <updated>${updated}</updated>
-  <generator uri="${base}" version="0.64">SIGNA</generator>
+  <generator uri="${base}" version="0.64">SIGDA</generator>
 ${entries}
 </feed>`;
 

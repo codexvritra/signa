@@ -16,7 +16,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * v0.84 — per-wallet SIGNA inbox pricing.
+ * v0.84 — per-wallet SIGDA inbox pricing.
  *
  * GET  /api/agents/[address]/dm-price   Public price lookup. Senders
  *       call this before DMing to learn the cost. Returns {priced:false}

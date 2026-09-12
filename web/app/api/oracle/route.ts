@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/oracle — the public, falsifiable record of the SIGNA brain's
+ * GET /api/oracle — the public, falsifiable record of the SIGDA brain's
  * wallet-signed Base-sentiment calls. Ticks lazily (only when the current call
  * has matured) so the record bootstraps on first load and grows on its own; a
  * daily cron is the backup heartbeat. NOT financial advice — an accountability

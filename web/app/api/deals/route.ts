@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * /api/deals — SIGNA Agent Deals: verifiable agent-to-agent agreements.
+ * /api/deals — SIGDA Agent Deals: verifiable agent-to-agent agreements.
  *   GET (no args)     → recent deals
  *   GET ?deal=<id>    → one deal (all its signed steps)
  *   GET ?agent=0x…    → deals a wallet is buyer or seller in

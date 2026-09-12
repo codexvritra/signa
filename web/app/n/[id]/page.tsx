@@ -28,15 +28,15 @@ export async function generateMetadata({
   const note = await loadNote(id);
   const img = noteEmbedImage(id);
   if (!note) {
-    return { title: "note not found · SIGNA" };
+    return { title: "note not found · SIGDA" };
   }
   const who = note.username ? `@${note.username}` : shortAddr(note.address);
-  const desc = `${note.body.slice(0, 150)} — signed on Base by ${who}, re-verifiable.`;
+  const desc = `${note.body.slice(0, 150)} — signed on Robinhood Chain by ${who}, re-verifiable.`;
   return {
-    title: `Signed on Base · ${who}`,
+    title: `Signed on Robinhood Chain · ${who}`,
     description: desc,
     openGraph: {
-      title: `"${note.body.slice(0, 80)}" — signed on Base`,
+      title: `"${note.body.slice(0, 80)}" — signed on Robinhood Chain`,
       description: desc,
       url: `${SITE}/n/${id}`,
       images: [{ url: img, width: 1200, height: 800 }],
@@ -44,7 +44,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `Signed on Base · ${who}`,
+      title: `Signed on Robinhood Chain · ${who}`,
       description: desc,
       images: [img],
     },
@@ -71,11 +71,11 @@ export default async function NotePage({
         <div className="flex items-center justify-between">
           <Link href="/mini" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/signa-logo.png" alt="SIGNA" className="size-8 rounded-full" />
-            <div className="font-display font-semibold tracking-tight">SIGNA</div>
+            <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+            <div className="font-display font-semibold tracking-tight">SIGDA</div>
           </Link>
           <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">
-            ✓ SIGNED ON BASE
+            ✓ SIGNED ON ROBINHOOD CHAIN
           </div>
         </div>
 
@@ -105,7 +105,7 @@ export default async function NotePage({
         <p className="text-muted text-[13px] mt-4 leading-relaxed">
           This is an EIP-191 wallet signature over a canonical message. Verify it below — or run the
           identical check yourself with <span className="font-mono text-white/70">viem.recoverMessageAddress</span>.
-          No trust in SIGNA required.
+          No trust in SIGDA required.
         </p>
 
         <Verify preimage={note.signed_message} signature={note.signature} expected={note.address} />
@@ -114,11 +114,11 @@ export default async function NotePage({
           href="/mini"
           className="mt-6 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]"
         >
-          Sign your own on Base
+          Sign your own on Robinhood Chain
         </Link>
 
         <div className="mt-5 text-center text-[11px] text-faint">
-          signaagent.xyz · the wallet-signed message layer on Base
+          signaagent.xyz · the wallet-signed message layer on Robinhood Chain
         </div>
       </div>
     </div>

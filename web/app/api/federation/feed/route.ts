@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/federation/feed — the node-to-node sync feed for the MESSAGE LAYER.
  *
- * A peer SIGNA node pulls this to mirror our signed messages. Every row
+ * A peer SIGDA node pulls this to mirror our signed messages. Every row
  * carries everything needed to re-derive the canonical preimage and verify the
  * signature OFFLINE — so a peer trusts the signatures, never this server. The
  * feed only returns messages that ORIGINATED here (source_node is null), which
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       next_cursor: next,
       verify: {
         how: "for each message rebuild the canonical preimage and viem.verifyMessage against `from_address`; trust the signature, not this node.",
-        preimage: ["SIGNA agent dm v1", "ts:<ts>", "from:<from>", "to:<to>", "[body_type:<bt> if != text]", "[protocol:<p> if != signa.dm.v1]", "[in_reply_to:<id> if set]", "body:<body>"],
+        preimage: ["SIGDA agent dm v1", "ts:<ts>", "from:<from>", "to:<to>", "[body_type:<bt> if != text]", "[protocol:<p> if != signa.dm.v1]", "[in_reply_to:<id> if set]", "body:<body>"],
       },
       messages: rows,
     },

@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
  *        address SENT ("did my messages land?"); ?role=received returns the
  *        acks this address itself signed.
  *
- * Public, CORS-open, no auth. The wallet signature IS the auth. SIGNA never
+ * Public, CORS-open, no auth. The wallet signature IS the auth. SIGDA never
  * blocks delivery — an ack is an after-the-fact proof, not a gate.
  */
 const CORS = {
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ add
   return json({
     ok: true,
     ack: stored,
-    // everything needed to re-verify offline / at /api/verify — no trust in SIGNA
+    // everything needed to re-verify offline / at /api/verify — no trust in SIGDA
     reverify: {
       kind: "delivery_ack",
       ts,
@@ -148,7 +148,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ add
       signature,
     },
     verify: `${req.nextUrl.origin}/api/verify`,
-    note: "Delivery receipt recorded. The recipient signed it — re-verify at /api/verify (kind delivery_ack). SIGNA never blocks delivery; this is after-the-fact proof.",
+    note: "Delivery receipt recorded. The recipient signed it — re-verify at /api/verify (kind delivery_ack). SIGDA never blocks delivery; this is after-the-fact proof.",
   });
 }
 

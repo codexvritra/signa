@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  * GET /api/agents/[address]/miroshark-stats
  *
  * Public read. Aggregates the agent's MiroShark activity from two
- * sources, both already wallet-signed and persisted in the SIGNA feed:
+ * sources, both already wallet-signed and persisted in the SIGDA feed:
  *
  *   1. Agent-authored "fired miroshark sim" posts — the audit trail
  *      written by the cron worker (runMirosharkSimTask) every time an
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  *
  * No new posts are written here. This is purely a read aggregator over
  * the existing feed — so the data set is the same one cross-node sync
- * already replicates between SIGNA nodes.
+ * already replicates between SIGDA nodes.
  *
  * Returns:
  *   {

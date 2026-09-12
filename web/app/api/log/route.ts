@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/log — the head of the SIGNA transparency log (the network ledger).
+ * GET /api/log — the head of the SIGDA transparency log (the network ledger).
  *
  * An append-only RFC 6962 Merkle log over EVERY signed artifact on the network
  * — messages, x402 deal receipts, mandate spends, delivery acks. The latest
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       ok: true,
-      log: "SIGNA transparency log — the network ledger (RFC 6962 Merkle over every signed artifact)",
+      log: "SIGDA transparency log — the network ledger (RFC 6962 Merkle over every signed artifact)",
       covers: ["dm", "receipt", "spend", "ack"],
       signer: LOG_SIGNER,
       checkpoint: cp,
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       anchor: {
         chain: "base",
         configured: !!logAnchorAddress(),
-        onchain, // { seq, tree_size, root, anchored_at } once anchored on Base
+        onchain, // { seq, tree_size, root, anchored_at } once anchored on Robinhood Chain
         status: `${origin}/api/log/anchor`,
       },
       how: {
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
         consistency: `${origin}/api/log/consistency?first=<earlier tree_size>`,
         verify_checkpoint: `${origin}/api/verify  { kind:"log_checkpoint", seq, size, prev, root, ts, signature }`,
         rebuild:
-          "fetch the ordered artifacts, leaf = SHA256(0x00 || 'SIGNA log leaf v2\\nkind:..\\nid:..\\nsig:..'), build the RFC 6962 tree, compare root to the signed checkpoint.",
+          "fetch the ordered artifacts, leaf = SHA256(0x00 || 'SIGDA log leaf v2\\nkind:..\\nid:..\\nsig:..'), build the RFC 6962 tree, compare root to the signed checkpoint.",
       },
       basis:
         "Each artifact is independently signed; this proves the SET wasn't tampered. Every checkpoint, inclusion proof and consistency proof is reproducible offline — don't trust, verify.",

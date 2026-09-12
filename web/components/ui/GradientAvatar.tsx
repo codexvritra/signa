@@ -2,7 +2,7 @@ import { cn } from "@/lib/cn";
 
 /**
  * Deterministic 2-stop gradient avatar derived from an address (or any seed
- * string). Palette is biased toward the SIGNA blue/violet accent system so
+ * string). Palette is biased toward the SIGDA blue/violet accent system so
  * avatars feel native to the product rather than randomly colored.
  *
  * - Stable: same address → same gradient, every render

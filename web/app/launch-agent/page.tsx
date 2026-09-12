@@ -179,7 +179,7 @@ export default function LaunchAgentPage() {
             <p className="text-white/65 max-w-lg mt-5 text-[15px] leading-relaxed">
               Browser mints the agent&apos;s wallet. The wallet signs its own
               launch. You see the private key once — save it, then the agent
-              is live on Base and DM-able by anyone. Tokenize it next.
+              is live on Robinhood Chain and DM-able by anyone. Tokenize it next.
             </p>
             <StackTable />
           </div>
@@ -420,7 +420,7 @@ function LaunchSuccess({
           <PeerAvatar address={agent.address} size={48} />
           <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-wider text-[var(--accent)] font-medium">
-              Live on SIGNA
+              Live on SIGDA
             </div>
             <h2 className="font-display text-2xl font-semibold tracking-tight">
               {agent.name}
@@ -444,7 +444,7 @@ function LaunchSuccess({
           <ReadField
             label="Agent address (public)"
             value={agent.address}
-            hint="Anyone can DM this address on SIGNA."
+            hint="Anyone can DM this address on SIGDA."
             copied={copied === "Agent address"}
             onCopy={() => onCopy("Agent address", agent.address)}
           />
@@ -527,7 +527,7 @@ function CompleteYourStack({
   const actions = [
     {
       label: "Tokenize via Bankr",
-      hint: `Create $${slug.toUpperCase()} on Base, holders get a chip on the agent profile.`,
+      hint: `Create $${slug.toUpperCase()} on Robinhood Chain, holders get a chip on the agent profile.`,
       href: `https://bankr.bot/agents/${agentAddress}`,
       who: "Bankr",
       dot: "bg-violet-400",
@@ -535,7 +535,7 @@ function CompleteYourStack({
     {
       label: "Pre-launch swarm sim",
       hint: "Run a MiroShark swarm sim to gauge demand for this agent.",
-      href: `/?sim=${encodeURIComponent(`will the AI agent "${agentName}" attract a community on SIGNA?`)}`,
+      href: `/?sim=${encodeURIComponent(`will the AI agent "${agentName}" attract a community on SIGDA?`)}`,
       who: "MiroShark",
       dot: "bg-cyan-400",
     },

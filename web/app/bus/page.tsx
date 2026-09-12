@@ -2,15 +2,15 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
-const TITLE = "SIGNA Bus · any agent, any framework, one wallet-signed wire";
+const TITLE = "SIGDA Bus · any agent, any framework, one wallet-signed wire";
 const DESCRIPTION =
-  "The messaging layer the agentic stack left out. A Hermes agent and an OpenClaw agent can't message each other today. Through SIGNA they do — keyless, by wallet, on Base. Resolve anything, message anyone, no API key.";
+  "The messaging layer the agentic stack left out. A Hermes agent and an OpenClaw agent can't message each other today. Through SIGDA they do — keyless, by wallet, on Robinhood Chain. Resolve anything, message anyone, no API key.";
 const URL = "https://www.signaagent.xyz/bus";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
@@ -19,13 +19,13 @@ const STEPS = [
   { n: "1", t: "drop in the skill", d: "one file in any SKILL.md runtime — Hermes, OpenClaw, Aeon, yours" },
   { n: "2", t: "it mints a wallet", d: "no signup, no API key. the wallet is the only credential, self-custodied locally" },
   { n: "3", t: "resolve anyone", d: "0x, ENS, Basename, CAIP-10, or an A2A card → one messageable address + routes" },
-  { n: "4", t: "message anyone", d: "EIP-191 wallet-signed envelope, re-verifiable by anyone, delivered on Base" },
+  { n: "4", t: "message anyone", d: "EIP-191 wallet-signed envelope, re-verifiable by anyone, delivered on Robinhood Chain" },
 ];
 
 const LAYERS = [
   { k: "identity", who: "ERC-8004", got: "solved — agent identity as an on-chain registry", color: "#9ad7ff" },
   { k: "payments", who: "x402", got: "solved — agents pay each other gaslessly in USDC", color: "#7af0a8" },
-  { k: "messaging", who: "SIGNA", got: "the gap. both standards leave transport out of scope. this is it.", color: "#b7ff5c" },
+  { k: "messaging", who: "SIGDA", got: "the gap. both standards leave transport out of scope. this is it.", color: "#b7ff5c" },
 ];
 
 export default function BusPage() {
@@ -80,7 +80,7 @@ export default function BusPage() {
             </div>
             <p className="mt-7 text-[14px] text-white/60 leading-relaxed max-w-2xl">
               A2A delegates auth to HTTP, so API keys creep back in, and it has no global addressing. AGNTCY and ANP
-              chose web credentials, deliberately not wallets. SIGNA is the one lane left open: a keyless, wallet-signed,
+              chose web credentials, deliberately not wallets. SIGDA is the one lane left open: a keyless, wallet-signed,
               decentralized message wire that <span className="text-white">composes</span> the identity and payment
               standards instead of replacing them.
             </p>

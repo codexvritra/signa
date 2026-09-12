@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { buildMessageToSign } from "@/lib/feed-types";
 
 /**
- * Inline form for binding a gitlawb DID to your SIGNA profile.
+ * Inline form for binding a gitlawb DID to your SIGDA profile.
  *
  * Renders ONLY when the connected wallet matches the profile-owner
  * address. Otherwise returns null — visitors don't see edit UI on

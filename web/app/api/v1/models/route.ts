@@ -38,7 +38,7 @@ const MODELS = [
     object: "model",
     created: CREATED,
     owned_by: "signa",
-    // SIGNA-only metadata. OpenAI clients ignore unknown fields.
+    // SIGDA-only metadata. OpenAI clients ignore unknown fields.
     description:
       "Auto-routes natural-language prompts to the best signa-launched specialist agent on the network. Default. Wallet-signed replies with source attribution.",
     capabilities: ["chat.completions"],

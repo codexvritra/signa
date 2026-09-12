@@ -24,9 +24,9 @@ const INTEGRATIONS: Integration[] = [
     blurb:
       "AI trading agent on X / Farcaster / Terminal. Trade with natural language across Base, Ethereum, Solana, Polygon. Coinbase-Ventures-backed.",
     signaUses: [
-      "Type /bankr <command> in any SIGNA chat — opens Bankr Terminal pre-filled",
+      "Type /bankr <command> in any SIGDA chat — opens Bankr Terminal pre-filled",
       "Tip with $BNKR from the payment modal",
-      "SIGNA is publishing a `signa-feed` Skill to BankrBot/skills",
+      "SIGDA is publishing a `signa-feed` Skill to BankrBot/skills",
     ],
     url: "https://bankr.bot",
     slash: "/bankr",
@@ -39,7 +39,7 @@ const INTEGRATIONS: Integration[] = [
     blurb:
       "Modular crypto payment protocol for AI agents. $263M+ processed, 5.7M+ txs. x402 facilitator for AI-to-AI micropayments.",
     signaUses: [
-      "Type /aeon in any SIGNA chat — opens AEON Pay",
+      "Type /aeon in any SIGDA chat — opens AEON Pay",
       "Tip with USDC (AEON's preferred unit) from the payment modal",
       "Roadmap: per-message agent pricing settled via AEON x402",
     ],
@@ -53,7 +53,7 @@ const INTEGRATIONS: Integration[] = [
     blurb:
       "Decentralized git network for AI agents. Repos on IPFS+Filecoin+Arweave, peer connectivity via libp2p, identity via DID+UCAN. Staking via $GITLAWB on Base.",
     signaUses: [
-      "Type /gitlawb in any SIGNA chat — opens gitlawb",
+      "Type /gitlawb in any SIGDA chat — opens gitlawb",
       "Tip with $GITLAWB from the payment modal",
       "Roadmap: \"Open source on gitlawb\" badge on directory agents",
     ],
@@ -68,7 +68,7 @@ const INTEGRATIONS: Integration[] = [
     blurb:
       "AI multi-agent simulation infrastructure on Base. Spawn hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets.",
     signaUses: [
-      "Ask the SIGNA agent 'simulate reaction to X' — calls miroshark_simulate which POSTs to your MIROSHARK_BASE_URL instance (or returns deploy-your-own instructions)",
+      "Ask the SIGDA agent 'simulate reaction to X' — calls miroshark_simulate which POSTs to your MIROSHARK_BASE_URL instance (or returns deploy-your-own instructions)",
       "Tip with $MIROSHARK from the payment modal — verified Base contract 0xd7bc…ba3",
       "Holder chip on every profile that owns $MIROSHARK",
     ],
@@ -99,7 +99,7 @@ export default function EcosystemPage() {
               The stack we&apos;re built on.
             </h1>
             <p className="text-white/55 max-w-xl mt-5 text-[16px] leading-relaxed">
-              SIGNA is the messenger and the kernel. Bankr is the trader.
+              SIGDA is the messenger and the kernel. Bankr is the trader.
               AEON is the on-chain identity + payment rail. gitlawb is the
               decentralized git layer. MiroShark is the simulation lab.
               All native to Base.
@@ -141,7 +141,7 @@ export default function EcosystemPage() {
                   </p>
                   <div>
                     <div className="text-[10px] uppercase tracking-wider text-white/40 mb-1.5">
-                      Uses in SIGNA
+                      Uses in SIGDA
                     </div>
                     <ul className="text-[12px] text-white/70 space-y-1">
                       {it.signaUses.map((u) => (
@@ -174,7 +174,7 @@ export default function EcosystemPage() {
               </span>
               If you&apos;re building something Base-native that touches
               messaging, agents, or payments, your project belongs on this
-              page. Find SIGNA on{" "}
+              page. Find SIGDA on{" "}
               <a
                 href="/directory"
                 className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accent-2)]"

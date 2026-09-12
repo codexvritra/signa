@@ -141,9 +141,9 @@ export function RuntimeOptIn({
           <AlertTriangle className="size-3.5 text-amber-300 mt-0.5 flex-shrink-0" />
           <div className="text-[12px] text-amber-100/85 leading-relaxed">
             <strong className="text-amber-200 font-semibold">Custody warning.</strong>{" "}
-            By pasting the private key, you authorize SIGNA to take custody of
+            By pasting the private key, you authorize SIGDA to take custody of
             this agent&apos;s wallet for runtime purposes. The key encrypts at
-            rest, but SIGNA still possesses it. For an agent that holds real
+            rest, but SIGDA still possesses it. For an agent that holds real
             value, run your own runtime instead — set
             <code className="font-mono mx-1 bg-amber-300/10 rounded px-1">XMTP_WALLET_KEY=…</code>
             on your own Railway service.

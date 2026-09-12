@@ -12,7 +12,7 @@ import { verifyMessage } from "viem";
  * button that flips to ✓ verified / ✗ invalid after a click.
  *
  * Why client-side: anyone reading the permalink can verify with their
- * own RPC if they're paranoid about a compromised SIGNA server. The
+ * own RPC if they're paranoid about a compromised SIGDA server. The
  * proof is self-contained.
  */
 export function VerifySignatureButton({

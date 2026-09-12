@@ -12,7 +12,7 @@
   --surface: #0e0e15;
   --surface-raised: #14141d;
   --surface-hover: #1a1a25;
-  /* SIGNA accent system — neon blue primary, violet secondary */
+  /* SIGDA accent system — neon blue primary, violet secondary */
   --accent: #5b8def;            /* electric blue, primary action + active states */
   --accent-strong: #4a7adb;     /* hover */
   --accent-dim: rgba(91, 141, 239, 0.14);

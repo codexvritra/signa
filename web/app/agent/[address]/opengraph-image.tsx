@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "signa agent card";
+export const alt = "sigda agent card";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -22,7 +22,7 @@ export default async function Image({
   params: Promise<{ address: string }>;
 }) {
   const { address: rawAddress } = await params;
-  let name = "signa agent";
+  let name = "sigda agent";
   let address = rawAddress;
   let tags: string[] = [];
   let did: string | null = null;
@@ -81,7 +81,7 @@ export default async function Image({
             letterSpacing: 4,
           }}
         >
-          <div style={{ display: "flex" }}>SIGNA AGENT</div>
+          <div style={{ display: "flex" }}>SIGDA AGENT</div>
           <div style={{ display: "flex" }}>signaagent.xyz</div>
         </div>
 

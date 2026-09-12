@@ -9,7 +9,7 @@ import { TokensTabs } from "./TokensTabs";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Tokens on Base · SIGNA",
+  title: "Tokens on Base · SIGDA",
   description:
     "Trending and recently launched tokens on Base mainnet. Discovery powered by GeckoTerminal, trading via Bankr.",
 };

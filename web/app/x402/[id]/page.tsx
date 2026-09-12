@@ -56,7 +56,7 @@ export async function generateMetadata({
   const { id } = await params;
   const r = await load(id);
   const img = `${SITE}/api/og/x402/${id}`;
-  if (!r) return { title: "receipt not found · SIGNA" };
+  if (!r) return { title: "receipt not found · SIGDA" };
   const title = `x402 receipt · ${usdg(r.amount)} on Robinhood Chain`;
   const desc = `${r.request?.item ?? "agent purchase"} — request, terms, x402 payment, and delivery bound into one verifiable receipt.`;
   return {
@@ -92,8 +92,8 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         <div className="flex items-center justify-between">
           <Link href="/x402" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/signa-logo.png" alt="SIGNA" className="size-8 rounded-full" />
-            <div className="font-display font-semibold tracking-tight">SIGNA · x402</div>
+            <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+            <div className="font-display font-semibold tracking-tight">SIGDA · x402</div>
           </Link>
           <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">
             ✓ x402 RECEIPT
@@ -144,9 +144,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         </div>
 
         <p className="text-muted text-[13px] mt-4 leading-relaxed">
-          The SIGNA attestor signed an envelope binding all four parts. Re-verify it below, or run the
+          The SIGDA attestor signed an envelope binding all four parts. Re-verify it below, or run the
           same check yourself with <span className="font-mono text-white/70">viem.recoverMessageAddress</span> —
-          no trust in SIGNA.
+          no trust in SIGDA.
         </p>
 
         <X402Verify
@@ -169,11 +169,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           href="/x402"
           className="mt-6 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]"
         >
-          x402 moves the money. SIGNA proves the deal →
+          x402 moves the money. SIGDA proves the deal →
         </Link>
 
         <div className="mt-5 text-center text-[11px] text-faint">
-          SIGNA never settles or custodies funds · provenance, not a settlement guarantee
+          SIGDA never settles or custodies funds · provenance, not a settlement guarantee
         </div>
       </div>
     </div>

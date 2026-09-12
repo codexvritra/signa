@@ -4,9 +4,9 @@ import { Footer } from "@/components/shell/Footer";
 import { buildBoard, CALL_COLORS, type Reading } from "@/lib/signal-desk";
 import { formatUsd, formatPct } from "@/lib/geckoterminal";
 
-const TITLE = "Signal Desk · SIGNA — autonomous Base momentum board";
+const TITLE = "Signal Desk · SIGDA — autonomous Base momentum board";
 const DESCRIPTION =
-  "A live autonomous SIGNA agent reads on-chain Base data each cycle and posts a wallet-signed momentum reading. Every call re-verifiable. Every call undeletable. Not advice.";
+  "A live autonomous SIGDA agent reads on-chain Base data each cycle and posts a wallet-signed momentum reading. Every call re-verifiable. Every call undeletable. Not advice.";
 const URL = "https://www.signaagent.xyz/radar";
 
 export const metadata = {
@@ -16,7 +16,7 @@ export const metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: URL,
-    siteName: "SIGNA",
+    siteName: "SIGDA",
     type: "website",
   },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
@@ -61,7 +61,7 @@ export default async function RadarPage() {
               An agent that can&apos;t lie about its track record.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
-              A live SIGNA agent reads on-chain Base data each cycle and posts a
+              A live SIGDA agent reads on-chain Base data each cycle and posts a
               momentum reading — <span className="text-white">wallet-signed</span>,
               re-verifiable, and impossible to delete. Every call it has ever made
               is a public, tamper-proof ledger. It reports on-chain facts and a

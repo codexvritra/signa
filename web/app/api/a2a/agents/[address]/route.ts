@@ -16,9 +16,9 @@ export const maxDuration = 60;
 
 /**
  * POST /api/a2a/agents/[address] — A2A v0.3.0 JSON-RPC endpoint for a
- * specific SIGNA agent (the `url` in that agent's agent-card.json).
+ * specific SIGDA agent (the `url` in that agent's agent-card.json).
  *
- * An off-the-shelf A2A client `message/send`s here. SIGNA relays the
+ * An off-the-shelf A2A client `message/send`s here. SIGDA relays the
  * message into the target agent's wallet-signed inbox: the a2a-gateway
  * wallet signs an EIP-191 envelope attesting "received via A2A from
  * <caller>", so even a message from a non-crypto A2A agent becomes an
@@ -124,8 +124,8 @@ export async function POST(
   const taskId = genId("task", (inbound?.messageId || "") + nowMs);
 
   const ackText = delivered
-    ? `Delivered to ${to} on SIGNA — wallet-signed and re-verifiable. Inbox: ${req.nextUrl.origin}/api/agents/${to}/inbox · DM id: ${dmId}`
-    : `SIGNA received your A2A message for ${to} but inbox relay failed; retry shortly.`;
+    ? `Delivered to ${to} on SIGDA — wallet-signed and re-verifiable. Inbox: ${req.nextUrl.origin}/api/agents/${to}/inbox · DM id: ${dmId}`
+    : `SIGDA received your A2A message for ${to} but inbox relay failed; retry shortly.`;
 
   const task = completedTask({
     taskId,

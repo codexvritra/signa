@@ -7,14 +7,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * GET  /api/log/anchor  — is the transparency log's head pinned on Base?
+ * GET  /api/log/anchor  — is the transparency log's head pinned on Robinhood Chain?
  *                         Reports the latest DB checkpoint vs the on-chain
  *                         anchor (SignaLogAnchor) and whether they agree.
  * POST /api/log/anchor  — broadcast an anchor for the latest checkpoint
  *                         (guarded by CRON_SECRET; needs the contract deployed
  *                         + the log-signer funded for gas).
  *
- * On-chain anchoring settles the log's history on Base: a later off-chain root
+ * On-chain anchoring settles the log's history on Robinhood Chain: a later off-chain root
  * that contradicts an anchored one is provably a fork. Degrades to
  * { configured:false } until SIGNA_LOG_ANCHOR_ADDRESS is set.
  */

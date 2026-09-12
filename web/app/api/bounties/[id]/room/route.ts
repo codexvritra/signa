@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/bounties/[id]/room
  *
- * Lazy-create a wallet-signed SIGNA room for a gitlawb open bounty.
+ * Lazy-create a wallet-signed SIGDA room for a gitlawb open bounty.
  * Bot wallet signs the room manifest + an intro message. Idempotent.
  *
  * Rooms are public by default so anyone can read the work going on, but
@@ -99,12 +99,12 @@ export async function POST(
   const description = [
     `Gitlawb bounty room · ${title}`,
     `Bounty: ${amount} ${token}`,
-    `Powered by SIGNA wallet-signed chat.`,
+    `Powered by SIGDA wallet-signed chat.`,
   ].join(" · ").slice(0, 500);
 
   const roomTs = Date.now();
   const roomMessage = [
-    "SIGNA room create v1",
+    "SIGDA room create v1",
     `ts:${roomTs}`,
     `address:${botAddr}`,
     `name:bounty · ${title.slice(0, 60)}`,
@@ -153,7 +153,7 @@ export async function POST(
   ].filter(Boolean).join("\n");
 
   const msgPreimage = [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${ts}`,
     `from:${botAddr}`,
     `room:${slug}`,

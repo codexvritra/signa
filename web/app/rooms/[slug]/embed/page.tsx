@@ -29,7 +29,7 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   return {
-    title: `#${slug} · SIGNA embed`,
+    title: `#${slug} · SIGDA embed`,
     robots: { index: false, follow: false },
   };
 }

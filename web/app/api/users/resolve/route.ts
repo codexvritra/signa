@@ -16,12 +16,12 @@ export const dynamic = "force-dynamic";
  *
  *   { ok: true, address, basename, ens_name, on_signa: bool, source: ... }
  *
- * `basename` is a legacy display-name column from when SIGNA also resolved
- * Base mainnet Basenames (*.base.eth) — no longer actively resolved (SIGNA
+ * `basename` is a legacy display-name column from when SIGDA also resolved
+ * Base mainnet Basenames (*.base.eth) — no longer actively resolved (SIGDA
  * runs on Robinhood Chain now), but existing stored values still display.
  *
  * Resolution strategy:
- *   1. 0x address → use as-is, look up SIGNA metadata for it.
+ *   1. 0x address → use as-is, look up SIGDA metadata for it.
  *   2. *.eth     → ensideas.com (verified, ~40ms from Vercel) with
  *      web3.bio /ens/ as a second backstop. viem getEnsAddress as a
  *      last-resort tertiary that only works against a CCIP-capable RPC.
@@ -29,7 +29,7 @@ export const dynamic = "force-dynamic";
  *      users.ens_name (exact-match only — no PostgREST OR filter with
  *      dots in values, that was the bug that 404'd vitalik.eth).
  *
- * After address is resolved, SIGNA metadata (basename / ens_name from
+ * After address is resolved, SIGDA metadata (basename / ens_name from
  * the users table, on_signa flag) is looked up via a single `.eq.` query
  * which PostgREST handles correctly.
  */
@@ -180,7 +180,7 @@ async function handleResolve(req: NextRequest) {
   }
 
   // 2. ENS-shaped (*.eth). Basenames (*.base.eth) are no longer actively
-  // resolved — SIGNA runs on Robinhood Chain, which has no Base dependency.
+  // resolved — SIGDA runs on Robinhood Chain, which has no Base dependency.
   if (handle.endsWith(".eth")) {
     // handle is already lowercased; the HTTP resolvers and viem are tolerant
     // of unicode names since we don't accept those from users today. If we
@@ -254,7 +254,7 @@ async function handleResolve(req: NextRequest) {
       handle: rawHandle,
       error: "unresolvable",
       message:
-        "no SIGNA user, Basename, or ENS matches this handle. did you mean an address (0x…)?",
+        "no SIGDA user, Basename, or ENS matches this handle. did you mean an address (0x…)?",
     },
     { status: 404 },
   );

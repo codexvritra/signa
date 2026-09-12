@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 /**
  * WebGL hero: a slowly rotating constellation of agent nodes with light beams
- * flowing into a central SIGNA core, traveling pulses along each beam, and
+ * flowing into a central SIGDA core, traveling pulses along each beam, and
  * mouse parallax. Brand colors (electric blue → violet on near-black).
  *
  * Degrades gracefully: prefers-reduced-motion or no-WebGL renders a static

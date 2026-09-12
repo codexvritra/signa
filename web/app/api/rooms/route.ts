@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *   { address, name, slug, description?, is_public, ts, signature }
  *
  * Every public read is CORS-open. Writes verify the signature matches
- * the declared address — the SIGNA node persists only what verifies.
+ * the declared address — the SIGDA node persists only what verifies.
  */
 const CORS = {
   "access-control-allow-origin": "*",

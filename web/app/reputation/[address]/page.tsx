@@ -21,10 +21,10 @@ export async function generateMetadata({ params }: { params: Promise<{ address: 
   const { address } = await params;
   const d = await getRep(address);
   const who = d?.name || short(address);
-  const title = d ? `${who} — reputation ${d.score} (${d.tier}) | SIGNA` : "Agent reputation | SIGNA";
+  const title = d ? `${who} — reputation ${d.score} (${d.tier}) | SIGDA` : "Agent reputation | SIGDA";
   const desc = d
-    ? `${who} has a SIGNA reputation of ${d.score} (${d.tier}) — backed by ${d.signed_actions} verifiable signed actions on Base. Not reviews — receipts.`
-    : "Proof-backed agent reputation on Base.";
+    ? `${who} has a SIGDA reputation of ${d.score} (${d.tier}) — backed by ${d.signed_actions} verifiable signed actions on Robinhood Chain. Not reviews — receipts.`
+    : "Proof-backed agent reputation on Robinhood Chain.";
   return { title, description: desc, openGraph: { title, description: desc, url: `${SITE}/reputation/${address}`, type: "profile" }, twitter: { card: "summary_large_image", title, description: desc } };
 }
 
@@ -47,7 +47,7 @@ export default async function RepCard({ params }: { params: Promise<{ address: s
                 <div>
                   <div className="text-[18px] font-semibold">{d.name || "Agent"}</div>
                   <div className="font-mono text-[12px] text-faint mt-1">{short(d.address)}</div>
-                  {d.registered_agent && <div className="text-[11px] text-[#a5c3ff] mt-1">SIGNA-registered agent</div>}
+                  {d.registered_agent && <div className="text-[11px] text-[#a5c3ff] mt-1">SIGDA-registered agent</div>}
                 </div>
                 <div className="text-right">
                   <div className="text-[44px] font-bold leading-none tabular-nums" style={{ color: d.tier_color }}>{d.score.toLocaleString()}</div>
@@ -69,7 +69,7 @@ export default async function RepCard({ params }: { params: Promise<{ address: s
                   </div>
                 ))}
                 {d.breakdown.every((b: any) => b.count === 0) && (
-                  <div className="text-[13px] text-faint py-4 text-center">No signed activity on SIGNA yet for this address.</div>
+                  <div className="text-[13px] text-faint py-4 text-center">No signed activity on SIGDA yet for this address.</div>
                 )}
               </div>
 
@@ -80,7 +80,7 @@ export default async function RepCard({ params }: { params: Promise<{ address: s
             </div>
 
             <div className="mt-4 text-[12px] text-faint leading-relaxed px-1">
-              SIGNA reputation scores on-network signed activity, not self-reported feedback (the gap in ERC-8004&apos;s
+              SIGDA reputation scores on-network signed activity, not self-reported feedback (the gap in ERC-8004&apos;s
               reputation registry). It complements an agent&apos;s on-chain identity — it doesn&apos;t replace your own judgment.
             </div>
           </>

@@ -70,8 +70,8 @@ export function PaymentModal({
     () => getToken(symbol) ?? TOKENS[0],
     [symbol],
   );
-  // Most tokens (ETH, USDG) live on Robinhood Chain, SIGNA's own chain.
-  // BNKR/GITLAWB/MIROSHARK are real third-party tokens that live on Base —
+  // Most tokens (ETH, USDG) live on Robinhood Chain, SIGDA's own chain.
+  // BNKR/GITLAWB/MIROSHARK are real third-party tokens that live on Robinhood Chain —
   // see the `chain` field doc in lib/tokens.ts — so send those there instead.
   const targetChain = token.chain === "base" ? base : rhChain;
 

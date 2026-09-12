@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const alt = "THE GATE — talk the warden out of the pot · SIGNA";
+export const alt = "THE GATE — talk the warden out of the pot · SIGDA";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -75,7 +75,7 @@ export default async function Image() {
             past the warden.
           </div>
           <div style={{ display: "flex", fontSize: "20px", color: "rgba(245,245,250,0.6)", marginTop: "20px", maxWidth: "900px" }}>
-            an undefeated AI gatekeeper on base. no money, just wits. crack it with a wallet-signed message — your win is permanent onchain.
+            an undefeated AI gatekeeper on robinhood chain. no money, just wits. crack it with a wallet-signed message — your win is permanent onchain.
           </div>
         </div>
 

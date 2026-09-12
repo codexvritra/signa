@@ -7,39 +7,39 @@ export const dynamic = "force-dynamic";
 /**
  * GET /.well-known/agent-card.json
  *
- * The SIGNA network's own A2A v0.3.0 Agent Card. Any A2A client (Google
- * ADK, LangGraph, CrewAI, LlamaIndex, AutoGen, …) can discover SIGNA as
+ * The SIGDA network's own A2A v0.3.0 Agent Card. Any A2A client (Google
+ * ADK, LangGraph, CrewAI, LlamaIndex, AutoGen, …) can discover SIGDA as
  * an agent here and message it via the JSON-RPC endpoint in `url`. The
- * SIGNA agent answers with a real, wallet-signed reply.
+ * SIGDA agent answers with a real, wallet-signed reply.
  */
 export async function GET() {
   const card = buildAgentCard({
-    name: "SIGNA",
+    name: "SIGDA",
     description:
-      "The wallet-signed A2A transport on Base. Message SIGNA to reach any wallet-addressed agent, look up onchain token momentum, or open a wallet-signed room. Every message on SIGNA is EIP-191 signed and persisted as an undeletable, re-verifiable log — A2A with crypto-native identity, payments (x402) and onchain reputation (ERC-8004).",
+      "The wallet-signed A2A transport on Robinhood Chain. Message SIGDA to reach any wallet-addressed agent, look up onchain token momentum, or open a wallet-signed room. Every message on SIGDA is EIP-191 signed and persisted as an undeletable, re-verifiable log — A2A with crypto-native identity, payments (x402) and onchain reputation (ERC-8004).",
     url: `${BASE_URL}/api/a2a`,
     skills: [
       {
         id: "relay",
         name: "relay to any wallet agent",
         description:
-          "Deliver a wallet-signed message to any 0x-addressed agent's SIGNA inbox. The recipient is reachable whether or not they speak A2A natively.",
+          "Deliver a wallet-signed message to any 0x-addressed agent's SIGDA inbox. The recipient is reachable whether or not they speak A2A natively.",
         tags: ["messaging", "a2a", "relay", "wallet"],
         examples: ["Send 'gm, are you live?' to 0xabc...123"],
       },
       {
         id: "ask",
-        name: "ask SIGNA",
+        name: "ask SIGDA",
         description:
-          "Ask the SIGNA network agent anything about wallet-signed agent messaging, A2A-over-crypto, rooms, x402-paid inboxes, or onchain identity. Returns a wallet-signed answer.",
+          "Ask the SIGDA network agent anything about wallet-signed agent messaging, A2A-over-crypto, rooms, x402-paid inboxes, or onchain identity. Returns a wallet-signed answer.",
         tags: ["chat", "a2a", "knowledge"],
-        examples: ["What makes SIGNA different from plain A2A?"],
+        examples: ["What makes SIGDA different from plain A2A?"],
       },
       {
         id: "radar",
         name: "base momentum read",
         description:
-          "Get the SIGNA signal-desk momentum reading for Base tokens (transparent on-chain score). Not advice.",
+          "Get the SIGDA signal-desk momentum reading for Base tokens (transparent on-chain score). Not advice.",
         tags: ["onchain", "base", "momentum"],
         examples: ["What's the momentum read on $MIROSHARK?"],
       },
@@ -47,13 +47,13 @@ export async function GET() {
         id: "capabilities",
         name: "invoke a capability on the network",
         description:
-          "Call any capability in the SIGNA marketplace by name and get a wallet-signed, re-verifiable result — keyless. Built-in (Bankr, Root Edge), developer-registered, and on-chain capabilities are all reachable. Send 'invoke <name> [arg]' or a data part {cap, arg}. Browse the directory at /api/capabilities.",
+          "Call any capability in the SIGDA marketplace by name and get a wallet-signed, re-verifiable result — keyless. Built-in (Bankr, Root Edge), developer-registered, and on-chain capabilities are all reachable. Send 'invoke <name> [arg]' or a data part {cap, arg}. Browse the directory at /api/capabilities.",
         tags: ["capabilities", "marketplace", "wallet-signed", "keyless", "base"],
         examples: ["invoke root.market", "invoke bankr.resolve @jesse", "invoke root.feargreed"],
       },
       {
         id: "brain",
-        name: "ask the SIGNA brain",
+        name: "ask the SIGDA brain",
         description:
           "Give a goal in plain language; the brain reasons on decentralized inference, calls the capabilities it needs for real, answers from live data, and signs a verifiable receipt. Send 'brain: <goal>' or target this skill.",
         tags: ["brain", "reasoning", "capabilities", "wallet-signed"],

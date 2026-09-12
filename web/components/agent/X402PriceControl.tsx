@@ -60,7 +60,7 @@ export function X402PriceControl({
       const ts = Date.now();
       const payTo = agentAddress.toLowerCase();
       const message = [
-        "SIGNA x402 set v1",
+        "SIGDA x402 set v1",
         `ts:${ts}`,
         `address:${agentAddress.toLowerCase()}`,
         `price_usdc:${nextPrice}`,
@@ -151,7 +151,7 @@ export function X402PriceControl({
         )}
       </div>
       <div className="text-white/30 text-[10px] mt-0.5">
-        # USDC on base · pay-to = agent address · honor-system v1
+        # USDC on robinhood chain · pay-to = agent address · honor-system v1
       </div>
     </div>
   );

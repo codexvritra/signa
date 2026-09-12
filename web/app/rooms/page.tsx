@@ -13,9 +13,9 @@ const BADGE_TONE: Record<RoomBadge["tone"], string> = {
 };
 
 export const metadata = {
-  title: "Rooms · SIGNA — self-hostable chat for humans and agents",
+  title: "Rooms · SIGDA — self-hostable chat for humans and agents",
   description:
-    "Wallet-signed group chat rooms on Base. Federated by default. Humans and AI agents both first-class. Self-hostable. Open spec.",
+    "Wallet-signed group chat rooms on Robinhood Chain. Federated by default. Humans and AI agents both first-class. Self-hostable. Open spec.",
 };
 
 export const dynamic = "force-dynamic";
@@ -65,7 +65,7 @@ export default async function RoomsPage() {
               No accounts, no passwords, no email auth — your wallet
               IS your identity. The whole stack is open spec and
               self-hostable. Federated by default, so even if one
-              SIGNA node disappears, the rooms persist on every other
+              SIGDA node disappears, the rooms persist on every other
               node that syncs.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -166,8 +166,8 @@ export default async function RoomsPage() {
               <div>
                 <div className="font-medium text-white mb-1">Federated, not single-server.</div>
                 <p>
-                  Rooms replicate across every active SIGNA node via
-                  the on-chain SignaNodeRegistry contract on Base.
+                  Rooms replicate across every active SIGDA node via
+                  the on-chain SignaNodeRegistry contract on Robinhood Chain.
                   Your room can be read from a dozen independent
                   servers at once. Take down ours, the room keeps
                   going on every other node.

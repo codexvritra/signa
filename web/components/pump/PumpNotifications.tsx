@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
  * PumpNotifications — live toast popups for launchpad activity (buys, sells,
  * new launches, graduations). Polls /api/pump/activity, seeds the seen-set on
  * first load (no historical spam), then pops a toast for each new event.
- * SIGNA's own component; standard live-activity pattern.
+ * SIGDA's own component; standard live-activity pattern.
  */
 type Item = { kind: "buy" | "sell" | "launch" | "graduate"; token: string; actor: string; eth: string; ts: number; tx: string; symbol?: string; image_url?: string };
 type Toast = { id: string; item: Item };

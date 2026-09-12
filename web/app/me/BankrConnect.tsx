@@ -11,10 +11,10 @@ import { buildMessageToSign } from "@/lib/feed-types";
  * Bankr connect/disconnect + real /trade execution.
  *
  * - Connect: paste your `bk_…` Bankr Agent API key, sign an attestation,
- *   SIGNA encrypts + stores it server-side. Trade button + slash-command
+ *   SIGDA encrypts + stores it server-side. Trade button + slash-command
  *   in chat go live.
  * - Trade: type a natural-language order ("buy 100 USDC of MIROSHARK").
- *   SIGNA forwards to Bankr /agent/prompt, polls the job, renders the
+ *   SIGDA forwards to Bankr /agent/prompt, polls the job, renders the
  *   result inline with the tx hash + amounts.
  * - Disconnect: signed purge; encrypted blob deleted from the DB.
  *
@@ -160,7 +160,7 @@ export function BankrConnect({ address }: { address: string }) {
       // Sign over the exact prompt so a stolen request can't be
       // replayed against a different one
       const message = [
-        `SIGNA trade v1`,
+        `SIGDA trade v1`,
         `ts:${ts}`,
         `address:${address.toLowerCase()}`,
         `prompt:${trimmed}`,
@@ -200,7 +200,7 @@ export function BankrConnect({ address }: { address: string }) {
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-            $ signa bankr --status
+            $ sigda bankr --status
           </div>
           <Spinner size={16} className="text-white/60" />
         </div>
@@ -212,7 +212,7 @@ export function BankrConnect({ address }: { address: string }) {
     <section className="border-b border-white/[0.06]">
       <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
         <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-          $ signa bankr {connected ? "--connected" : "--connect"}
+          $ sigda bankr {connected ? "--connected" : "--connect"}
         </div>
 
         <div className="border border-white/10 bg-black/30 p-4">
@@ -223,7 +223,7 @@ export function BankrConnect({ address }: { address: string }) {
                   Connect your Bankr account
                 </div>
                 <p className="text-[12px] text-white/55 mt-1.5 leading-relaxed max-w-md">
-                  Paste your Bankr Agent API key once. SIGNA encrypts it with
+                  Paste your Bankr Agent API key once. SIGDA encrypts it with
                   AES-256-GCM server-side. Then{" "}
                   <code className="font-mono text-white/75 bg-white/[0.04] px-1 rounded">
                     /trade buy 100 USDC of MIROSHARK
@@ -274,7 +274,7 @@ export function BankrConnect({ address }: { address: string }) {
                 </button>
               </div>
               <p className="text-[11px] text-white/35 mt-1.5">
-                SIGNA verifies this key by calling Bankr&apos;s /wallet/me
+                SIGDA verifies this key by calling Bankr&apos;s /wallet/me
                 before storing. Bad keys are rejected without persisting.
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -368,7 +368,7 @@ export function BankrConnect({ address }: { address: string }) {
                 <p className="text-[11px] text-white/35 mt-1.5">
                   Goes to <code className="font-mono">api.bankr.bot/agent/prompt</code>{" "}
                   with your key, polled up to 30s. Bankr executes against your
-                  Bankr-managed wallet — SIGNA never holds funds.
+                  Bankr-managed wallet — SIGDA never holds funds.
                 </p>
 
                 {tradeError && (

@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * gitlawb → SIGNA poller.
+ * gitlawb → SIGDA poller.
  *
  * Runs every 10 minutes on Vercel cron. Fetches gitlawb's public
  * /node/repos page, regex-extracts the repo DIDs visible on the first

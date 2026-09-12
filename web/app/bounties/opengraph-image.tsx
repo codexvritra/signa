@@ -42,7 +42,7 @@ export default async function Image() {
             letterSpacing: 4,
           }}
         >
-          <div style={{ display: "flex" }}>SIGNA · BOUNTIES</div>
+          <div style={{ display: "flex" }}>SIGDA · BOUNTIES</div>
           <div style={{ display: "flex" }}>signaagent.xyz/bounties</div>
         </div>
 

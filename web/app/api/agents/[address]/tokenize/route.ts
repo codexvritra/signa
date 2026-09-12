@@ -21,14 +21,14 @@ export const dynamic = "force-dynamic";
  * link to the deeplink fallback instead of pretending the endpoint
  * is broken. The agent profile UI handles that gracefully.
  *
- * Request body (from the SIGNA agent profile button):
+ * Request body (from the SIGDA agent profile button):
  *   {
  *     tokenName?:   string  (default: agent.name)
  *     tokenSymbol?: string  (default: derived from agent.name)
  *   }
  *
  * The agent's own wallet (agent.address) is always the feeRecipient
- * so fees flow to whoever controls the agent — not to SIGNA.
+ * so fees flow to whoever controls the agent — not to SIGDA.
  */
 
 const BANKR_API = "https://api.bankr.bot";
@@ -59,7 +59,7 @@ export async function POST(
         ok: false,
         error: "bankr_partner_key_not_configured",
         message:
-          "Bankr Partner Key not set on this SIGNA deployment. Use the deeplink fallback to tokenize manually.",
+          "Bankr Partner Key not set on this SIGDA deployment. Use the deeplink fallback to tokenize manually.",
         deeplink: `https://bankr.bot/agents/${address}`,
         apply_partner: "https://docs.bankr.bot/token-launching/overview",
       },

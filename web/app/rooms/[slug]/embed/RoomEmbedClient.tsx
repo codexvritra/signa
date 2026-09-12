@@ -88,7 +88,7 @@ function buildRoomMessagePreimage(args: {
   body: string;
 }) {
   return [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${args.ts}`,
     `from:${args.address.toLowerCase()}`,
     `room:${args.room_slug.toLowerCase()}`,

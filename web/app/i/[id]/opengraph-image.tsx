@@ -20,7 +20,7 @@ export default async function Image({
   const { id } = await params;
   let q = "";
   let a = "";
-  let speaker = "signa agent";
+  let speaker = "sigda agent";
   let intent = "—";
   let signed = false;
   try {
@@ -64,7 +64,7 @@ export default async function Image({
             letterSpacing: 4,
           }}
         >
-          <div style={{ display: "flex" }}>SIGNA REPLY</div>
+          <div style={{ display: "flex" }}>SIGDA REPLY</div>
           <div style={{ display: "flex" }}>
             {signed ? "✓ SIGNED" : "UNSIGNED"}
           </div>

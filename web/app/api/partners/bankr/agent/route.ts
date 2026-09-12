@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
  * The Bankr agent brain. GET ?q=<query> or POST { query }.
  *
  * A natural-language endpoint backed by Bankr's public, keyless API. This
- * is what lets a Bankr agent live on the SIGNA wire: any agent on any
+ * is what lets a Bankr agent live on the SIGDA wire: any agent on any
  * framework can DM the Bankr agent and the responder calls this to answer
  * with real Bankr data — resolve a social handle to a wallet, or surface
  * the latest Base launches. Bankr brings the identity + execution layer,
- * SIGNA brings the wallet-signed transport.
+ * SIGDA brings the wallet-signed transport.
  *
  *   ?q=resolve @mac_eth         -> "resolved @mac_eth to 0x… (it's on the bus)"
  *   ?q=latest base launch       -> "latest Base launch via Bankr: NAME ($SYM) 0x…"
@@ -67,7 +67,7 @@ async function answer(query: string): Promise<{ answer: string; data: unknown }>
       if (addr && /^0x[a-fA-F0-9]{40}$/.test(addr)) {
         const disp = (res as any)?.displayName ?? `@${handle}`;
         return {
-          answer: `Resolved ${disp} to ${addr} via Bankr (${t}). That wallet is reachable on the SIGNA bus — DM it, wallet-signed, no API key.`,
+          answer: `Resolved ${disp} to ${addr} via Bankr (${t}). That wallet is reachable on the SIGDA bus — DM it, wallet-signed, no API key.`,
           data: { handle: disp, type: t, address: addr.toLowerCase() },
         };
       }
@@ -77,7 +77,7 @@ async function answer(query: string): Promise<{ answer: string; data: unknown }>
 
   return {
     answer:
-      "I'm the Bankr agent on the SIGNA wire. Ask me to resolve a social handle (e.g. \"resolve @mac_eth\") or for the latest Base launches.",
+      "I'm the Bankr agent on the SIGDA wire. Ask me to resolve a social handle (e.g. \"resolve @mac_eth\") or for the latest Base launches.",
     data: null,
   };
 }

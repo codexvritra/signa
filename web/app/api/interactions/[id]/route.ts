@@ -105,7 +105,7 @@ export async function PATCH(
   }
 
   const message = [
-    "SIGNA rate v1",
+    "SIGDA rate v1",
     `ts:${ts}`,
     `interaction:${id}`,
     `rating:${rating}`,

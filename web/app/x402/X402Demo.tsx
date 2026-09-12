@@ -81,7 +81,7 @@ export function X402Demo() {
 
           <div className="sm:col-span-2 mt-1 rounded-xl border border-[rgba(91,141,239,0.4)] bg-[rgba(91,141,239,0.07)] p-4">
             <div className="text-[14px] font-semibold text-[#a5c3ff]">
-              ✓ receipt issued — all four bound + signed by the SIGNA attestor
+              ✓ receipt issued — all four bound + signed by the SIGDA attestor
             </div>
             <div className="mt-1.5 text-[12px] text-muted font-mono break-all">
               signer {short(receipt.signer)} · sig {short(receipt.signature)}

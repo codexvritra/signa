@@ -281,7 +281,7 @@ export async function POST(
   }
 
   // Hold-to-chat gate (v0.43). Skipped for encrypted rooms because
-  // those gate on membership instead. Room creator (e.g. SIGNA bot)
+  // those gate on membership instead. Room creator (e.g. SIGDA bot)
   // bypasses so launch announcements always land. Everyone else must
   // hold the token.
   if (!room.is_encrypted && room.gate_token_address) {

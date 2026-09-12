@@ -48,7 +48,7 @@ export function BrainSpendDemo() {
           <div className="text-[15px] font-semibold">A brain that spends on a budget</div>
           <div className="text-[13px] text-muted mt-0.5">
             The brain holds no funds. Give it a budget and it reasons, pays for its <em>own inference</em>,
-            and <em>buys a real priced service</em> — every spend capped, receipted, on Base.
+            and <em>buys a real priced service</em> — every spend capped, receipted, on Robinhood Chain.
           </div>
         </div>
         <button
@@ -105,7 +105,7 @@ export function BrainSpendDemo() {
           {shown >= res.steps.length && (
             <div className="mt-4 text-[13px] text-[#a5c3ff]">
               ✓ The brain paid for its own compute <em>and bought a real service</em> — all inside a signed
-              budget it can&apos;t exceed. The model decides; SIGNA enforces the cap and proves every cent on Base.
+              budget it can&apos;t exceed. The model decides; SIGDA enforces the cap and proves every cent on Robinhood Chain.
             </div>
           )}
         </>

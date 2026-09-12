@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * /api/social — the SIGNA social agent's signed public takes.
+ * /api/social — the SIGDA social agent's signed public takes.
  * GET  → recent takes (public feed)
  * POST → generate a new take (guarded by CRON_SECRET; body { topic? })
  */

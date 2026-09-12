@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/swarm/verify
  *
- * The trustless verifier for a SIGNA Swarm receipt. A swarm receipt is the
+ * The trustless verifier for a SIGDA Swarm receipt. A swarm receipt is the
  * ordered list of wallet-signed messages exchanged by the agents during a
  * mission. This endpoint re-derives everything from scratch and proves the
  * record is authentic AND untampered:
@@ -19,8 +19,8 @@ export const dynamic = "force-dynamic";
  *     message's signature), so reordering, inserting, or dropping any
  *     message breaks the chain.
  *
- * No trust in SIGNA required — the same check runs in any viem/ethers
- * client. SIGNA is just where the signed messages were delivered.
+ * No trust in SIGDA required — the same check runs in any viem/ethers
+ * client. SIGDA is just where the signed messages were delivered.
  *
  * Body: { messages: [{ from, to, ts, body, signature }, ...] }
  */
@@ -76,12 +76,12 @@ export async function POST(req: NextRequest) {
         message,
         signature: m.signature as `0x${string}`,
       });
-      // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed
+      // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed
       // preimage so an older receipt still verifies.
       if (!sigOk) {
         sigOk = await verifyMessage({
           address: m.from as `0x${string}`,
-          message: "SIGNA " + message.slice("SIGDA ".length),
+          message: "SIGDA " + message.slice("SIGDA ".length),
           signature: m.signature as `0x${string}`,
         });
       }

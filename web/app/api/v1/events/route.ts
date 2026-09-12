@@ -5,7 +5,7 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/v1/events — real-time event stream of new SIGNA interactions.
+ * GET /api/v1/events — real-time event stream of new SIGDA interactions.
  *
  * Server-Sent Events (SSE). One open connection per client. While the
  * connection is open we poll agent_interactions every 3s for rows

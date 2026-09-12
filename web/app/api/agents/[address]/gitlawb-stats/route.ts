@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/agents/[address]/gitlawb-stats
  *
- * Public read. For an agent (or any SIGNA wallet) bound to a gitlawb
+ * Public read. For an agent (or any SIGDA wallet) bound to a gitlawb
  * DID via the link_gitlawb signed envelope, surface their live gitlawb
  * activity by hitting node.gitlawb.com directly.
  *
@@ -65,7 +65,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "no_gitlawb_did_bound",
-        hint: "this wallet has no gitlawb DID linked. run `signa gitlawb link <did>` to attach one.",
+        hint: "this wallet has no gitlawb DID linked. run `sigda gitlawb link <did>` to attach one.",
       },
       { status: 404 },
     );

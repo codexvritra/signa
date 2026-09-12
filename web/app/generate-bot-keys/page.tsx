@@ -89,7 +89,7 @@ export default function GenerateBotKeysPage() {
               Setup utility · one-time
             </div>
             <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.03em] leading-tight">
-              Generate SIGNA bot wallets
+              Generate SIGDA bot wallets
             </h1>
             <p className="text-white/55 max-w-xl mt-4 text-[15px] leading-relaxed">
               Mints three wallets — one each for the MiroShark, gitlawb, and
@@ -166,7 +166,7 @@ export default function GenerateBotKeysPage() {
                     <Field
                       label="MIROSHARK_WEBHOOK_SECRET"
                       value={bundle.mirosharkWebhookSecret}
-                      hint="Set on Vercel AND on every MiroShark instance whose webhook points at SIGNA (as WEBHOOK_SECRET on the MiroShark side). Used for the X-MiroShark-Signature HMAC check."
+                      hint="Set on Vercel AND on every MiroShark instance whose webhook points at SIGDA (as WEBHOOK_SECRET on the MiroShark side). Used for the X-MiroShark-Signature HMAC check."
                       copied={copied === "MIROSHARK_WEBHOOK_SECRET"}
                       onCopy={() =>
                         copy(
@@ -201,7 +201,7 @@ export default function GenerateBotKeysPage() {
             <ol className="text-sm text-white/75 space-y-3 list-decimal pl-5">
               <li>Copy all 7 values into a password manager first.</li>
               <li>
-                Open the SIGNA Vercel project → <strong>Settings → Environment Variables</strong>. Add:
+                Open the SIGDA Vercel project → <strong>Settings → Environment Variables</strong>. Add:
                 <ul className="mt-2 space-y-1 text-[13px] text-white/60 list-disc pl-5">
                   <li>
                     <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5">
@@ -226,7 +226,7 @@ export default function GenerateBotKeysPage() {
                 </ul>
               </li>
               <li>
-                Redeploy. The bridges register the bots in the SIGNA users
+                Redeploy. The bridges register the bots in the SIGDA users
                 table on first post.
               </li>
               <li>

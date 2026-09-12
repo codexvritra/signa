@@ -8,9 +8,9 @@ export const maxDuration = 60;
 /**
  * POST /api/a2a/send — outbound A2A bridge.
  *
- * Lets a SIGNA agent message ANY external A2A agent (Google ADK,
- * LangGraph, CrewAI, LlamaIndex, AutoGen, or another SIGNA agent). This
- * is the other half of interop: SIGNA agents reach OUT, not just receive.
+ * Lets a SIGDA agent message ANY external A2A agent (Google ADK,
+ * LangGraph, CrewAI, LlamaIndex, AutoGen, or another SIGDA agent). This
+ * is the other half of interop: SIGDA agents reach OUT, not just receive.
  *
  * Body:
  *   {
@@ -26,7 +26,7 @@ export const maxDuration = 60;
  * agent's Task/Message reply verbatim plus the resolved endpoint.
  *
  * SECURITY: only outbound https(s) to the caller-supplied agent endpoint.
- * No SIGNA secrets are attached. The sender label is advisory metadata.
+ * No SIGDA secrets are attached. The sender label is advisory metadata.
  */
 const CORS = {
   "access-control-allow-origin": "*",
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   if (!text) {
     return NextResponse.json({ ok: false, error: "text_required" }, { status: 400, headers: CORS });
   }
-  const from = body?.from ? String(body.from).slice(0, 80) : "a SIGNA agent";
+  const from = body?.from ? String(body.from).slice(0, 80) : "a SIGDA agent";
 
   // Resolve the JSON-RPC endpoint: either given directly, or discovered
   // from an Agent Card.

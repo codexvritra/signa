@@ -11,16 +11,16 @@ export const metadata = {
 /**
  * /verify — standalone in-browser EIP-191 signature verifier.
  *
- * Not specific to SIGNA-issued signatures — works for any personal_sign
+ * Not specific to SIGDA-issued signatures — works for any personal_sign
  * output. Pure client-side viem.verifyMessage. Tool used by:
  *
- *   - users auditing a SIGNA reply they got from /respond or /i/[id]
- *   - third parties / partner ops verifying a SIGNA agent reply they
+ *   - users auditing a SIGDA reply they got from /respond or /i/[id]
+ *   - third parties / partner ops verifying a SIGDA agent reply they
  *     received via webhook
  *   - anyone who wants to spot-check an arbitrary signature without
  *     trusting our database
  *
- * The point: SIGNA's signed-reply story is REAL. Anyone can paste the
+ * The point: SIGDA's signed-reply story is REAL. Anyone can paste the
  * sig, recover the address, and confirm. No backend dependency.
  */
 export default function VerifyPage() {
@@ -30,7 +30,7 @@ export default function VerifyPage() {
       <main className="flex-1 font-mono text-[13px] leading-[1.75] text-white/85">
         <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-10 pb-14">
           <div className="flex items-baseline justify-between text-white/40 text-[11px] mb-8">
-            <span>SIGNA-VERIFY(1)</span>
+            <span>SIGDA-VERIFY(1)</span>
             <span className="hidden sm:inline">offline-capable</span>
           </div>
 
@@ -67,7 +67,7 @@ export default function VerifyPage() {
               SEE ALSO
             </h2>
             <div className="pl-4 border-l border-white/[0.06] text-white/55">
-              every signa reply with{" "}
+              every sigda reply with{" "}
               <code className="text-white bg-white/[0.05] rounded px-1">
                 signed:true
               </code>{" "}

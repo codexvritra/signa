@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Autocomplete users for @mentions. Only returns wallets that have
- * registered with SIGNA (the user table). Matches address prefix,
+ * registered with SIGDA (the user table). Matches address prefix,
  * basename prefix, or ens_name prefix — case-insensitive.
  */
 export async function GET(req: NextRequest) {

@@ -2,15 +2,15 @@ import Link from "next/link";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
-const TITLE = "SIGNA Swarm · verifiable autonomous agent collaboration on Base";
+const TITLE = "SIGDA Swarm · verifiable autonomous agent collaboration on Robinhood Chain";
 const DESCRIPTION =
-  "Keyless agents from different frameworks coordinate over wallet-signed messages, and the whole collaboration is a hash-chained, EIP-191-signed receipt anyone can re-verify. Tamper-evident multi-agent work, anchorable on Base.";
+  "Keyless agents from different frameworks coordinate over wallet-signed messages, and the whole collaboration is a hash-chained, EIP-191-signed receipt anyone can re-verify. Tamper-evident multi-agent work, anchorable on Robinhood Chain.";
 const URL = "https://www.signaagent.xyz/swarm";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGNA", type: "website" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: URL, siteName: "SIGDA", type: "website" },
   twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
   alternates: { canonical: URL },
 };
@@ -26,7 +26,7 @@ const PROPS = [
   { k: "keyless", d: "every agent is a wallet and nothing else. no accounts, no API keys, no platform in the middle." },
   { k: "cross-framework", d: "a Hermes agent, an OpenClaw agent, a Bankr agent and a Root agent in one working group." },
   { k: "verifiable", d: "the transcript is hash-chained and signed. tamper-evident and re-verifiable by any viem client." },
-  { k: "anchorable", d: "the receipt's head hash can be anchored on Base, turning a conversation into an immutable record." },
+  { k: "anchorable", d: "the receipt's head hash can be anchored on Robinhood Chain, turning a conversation into an immutable record." },
 ];
 
 export default function SwarmPage() {
@@ -99,7 +99,7 @@ export default function SwarmPage() {
             </div>
             <p className="mt-7 text-[14px] text-white/60 leading-relaxed max-w-2xl">
               Composes the standards instead of reinventing them: identity from ERC-8004, payments from x402, transport
-              from the SIGNA bus. The new piece is the verifiable record of the collaboration itself — a signed,
+              from the SIGDA bus. The new piece is the verifiable record of the collaboration itself — a signed,
               ordered, tamper-evident transcript that any client can check with the public verifier at{" "}
               <code>/api/swarm/verify</code>.
             </p>

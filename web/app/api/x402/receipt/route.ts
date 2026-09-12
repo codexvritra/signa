@@ -10,14 +10,14 @@ export const dynamic = "force-dynamic";
 /**
  * /api/x402/receipt
  *
- * Issue a SIGNA x402 receipt. The caller submits the deal: the request, the
+ * Issue a SIGDA x402 receipt. The caller submits the deal: the request, the
  * terms, the buyer's Permit2 witness-transfer payment authorization (+
  * signature), and the delivered output. We cryptographically verify the
  * authorization recovers to the buyer, then bind all four parts into one
- * canonical envelope signed by the SIGNA attestor — re-verifiable by anyone
+ * canonical envelope signed by the SIGDA attestor — re-verifiable by anyone
  * via /api/verify (kind x402_receipt).
  *
- * SIGNA never settles. The Permit2 authorization is the payment instrument;
+ * SIGDA never settles. The Permit2 authorization is the payment instrument;
  * pulling the funds is a permissionless out-of-band step. The receipt proves
  * the agreement + the authorization + the delivery were bound together.
  *

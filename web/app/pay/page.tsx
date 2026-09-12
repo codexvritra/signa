@@ -7,7 +7,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { buildPaidSendCalldata, buildSetPriceCalldata, SIGNA_PAID_ADDRESS } from "@/lib/signa-paid";
 
 /**
- * /pay — pay-to-reach inboxes, settled on Base in the same tx.
+ * /pay — pay-to-reach inboxes, settled on Robinhood Chain in the same tx.
  * Set a price → share your "pay to reach me" link. Or /pay?to=0x… to pay + message.
  */
 type Paid = { id: string; from: string; to: string; value_eth: string; body: string; timestamp: number; tx: string };
@@ -91,10 +91,10 @@ export default function PayPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[560px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Pay to reach · settled on Base</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Pay to reach · settled on Robinhood Chain</div>
         <h1 className="text-[32px] sm:text-[40px] font-bold leading-tight mt-1 tracking-tight">{payMode ? "Pay to reach this wallet." : "Charge to reach your inbox."}</h1>
         <p className="text-[15px] text-muted mt-2 leading-relaxed">
-          A message with payment attached — the full amount settles to the recipient in the <span className="text-white">same Base transaction</span>, recorded on-chain. SIGNA holds nothing and takes no fee.
+          A message with payment attached — the full amount settles to the recipient in the <span className="text-white">same Base transaction</span>, recorded on-chain. SIGDA holds nothing and takes no fee.
         </p>
 
         <div className="mt-5"><ConnectButton /></div>
@@ -125,7 +125,7 @@ export default function PayPage() {
                 <button onClick={() => { navigator.clipboard?.writeText(`https://${myLink}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="px-3 py-1.5 rounded text-[12px] font-semibold bg-white/[0.07] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy link"}</button>
               </div>
             )}
-            <p className="text-[11px] text-faint mt-2">Share that link — anyone who opens it pays your price to message you, settled to your wallet on Base.</p>
+            <p className="text-[11px] text-faint mt-2">Share that link — anyone who opens it pays your price to message you, settled to your wallet on Robinhood Chain.</p>
           </div>
         )}
 
@@ -153,7 +153,7 @@ export default function PayPage() {
         )}
 
         <p className="text-[11px] text-faint mt-10">
-          Powered by the SignaPaidMessages contract on Base — the full payment is forwarded to the recipient in the same transaction; the contract holds no funds and charges no fee. signaagent.xyz/pay
+          Powered by the SignaPaidMessages contract on Robinhood Chain — the full payment is forwarded to the recipient in the same transaction; the contract holds no funds and charges no fee. signaagent.xyz/pay
         </p>
       </div>
     </div>

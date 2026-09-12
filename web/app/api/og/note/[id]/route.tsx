@@ -10,7 +10,7 @@ export async function GET(
 ) {
   const { id } = await params;
   let body = "";
-  let who = "a wallet on Base";
+  let who = "a wallet on Robinhood Chain";
   let signed = false;
   try {
     const res = await fetch(`${SITE}/api/notes/${id}`, { cache: "no-store" });
@@ -57,7 +57,7 @@ export async function GET(
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={LOGO} width={56} height={56} style={{ borderRadius: 999 }} alt="" />
-            <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>SIGNA</div>
+            <div style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>SIGDA</div>
           </div>
           <div
             style={{
@@ -73,7 +73,7 @@ export async function GET(
               padding: "10px 22px",
             }}
           >
-            {signed ? "✓ SIGNED ON BASE" : "UNSIGNED"}
+            {signed ? "✓ SIGNED ON ROBINHOOD CHAIN" : "UNSIGNED"}
           </div>
         </div>
 

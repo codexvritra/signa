@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  * POST /api/autonomy/demo — the FULL agentic-commerce loop, live.
  *
  * A human grants an agent a bounded budget. For each purchase the agent signs a
- * REAL Permit2 witness-transfer USDG-on-Robinhood-Chain authorization, SIGNA
+ * REAL Permit2 witness-transfer USDG-on-Robinhood-Chain authorization, SIGDA
  * issues a verifiable x402 receipt, and the spend is recorded against the
  * mandate (bound to that receipt). When it hits the cap it wallet-signs a
  * request for more, the human funds it, and it finishes. budget -> autonomous
