@@ -4766,7 +4766,7 @@ async function cmdChat(args, { fromRepl = false, replRl = null } = {}) {
 
 function chatPromptFor(ctx) {
   if (NO_COLOR) return `@${ctx.their_handle} > `;
-  return `\x1b[38;2;91;141;239m@${ctx.their_handle} ›\x1b[0m `;
+  return `\x1b[38;2;0;200;83m@${ctx.their_handle} ›\x1b[0m `;
 }
 
 // ---------- partner integrations ----------
@@ -6338,30 +6338,23 @@ function rgb(r, g, b, s) {
 
 async function printBanner({ welcome = true } = {}) {
   const GREEN = [0, 200, 83];
-  const GREEN_DIM = [0, 150, 64];
   const DIM = [120, 120, 130];
   out("");
   for (const line of bannerLines()) {
     out("  " + rgb(GREEN[0], GREEN[1], GREEN[2], line));
   }
   out("");
-  // decentralization motif — a tiny mesh of nodes
+  // Robinhood Chain motif — a small leaf, echoing Robinhood's own mark.
   out(
-    "  " +
-      rgb(GREEN_DIM[0], GREEN_DIM[1], GREEN_DIM[2], "●━━●━━●━━●━━●━━●") +
-      "   " +
+    "  🍃 " +
       rgb(DIM[0], DIM[1], DIM[2], "wallet-native messaging · robinhood chain"),
   );
   out(
-    "  " +
-      rgb(GREEN_DIM[0], GREEN_DIM[1], GREEN_DIM[2], " ╲      ╱      ╲ ") +
-      "   " +
+    "  🍃 " +
       rgb(DIM[0], DIM[1], DIM[2], `sigda cli v${VERSION} · 0 api keys · 0 mocks`),
   );
   out(
-    "  " +
-      rgb(GREEN_DIM[0], GREEN_DIM[1], GREEN_DIM[2], "●━━●━━●━━●━━●━━●") +
-      "   " +
+    "  🍃 " +
       rgb(DIM[0], DIM[1], DIM[2], "non-custodial · keyless · wallet-signed"),
   );
   out("");
@@ -6817,7 +6810,7 @@ async function startRepl() {
 
   const promptStr = NO_COLOR
     ? "sigda > "
-    : `\x1b[38;2;91;141;239msigna ›\x1b[0m `;
+    : `\x1b[38;2;0;200;83msigda ›\x1b[0m `;
 
   const rl = createInterface({
     input: stdin,
