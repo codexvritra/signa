@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { notePreimage, NOTE_MAX_BODY, sanitizeTo, shortAddr, type SignedNote } from "@/lib/note";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -220,8 +221,9 @@ export function MiniApp() {
       {/* header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+          <div className="size-8 rounded-full bg-black flex items-center justify-center">
+            <LogoMark size={16} className="text-white" />
+          </div>
           <div className="font-display font-semibold tracking-tight">SIGDA</div>
         </div>
         {user ? (
@@ -289,19 +291,19 @@ export function MiniApp() {
             <button
               onClick={sign}
               disabled={phase === "signing" || body.trim().length === 0}
-              className="mt-4 h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6] disabled:opacity-40 transition-opacity"
+              className="mt-4 h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-br from-[#22c55e] to-[#16a34a] disabled:opacity-40 transition-opacity"
             >
               {phase === "signing" ? "Signing…" : "Sign on Robinhood Chain"}
             </button>
           </>
         ) : (
           <div className="mt-3 flex flex-col">
-            <div className="inline-flex self-start items-center gap-2 text-[12px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">
+            <div className="inline-flex self-start items-center gap-2 text-[12px] font-semibold tracking-wide text-[#22c55e] border border-[rgba(34,197,94,0.4)] rounded-full px-3 py-1">
               ✓ SIGNED ON ROBINHOOD CHAIN
             </div>
             <div className="glass rounded-2xl p-4 mt-4">
               {result?.to_label ? (
-                <div className="text-[12px] text-[#a5c3ff] mb-2">→ to @{result.to_label}</div>
+                <div className="text-[12px] text-[#86efac] mb-2">→ to @{result.to_label}</div>
               ) : null}
               <div className="text-[18px] leading-relaxed">{result?.body}</div>
               <div className="mt-3 pt-3 border-t border-white/[0.06] text-[12px] text-faint font-mono">
@@ -312,7 +314,7 @@ export function MiniApp() {
 
             <button
               onClick={share}
-              className="mt-4 h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]"
+              className="mt-4 h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-br from-[#22c55e] to-[#16a34a]"
             >
               {inMini ? "Share to feed" : "Copy cast + link"}
             </button>
@@ -330,7 +332,7 @@ export function MiniApp() {
                 Share your inbox link — anyone can send you a wallet-signed message on Robinhood Chain.
               </div>
               <div className="mt-3 flex items-center gap-2">
-                <code className="flex-1 text-[12px] text-[#a5c3ff] font-mono truncate bg-black/30 rounded-lg px-3 py-2">
+                <code className="flex-1 text-[12px] text-[#86efac] font-mono truncate bg-black/30 rounded-lg px-3 py-2">
                   /to/{inboxHandle()}
                 </code>
                 <button
@@ -345,7 +347,7 @@ export function MiniApp() {
             <button onClick={reset} className="mt-4 text-[13px] text-faint hover:text-white/70">
               Sign another
             </button>
-            {error ? <div className="mt-3 text-[13px] text-[#a5c3ff]">{error}</div> : null}
+            {error ? <div className="mt-3 text-[13px] text-[#86efac]">{error}</div> : null}
           </div>
         )}
 

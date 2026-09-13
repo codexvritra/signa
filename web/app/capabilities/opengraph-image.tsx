@@ -23,11 +23,11 @@ export default function Image() {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <div style={{ display: "flex", fontSize: "22px", fontWeight: 700 }}>
-            <span style={{ color: "#b7ff5c" }}>signa</span>
+            <span style={{ color: "#b7ff5c" }}>sigda</span>
             <span style={{ color: "rgba(245,245,250,0.5)" }}>&nbsp;capabilities</span>
           </div>
           <div style={{ display: "flex", fontSize: "13px", color: "#b7ff5c", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-            keyless · wallet-signed · base
+            keyless · wallet-signed · robinhood chain
           </div>
         </div>
 
@@ -44,14 +44,14 @@ export default function Image() {
         </div>
 
         <div style={{ display: "flex", gap: "10px", marginTop: "30px" }}>
-          {["bankr.resolve", "bankr.launches", "root.market", "root.feargreed"].map((c) => (
+          {["token.price", "base.gas", "base.block", "defi.tvl"].map((c) => (
             <div key={c} style={{ display: "flex", background: "rgba(183,255,92,0.07)", border: "1px solid rgba(183,255,92,0.3)", borderRadius: "9px", padding: "9px 14px", fontSize: "15px", color: "#b7ff5c" }}>{c}</div>
           ))}
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>
-            mcp is keyed urls · x402 proves you paid · signa proves what you got
+            mcp is keyed urls · x402 proves you paid · sigda proves what you got
           </div>
           <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/capabilities</div>
         </div>

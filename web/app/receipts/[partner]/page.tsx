@@ -11,7 +11,6 @@ const TONE: Record<PartnerKey, string> = {
   bankr: "text-[var(--accent)] border-[var(--accent)]/40",
   gitlawb: "text-cyan-300 border-cyan-300/40",
   miroshark: "text-fuchsia-300 border-fuchsia-300/40",
-  aeon: "text-emerald-300 border-emerald-300/40",
   community: "text-white/60 border-white/15",
 };
 

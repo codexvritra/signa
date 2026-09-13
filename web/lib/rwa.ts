@@ -1,5 +1,5 @@
 /**
- * SIGNA Proof-of-Stock — the verifiable registry for Robinhood Chain Stock Tokens.
+ * SIGDA Proof-of-Stock — the verifiable registry for Robinhood Chain Stock Tokens.
  *
  * Robinhood Chain went live with tokenized equities ("Stock Tokens" — NVDA, TSLA,
  * AAPL, SpaceX, Circle…). The problem: the chain is permissionless, so for every
@@ -7,23 +7,23 @@
  * "NVDA" on the explorer and you get the genuine `NVIDIA • Robinhood Token` plus
  * five fakes with no market and the same symbol.
  *
- * SIGNA fixes this the SIGNA way — with a signature, not a promise. For each
- * ticker the SIGNA RWA attestor wallet signs a canonical envelope: "THIS contract
+ * SIGDA fixes this the SIGDA way — with a signature, not a promise. For each
+ * ticker the SIGDA RWA attestor wallet signs a canonical envelope: "THIS contract
  * is the real Robinhood <TICKER>, and at block N on Robinhood Chain it had this
  * total supply." Anyone re-verifies two independent ways:
- *   1) recover the EIP-191 signature → it's the SIGNA attestor (curation vouch)
+ *   1) recover the EIP-191 signature → it's the SIGDA attestor (curation vouch)
  *   2) replay the eth_call at block N → the supply matches (trustless onchain state)
  *
- * Read-only. SIGNA mints nothing, custodies nothing, impersonates no one — it
- * proves which token is real. "Robinhood tokenizes the stock. SIGNA proves it."
+ * Read-only. SIGDA mints nothing, custodies nothing, impersonates no one — it
+ * proves which token is real. "Robinhood tokenizes the stock. SIGDA proves it."
  */
 import { createPublicClient, http, parseAbi, formatUnits, type Address } from "viem";
 import { keccak256, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { RH_CHAIN_ID, RH_RPC, RH_EXPLORER, rhChain, explorerToken } from "./chain";
 
-/** The SIGNA RWA attestor — a deterministic, keyless service identity (like the x402 attestor). */
-const ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:rwa-attestor:v1")));
+/** The SIGDA RWA attestor — a deterministic, keyless service identity (like the x402 attestor). */
+const ATTESTOR = privateKeyToAccount(keccak256(toBytes("sigda:rwa-attestor:v1")));
 export const RWA_ATTESTOR_ADDRESS = ATTESTOR.address.toLowerCase();
 
 export const RWA_CHAIN_NAME = "Robinhood Chain";
@@ -42,7 +42,7 @@ export type StockToken = { ticker: string; company: string; asset_class: "stock"
  * The canonical Robinhood Stock Token registry — curated from the official
  * `• Robinhood Token` contracts that carry a live market on Robinhood Chain
  * (verified on the chain's Blockscout token index, 2026-07-14). Each address is
- * the genuine issuer contract; SIGNA vouches for it against the ticker squatters.
+ * the genuine issuer contract; SIGDA vouches for it against the ticker squatters.
  */
 export const STOCK_TOKENS: StockToken[] = [
   { ticker: "NVDA", company: "NVIDIA", asset_class: "stock", address: "0xd0601CE157Db5bdC3162BbaC2a2C8aF5320D9EEC" },
@@ -155,7 +155,7 @@ export async function findImpostors(ticker: string, canonical: string, limit = 8
 
 /**
  * The exact string the attestor signs — the trustless core. Only facts that are
- * either SIGNA's curation vouch (ticker/subject/canonical/contract) or directly
+ * either SIGDA's curation vouch (ticker/subject/canonical/contract) or directly
  * re-checkable onchain (chain/block/decimals/supply). Market data is NOT signed.
  * Mirror this byte-for-byte in the universal verifier (kind `rwa_attestation`).
  */

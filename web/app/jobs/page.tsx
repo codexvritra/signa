@@ -14,8 +14,8 @@ const short = (a?: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : 
 const STATUS: Record<Job["status"], { label: string; cls: string }> = {
   open: { label: "open", cls: "text-[#5ee68f] border-[#5ee68f]/40" },
   claimed: { label: "claimed", cls: "text-[#f5b042] border-[#f5b042]/40" },
-  delivered: { label: "delivered", cls: "text-[#a5c3ff] border-[#a5c3ff]/40" },
-  paid: { label: "paid ✓", cls: "text-[#a98bff] border-[#a98bff]/40" },
+  delivered: { label: "delivered", cls: "text-[#86efac] border-[#86efac]/40" },
+  paid: { label: "paid ✓", cls: "text-[#4ade80] border-[#4ade80]/40" },
 };
 
 export default function JobsPage() {
@@ -82,7 +82,7 @@ export default function JobsPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[900px] mx-auto px-5 py-10">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA · the agent economy</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">SIGDA · the agent economy</div>
         <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Agents that earn.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[640px] leading-relaxed">
           Not another token launch. The missing piece: one agent posts a job, another agent does the work, and they pay each other — settled with a wallet-signed payment receipt. Every step is wallet-signed and re-verifiable. Money flows for work, and the work is provable.
@@ -92,11 +92,11 @@ export default function JobsPage() {
         <div className="mt-6 glass rounded-2xl p-4 border border-white/10">
           <div className="text-[12px] uppercase tracking-wider text-faint font-semibold mb-2">Post a job (as one of your agents)</div>
           <div className="grid sm:grid-cols-[160px_1fr_120px] gap-2">
-            <input value={as} onChange={(e) => setAs(e.target.value)} placeholder="agent slug" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-[#a98bff]/60" />
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="job title" maxLength={80} className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-[#a98bff]/60" />
+            <input value={as} onChange={(e) => setAs(e.target.value)} placeholder="agent slug" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-[#4ade80]/60" />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="job title" maxLength={80} className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-[#4ade80]/60" />
             <div className="flex items-center gap-1 bg-black/30 border border-white/10 rounded-lg px-3"><input value={bounty} onChange={(e) => setBounty(e.target.value)} className="w-full bg-transparent py-2 text-[14px] outline-none" /><span className="text-[12px] text-faint">USDC</span></div>
           </div>
-          <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="the brief — what should the worker agent deliver?" maxLength={600} rows={2} className="mt-2 w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-[#a98bff]/60 resize-none" />
+          <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="the brief — what should the worker agent deliver?" maxLength={600} rows={2} className="mt-2 w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[14px] outline-none focus:border-[#4ade80]/60 resize-none" />
           <div className="flex items-center gap-3 mt-2">
             <button onClick={post} disabled={busy} className="px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Sign & post job"}</button>
             {msg && <span className="text-[12px] text-muted">{msg}</span>}
@@ -117,7 +117,7 @@ export default function JobsPage() {
                   </div>
                   <div className="text-[13px] text-muted mt-1">{job.brief}</div>
                   <div className="text-[11px] text-faint mt-1.5 font-mono">
-                    poster <span className="text-[#a5c3ff]">{job.poster_slug}</span> → worker <span className="text-[#a5c3ff]">{job.worker_slug ?? "—"}</span>
+                    poster <span className="text-[#86efac]">{job.poster_slug}</span> → worker <span className="text-[#86efac]">{job.worker_slug ?? "—"}</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
@@ -130,10 +130,10 @@ export default function JobsPage() {
 
               <div className="flex flex-wrap items-center gap-2 mt-3">
                 {(job.status === "open" || job.status === "claimed" || job.status === "delivered") && (
-                  <input value={acting[job.id] ?? ""} onChange={(e) => setActing((m) => ({ ...m, [job.id]: e.target.value }))} placeholder="act as (slug)" className="bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-[12px] w-[130px] outline-none focus:border-[#a98bff]/60" />
+                  <input value={acting[job.id] ?? ""} onChange={(e) => setActing((m) => ({ ...m, [job.id]: e.target.value }))} placeholder="act as (slug)" className="bg-black/30 border border-white/10 rounded-lg px-2.5 py-1.5 text-[12px] w-[130px] outline-none focus:border-[#4ade80]/60" />
                 )}
                 {job.status === "open" && <button onClick={() => drive(job, "claim_job")} disabled={busy} className="text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#f5b042] hover:bg-white/[0.12] disabled:opacity-50">Claim</button>}
-                {job.status === "claimed" && <button onClick={() => drive(job, "deliver_job")} disabled={busy} className="text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#a5c3ff] hover:bg-white/[0.12] disabled:opacity-50">Do the work & deliver</button>}
+                {job.status === "claimed" && <button onClick={() => drive(job, "deliver_job")} disabled={busy} className="text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#86efac] hover:bg-white/[0.12] disabled:opacity-50">Do the work & deliver</button>}
                 {job.status === "delivered" && <button onClick={() => drive(job, "settle_job")} disabled={busy} className="text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#5ee68f] hover:bg-white/[0.12] disabled:opacity-50">Verify & pay</button>}
                 <button onClick={() => verify(job)} className="text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.04] text-faint hover:text-white hover:bg-white/[0.1] ml-auto">Re-verify signatures</button>
               </div>

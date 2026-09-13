@@ -9,7 +9,7 @@
  * EIP-3009 on Robinhood Chain: USDG implements neither EIP-3009 nor
  * EIP-2612).
  *
- * SIGNA's role is to VERIFY the authorization is real and binding —
+ * SIGDA's role is to VERIFY the authorization is real and binding —
  * recover the signer from the typed-data signature, confirm it matches
  * the sender, pays the recipient the right amount of the right asset,
  * and the deadline is valid — then record it as the DM's payment
@@ -17,7 +17,7 @@
  * the funds) is a permissionless action the recipient performs out of
  * band, once they've done a one-time `approve(PERMIT2, max)` allowance
  * check on their own end (payer's one-time step, standard Permit2 UX).
- * SIGNA never holds funds, never pays gas, never custodies a key.
+ * SIGDA never holds funds, never pays gas, never custodies a key.
  *
  * This mirrors the x402 "exact" scheme exactly — the authorization IS
  * the payment instrument; verification and settlement are separable.
@@ -145,7 +145,7 @@ export type VerifyPaymentResult =
  *   2. authorization.owner == the declared DM sender
  *   3. authorization.spender == authorization.to == the price's payTo
  *      (recipient redeems their own payment — no third-party facilitator
- *      in SIGNA's default non-custodial flow)
+ *      in SIGDA's default non-custodial flow)
  *   4. authorization.token == the price's asset
  *   5. authorization.amount >= the price (sender may over-pay, never under)
  *   6. now is within the deadline
@@ -154,7 +154,7 @@ export type VerifyPaymentResult =
  *
  * Replay protection (nonce single-use) is enforced by the caller against
  * signa_dm_payment_nonces — it needs DB access, so it's not done here. (Note:
- * Permit2 also enforces on-chain single-use via its nonce bitmap, but SIGNA's
+ * Permit2 also enforces on-chain single-use via its nonce bitmap, but SIGDA's
  * own DB check guards the off-chain "was this signature already used as a DM
  * payment receipt" question, which is independent of on-chain settlement.)
  */
@@ -321,7 +321,7 @@ export async function verifyTransferAuthorization(args: {
   } catch (e) {
     return { ok: false, reason: `sig_verify_threw:${e instanceof Error ? e.message : String(e)}` };
   }
-  return valid ? { ok: true } : { ok: false, reason: "bad_authorization_signature" };
+  return valid ? { ok: true } : { ok: false, reason: "bad_authorization_sigdature" };
 }
 
 /** Human-readable price, e.g. "0.10 USDG". */

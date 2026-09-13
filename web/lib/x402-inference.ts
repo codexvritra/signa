@@ -1,7 +1,7 @@
 /**
- * v0.96 — x402 decentralized inference for SIGNA agents.
+ * v0.96 — x402 decentralized inference for SIGDA agents.
  *
- * SIGNA agents already speak x402 + USDC on Base. This lets them ALSO
+ * SIGDA agents already speak x402 + USDC on Base. This lets them ALSO
  * *think* on decentralized, pay-per-call inference instead of a single
  * centralized API — composing with the x402 inference marketplaces in
  * the Base agent stack. Provider-agnostic: Surplus Intelligence is the
@@ -11,7 +11,7 @@
  *
  * Auth model is x402 (pay-per-call), NOT an API key: the chat endpoint
  * returns a 402 challenge; the caller signs an EIP-3009 USDC
- * authorization (the same exact scheme SIGNA's paid-DM uses) and retries
+ * authorization (the same exact scheme SIGDA's paid-DM uses) and retries
  * with the X-PAYMENT header. Verifying the catalog + challenge needs no
  * funds; only a settled inference call spends USDC.
  */
@@ -116,7 +116,7 @@ function randomNonce(): Hex {
  * FUNDED account. Returns the assistant text.
  *
  * The signing wallet authorizes an EIP-3009 USDC transfer to the
- * provider; the provider's facilitator settles it. SIGNA holds nothing.
+ * provider; the provider's facilitator settles it. SIGDA holds nothing.
  */
 export async function payAndInfer(args: {
   account: PrivateKeyAccount;

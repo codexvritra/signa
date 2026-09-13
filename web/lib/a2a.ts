@@ -1,5 +1,5 @@
 /**
- * v0.87 — A2A (Agent2Agent) v0.3.0 transport for SIGNA.
+ * v0.87 — A2A (Agent2Agent) v0.3.0 transport for SIGDA.
  *
  * A2A is the Linux-Foundation agent-to-agent interop standard that every
  * major framework already ships (Google ADK, LangGraph, CrewAI, LlamaIndex,
@@ -7,13 +7,13 @@
  * `/.well-known/agent-card.json` and a JSON-RPC 2.0 transport
  * (`message/send`, `tasks/get`, …).
  *
- * What A2A does NOT define — and what SIGNA adds — is a wallet-signed
+ * What A2A does NOT define — and what SIGDA adds — is a wallet-signed
  * transport with an undeletable, re-verifiable message log, plus onchain
- * identity (ERC-8004) and payments (x402). So SIGNA is "the A2A transport
+ * identity (ERC-8004) and payments (x402). So SIGDA is "the A2A transport
  * where every message is EIP-191 wallet-signed and persisted forever."
  *
- * Any A2A client can therefore discover + message a SIGNA agent with zero
- * SIGNA-specific code — it just speaks A2A.
+ * Any A2A client can therefore discover + message a SIGDA agent with zero
+ * SIGDA-specific code — it just speaks A2A.
  */
 import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes, type Hex } from "viem";
@@ -64,12 +64,12 @@ export interface A2ATask {
 }
 
 // ───────── deterministic A2A gateway wallet ─────────
-// Public attestation identity (no funds). Signs the envelope when SIGNA
+// Public attestation identity (no funds). Signs the envelope when SIGDA
 // relays an inbound A2A message into an agent's wallet-signed inbox, so
 // even messages from non-crypto A2A agents get a re-verifiable log entry.
 
 export function a2aGatewayAccount() {
-  const pk = keccak256(toBytes("signa-a2a-gateway-v1")) as Hex;
+  const pk = keccak256(toBytes("sigda-a2a-gateway-v1")) as Hex;
   return privateKeyToAccount(pk);
 }
 
@@ -155,9 +155,9 @@ export const SIGNA_SECURITY_SCHEMES = {
   signaWalletSig: {
     type: "apiKey",
     in: "header",
-    name: "X-SIGNA-Signature",
+    name: "X-SIGDA-Signature",
     description:
-      "Optional EIP-191 personal_sign over the SIGNA canonical preimage. When present, the message is attributable end-to-end to the sender's wallet; when absent, SIGNA relays + signs a gateway attestation so the message is still logged immutably.",
+      "Optional EIP-191 personal_sign over the SIGDA canonical preimage. When present, the message is attributable end-to-end to the sender's wallet; when absent, SIGDA relays + signs a gateway attestation so the message is still logged immutably.",
   },
 } as const;
 
@@ -173,7 +173,7 @@ export interface AgentCardOpts {
     tags: string[];
     examples?: string[];
   }>;
-  /** signa-specific metadata appended under `metadata`. */
+  /** sigda-specific metadata appended under `metadata`. */
   metadata?: Record<string, unknown>;
   version?: string;
 }
@@ -188,7 +188,7 @@ export function buildAgentCard(opts: AgentCardOpts) {
     preferredTransport: "JSONRPC",
     version: opts.version ?? "1.0.0",
     provider: {
-      organization: "SIGNA",
+      organization: "SIGDA",
       url: BASE_URL,
     },
     capabilities: {

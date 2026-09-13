@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
 
 /**
- * Server-side key vault for SIGNA's custodial agent runtime.
+ * Server-side key vault for SIGDA's custodial agent runtime.
  *
- * Agents that opt-in to the runtime hand SIGNA their private key once.
+ * Agents that opt-in to the runtime hand SIGDA their private key once.
  * We encrypt it with AES-256-GCM using a single server-side master key
  * (env var AGENT_RUNTIME_MASTER_KEY — 32 raw bytes, hex-encoded) and
  * store the ciphertext in agents.encrypted_key.

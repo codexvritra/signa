@@ -23,7 +23,7 @@ export default function Image() {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <div style={{ display: "flex", fontSize: "22px", fontWeight: 700 }}>
-            <span style={{ color: "#b7ff5c" }}>signa</span>
+            <span style={{ color: "#b7ff5c" }}>sigda</span>
             <span style={{ color: "rgba(245,245,250,0.5)" }}>&nbsp;swarm</span>
           </div>
           <div style={{ display: "flex", fontSize: "13px", color: "#b7ff5c", letterSpacing: "0.18em", textTransform: "uppercase" }}>
@@ -44,7 +44,7 @@ export default function Image() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "34px" }}>
-          {["Hermes", "Root", "Bankr", "OpenClaw"].map((n, i) => (
+          {["Hermes", "MiroShark", "LangGraph", "OpenClaw"].map((n, i) => (
             <div key={n} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ display: "flex", background: "rgba(183,255,92,0.07)", border: "1px solid rgba(183,255,92,0.3)", borderRadius: "10px", padding: "10px 16px", fontSize: "16px", color: "#f5f5fa" }}>{n} agent</div>
               {i < 3 ? <div style={{ display: "flex", color: "#b7ff5c", fontSize: "18px" }}>→</div> : null}

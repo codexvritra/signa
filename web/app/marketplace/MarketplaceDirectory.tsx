@@ -72,7 +72,7 @@ export function MarketplaceDirectory() {
   if (err) return <div className="text-[13px] text-white/50">{err}</div>;
   if (!dir) return <div className="text-[13px] text-white/40 font-mono animate-pulse">loading the live directory…</div>;
 
-  const builtinArg = (n: string) => (n === "bankr.resolve" ? "@mac_eth" : undefined);
+  const builtinArg = (n: string) => (n === "token.price" ? "ethereum" : undefined);
 
   return (
     <div className="space-y-10">

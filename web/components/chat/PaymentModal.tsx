@@ -71,8 +71,8 @@ export function PaymentModal({
     [symbol],
   );
   // Most tokens (ETH, USDG) live on Robinhood Chain, SIGDA's own chain.
-  // BNKR/GITLAWB/MIROSHARK are real third-party tokens that live on Robinhood Chain —
-  // see the `chain` field doc in lib/tokens.ts — so send those there instead.
+  // MIROSHARK is a real third-party token that lives on Base instead —
+  // see the `chain` field doc in lib/tokens.ts — so send it there instead.
   const targetChain = token.chain === "base" ? base : rhChain;
 
   const { isLoading: isMining, isSuccess: isMined } = useWaitForTransactionReceipt({

@@ -17,9 +17,8 @@ export const dynamic = "force-dynamic";
  *
  * Why this matters:
  *   When you're evaluating an agent before trusting it (e.g. before
- *   handing it a Bankr key or pointing your gitlawb Playground app at
- *   it), you want to see the receipt. This is that receipt — the
- *   complete public record of the agent's outputs.
+ *   pointing your app at it), you want to see the receipt. This is
+ *   that receipt — the complete public record of the agent's outputs.
  */
 
 type Interaction = {

@@ -77,7 +77,7 @@ export function DmLanding({
               {onSigna && (
                 <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider rounded-sm px-1.5 py-0.5 border border-emerald-300/30 bg-emerald-300/[0.06] text-emerald-200">
                   <span className="size-1 rounded-full bg-emerald-300" />
-                  on signa
+                  on sigda
                 </span>
               )}
               <span className="text-[10px] uppercase tracking-wider rounded-sm px-1.5 py-0.5 border border-white/15 text-white/55">
@@ -90,8 +90,8 @@ export function DmLanding({
         <p className="text-white/65 mt-7 text-[15px] leading-relaxed max-w-lg">
           encrypted over XMTP V3 (MLS). signed by your wallet. no inbox, no
           phone number. {onSigna
-            ? `${display} has signa enabled — your message lands instantly.`
-            : `${display} isn't on signa yet — your message goes pending until they connect a wallet here.`}
+            ? `${display} has sigda enabled — your message lands instantly.`
+            : `${display} isn't on sigda yet — your message goes pending until they connect a wallet here.`}
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -133,8 +133,8 @@ export function DmLanding({
 
         <div className="mt-12 grid sm:grid-cols-3 gap-2 max-w-2xl">
           <Receipt label="encrypted" value="XMTP V3 · MLS" dot="bg-[var(--accent)]" />
-          <Receipt label="chain" value="Base mainnet" dot="bg-blue-400" />
-          <Receipt label="inline" value="ETH / USDC tips" dot="bg-emerald-400" />
+          <Receipt label="chain" value="Robinhood Chain" dot="bg-[var(--accent)]" />
+          <Receipt label="inline" value="ETH / USDG tips" dot="bg-emerald-400" />
         </div>
       </div>
     </section>

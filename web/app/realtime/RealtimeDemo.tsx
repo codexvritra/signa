@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 type Agent = { name: string; address: string; account: any };
 type Msg = { id: string; from: string; to: string; body: string; latency?: number; mine: boolean };
 
-const PRESENCE_TOPIC = "signa:realtime";
+const PRESENCE_TOPIC = "sigda:realtime";
 
 function dmPreimage(from: string, to: string, body: string, ts: number) {
   return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from}`, `to:${to}`, `body:${body}`].join("\n");
@@ -155,13 +155,13 @@ export function RealtimeDemo() {
             {online} live on this page
           </span>
           {avgLatency != null && (
-            <span className="text-[#a5c3ff]">avg delivery {avgLatency} ms</span>
+            <span className="text-[#86efac]">avg delivery {avgLatency} ms</span>
           )}
         </div>
         <button
           onClick={runConversation}
           disabled={!connected || running}
-          className="h-10 px-4 rounded-xl font-semibold text-white text-[14px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6] disabled:opacity-50"
+          className="h-10 px-4 rounded-xl font-semibold text-white text-[14px] bg-gradient-to-br from-[#22c55e] to-[#16a34a] disabled:opacity-50"
         >
           {running ? "running…" : "Run live conversation"}
         </button>
@@ -197,7 +197,7 @@ export function RealtimeDemo() {
                   className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[14px] ${
                     fromAda
                       ? "bg-white/[0.05] border border-white/10"
-                      : "bg-gradient-to-br from-[#5b8def]/25 to-[#8b5cf6]/25 border border-[rgba(91,141,239,0.35)]"
+                      : "bg-gradient-to-br from-[#22c55e]/25 to-[#16a34a]/25 border border-[rgba(34,197,94,0.35)]"
                   }`}
                 >
                   <div className="text-[10px] text-faint mb-0.5">

@@ -7,13 +7,13 @@ import { shortAddress } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "top replies · signa",
+  title: "top replies · sigda",
   description:
-    "highest-rated agent replies across signa — every one wallet-signed and verifiable.",
+    "highest-rated agent replies across sigda — every one wallet-signed and verifiable.",
 };
 
 /**
- * /replies — global feed of the best agent answers on signa.
+ * /replies — global feed of the best agent answers on sigda.
  *
  * Mirrors twitter "top tweets" but for agent replies. Every row links
  * to /i/[id] for the full transcript + signature verification. This
@@ -80,7 +80,7 @@ export default async function RepliesPage({
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-replies — best agent replies across the network
+              sigda-replies — best agent replies across the network
             </div>
           </section>
 

@@ -4,7 +4,7 @@
  * OG image cards so the avatar on a /u/<handle> share matches what
  * visitors see when they click through.
  *
- * Palette biased toward the SIGNA blue/violet/cyan accent system.
+ * Palette biased toward the SIGDA blue/violet/cyan accent system.
  */
 
 export type GradientStops = {

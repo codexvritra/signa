@@ -79,8 +79,8 @@ const POLL_MS = 4_000;
 const GATE_RECHECK_MS = 30_000;
 
 function buyLinkFor(gate: RoomGate): string {
-  // Default to Aerodrome on Base for now (where Bankr tokens settle).
-  // Anyone on the chain can swap there. Future: per-chain router.
+  // Default to Aerodrome for Base-gated tokens. Anyone on the chain
+  // can swap there. Future: per-chain router.
   if (gate.chain.toLowerCase() === "base") {
     return `https://aerodrome.finance/swap?to=${gate.tokenAddress}`;
   }
@@ -175,80 +175,6 @@ interface SlashCommand {
 }
 
 const SLASH: SlashCommand[] = [
-  {
-    name: "bankr",
-    syntax: "/bankr <handle>",
-    desc: "Resolve any ENS / Twitter / Farcaster / 0x handle to a wallet via Bankr.",
-    async run(args) {
-      if (!args.trim()) return "/bankr — usage: /bankr <handle>";
-      const r = await fetch(`/api/partners/bankr/resolve?value=${encodeURIComponent(args.trim())}`);
-      const d = await r.json().catch(() => ({}));
-      if (!d?.ok) return `/bankr ${args}\n  ↳ ${d?.error ?? "could not resolve"}`;
-      const res = d.resolution ?? {};
-      const extra = res.type ? ` (${res.type})` : "";
-      return `/bankr ${args}\n  ↳ ${res.address}${extra}`;
-    },
-  },
-  {
-    name: "launches",
-    syntax: "/launches [N]",
-    desc: "Show the last N recent Bankr token launches on Base + Solana.",
-    async run(args) {
-      const n = Math.min(Math.max(Number(args.trim() || 5), 1), 10);
-      const r = await fetch(`/api/partners/bankr/launches?limit=${n}`);
-      const d = await r.json().catch(() => ({}));
-      if (!d?.ok) return `/launches\n  ↳ failed: ${d?.error ?? "unknown"}`;
-      const lines = [`/launches\n  ↳ ${d.count} recent launches`];
-      for (const l of d.launches ?? []) {
-        const sym = l.tokenSymbol ?? l.symbol ?? "?";
-        const name = l.tokenName ?? l.name ?? "";
-        const dep = l.feeRecipient?.xUsername
-          ? `@${l.feeRecipient.xUsername}`
-          : l.deployer?.walletAddress
-            ? l.deployer.walletAddress.slice(0, 6) + "…" + l.deployer.walletAddress.slice(-4)
-            : "";
-        lines.push(`    [${l.chain ?? "?"}] $${sym} — ${name}${dep ? "  by " + dep : ""}`);
-      }
-      return lines.join("\n");
-    },
-  },
-  {
-    name: "aeon",
-    syntax: "/aeon <token_id>",
-    desc: "Look up an Aeon / ERC-8004 agent registration on Ethereum mainnet.",
-    async run(args) {
-      const id = args.trim();
-      if (!/^\d+$/.test(id)) return "/aeon — usage: /aeon <numeric_token_id>";
-      const r = await fetch(`/api/partners/aeon/${id}`);
-      const d = await r.json().catch(() => ({}));
-      if (!d?.ok) return `/aeon ${id}\n  ↳ ${d?.error ?? "lookup failed"} (try sepolia if mainnet returns no result)`;
-      const reg = d.registration ?? {};
-      const bits = [`/aeon ${id}`, `  ↳ owner: ${d.owner}`, `  ↳ uri: ${d.uri}`];
-      if (reg.name) bits.push(`  ↳ name: ${reg.name}`);
-      if (Array.isArray(reg.services)) bits.push(`  ↳ services: ${reg.services.length}`);
-      return bits.join("\n");
-    },
-  },
-  {
-    name: "gitlawb",
-    syntax: "/gitlawb <0x address>",
-    desc: "Pull repos / commits / bounty totals for an agent bound to a gitlawb DID.",
-    async run(args) {
-      const addr = args.trim().toLowerCase();
-      if (!/^0x[a-f0-9]{40}$/.test(addr)) return "/gitlawb — usage: /gitlawb <0x address>";
-      const r = await fetch(`/api/agents/${addr}/gitlawb-stats`);
-      if (r.status === 404) {
-        return `/gitlawb ${addr}\n  ↳ no gitlawb DID bound to this wallet`;
-      }
-      const d = await r.json().catch(() => ({}));
-      if (!d?.ok) return `/gitlawb ${addr}\n  ↳ ${d?.error ?? "lookup failed"}`;
-      return [
-        `/gitlawb ${addr}`,
-        `  ↳ DID: ${d.gitlawb_did ?? "(none)"}`,
-        `  ↳ repos: ${d.repo_count ?? 0} · commits: ${d.total_commits ?? 0} · open tasks: ${d.open_tasks ?? 0}`,
-      ].join("\n");
-    },
-  },
   {
     name: "miroshark",
     syntax: "/miroshark <0x address>",

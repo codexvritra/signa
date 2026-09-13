@@ -9,8 +9,8 @@
  * input/output hashes and confirm the signed links match.
  *
  * Honest scope: this proves PROVENANCE (who produced what, in what order),
- * not correctness of the content. Orchestration is SIGNA's; the proof is
- * re-verifiable by anyone with viem, no trust in SIGNA required.
+ * not correctness of the content. Orchestration is SIGDA's; the proof is
+ * re-verifiable by anyone with viem, no trust in SIGDA required.
  */
 import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes, verifyMessage } from "viem";
@@ -121,9 +121,9 @@ export async function verifyPipeline(args: { runId: string; chain: SignedLink[];
     });
     let sigOk = false;
     try { sigOk = await verifyMessage({ address: gateway.address, message: pre, signature: l.signature as `0x${string}` }); } catch { sigOk = false; }
-    // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed preimage.
+    // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed preimage.
     if (!sigOk && pre.startsWith("SIGDA ")) {
-      const legacyPre = "SIGNA " + pre.slice("SIGDA ".length);
+      const legacyPre = "SIGDA " + pre.slice("SIGDA ".length);
       try { sigOk = await verifyMessage({ address: gateway.address, message: legacyPre, signature: l.signature as `0x${string}` }); } catch { sigOk = false; }
     }
     const chainOk = l.prev === prev;

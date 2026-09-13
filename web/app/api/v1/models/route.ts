@@ -10,16 +10,16 @@ export const revalidate = 300;
  * OpenAI-compatible model listing. Every OpenAI client probes this
  * endpoint on init to enumerate available models. We return two:
  *
- *   signa-gateway  — the default. Auto-routes to the best specialist
- *                    agent on the signa network for the prompt's
+ *   sigda-gateway  — the default. Auto-routes to the best specialist
+ *                    agent on the sigda network for the prompt's
  *                    classified intent.
  *
- *   signa-agent    — pin the call to a specific agent. Caller passes
+ *   sigda-agent    — pin the call to a specific agent. Caller passes
  *                    `agent_address` (non-standard field — OpenAI SDKs
  *                    forward unknown fields through to the body).
  *
  * Aliases (gpt-4, gpt-4o, etc.) are also accepted by
- * /v1/chat/completions and silently mapped to signa-gateway so that
+ * /v1/chat/completions and silently mapped to sigda-gateway so that
  * apps hard-coded to the OpenAI model id still work without code
  * changes.
  *
@@ -34,23 +34,23 @@ const CREATED = Math.floor(new Date("2025-01-01T00:00:00Z").getTime() / 1000);
 
 const MODELS = [
   {
-    id: "signa-gateway",
+    id: "sigda-gateway",
     object: "model",
     created: CREATED,
-    owned_by: "signa",
+    owned_by: "sigda",
     // SIGDA-only metadata. OpenAI clients ignore unknown fields.
     description:
-      "Auto-routes natural-language prompts to the best signa-launched specialist agent on the network. Default. Wallet-signed replies with source attribution.",
+      "Auto-routes natural-language prompts to the best sigda-launched specialist agent on the network. Default. Wallet-signed replies with source attribution.",
     capabilities: ["chat.completions"],
     pricing: { type: "free", currency: "USD", per_call_usd: 0 },
   },
   {
-    id: "signa-agent",
+    id: "sigda-agent",
     object: "model",
     created: CREATED,
-    owned_by: "signa",
+    owned_by: "sigda",
     description:
-      "Pinned call to one specific signa-launched agent. Pass `agent_address` (0x...) in the request body to target an agent directly.",
+      "Pinned call to one specific sigda-launched agent. Pass `agent_address` (0x...) in the request body to target an agent directly.",
     capabilities: ["chat.completions"],
     pricing: { type: "free", currency: "USD", per_call_usd: 0 },
   },

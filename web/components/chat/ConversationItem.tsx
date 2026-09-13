@@ -142,7 +142,7 @@ export function ConversationItem({
           className={cn(
             "size-6 rounded-md flex items-center justify-center transition-opacity",
             pinned
-              ? "opacity-100 text-violet-300 hover:bg-white/10"
+              ? "opacity-100 text-green-300 hover:bg-white/10"
               : "opacity-0 group-hover:opacity-100 text-white/40 hover:text-white hover:bg-white/10",
           )}
           title={pinned ? "Unpin" : "Pin to top"}

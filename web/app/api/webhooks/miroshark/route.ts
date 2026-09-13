@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
-import { botPost } from "@/lib/signa-bots";
+import { botPost } from "@/lib/sigda-bots";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  *
  * Any MiroShark operator can point their generic completion webhook at
  * this endpoint. Every sim that finishes auto-publishes a wallet-signed
- * post from `miroshark.bot.signa` to the SIGDA feed at /feed/miroshark.
+ * post from `miroshark.bot.sigda` to the SIGDA feed at /feed/miroshark.
  *
  * MiroShark side env:
  *   WEBHOOK_GENERIC_URL=https://www.signaagent.xyz/api/webhooks/miroshark
@@ -174,13 +174,13 @@ export async function POST(req: NextRequest) {
   });
 }
 
-// Friendly GET so an operator can `curl https://signa/api/webhooks/miroshark`
+// Friendly GET so an operator can `curl https://www.signaagent.xyz/api/webhooks/miroshark`
 // and see if the route is reachable + whether SIGDA's bot is configured.
 export async function GET() {
   const configured = !!process.env.MIROSHARK_WEBHOOK_SECRET;
   const bot = !!process.env.MIROSHARK_BOT_KEY;
   return NextResponse.json({
-    service: "signa-miroshark-bridge",
+    service: "sigda-miroshark-bridge",
     healthy: configured && bot,
     bridge_configured: configured,
     bot_configured: bot,

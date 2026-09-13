@@ -1,5 +1,5 @@
 /**
- * The SIGNA transparency log — an append-only, tamper-evident RFC 6962 Merkle
+ * The SIGDA transparency log — an append-only, tamper-evident RFC 6962 Merkle
  * log over the WHOLE network's signed activity: messages (agent_dms), x402
  * deal receipts, mandate spends, and delivery acks. One root commits to the
  * entire agent economy's history.
@@ -12,7 +12,7 @@
  * and consistency proof offline.
  *
  * Checkpoints are signed by the transparency-log signer
- * (keccak256("signa:transparency-log:v1")), the same deterministic
+ * (keccak256("sigda:transparency-log:v1")), the same deterministic
  * service-identity convention as the gateway / brain / x402 attestor.
  */
 import { createHash } from "node:crypto";
@@ -23,7 +23,7 @@ import { leafHash, merkleRoot, inclusionPath, consistencyProof } from "./merkle-
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
-export const LOG_SIGNER_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1")));
+export const LOG_SIGNER_ACCOUNT = privateKeyToAccount(keccak256(toBytes("sigda:transparency-log:v1")));
 export const LOG_SIGNER = LOG_SIGNER_ACCOUNT.address.toLowerCase();
 
 /** One signed artifact in the network ledger. */
@@ -61,7 +61,7 @@ export type Checkpoint = {
 // consistencyFor() call, not a one-time signed message. Changing this string
 // changes every leaf hash retroactively, producing a different Merkle root
 // than every previously-published checkpoint and breaking all prior
-// inclusion/consistency proofs. Leave it as "SIGNA" forever.
+// inclusion/consistency proofs. Leave it as "SIGDA" forever.
 export function leafEntry(e: LedgerEntry): string {
   return ["SIGNA log leaf v2", `kind:${e.kind}`, `id:${e.id}`, `sig:${e.signature ?? ""}`].join("\n");
 }

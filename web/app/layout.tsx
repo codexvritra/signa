@@ -78,7 +78,7 @@ export default async function RootLayout({
 }) {
   // Hydrate WagmiProvider with the wallet state stored in the
   // `wagmi.store` cookie. Without this, dynamic-rendered routes
-  // (e.g. /feed/bankr) mount the provider empty and show the
+  // (e.g. /feed/miroshark) mount the provider empty and show the
   // wallet as disconnected for a beat before auto-reconnect runs.
   const requestHeaders = await headers();
   const initialWagmiState = cookieToInitialState(

@@ -1,5 +1,5 @@
 /**
- * v0.80 — SIGNA encrypted-room client crypto.
+ * v0.80 — SIGDA encrypted-room client crypto.
  *
  * Wire scheme: signa-sealedbox-v1
  *

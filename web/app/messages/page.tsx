@@ -46,7 +46,7 @@ export default function MessagesPage() {
     fetch(`/api/mail?address=${me}`, { cache: "no-store" }).then((r) => r.json()).then((j) => { if (j.ok) setMyHandle(j.handle ?? null); }).catch(() => {});
   }, [me]);
 
-  // deep link: /messages?to=name@signa pre-fills the composer (from profile pages / directory)
+  // deep link: /messages?to=name@sigda pre-fills the composer (from profile pages / directory)
   useEffect(() => {
     try { const t = new URLSearchParams(window.location.search).get("to"); if (t) setToInput(t); } catch {}
   }, []);
@@ -126,7 +126,7 @@ export default function MessagesPage() {
       const ts = Date.now();
       const signature = await signMessageAsync({ message: `SIGDA handle claim v1\nts:${ts}\nhandle:${h}\naddress:${me}` });
       const r = await fetch("/api/mail", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ handle: h, address: me, ts, signature }) }).then((x) => x.json());
-      if (r.ok) { setMyHandle(r.handle); setHandleInput(""); setStatus({ kind: "ok", text: `Claimed ${r.handle}@signa` }); }
+      if (r.ok) { setMyHandle(r.handle); setHandleInput(""); setStatus({ kind: "ok", text: `Claimed ${r.handle}@sigda` }); }
       else setStatus({ kind: "err", text: r.error || "claim failed" });
     } catch (e) {
       setStatus({ kind: "err", text: e instanceof Error && /reject/i.test(e.message) ? "Signature rejected." : "Couldn't claim." });
@@ -239,7 +239,7 @@ export default function MessagesPage() {
       <div className="max-w-[640px] mx-auto px-5 py-10 sm:py-14">
         <div className="flex items-center gap-2">
           <div>
-            <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA · wallet-native messaging</div>
+            <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">SIGDA · wallet-native messaging</div>
             <h1 className="text-[32px] sm:text-[42px] font-bold leading-tight tracking-tight">Messages</h1>
           </div>
           {isConnected && live && <span className="ml-auto inline-flex items-center gap-1 text-[12px] text-[#5ee68f]"><span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full rounded-full bg-[#5ee68f] opacity-75 animate-ping" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#5ee68f]" /></span>live</span>}
@@ -272,7 +272,7 @@ export default function MessagesPage() {
                   <div key={m.id} className={`max-w-[80%] ${mine ? "self-end" : "self-start"}`}>
                     <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-snug whitespace-pre-wrap break-words ${mine ? "bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] text-white" : "glass border border-white/10 text-[#e8edf7]"}`}>{d.text}</div>
                     <div className={`text-[10px] mt-1 flex gap-1.5 ${mine ? "justify-end" : ""}`}>
-                      {d.enc && <span className="text-[#a98bff]">🔒 encrypted</span>}
+                      {d.enc && <span className="text-[#4ade80]">🔒 encrypted</span>}
                       {m.tx ? <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Robinhood Chain · Basescan ↗</a> : <span className="text-faint">✓ signed</span>}
                     </div>
                   </div>
@@ -286,15 +286,15 @@ export default function MessagesPage() {
                 value={draft} onChange={(e) => setDraft(e.target.value)} rows={1} maxLength={8000}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
                 placeholder="Message… (Enter to sign & send)"
-                className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60 resize-none"
+                className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60 resize-none"
               />
-              <button onClick={() => setEncOn((v) => !v)} disabled={busy} title="Encrypt the onchain message — only the recipient can read it" className={`shrink-0 px-3 py-2.5 rounded-xl text-[15px] disabled:opacity-60 ${encOn ? "bg-[#a98bff]/25 text-[#c4b4ff]" : "bg-white/[0.06] text-faint hover:bg-white/[0.12]"}`}>🔒</button>
+              <button onClick={() => setEncOn((v) => !v)} disabled={busy} title="Encrypt the onchain message — only the recipient can read it" className={`shrink-0 px-3 py-2.5 rounded-xl text-[15px] disabled:opacity-60 ${encOn ? "bg-[#4ade80]/25 text-[#86efac]" : "bg-white/[0.06] text-faint hover:bg-white/[0.12]"}`}>🔒</button>
               <button onClick={sendOnchain} disabled={busy} title="Write this message on Robinhood Chain — permanent, readable from the chain (costs a little gas)" className="shrink-0 px-3 py-2.5 rounded-xl text-[15px] bg-white/[0.06] text-[#5ee68f] disabled:opacity-60 hover:bg-white/[0.12]">⛓</button>
               <button onClick={sendReply} disabled={busy} className="shrink-0 px-4 py-2.5 rounded-xl text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Send"}</button>
             </div>
             <div className="text-[11px] text-faint mt-1.5">
               Send = free wallet-signed DM · ⛓ = write it on Robinhood Chain forever · 🔒+⛓ = encrypted onchain (only they can read){" "}
-              {!myKeys && <button onClick={enableEncryption} disabled={busy} className="text-[#a98bff] underline ml-1">Enable encryption</button>}
+              {!myKeys && <button onClick={enableEncryption} disabled={busy} className="text-[#4ade80] underline ml-1">Enable encryption</button>}
               {myKeys && <span className="text-[#5ee68f] ml-1">· encryption on</span>}
             </div>
             {status && <div className={`mt-2 text-[12px] ${status.kind === "err" ? "text-[#ff8f8f]" : "text-muted"}`}>{status.text}</div>}
@@ -303,22 +303,22 @@ export default function MessagesPage() {
           /* ============ INBOX ============ */
           <>
             {/* SIGDA Mail — your wallet's address */}
-            <div className="mt-6 glass rounded-xl p-3.5 border border-[#a98bff]/25">
+            <div className="mt-6 glass rounded-xl p-3.5 border border-[#4ade80]/25">
               {myHandle ? (
                 <div className="flex items-center gap-2">
                   <div className="min-w-0">
                     <div className="text-[11px] text-faint">your SIGDA address</div>
-                    <div className="text-[16px] font-semibold text-[#c4b4ff]">{myHandle}@signa</div>
+                    <div className="text-[16px] font-semibold text-[#86efac]">{myHandle}@sigda</div>
                   </div>
-                  <button onClick={() => { navigator.clipboard?.writeText(`${myHandle}@signa`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="ml-auto shrink-0 text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy"}</button>
+                  <button onClick={() => { navigator.clipboard?.writeText(`${myHandle}@sigda`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="ml-auto shrink-0 text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy"}</button>
                 </div>
               ) : (
                 <div>
-                  <div className="text-[12px] text-faint mb-2">Claim your <span className="text-white">SIGDA address</span> — a name for your wallet inbox, so people DM you at <span className="text-[#c4b4ff]">you@signa</span> instead of 0x.</div>
+                  <div className="text-[12px] text-faint mb-2">Claim your <span className="text-white">SIGDA address</span> — a name for your wallet inbox, so people DM you at <span className="text-[#86efac]">you@sigda</span> instead of 0x.</div>
                   <div className="flex gap-2">
-                    <div className="flex-1 flex items-center bg-black/30 border border-white/10 rounded-lg px-3 focus-within:border-[#a98bff]/60">
+                    <div className="flex-1 flex items-center bg-black/30 border border-white/10 rounded-lg px-3 focus-within:border-[#4ade80]/60">
                       <input value={handleInput} onChange={(e) => setHandleInput(e.target.value.toLowerCase())} onKeyDown={(e) => { if (e.key === "Enter") claimHandle(); }} placeholder="yourname" maxLength={20} className="flex-1 bg-transparent py-2 text-[14px] outline-none" />
-                      <span className="text-[13px] text-faint">@signa</span>
+                      <span className="text-[13px] text-faint">@sigda</span>
                     </div>
                     <button onClick={claimHandle} disabled={busy} className="px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Claim"}</button>
                   </div>
@@ -329,7 +329,7 @@ export default function MessagesPage() {
             <div className="mt-3 glass rounded-xl p-3.5 border border-white/10 flex items-center gap-2">
               <div className="min-w-0">
                 <div className="text-[11px] text-faint">your inbox link · share it, anyone can sign you a message</div>
-                <code className="text-[12.5px] text-[#a5c3ff] font-mono truncate block">{myLink}</code>
+                <code className="text-[12.5px] text-[#86efac] font-mono truncate block">{myLink}</code>
               </div>
               <button onClick={() => { navigator.clipboard?.writeText(`https://${myLink}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="ml-auto shrink-0 text-[12px] px-3 py-1.5 rounded-lg bg-white/[0.06] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy"}</button>
             </div>
@@ -340,8 +340,8 @@ export default function MessagesPage() {
                 <input
                   value={toInput} onChange={(e) => setToInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") startConversation(); }}
-                  placeholder="name@signa, 0x…, name.eth, or @handle"
-                  className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60"
+                  placeholder="name@sigda, 0x…, name.eth, or @handle"
+                  className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60"
                 />
                 <button onClick={startConversation} disabled={busy} className="px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "…" : "Open"}</button>
               </div>

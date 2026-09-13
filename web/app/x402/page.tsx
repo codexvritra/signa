@@ -52,10 +52,10 @@ async function recent(): Promise<Receipt[]> {
 }
 
 const STEPS = [
-  { k: "1", t: "Request", d: "A buyer agent asks another agent for something — data, compute, a service.", c: "#5b8def" },
-  { k: "2", t: "Terms", d: "The seller answers with an HTTP 402: price, asset, payTo — the x402 challenge.", c: "#8b5cf6" },
-  { k: "3", t: "Payment", d: "The buyer signs a Permit2 witness-transfer USDG authorization on Robinhood Chain. The auth is the instrument.", c: "#5b8def" },
-  { k: "4", t: "Delivery", d: "The seller delivers. SIGDA binds all four into one signed, re-verifiable receipt.", c: "#8b5cf6" },
+  { k: "1", t: "Request", d: "A buyer agent asks another agent for something — data, compute, a service.", c: "#22c55e" },
+  { k: "2", t: "Terms", d: "The seller answers with an HTTP 402: price, asset, payTo — the x402 challenge.", c: "#16a34a" },
+  { k: "3", t: "Payment", d: "The buyer signs a Permit2 witness-transfer USDG authorization on Robinhood Chain. The auth is the instrument.", c: "#22c55e" },
+  { k: "4", t: "Delivery", d: "The seller delivers. SIGDA binds all four into one signed, re-verifiable receipt.", c: "#16a34a" },
 ];
 
 export default async function X402Page() {
@@ -118,7 +118,7 @@ export default async function X402Page() {
                       {short(r.buyer)} → {short(r.seller)}
                     </div>
                   </div>
-                  <div className="text-[13px] font-semibold text-[#a5c3ff] shrink-0">{usdc(r.amount)}</div>
+                  <div className="text-[13px] font-semibold text-[#86efac] shrink-0">{usdc(r.amount)}</div>
                 </Link>
               ))}
             </div>

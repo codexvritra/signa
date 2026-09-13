@@ -23,10 +23,10 @@ export const metadata: Metadata = {
 };
 
 const STEPS = [
-  { k: "1", t: "Grant", d: "A human wallet-signs a budget: this agent may spend up to $X, max $Y per buy, until [date].", c: "#8b5cf6" },
-  { k: "2", t: "Spend", d: "The agent buys within bounds — every spend signed + checked against the mandate.", c: "#5b8def" },
-  { k: "3", t: "Ask", d: "Out of budget? The agent wallet-signs a request for more — the primitive that was missing.", c: "#5b8def" },
-  { k: "4", t: "Audit", d: "The human sees every dollar, why, and that it stayed in bounds — re-verifiable on Robinhood Chain.", c: "#8b5cf6" },
+  { k: "1", t: "Grant", d: "A human wallet-signs a budget: this agent may spend up to $X, max $Y per buy, until [date].", c: "#16a34a" },
+  { k: "2", t: "Spend", d: "The agent buys within bounds — every spend signed + checked against the mandate.", c: "#22c55e" },
+  { k: "3", t: "Ask", d: "Out of budget? The agent wallet-signs a request for more — the primitive that was missing.", c: "#22c55e" },
+  { k: "4", t: "Audit", d: "The human sees every dollar, why, and that it stayed in bounds — re-verifiable on Robinhood Chain.", c: "#16a34a" },
 ];
 
 export default function AutonomyPage() {

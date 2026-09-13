@@ -59,7 +59,7 @@ export default async function Image() {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <div style={{ display: "flex", fontSize: "22px", fontWeight: 700 }}>
-            <span style={{ color: "#b7ff5c" }}>signa</span>
+            <span style={{ color: "#b7ff5c" }}>sigda</span>
             <span style={{ color: "rgba(245,245,250,0.5)" }}>&nbsp;· the gate</span>
           </div>
           <div style={{ display: "flex", fontSize: "13px", color: "#b7ff5c", letterSpacing: "0.18em", textTransform: "uppercase" }}>

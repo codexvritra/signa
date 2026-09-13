@@ -18,50 +18,6 @@ type Integration = {
 
 const INTEGRATIONS: Integration[] = [
   {
-    name: "Bankr",
-    token: "$BNKR",
-    category: "Trading",
-    blurb:
-      "AI trading agent on X / Farcaster / Terminal. Trade with natural language across Base, Ethereum, Solana, Polygon. Coinbase-Ventures-backed.",
-    signaUses: [
-      "Type /bankr <command> in any SIGDA chat — opens Bankr Terminal pre-filled",
-      "Tip with $BNKR from the payment modal",
-      "SIGDA is publishing a `signa-feed` Skill to BankrBot/skills",
-    ],
-    url: "https://bankr.bot",
-    slash: "/bankr",
-    contract: "0x22af33fe49fd1fa80c7149773dde5890d3c76f3b",
-  },
-  {
-    name: "AEON",
-    token: "USDC",
-    category: "Payments",
-    blurb:
-      "Modular crypto payment protocol for AI agents. $263M+ processed, 5.7M+ txs. x402 facilitator for AI-to-AI micropayments.",
-    signaUses: [
-      "Type /aeon in any SIGDA chat — opens AEON Pay",
-      "Tip with USDC (AEON's preferred unit) from the payment modal",
-      "Roadmap: per-message agent pricing settled via AEON x402",
-    ],
-    url: "https://aeon.xyz",
-    slash: "/aeon",
-  },
-  {
-    name: "gitlawb",
-    token: "$GITLAWB",
-    category: "Open source",
-    blurb:
-      "Decentralized git network for AI agents. Repos on IPFS+Filecoin+Arweave, peer connectivity via libp2p, identity via DID+UCAN. Staking via $GITLAWB on Base.",
-    signaUses: [
-      "Type /gitlawb in any SIGDA chat — opens gitlawb",
-      "Tip with $GITLAWB from the payment modal",
-      "Roadmap: \"Open source on gitlawb\" badge on directory agents",
-    ],
-    url: "https://gitlawb.com",
-    slash: "/gitlawb",
-    contract: "0x5f980dcfc4c0fa3911554cf5ab288ed0eb13dba3",
-  },
-  {
     name: "MiroShark",
     token: "$MIROSHARK",
     category: "Simulation",
@@ -99,10 +55,8 @@ export default function EcosystemPage() {
               The stack we&apos;re built on.
             </h1>
             <p className="text-white/55 max-w-xl mt-5 text-[16px] leading-relaxed">
-              SIGDA is the messenger and the kernel. Bankr is the trader.
-              AEON is the on-chain identity + payment rail. gitlawb is the
-              decentralized git layer. MiroShark is the simulation lab.
-              All native to Base.
+              SIGDA is the messenger and the kernel. MiroShark is the
+              simulation lab.
             </p>
           </div>
         </section>
@@ -172,9 +126,9 @@ export default function EcosystemPage() {
               <span className="text-[10px] uppercase tracking-wider text-white/40 block mb-2">
                 Want to integrate?
               </span>
-              If you&apos;re building something Base-native that touches
-              messaging, agents, or payments, your project belongs on this
-              page. Find SIGDA on{" "}
+              If you&apos;re building something that touches messaging,
+              agents, or payments, your project belongs on this page. Find
+              SIGDA on{" "}
               <a
                 href="/directory"
                 className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--accent-2)]"

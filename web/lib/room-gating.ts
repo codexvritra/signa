@@ -1,7 +1,7 @@
 /**
  * Hold-to-chat gating (v0.43).
  *
- * A SIGNA room can be gated by holding an ERC-20: only addresses whose
+ * A SIGDA room can be gated by holding an ERC-20: only addresses whose
  * balanceOf(token) >= gate_min_balance_raw may POST messages. Reads stay
  * open — the signatures are still the source of truth, and gating is
  * enforced server-side after signature verification.
@@ -53,9 +53,9 @@ function clientForChain(chain: string) {
         chain: rhChain,
         transport: http(RH_RPC),
       });
-    // Kept for rooms already gated on a real Base-native token (e.g. BNKR) —
-    // SIGNA itself runs on Robinhood Chain, but the gated token's contract
-    // still only exists on Base.
+    // Kept for rooms gated on a token whose contract lives on Base —
+    // SIGDA itself runs on Robinhood Chain, but a gated token's contract
+    // may still only exist on Base.
     case "base":
     case "8453":
       return createPublicClient({

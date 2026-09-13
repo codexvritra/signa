@@ -39,8 +39,8 @@ const PRESETS: { cmd: string; prompt: string }[] = [
       "price of $USDC on robinhood chain 0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
   },
   { cmd: "/code", prompt: "build me a single-html dashboard for base trending tokens" },
-  { cmd: "/swarm", prompt: "simulate 1000 wallets buying $AEON over 24h" },
-  { cmd: "/action", prompt: "buy me 10 USDC of $AEON on base" },
+  { cmd: "/swarm", prompt: "simulate 1000 wallets buying $PEPE over 24h" },
+  { cmd: "/action", prompt: "buy me 10 USDC of $PEPE on base" },
   { cmd: "/chat", prompt: "who built you" },
 ];
 
@@ -232,7 +232,7 @@ export function AgentRespondWidget({
                 </a>
                 <a
                   href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                    `${agentName} answered me on signa — wallet-verifiable.\n\nhttps://www.signaagent.xyz/i/${reply.interaction_id}`,
+                    `${agentName} answered me on sigda — wallet-verifiable.\n\nhttps://www.signaagent.xyz/i/${reply.interaction_id}`,
                   )}`}
                   target="_blank"
                   rel="noreferrer"

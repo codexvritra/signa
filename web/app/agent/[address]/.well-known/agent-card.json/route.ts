@@ -30,7 +30,7 @@ export async function GET(
   const { data: agent } = await db
     .from("agents")
     .select(
-      "address, name, description, tags, runtime_enabled, launched_at, erc8004_token_id, bankr_token_address, gitlawb_did, miroshark_sim_id, x402_price_usdc, x402_pay_to, x402_currency, x402_chain",
+      "address, name, description, tags, runtime_enabled, launched_at, bankr_token_address, miroshark_sim_id, x402_price_usdc, x402_pay_to, x402_currency, x402_chain",
     )
     .eq("address", address)
     .is("deleted_at", null)
@@ -38,7 +38,7 @@ export async function GET(
 
   // Card is emitted even for unregistered wallets — any 0x address is a
   // valid SIGDA inbox. Registered agents get richer metadata + skills.
-  const name = agent?.name || `signa:${address.slice(0, 6)}…${address.slice(-4)}`;
+  const name = agent?.name || `sigda:${address.slice(0, 6)}…${address.slice(-4)}`;
   const description =
     agent?.description ||
     "A wallet-addressed agent on SIGDA. Message it over A2A and your message lands in its EIP-191 wallet-signed, re-verifiable inbox on Robinhood Chain.";
@@ -53,24 +53,23 @@ export async function GET(
         name: "wallet-signed inbox",
         description:
           "Receive an A2A message; SIGDA relays it into this agent's wallet-signed, undeletable inbox on Robinhood Chain. Re-verifiable offline with viem.",
-        tags: ["messaging", "a2a", "wallet", "base"],
+        tags: ["messaging", "a2a", "wallet", "robinhood"],
         examples: ["gm — are you live for a collab?"],
       },
     ],
     metadata: {
-      "signa.address": address,
-      "signa.network": "base-mainnet",
-      "signa.transport": "wallet-signed EIP-191, persisted + re-verifiable",
-      "signa.inbox_url": `${BASE_URL}/api/agents/${address}/inbox`,
-      "signa.profile_url": `${BASE_URL}/agent/${address}`,
-      "signa.tags": agent?.tags ?? [],
-      "signa.runtime_enabled": !!agent?.runtime_enabled,
-      "signa.erc8004_token_id": agent?.erc8004_token_id ?? null,
-      "signa.bankr_token_address": agent?.bankr_token_address ?? null,
-      "signa.extensions": ["x402", "erc-8004"],
+      "sigda.address": address,
+      "sigda.network": "robinhood-chain-mainnet",
+      "sigda.transport": "wallet-signed EIP-191, persisted + re-verifiable",
+      "sigda.inbox_url": `${BASE_URL}/api/agents/${address}/inbox`,
+      "sigda.profile_url": `${BASE_URL}/agent/${address}`,
+      "sigda.tags": agent?.tags ?? [],
+      "sigda.runtime_enabled": !!agent?.runtime_enabled,
+      "sigda.bankr_token_address": agent?.bankr_token_address ?? null,
+      "sigda.extensions": ["x402"],
       ...(agent?.x402_price_usdc != null && Number(agent.x402_price_usdc) > 0
         ? {
-            "signa.x402": {
+            "sigda.x402": {
               price: Number(agent.x402_price_usdc),
               currency: agent.x402_currency ?? "USDC",
               chain: agent.x402_chain ?? "base",

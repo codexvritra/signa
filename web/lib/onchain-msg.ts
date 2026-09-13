@@ -19,7 +19,7 @@ export function buildOnchainMessageTx(a: { from: string; to: string; body: strin
   return { to: a.to.toLowerCase(), value: "0x0", data: toHex(canonical) };
 }
 
-/** Decode a tx input back into a SIGNA message, or null if it isn't one. */
+/** Decode a tx input back into a SIGDA message, or null if it isn't one. */
 export function decodeOnchainMessage(inputHex: string): { from: string; to: string; body: string } | null {
   try {
     if (!inputHex || inputHex === "0x") return null;
@@ -40,7 +40,7 @@ function client(): any {
   return _client;
 }
 
-/** Read a SIGNA message back from a Base transaction hash — straight from the chain. */
+/** Read a SIGDA message back from a Base transaction hash — straight from the chain. */
 export async function readOnchainMessage(txHash: string): Promise<
   { tx: string; tx_from: string; tx_to: string; from: string; to: string; body: string; block: string; sender_matches: boolean } | null
 > {

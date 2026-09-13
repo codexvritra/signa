@@ -1,6 +1,6 @@
 /**
  * RFC 6962 (Certificate Transparency) Merkle tree — the cryptographic core of
- * the SIGNA transparency log.
+ * the SIGDA transparency log.
  *
  * A wallet signature proves WHO wrote a message. It does not prove the central
  * store didn't later drop, reorder, or alter the set of messages. This module

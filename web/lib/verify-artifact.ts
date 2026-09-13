@@ -292,11 +292,11 @@ export async function verifyArtifact(a: VerifyInput): Promise<VerifyResult> {
   const matched = (r: string | null) => (expected ? r === expected : !!r);
 
   // Pre-rebrand compatibility: every preimage's first line is a "SIGDA <kind>
-  // v1" marker (was "SIGNA" before the rebrand). Nothing signed under the old
+  // v1" marker (was "SIGDA" before the rebrand). Nothing signed under the old
   // marker should stop verifying — retry against the pre-rebrand preimage
   // before giving up, so historical signatures stay re-verifiable forever.
   if (kind !== "raw" && !matched(recovered) && preimage.startsWith("SIGDA ")) {
-    const legacyPreimage = "SIGNA " + preimage.slice("SIGDA ".length);
+    const legacyPreimage = "SIGDA " + preimage.slice("SIGDA ".length);
     const legacyRecovered = await tryRecover(legacyPreimage);
     if (matched(legacyRecovered) || (!expected && legacyRecovered && !recovered)) {
       preimage = legacyPreimage;

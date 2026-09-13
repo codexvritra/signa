@@ -169,7 +169,7 @@ async function runPostTask(
  *      the agent. Acts as the audit trail — the agent's feed shows when
  *      it requested a sim, regardless of whether the sim itself returns.
  *   3. Kick off the actual MiroShark sim via mirosharkCreateSim. The
- *      verdict is posted asynchronously by miroshark.bot.signa via the
+ *      verdict is posted asynchronously by miroshark.bot.sigda via the
  *      existing /api/webhooks/miroshark handler when the sim completes.
  *
  * If MIROSHARK_BASE_URL isn't configured on this deployment, we still

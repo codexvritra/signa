@@ -5,7 +5,7 @@
  * marketplace: a provider registers a capability with a Base transaction and
  * the full callable spec (endpoint, method, price, payout) lives on chain —
  * not in any single node's database. Anyone can read it straight from Base
- * and call the capability without trusting SIGNA's index.
+ * and call the capability without trusting SIGDA's index.
  *
  * Gracefully no-ops when SIGNA_CAPABILITY_REGISTRY_ADDRESS isn't configured,
  * so the app stays fully functional before the contract is deployed. Maps

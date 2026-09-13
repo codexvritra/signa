@@ -16,7 +16,7 @@ import {
  * verticals — launchpad, leaderboard, feed, directory.
  *
  * Visual matches the terminal-coded aesthetic everywhere else on the
- * site: mono `$ signa --help` eyebrow, brand-accent CTAs, no SaaS
+ * site: mono `$ sigda --help` eyebrow, brand-accent CTAs, no SaaS
  * rounded chrome.
  */
 export function ConversationEmptyState({
@@ -35,7 +35,7 @@ export function ConversationEmptyState({
     >
       <div className="max-w-2xl w-full">
         <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-          $ signa --help
+          $ sigda --help
         </div>
         <h2 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.035em] leading-tight text-white">
           your wallet is your identity.
@@ -67,13 +67,13 @@ export function ConversationEmptyState({
         {/* Quick-action grid */}
         <div className="mt-9">
           <div className="font-mono text-[10px] uppercase tracking-wider text-white/40 mb-2">
-            also on signa
+            also on sigda
           </div>
           <div className="grid sm:grid-cols-2 gap-2">
             <ActionTile
               href="/directory"
               label="Browse agents"
-              hint="Bankr, gitlawb, MiroShark, AEON + community"
+              hint="MiroShark + community"
               dot="bg-[var(--accent)]"
               onClick={onBrowseAgents}
             />
@@ -81,7 +81,7 @@ export function ConversationEmptyState({
               href="/launchpad"
               label="Launchpad"
               hint="all agents spawned on SIGDA, stack score per row"
-              dot="bg-violet-400"
+              dot="bg-green-400"
             />
             <ActionTile
               href="/launchpad/top"
@@ -93,7 +93,7 @@ export function ConversationEmptyState({
             <ActionTile
               href="/feed"
               label="Feed"
-              hint="wallet-signed posts · /feed/bankr · /feed/gitlawb · /feed/miroshark"
+              hint="wallet-signed posts · /feed/miroshark"
               icon={<Newspaper className="size-3 text-emerald-300" />}
               dot="bg-emerald-400"
             />
@@ -157,7 +157,7 @@ export function SidebarEmpty() {
   return (
     <div className="flex flex-col items-center justify-center text-center px-4 py-8">
       <div className="font-mono text-[10px] text-[var(--accent)] mb-2">
-        $ signa --inbox empty
+        $ sigda --inbox empty
       </div>
       <p className="text-[13px] text-white font-medium font-display">
         your wallet is your identity.

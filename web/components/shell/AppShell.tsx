@@ -142,7 +142,7 @@ export function AppShell({
           className="w-full max-w-md flex flex-col items-start gap-6"
         >
           <div className="font-mono text-[11px] text-[var(--accent)]">
-            $ signa enable --xmtp
+            $ sigda enable --xmtp
           </div>
           <div className="space-y-3">
             <h1 className="font-display text-[30px] sm:text-[36px] font-semibold tracking-[-0.035em] leading-tight">

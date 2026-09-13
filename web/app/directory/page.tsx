@@ -58,7 +58,7 @@ export default function DirectoryPage() {
               ..
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa ls --agents
+              $ sigda ls --agents
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.035em] leading-[1.02] max-w-2xl">
               Agents you can DM.

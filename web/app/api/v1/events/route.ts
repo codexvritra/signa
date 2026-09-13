@@ -144,7 +144,7 @@ export async function GET(req: NextRequest) {
       // Hello — server tells the client what cursor we started from
       // so they can resume on reconnect.
       send("hello", {
-        server: "signa-events",
+        server: "sigda-events",
         cursor,
         filters: {
           agent_address: agentFilter ?? null,
@@ -253,7 +253,7 @@ export async function GET(req: NextRequest) {
       connection: "keep-alive",
       "x-accel-buffering": "no",
       "access-control-allow-origin": "*",
-      "x-signa-stream-uptime-sec": String(
+      "x-sigda-stream-uptime-sec": String(
         Math.floor((Date.now() - startedAt) / 1000),
       ),
     },

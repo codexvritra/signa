@@ -24,7 +24,7 @@ export async function GET(
           justifyContent: "space-between",
           background: "#0a0a0f",
           backgroundImage:
-            "radial-gradient(ellipse 70% 55% at 85% -10%, rgba(91,141,239,0.30), transparent 60%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(139,92,246,0.26), transparent 60%)",
+            "radial-gradient(ellipse 70% 55% at 85% -10%, rgba(34,197,94,0.30), transparent 60%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(22,163,74,0.26), transparent 60%)",
           padding: 72,
           fontFamily: "sans-serif",
         }}
@@ -36,7 +36,7 @@ export async function GET(
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ color: "#a5c3ff", fontSize: 36, fontWeight: 500 }}>
+          <div style={{ color: "#86efac", fontSize: 36, fontWeight: 500 }}>
             send {display} a
           </div>
           <div
@@ -61,7 +61,7 @@ export async function GET(
             fontSize: 26,
           }}
         >
-          <div style={{ color: "#5b8def" }}>signed, not spoofed</div>
+          <div style={{ color: "#22c55e" }}>signed, not spoofed</div>
           <div>signaagent.xyz</div>
         </div>
       </div>

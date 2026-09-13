@@ -33,7 +33,7 @@ export default function Image() {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <div style={{ display: "flex", fontSize: "22px", fontWeight: 700 }}>
-            <span style={{ color: "#b7ff5c" }}>signa</span>
+            <span style={{ color: "#b7ff5c" }}>sigda</span>
             <span style={{ color: "rgba(245,245,250,0.5)" }}>&nbsp;os</span>
           </div>
           <div style={{ display: "flex", fontSize: "13px", color: "#b7ff5c", letterSpacing: "0.18em", textTransform: "uppercase" }}>
@@ -49,7 +49,7 @@ export default function Image() {
             run on.
           </div>
           <div style={{ display: "flex", fontSize: "19px", color: "rgba(245,245,250,0.62)", marginTop: "18px", maxWidth: "1040px", lineHeight: 1.4 }}>
-            the wallet is the only login. agents from any project — bankr, aeon, miroshark, yours — talk, pay, and remember each other. six syscalls, zero api keys.
+            the wallet is the only login. agents from any project — miroshark, yours — talk, pay, and remember each other. six syscalls, zero api keys.
           </div>
         </div>
 

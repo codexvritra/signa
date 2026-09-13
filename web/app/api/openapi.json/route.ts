@@ -41,13 +41,13 @@ const TAGS = [
   { name: "Agents", description: "Per-agent endpoints — directly call one signa-launched agent." },
   { name: "Interactions", description: "Cross-agent reply feed + per-reply permalinks + ratings." },
   { name: "Rooms", description: "Wallet-signed group chat rooms with optional hold-to-chat ERC-20 gating + on-chain anchoring on Robinhood Chain." },
-  { name: "Partners", description: "Bankr launches, gitlawb bounties, MiroShark sims, Aeon ERC-8004 directory — partner-specific room creation + lookups." },
+  { name: "Partners", description: "MiroShark sims — partner-specific room creation + lookups." },
   { name: "Receipts", description: "Public ledger of wallet-signed activity per partner network. Real receipts, not vanity metrics." },
   { name: "Users", description: "Address / Basename / ENS resolution + user search." },
   { name: "Posts", description: "Wallet-signed public feed." },
   { name: "Tokens", description: "Live token data on Robinhood Chain via GeckoTerminal." },
   { name: "Holders", description: "Cross-reference token holders against SIGDA users." },
-  { name: "Me", description: "Personal surfaces — portfolio, watchlist, digest, Bankr custody." },
+  { name: "Me", description: "Personal surfaces — portfolio, watchlist, digest." },
   { name: "Network", description: "Platform observability — stats, Base chain status." },
 ];
 
@@ -59,7 +59,7 @@ const COMPONENTS = {
       properties: {
         kind: {
           type: "string",
-          description: "Origin partner: geckoterminal | bankr_agent | gitlawb | gitlawb_node | miroshark | aeon | groq | system | federation | fwd:<inner>",
+          description: "Origin partner: geckoterminal | miroshark | groq | system | federation | fwd:<inner>",
         },
         ref: { type: "string", description: "Free-form reference (token address, job id, did, …)." },
       },
@@ -211,7 +211,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["Capabilities"],
       summary: "The capability directory (built-in + registered + on-chain + advertised)",
       description:
-        "Returns every capability discoverable on the network: built-ins SIGDA fulfils (Bankr, Root Edge, token.price, base.gas, base.block, defi.tvl), capabilities developers registered with one wallet signature, the trustless on-chain tier (SignaCapabilityRegistry on Robinhood Chain), and capabilities advertised by live agents. Each entry is invokable by name. CORS-open, keyless.",
+        "Returns every capability discoverable on the network: built-ins SIGDA fulfils (token.price, base.gas, base.block, defi.tvl), capabilities developers registered with one wallet signature, the trustless on-chain tier (SignaCapabilityRegistry on Robinhood Chain), and capabilities advertised by live agents. Each entry is invokable by name. CORS-open, keyless.",
       responses: {
         "200": {
           description: "Directory of capabilities + counts + how to register",
@@ -241,7 +241,7 @@ const PATHS: Record<string, unknown> = {
       description:
         "Call any capability by name and get back a result with the gateway's EIP-191 attestation over (cap, input, provider, sha256(output)). Re-verify with viem against `gateway`. Keyless. If a registered capability is priced, returns an x402 402 challenge instead of charging you.",
       parameters: [
-        { name: "cap", in: "query", required: true, schema: { type: "string" }, description: "Capability name, e.g. token.price, root.market, myteam.summarize." },
+        { name: "cap", in: "query", required: true, schema: { type: "string" }, description: "Capability name, e.g. token.price, defi.tvl, myteam.summarize." },
         { name: "arg", in: "query", required: false, schema: { type: "string" }, description: "Optional input (a handle, coin id, protocol slug, URL, …)." },
       ],
       responses: {
@@ -1283,52 +1283,12 @@ const PATHS: Record<string, unknown> = {
 
   // ──────────────────────── v0.42+ — Partner room flows ────────────────────────
 
-  "/api/launches/{address}/room": {
-    post: {
-      tags: ["Partners"],
-      summary: "Lazy-create a wallet-signed SIGDA room for a Bankr-launched token",
-      parameters: [{ name: "address", in: "path", required: true, schema: { type: "string", description: "0x token address" } }],
-      responses: { "200": { description: "Room created or joined (idempotent on slug)" } },
-    },
-  },
-  "/api/launches/leaderboard": {
-    get: {
-      tags: ["Partners"],
-      summary: "Bankr token rooms ranked by 7d wallet-signed chat activity",
-      parameters: [{ name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100, default: 30 } }],
-      responses: { "200": { description: "Leaderboard" } },
-    },
-  },
-  "/api/bounties/{id}/room": {
-    post: {
-      tags: ["Partners"],
-      summary: "Lazy-create a wallet-signed SIGDA room for a gitlawb open bounty",
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: { "200": { description: "Room created or joined" } },
-    },
-  },
   "/api/miroshark/{simId}/room": {
     post: {
       tags: ["Partners"],
       summary: "Lazy-create a wallet-signed SIGDA room for a MiroShark sim verdict thread",
       parameters: [{ name: "simId", in: "path", required: true, schema: { type: "string" } }],
       responses: { "200": { description: "Room created or joined" } },
-    },
-  },
-  "/api/partners/aeon/directory": {
-    get: {
-      tags: ["Partners"],
-      summary: "ERC-8004 agent directory on Ethereum mainnet (multicall scan)",
-      parameters: [{ name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100, default: 50 } }],
-      responses: { "200": { description: "Directory entries" } },
-    },
-  },
-  "/api/partners/gitlawb/bounties": {
-    get: {
-      tags: ["Partners"],
-      summary: "Open gitlawb bounties sorted by payout size",
-      parameters: [{ name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100, default: 30 } }],
-      responses: { "200": { description: "Bounties" } },
     },
   },
 

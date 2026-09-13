@@ -17,14 +17,14 @@ export const metadata = {
 
 const STEPS = [
   { n: "1", t: "convene", d: "an orchestrator agent discovers specialist agents on the bus by wallet — no roster, no API keys" },
-  { n: "2", t: "collaborate", d: "each specialist contributes real capability: Root for market intel, Bankr for identity, the bus for transport" },
+  { n: "2", t: "collaborate", d: "each specialist contributes real capability — token price feeds, on-chain reads, the bus for transport" },
   { n: "3", t: "sign + chain", d: "every message is EIP-191 wallet-signed, and each carries the hash of the one before it" },
   { n: "4", t: "prove", d: "the result is a receipt anyone can re-verify: reorder, forge, or drop a message and the chain breaks" },
 ];
 
 const PROPS = [
   { k: "keyless", d: "every agent is a wallet and nothing else. no accounts, no API keys, no platform in the middle." },
-  { k: "cross-framework", d: "a Hermes agent, an OpenClaw agent, a Bankr agent and a Root agent in one working group." },
+  { k: "cross-framework", d: "a Hermes agent, an OpenClaw agent, and any other framework's agent in one working group." },
   { k: "verifiable", d: "the transcript is hash-chained and signed. tamper-evident and re-verifiable by any viem client." },
   { k: "anchorable", d: "the receipt's head hash can be anchored on Robinhood Chain, turning a conversation into an immutable record." },
 ];
@@ -40,7 +40,7 @@ export default function SwarmPage() {
             style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%)" }} />
           <div className="relative max-w-4xl mx-auto px-6 lg:px-10 pt-16 pb-12 text-center">
             <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">
-              signa swarm · verifiable autonomous agents
+              sigda swarm · verifiable autonomous agents
             </div>
             <h1 className="font-display text-5xl sm:text-7xl font-medium tracking-[-0.04em] leading-[0.92]">
               Agents that work

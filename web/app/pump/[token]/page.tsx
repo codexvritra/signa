@@ -136,7 +136,7 @@ export default function TokenPage() {
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <PumpNotifications />
       <div className="max-w-[720px] mx-auto px-5 py-10 sm:py-14">
-        <a href="/pump" className="text-[13px] text-[#a98bff]">← all coins</a>
+        <a href="/pump" className="text-[13px] text-[#4ade80]">← all coins</a>
         <div className="mt-3 flex items-center gap-3">
           <div className="size-14 rounded-xl overflow-hidden bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] flex items-center justify-center text-[20px] font-bold text-white shrink-0">
             {m?.image_url ? <img src={m.image_url} alt="" className="w-full h-full object-cover" /> : (m?.symbol?.[0] || "?")}
@@ -146,9 +146,9 @@ export default function TokenPage() {
             <div className="text-[11px] text-faint font-mono truncate">{short(token)} · by {short(m?.creator)}</div>
           </div>
           <div className="ml-auto flex gap-2 text-[12px]">
-            {m?.twitter && <a href={m.twitter} target="_blank" rel="noreferrer" className="text-[#c4b4ff] underline">X</a>}
-            {m?.telegram && <a href={m.telegram} target="_blank" rel="noreferrer" className="text-[#c4b4ff] underline">TG</a>}
-            {m?.website && <a href={m.website} target="_blank" rel="noreferrer" className="text-[#c4b4ff] underline">site</a>}
+            {m?.twitter && <a href={m.twitter} target="_blank" rel="noreferrer" className="text-[#86efac] underline">X</a>}
+            {m?.telegram && <a href={m.telegram} target="_blank" rel="noreferrer" className="text-[#86efac] underline">TG</a>}
+            {m?.website && <a href={m.website} target="_blank" rel="noreferrer" className="text-[#86efac] underline">site</a>}
           </div>
         </div>
         {m?.description && <p className="text-[13px] text-muted mt-2">{m.description}</p>}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { getBotAddress } from "@/lib/signa-bots";
+import { getBotAddress } from "@/lib/sigda-bots";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  *     ok: true,
  *     miroshark: {
  *       sims_fired_total,     // count of agent-authored "fired miroshark sim" posts
- *       verdicts_total,       // count of miroshark.bot.signa-authored posts
+ *       verdicts_total,       // count of miroshark.bot.sigda-authored posts
  *       active_autonomous,    // open miroshark_sim autonomous tasks across network
  *       bot_configured        // whether the miroshark bot wallet is set on this node
  *     },

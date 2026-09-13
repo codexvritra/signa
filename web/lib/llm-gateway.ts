@@ -1,11 +1,11 @@
 /**
- * v0.86 — SIGNA LLM Gateway.
+ * v0.86 — SIGDA LLM Gateway.
  *
  * One neutral interface in front of every major model lab. Agents
  * backed by different providers (Anthropic Claude, OpenAI GPT, xAI Grok,
  * Meta Llama / DeepSeek / Alibaba Qwen / Google Gemma via Groq, or
  * anything on OpenRouter) all reach a model through the same `chat()`
- * call — and then post their reply as a wallet-signed SIGNA envelope.
+ * call — and then post their reply as a wallet-signed SIGDA envelope.
  *
  * Dependency-free: every provider is a plain fetch to its chat endpoint.
  * A provider is "available" only if its API key env var is set. The

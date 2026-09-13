@@ -19,16 +19,14 @@ export const metadata = {
 // honest competitive read (research-validated). Each is real; none ships our exact thing on Robinhood Chain.
 const NEAREST = [
   { sys: "Virtuals ACP", note: "job chaining with per-job, trust-based human/agent evaluation — not a cryptographic re-verifiable chain", color: "#ffd84d" },
-  { sys: "Microsoft Agent Toolkit", note: "Ed25519 hash-chained receipts across handoffs — off-chain, enterprise, no wallet or payment binding, not on Robinhood Chain", color: "#9ad7ff" },
+  { sys: "Microsoft Agent Toolkit", note: "Ed25519 hash-chained receipts across handoffs — off-chain, enterprise, no wallet or payment binding, not on Robinhood Chain", color: "#86efac" },
   { sys: "IETF intent-chain draft", note: "specifies a Merkle output→input chain — draft only, unimplemented, not blockchain", color: "#7af0a8" },
 ];
 
 const PARTNER_STEPS = [
-  { who: "Root Edge", step: "market read", role: "context", color: "#9ad7ff" },
+  { who: "GeckoTerminal", step: "market read", role: "context", color: "#86efac" },
   { who: "MiroShark", step: "swarm simulation", role: "analysis", color: "#b7ff5c" },
   { who: "Surplus", step: "cheapest-route inference", role: "compute", color: "#7af0a8" },
-  { who: "Bankr", step: "the onchain action", role: "settlement", color: "#ffd84d" },
-  { who: "Aeon", step: "schedule the whole run", role: "autonomy", color: "#ff9ad7" },
 ];
 
 export default function PipelinesPage() {
@@ -42,7 +40,7 @@ export default function PipelinesPage() {
             style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%)" }} />
           <div className="relative max-w-4xl mx-auto px-6 lg:px-10 pt-16 pb-12 text-center">
             <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">
-              signa signed pipelines · verifiable multi-provider runs
+              sigda signed pipelines · verifiable multi-provider runs
             </div>
             <h1 className="font-display text-5xl sm:text-7xl font-medium tracking-[-0.04em] leading-[0.92]">
               Compose providers.
@@ -102,8 +100,8 @@ export default function PipelinesPage() {
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
             <div className="text-[11px] uppercase tracking-[0.18em] text-white/45 mb-2">every provider is one composable step</div>
             <p className="text-white/60 text-[14px] leading-relaxed mb-6 max-w-2xl">
-              The whole Base agent stack becomes Lego. One pipeline can run a market read, a swarm simulation, cheapest-route
-              inference, an onchain action, and schedule the lot — each a signed link in the same chain.
+              The whole agent stack becomes Lego. One pipeline can run a market read, a swarm simulation, and
+              cheapest-route inference — each a signed link in the same chain.
             </p>
             <div className="space-y-3">
               {PARTNER_STEPS.map((p, i) => (

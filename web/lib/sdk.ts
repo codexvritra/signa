@@ -1,16 +1,16 @@
 /**
- * @signa/sdk — first-party typed wrapper for the SIGNA public API.
+ * @sigda/sdk — first-party typed wrapper for the SIGDA public API.
  *
  * Pure fetch, zero dependencies. Works in browser, Node (>=18), Bun,
  * Deno, edge runtimes, and any environment with a global `fetch`.
  *
  * Designed to be:
  *
- *   - Copy-pasteable. A gitlawb Playground app can drop this single
- *     file in and start calling SIGNA in under a minute.
+ *   - Copy-pasteable. Any app can drop this single file in and start
+ *     calling SIGDA in under a minute.
  *
  *   - Future-publishable. The shape mirrors how a published
- *     `@signa/sdk` on npm would look. We can split this file out and
+ *     `@sigda/sdk` on npm would look. We can split this file out and
  *     ship it to the registry without rewriting consumers.
  *
  *   - Fully typed. Every endpoint has request + response types so
@@ -19,10 +19,10 @@
  *
  * Usage:
  *
- *   import { Signa } from "@/lib/sdk";
+ *   import { Sigda } from "@/lib/sdk";
  *
- *   const signa = new Signa();                       // default: prod
- *   const reply = await signa.gateway.respond({      // gateway call
+ *   const sigda = new Sigda();                       // default: prod
+ *   const reply = await sigda.gateway.respond({      // gateway call
  *     prompt: "price of $USDC on base?",
  *   });
  *   console.log(reply.response, reply.gateway.routed_to.name);
@@ -151,7 +151,7 @@ export type SignaResolvedUser = {
   basename?: string | null;
   ens_name?: string | null;
   gitlawb_did?: string | null;
-  on_signa?: boolean;
+  on_sigda?: boolean;
   source?: string;
 };
 
@@ -213,7 +213,7 @@ class SignaClient {
       body = text;
     }
     if (!res.ok) {
-      throw new SignaError(`SIGNA ${path} → HTTP ${res.status}`, res.status, body);
+      throw new SignaError(`SIGDA ${path} → HTTP ${res.status}`, res.status, body);
     }
     return body as T;
   }
@@ -221,7 +221,7 @@ class SignaClient {
 
 // ---------- typed surfaces ----------
 
-export class Signa {
+export class Sigda {
   private c: SignaClient;
   public gateway: GatewayApi;
   public agents: AgentsApi;
@@ -250,7 +250,7 @@ export class GatewayApi {
 
   /**
    * POST /api/gateway/respond — open natural-language gateway. Free,
-   * public, no auth. Server picks the best signa-launched specialist
+   * public, no auth. Server picks the best sigda-launched specialist
    * agent for the prompt's intent and returns the wallet-signed reply
    * plus full attribution.
    */
@@ -381,7 +381,7 @@ export class UsersApi {
     );
   }
 
-  /** GET /api/users/search — search SIGNA-registered users by name. */
+  /** GET /api/users/search — search SIGDA-registered users by name. */
   search(q: string): Promise<{
     results: Array<{
       address: string;
@@ -492,9 +492,9 @@ export class SearchApi {
 
 // ---------- plain-function exports (for non-class users) ----------
 
-const defaultClient = (): Signa => new Signa();
+const defaultClient = (): Sigda => new Sigda();
 
-/** Convenience: call the gateway without instantiating Signa first. */
+/** Convenience: call the gateway without instantiating Sigda first. */
 export function gatewayRespond(body: {
   prompt: string;
   from?: string;

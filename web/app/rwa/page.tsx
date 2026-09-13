@@ -65,10 +65,10 @@ export default function RwaPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[980px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Proof-of-Stock · Robinhood Chain</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">Proof-of-Stock · Robinhood Chain</div>
         <h1 className="text-[34px] sm:text-[46px] font-bold leading-tight mt-1 tracking-tight">
           Robinhood tokenizes the stock.<br />
-          <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">SIGDA proves it&apos;s real.</span>
+          <span className="bg-gradient-to-r from-[#4ade80] to-[#4ade80] bg-clip-text text-transparent">SIGDA proves it&apos;s real.</span>
         </h1>
         <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[660px]">
           Robinhood Chain went live with tokenized equities — NVDA, TSLA, SpaceX, Circle. But the chain is permissionless: for every
@@ -84,7 +84,7 @@ export default function RwaPage() {
         {/* the two legs */}
         <div className="mt-6 grid sm:grid-cols-2 gap-2 text-[13px]">
           <div className="glass rounded-lg px-3 py-2.5 border border-white/[0.07]">
-            <b className="text-[#c4b4ff]">Leg 1 — the vouch.</b> <span className="text-muted">The signature recovers to SIGDA&apos;s RWA attestor. That&apos;s SIGDA staking its key on which contract is canonical.</span>
+            <b className="text-[#86efac]">Leg 1 — the vouch.</b> <span className="text-muted">The signature recovers to SIGDA&apos;s RWA attestor. That&apos;s SIGDA staking its key on which contract is canonical.</span>
           </div>
           <div className="glass rounded-lg px-3 py-2.5 border border-white/[0.07]">
             <b className="text-[#7ee2b8]">Leg 2 — the state.</b> <span className="text-muted">Replay the eth_call at that block yourself. The supply matches, or the attestation is worthless.</span>
@@ -92,7 +92,7 @@ export default function RwaPage() {
         </div>
 
         {/* demo */}
-        <div className="mt-7 glass rounded-2xl p-5 border border-[#a98bff]/25">
+        <div className="mt-7 glass rounded-2xl p-5 border border-[#4ade80]/25">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="text-[15px] font-semibold">Prove it on a real Stock Token</div>
             <button onClick={runDemo} disabled={running} className="ml-auto px-4 py-2 rounded-lg text-[14px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">
@@ -136,7 +136,7 @@ export default function RwaPage() {
               )}
               {demo.attestation?.preimage && (
                 <details className="mt-3">
-                  <summary className="text-[12px] text-[#a5c3ff] cursor-pointer">the exact signed message</summary>
+                  <summary className="text-[12px] text-[#86efac] cursor-pointer">the exact signed message</summary>
                   <pre className="mt-2 text-[10px] text-faint bg-black/30 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all">{demo.attestation.preimage}{"\n\n"}signature: {demo.attestation.signature}</pre>
                 </details>
               )}
@@ -177,7 +177,7 @@ export default function RwaPage() {
                   </div>
 
                   <div className="mt-2.5 flex items-center gap-2">
-                    <a href={t.explorer} target="_blank" rel="noopener noreferrer" className="text-[11px] font-mono text-[#a5c3ff] hover:underline">{short(t.contract)}</a>
+                    <a href={t.explorer} target="_blank" rel="noopener noreferrer" className="text-[11px] font-mono text-[#86efac] hover:underline">{short(t.contract)}</a>
                     <button
                       onClick={() => verifyOne(t)}
                       className={`ml-auto text-[11px] px-2 py-1 rounded-md font-medium transition-colors ${

@@ -17,7 +17,7 @@ export const revalidate = 60;
  *     ok: true,
  *     agents:           { total, runtime_enabled, with_did, with_token, with_sim },
  *     interactions:     { total, signed, by_intent: {facts, code, ...}, rated_up, rated_down },
- *     posts:            { total, by_bot: {bankr, gitlawb, miroshark} },
+ *     posts:            { total, by_bot: {miroshark, digest} },
  *     users:            { registered }
  *   }
  */
@@ -76,9 +76,9 @@ export async function GET() {
   // Aggregate posts by bot — we keep bot wallets in a small map.
   const BOT_WALLETS: Record<string, string> = {
     "0xa215c8717502e56c81a9e25a3f3d4fde9d17adca": "miroshark",
-    // Bankr bot + gitlawb bot addresses are resolved at runtime from env
-    // when getBotAccount is called, but we won't import that whole stack
-    // here. The counts will just go into 'other' for now — homepage
+    // The digest bot address is resolved at runtime from env when
+    // getBotAccount is called, but we won't import that whole stack
+    // here. Its counts will just go into 'other' for now — homepage
     // doesn't need exact bot attribution to render.
   };
   let byBot: Record<string, number> = {};

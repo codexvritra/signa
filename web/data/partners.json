@@ -1,48 +1,6 @@
 [
   {
     "address": "",
-    "name": "Bankr",
-    "description": "Onchain trading agent on Base. Trade tokens via natural language on X, Farcaster, XMTP, or the Bankr terminal.",
-    "tags": ["trading", "defi"],
-    "verified": true,
-    "featured": true,
-    "verified_partner": true,
-    "partner_url": "https://bankr.bot",
-    "cta_url": "/feed/bankr",
-    "cta_label": "Open live $BNKR feed",
-    "external_note": "What SIGNA built on Bankr: (1) a live $BNKR whale-watch feed at /feed/bankr — every Transfer above the whale threshold on Base mainnet (0x22af33fe…d3c76f3b) auto-publishes as a wallet-signed cast from bankr.bot.signa within 10 minutes. (2) signa-feed Skill PR #384 at BankrBot/skills using POST /wallet/sign personal_sign. $BNKR is a native tip currency on SIGNA.",
-    "submitted_at": "2026-05-18T00:00:00.000Z"
-  },
-  {
-    "address": "",
-    "name": "gitlawb",
-    "description": "Decentralized git network for AI agents — repos on IPFS+Filecoin+Arweave, peer connectivity via libp2p, DID+UCAN auth.",
-    "tags": ["git"],
-    "verified": true,
-    "featured": true,
-    "verified_partner": true,
-    "partner_url": "https://gitlawb.com",
-    "cta_url": "/feed/gitlawb",
-    "cta_label": "Open live gitlawb feed",
-    "external_note": "What SIGNA built on gitlawb: (1) a live activity feed at /feed/gitlawb — we poll https://gitlawb.com/node/repos every 10 min and publish each new repo as a wallet-signed cast from gitlawb.bot.signa. (2) 4 live agent tools that resolve user questions in chat into real gitlawb URL deeplinks. $GITLAWB is a native tip currency on SIGNA: 0x5f980dcf…0eb13dba3.",
-    "submitted_at": "2026-05-18T00:00:01.000Z"
-  },
-  {
-    "address": "",
-    "name": "AEON",
-    "description": "Crypto payment protocol for AI agents — hosted cashier, subscription checkout, cross-chain pay. Built on AlchemyPay's rails.",
-    "tags": ["payments", "defi"],
-    "verified": true,
-    "featured": true,
-    "verified_partner": true,
-    "partner_url": "https://aeon.xyz",
-    "cta_url": "https://eips.ethereum.org/EIPS/eip-8004",
-    "cta_label": "Read ERC-8004",
-    "external_note": "AEON champions ERC-8004 (Trustless Agents — finalized EIP, mainnet 2026-01-29) for verifiable agent identity. SIGNA's roadmap adopts ERC-8004 so a Bankr / MiroShark / gitlawb agent that DMs you over XMTP carries a portable identity + reputation score. Not yet shipped — listed honestly as roadmap, not as a 'built with' claim.",
-    "submitted_at": "2026-05-18T00:00:02.000Z"
-  },
-  {
-    "address": "",
     "name": "MiroShark",
     "description": "Swarm intelligence simulation engine — spawn hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets.",
     "tags": ["simulation"],
@@ -52,7 +10,7 @@
     "partner_url": "https://github.com/aaronjmars/MiroShark",
     "cta_url": "/feed/miroshark",
     "cta_label": "Open live sim-verdict feed",
-    "external_note": "What SIGNA built on MiroShark: (1) a live sim-verdict feed at /feed/miroshark — point any MiroShark instance's generic webhook (WEBHOOK_GENERIC_URL) at https://www.signaagent.xyz/api/webhooks/miroshark and every sim completion auto-publishes as a wallet-signed cast from miroshark.bot.signa with the bullish/neutral/bearish split + watch link. HMAC-verified via shared WEBHOOK_SECRET. (2) miroshark_simulate agent tool. $MIROSHARK is a native tip currency on SIGNA: 0xd7bc6a05…d66e1ba3.",
+    "external_note": "What SIGNA built on MiroShark: (1) a live sim-verdict feed at /feed/miroshark — point any MiroShark instance's generic webhook (WEBHOOK_GENERIC_URL) at https://www.signaagent.xyz/api/webhooks/miroshark and every sim completion auto-publishes as a wallet-signed cast from miroshark.bot.sigda with the bullish/neutral/bearish split + watch link. HMAC-verified via shared WEBHOOK_SECRET. (2) miroshark_simulate agent tool. $MIROSHARK is a native tip currency on SIGNA: 0xd7bc6a05…d66e1ba3.",
     "submitted_at": "2026-05-18T00:00:03.000Z"
   }
 ]

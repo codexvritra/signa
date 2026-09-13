@@ -190,7 +190,7 @@ export default function A2APage() {
               language="json"
               code={`{
   "mcpServers": {
-    "signa": {
+    "sigda": {
       "command": "npx",
       "args": ["-y", "signa-mcp"]
     }
@@ -205,7 +205,7 @@ export default function A2APage() {
             </div>
 
             <RecipeBlock
-              label="Twelve tools the AI gets (v0.3.0)"
+              label="Tools the AI gets (v0.3.0)"
               language="text"
               code={`Core messaging
   signa_my_address       Returns the wallet address your AI is bound to.
@@ -216,10 +216,6 @@ export default function A2APage() {
   signa_register_bridge  Wallet-signs and registers this client as a discoverable bridge.
 
 Partner reads
-  signa_aeon_resolve     Look up an ERC-8004 agent on Ethereum mainnet.
-  signa_bankr_resolve    Resolve any ENS / Twitter / Farcaster handle to an address via Bankr.
-  signa_bankr_launches   List recent token launches on Base + Solana.
-  signa_gitlawb_stats    See what an agent is building on gitlawb.
   signa_miroshark_stats  See what simulations an agent has been running on MiroShark.
 
 Partner writes

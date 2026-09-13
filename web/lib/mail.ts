@@ -1,5 +1,5 @@
 /**
- * SIGNA Mail — human-readable handles (you@signa) for wallet inboxes.
+ * SIGDA Mail — human-readable handles (you@sigda) for wallet inboxes.
  *
  * A handle is owned by whoever wallet-signs the claim. Ownership is verified
  * cryptographically at CLAIM time AND re-verified at RESOLVE time: the stored
@@ -12,14 +12,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const HANDLE_RE = /^[a-z0-9_]{3,20}$/;
 const RESERVED = new Set([
-  "signa", "admin", "support", "help", "root", "mail", "inbox", "verify",
-  "agent", "signaagent", "official", "team", "base", "bankr", "aeon",
+  "signa", "sigda", "admin", "support", "help", "root", "mail", "inbox", "verify",
+  "agent", "signaagent", "sigdaagent", "official", "team", "base", "bankr", "aeon",
 ]);
 
-/** Strip any SIGNA suffix (you@signa, you@signa.xyz, you@signaagent.xyz, you.signa) → bare handle. */
+/** Strip any SIGDA suffix (you@sigda, you@signa, you@signaagent.xyz, you.sigda) → bare handle. */
 export function normalizeHandle(raw: string): string | null {
   let bare = (raw ?? "").trim().toLowerCase();
-  bare = bare.replace(/@signa(?:agent)?(?:\.[a-z]+)*$/i, "").replace(/\.signa$/i, "");
+  bare = bare.replace(/@sig(?:n|d)a(?:agent)?(?:\.[a-z]+)*$/i, "").replace(/\.sig(?:n|d)a$/i, "");
   return HANDLE_RE.test(bare) ? bare : null;
 }
 
@@ -39,7 +39,7 @@ async function rowIsValid(row: Row): Promise<boolean> {
   }
 }
 
-/** Resolve "you@signa" / "you.signa" / "you" → wallet, only if the claim sig verifies. */
+/** Resolve "you@sigda" / "you.sigda" / "you" → wallet, only if the claim sig verifies. */
 export async function resolveHandle(db: SupabaseClient, raw: string): Promise<{ handle: string; address: string } | null> {
   const h = normalizeHandle(raw);
   if (!h) return null;
@@ -95,10 +95,10 @@ export async function claimHandle(
   const message = handleClaimPreimage({ ts: a.ts, handle, address });
   let recovered = "";
   try { recovered = (await recoverMessageAddress({ message, signature: a.signature as Hex })).toLowerCase(); } catch { /* invalid */ }
-  // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed
+  // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed
   // preimage so a stale cached client doesn't fail to claim.
   if (recovered !== address && message.startsWith("SIGDA ")) {
-    const legacy = "SIGNA " + message.slice("SIGDA ".length);
+    const legacy = "SIGDA " + message.slice("SIGDA ".length);
     try { recovered = (await recoverMessageAddress({ message: legacy, signature: a.signature as Hex })).toLowerCase(); } catch { /* invalid */ }
   }
   if (recovered !== address) return { ok: false, error: "signature does not match the connected wallet" };

@@ -5,18 +5,18 @@
  * does expose a documented webhook contract at
  * github.com/aaronjmars/MiroShark/blob/main/docs/WEBHOOKS.md.
  *
- * SIGNA's integration is two-way:
+ * SIGDA's integration is two-way:
  *
- *   1. SIGNA → MiroShark: programmatic sim creation (this file)
+ *   1. SIGDA → MiroShark: programmatic sim creation (this file)
  *      Called from /respond's swarm intent when a user asks an agent
  *      to simulate a multi-agent / population scenario. Env-gated on
  *      MIROSHARK_BASE_URL so the call no-ops gracefully when not
  *      configured.
  *
- *   2. MiroShark → SIGNA: completion webhook
+ *   2. MiroShark → SIGDA: completion webhook
  *      Already wired at /api/webhooks/miroshark — every finished sim
  *      auto-posts a wallet-signed verdict to /feed/miroshark authored
- *      by miroshark.bot.signa. HMAC-SHA256 over the raw body.
+ *      by miroshark.bot.sigda. HMAC-SHA256 over the raw body.
  *
  * Reference: https://github.com/aaronjmars/MiroShark
  */
@@ -45,7 +45,7 @@ export function mirosharkConfigured(): boolean {
 
 /**
  * POST /api/simulation/create — kick off a new swarm sim. The webhook
- * fires when it completes; we don't poll here. SIGNA's /respond swarm
+ * fires when it completes; we don't poll here. SIGDA's /respond swarm
  * intent calls this then folds the returned sim_id + preview into the
  * tool context the synthesizer sees.
  */
@@ -89,14 +89,14 @@ export async function mirosharkCreateSim(args: {
 // mirosharkX402Configured) was removed when the public "Run a sim"
 // button moved to a visitor-pays browser flow. See
 // `web/lib/x402-client.ts` for the new path — payment happens in the
-// browser with the visitor's wallet, SIGNA never holds a buyer key
+// browser with the visitor's wallet, SIGDA never holds a buyer key
 // for public sims anymore. The autonomous-cron flow keeps using
 // `mirosharkCreateSim` (free, MIROSHARK_API_KEY-authed) above.
 
 // ============================== receive-side helpers ==============================
 
 /**
- * Format a completed sim for posting to SIGNA's /feed/miroshark bot.
+ * Format a completed sim for posting to SIGDA's /feed/miroshark bot.
  * The webhook handler at /api/webhooks/miroshark uses this function
  * (re-imported there for clarity) so both the receive path and any
  * future client-side render of a sim share the same formatting.

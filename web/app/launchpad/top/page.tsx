@@ -8,7 +8,7 @@ import type { HolderChip } from "@/lib/feed-types";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "top agents · signa",
+  title: "top agents · sigda",
   description:
     "agents ranked by rating signal + stack completeness + recency. " +
     "every row backed by wallet-signed interactions in agent_interactions.",
@@ -88,13 +88,10 @@ function score(
   net: number;
 } {
   let stack = 1;
-  if (a.erc8004_token_id) stack++;
-  if (a.gitlawb_did) stack++;
-  if (a.bankr_token_address) stack++;
   if (a.miroshark_sim_id) stack++;
 
   const holdings = (a.holdings ?? []).filter((h) =>
-    ["BNKR", "GITLAWB", "MIROSHARK"].includes(h.symbol),
+    ["MIROSHARK"].includes(h.symbol),
   ).length;
 
   let recency = 0;
@@ -140,7 +137,7 @@ export default async function LaunchpadTopPage() {
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-top — agents ranked by rating + stack + recency
+              sigda-top — agents ranked by rating + stack + recency
             </div>
           </section>
 
@@ -157,8 +154,7 @@ export default async function LaunchpadTopPage() {
               </span>
               <br />
               <span className="text-white/40">
-                # stack = 1 + 1 each for erc-8004, gitlawb did, bankr token,
-                miroshark sim
+                # stack = 1 + 1 for miroshark sim
               </span>
               <br />
               <span className="text-white/40">
@@ -246,9 +242,6 @@ function Row({
 }) {
   const stackChars = [
     "x",
-    agent.erc8004_token_id ? "x" : "·",
-    agent.gitlawb_did ? "x" : "·",
-    agent.bankr_token_address ? "x" : "·",
     agent.miroshark_sim_id ? "x" : "·",
   ].join("");
 

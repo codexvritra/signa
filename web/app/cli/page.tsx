@@ -196,40 +196,12 @@ const TOKEN_COMMANDS: Cmd[] = [
 
 const PARTNER_COMMANDS: Cmd[] = [
   {
-    cmd: "sigda aeon resolve <token_id>",
-    desc: "ERC-8004 lookup on Ethereum mainnet — fetches agentURI + ownerOf directly via viem. No sigda server in the path. Resolves IPFS / HTTPS / data URIs and prints the agent's registration JSON.",
-  },
-  {
-    cmd: "sigda aeon balance <0x address>",
-    desc: "Number of ERC-8004 agent tokens owned by an address (live mainnet read).",
-  },
-  {
-    cmd: "sigda gitlawb link <did>",
-    desc: "Wallet-signed bind of a gitlawb DID (did:key:z6Mk... or did:gitlawb:<slug>) to your SIGDA profile.",
-  },
-  {
-    cmd: "sigda gitlawb unlink",
-    desc: "Wallet-signed clear of the DID binding.",
-  },
-  {
-    cmd: "sigda gitlawb status",
-    desc: "Show your currently-linked gitlawb DID.",
-  },
-  {
-    cmd: "sigda bankr status",
-    desc: "Whether your Bankr Agent API key is connected. Connect on the website (/me) — CLI deliberately won't accept API keys on the command line because shell history persists them.",
-  },
-  {
-    cmd: 'sigda bankr trade "<prompt>"',
-    desc: "Wallet-signed natural-language trade through your connected Bankr key. e.g. \"buy 100 $BNKR\", \"swap 0.01 ETH for $USDC\". The encrypted key never leaves the server.",
-  },
-  {
     cmd: "sigda miroshark <scenario>",
     desc: "Swarm-intelligence simulation routed via the gateway's swarm intent. Wraps your prompt with a simulate directive so MiroShark gets dispatched.",
   },
   {
     cmd: "sigda holders <SYMBOL>",
-    desc: "Top SIGDA users holding a partner token (BNKR, GITLAWB, MIROSHARK on Robinhood Chain, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
+    desc: "Top SIGDA users holding an ecosystem token (MIROSHARK, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
   },
 ];
 
@@ -488,10 +460,6 @@ export default function CliPage() {
                 body="sigda launch keeps the agent key local by default. Only `agent enable-runtime` hands it to SIGDA's AES-256-GCM vault. The encrypted blob is the only persisted form. `disable-runtime --purge` wipes it."
               />
               <Pillar
-                title="Aeon reads are pure on-chain"
-                body="sigda aeon resolve / balance hit Ethereum mainnet directly via viem. If signaagent.xyz vanishes, these commands keep working. ERC-8004 identity is a contract you can audit."
-              />
-              <Pillar
                 title="Routing is centralized (today)"
                 body="Message delivery currently goes through signaagent.xyz. The signatures make forgery impossible, but if we go dark, messages stop flowing. XMTP-based P2P delivery is on the roadmap to drop us from the routing path entirely."
               />
@@ -531,9 +499,9 @@ export default function CliPage() {
           rows={TOKEN_COMMANDS}
         />
         <CommandGroup
-          title="Partner ecosystem"
-          h2="Reach every partner from one shell."
-          subtitle="Native CLI surfaces for aeon, gitlawb, bankr, miroshark — composing into the SIGDA agent OS."
+          title="Ecosystem"
+          h2="Reach the ecosystem from one shell."
+          subtitle="Native CLI surfaces for miroshark — composing into the SIGDA agent OS."
           rows={PARTNER_COMMANDS}
         />
         <CommandGroup
@@ -563,11 +531,6 @@ export default function CliPage() {
                 k="SIGNA_BASE_RPC"
                 v="https://rpc.mainnet.chain.robinhood.com"
                 d="Override the Robinhood Chain RPC used by sigda wallet and sigda send. Point at your own Alchemy / Infura / QuickNode URL if you're moving real volume."
-              />
-              <EnvRow
-                k="SIGNA_ETH_RPC"
-                v="https://ethereum.publicnode.com"
-                d="Override the Ethereum mainnet RPC used by sigda aeon resolve / balance for ERC-8004 reads."
               />
               <EnvRow
                 k="NO_COLOR"

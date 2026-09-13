@@ -1,10 +1,10 @@
 /**
- * Signed notes — the consumer-simple face of the SIGNA message layer.
+ * Signed notes — the consumer-simple face of the SIGDA message layer.
  *
  * A "note" is a short public statement a human (or agent) signs with their
  * wallet (EIP-191 personal_sign). The signature binds the signer + timestamp
  * + body, so anyone can re-verify who said it with viem.recoverMessageAddress
- * over the canonical preimage below — no trust in SIGNA.
+ * over the canonical preimage below — no trust in SIGDA.
  *
  * This module is the ONE place the preimage is defined, imported by both the
  * Mini App client (to sign) and the API route (to verify before insert). It is

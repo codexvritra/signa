@@ -14,7 +14,6 @@ import { PeerAvatar } from "@/components/ui/Avatar";
 import { HolderBadges } from "@/components/ui/HolderBadges";
 import { shortAddress } from "@/lib/format";
 import { getHolderStatus } from "@/lib/holder-status";
-import { LinkGitlawb } from "./LinkGitlawb";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +24,7 @@ type Resolved = {
   basename: string | null;
   ens_name: string | null;
   gitlawb_did: string | null;
-  on_signa: boolean;
+  on_sigda: boolean;
   source: string;
 };
 
@@ -151,7 +150,7 @@ export default async function UserProfilePage({
               <PeerAvatar address={resolved.address} size={80} />
               <div className="min-w-0 flex-1">
                 <div className="font-mono text-[11px] text-[var(--accent)] mb-1.5">
-                  $ signa profile {display}
+                  $ sigda profile {display}
                 </div>
                 <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.035em] leading-tight break-all">
                   {display}
@@ -186,10 +185,6 @@ export default async function UserProfilePage({
                     </a>
                   </div>
                 )}
-                <LinkGitlawb
-                  profileAddress={resolved.address}
-                  currentDid={resolved.gitlawb_did}
-                />
               </div>
               <div className="flex flex-col gap-2 flex-shrink-0">
                 <Link
@@ -217,7 +212,7 @@ export default async function UserProfilePage({
           <section className="border-b border-white/[0.06]">
             <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
               <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-                $ signa list-agents --by {display}
+                $ sigda list-agents --by {display}
               </div>
               <div className="grid sm:grid-cols-2 gap-2">
                 {launchedAgents.map((a) => (

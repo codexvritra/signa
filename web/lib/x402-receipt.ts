@@ -4,12 +4,12 @@
  *
  * x402 moves the money (a Permit2 witness-transfer payment authorization —
  * see lib/permit2.ts). But x402 alone doesn't prove WHAT was agreed: which
- * request, which terms, which delivery. A SIGNA x402 receipt binds all four —
+ * request, which terms, which delivery. A SIGDA x402 receipt binds all four —
  * request, terms, payment authorization, delivery — into one canonical
- * envelope, signed by the SIGNA attestor wallet, and re-verifiable by anyone
- * with viem + the universal verifier. No trust in SIGNA: the attestor only
+ * envelope, signed by the SIGDA attestor wallet, and re-verifiable by anyone
+ * with viem + the universal verifier. No trust in SIGDA: the attestor only
  * signs after cryptographically verifying the buyer's Permit2 authorization.
- * Settlement stays out-of-band — SIGNA never custodies funds, never pays gas.
+ * Settlement stays out-of-band — SIGDA never custodies funds, never pays gas.
  * The receipt proves the deal, not the on-chain pull.
  */
 import { keccak256, toBytes } from "viem";
@@ -30,8 +30,8 @@ export function stableStringify(v: unknown): string {
 
 export const hashPart = (v: unknown): string => sha256(stableStringify(v));
 
-/** The SIGNA x402 receipt attestor — a deterministic, keyless service identity. */
-const ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1")));
+/** The SIGDA x402 receipt attestor — a deterministic, keyless service identity. */
+const ATTESTOR = privateKeyToAccount(keccak256(toBytes("sigda:x402-receipt:v1")));
 export const ATTESTOR_ADDRESS = ATTESTOR.address.toLowerCase();
 
 export type X402Terms = {

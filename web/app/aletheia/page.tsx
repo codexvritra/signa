@@ -47,35 +47,35 @@ export default function AletheiaPage() {
         {/* hero */}
         <div className="text-[12px] uppercase tracking-[0.2em] text-[#5ee68f] font-semibold">SIGDA · model release</div>
         <h1 className="text-[52px] sm:text-[72px] font-bold leading-[0.98] mt-2 tracking-tight">
-          <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">ALETHEIA</span>
+          <span className="bg-gradient-to-r from-[#4ade80] to-[#4ade80] bg-clip-text text-transparent">ALETHEIA</span>
         </h1>
         <div className="text-[16px] text-muted mt-1">Aletheia 1.0 — SIGDA&apos;s verifiable reasoning model</div>
         <p className="text-[20px] mt-4 max-w-[680px] leading-relaxed">
           Greek for <span className="italic">truth made visible</span>. The first reasoning model where every answer is
-          <span className="text-[#6ea2ff]"> grounded in live data</span>,
+          <span className="text-[#4ade80]"> grounded in live data</span>,
           <span className="text-[#5ee68f]"> wallet-signed by the model</span>, and
-          <span className="text-[#a98bff]"> re-verifiable by anyone</span>. Not bigger — provable.
+          <span className="text-[#4ade80]"> re-verifiable by anyone</span>. Not bigger — provable.
         </p>
 
         {/* playground */}
         <div className="mt-8 glass-strong rounded-2xl p-5 sm:p-6">
-          <div className="text-[12px] uppercase tracking-wider text-[#a5c3ff] font-semibold mb-2">Live playground</div>
+          <div className="text-[12px] uppercase tracking-wider text-[#86efac] font-semibold mb-2">Live playground</div>
           <textarea
             value={goal} onChange={(e) => setGoal(e.target.value)} rows={2}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[15px] outline-none focus:border-[#6ea2ff]/60 resize-none"
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[15px] outline-none focus:border-[#4ade80]/60 resize-none"
           />
           <div className="flex items-center gap-2 flex-wrap mt-2">
             {SAMPLES.map((s) => (
               <button key={s} onClick={() => setGoal(s)} className="text-[11px] px-2 py-1 rounded bg-white/[0.05] text-faint hover:text-white">{s.slice(0, 38)}…</button>
             ))}
           </div>
-          <button onClick={reason} disabled={busy} className="mt-4 px-5 py-2.5 rounded-xl font-semibold text-[15px] bg-gradient-to-r from-[#3b6fe0] to-[#8b5cf6] text-white disabled:opacity-60 hover:brightness-110 transition">
+          <button onClick={reason} disabled={busy} className="mt-4 px-5 py-2.5 rounded-xl font-semibold text-[15px] bg-gradient-to-r from-[#3b6fe0] to-[#16a34a] text-white disabled:opacity-60 hover:brightness-110 transition">
             {busy ? "Aletheia is reasoning…" : "Reason →"}
           </button>
 
           {busy && (
             <div className="mt-5 text-[14px] text-muted flex items-center gap-3">
-              <span className="size-4 rounded-full border-2 border-[#a98bff] border-t-transparent animate-spin" /> thinking in steps, calling live tools…
+              <span className="size-4 rounded-full border-2 border-[#4ade80] border-t-transparent animate-spin" /> thinking in steps, calling live tools…
             </div>
           )}
 
@@ -85,9 +85,9 @@ export default function AletheiaPage() {
               <div className="flex flex-col gap-2">
                 {res.steps.filter((s) => s.action).map((s) => (
                   <div key={s.n} className="flex items-start gap-3 bg-black/20 border border-white/[0.06] rounded-lg px-3 py-2">
-                    <span className="text-[11px] font-bold text-[#6ea2ff] mt-0.5">#{s.n}</span>
+                    <span className="text-[11px] font-bold text-[#4ade80] mt-0.5">#{s.n}</span>
                     <div className="text-[12.5px]">
-                      <span className="font-mono text-[#a98bff]">{s.action!.tool}{s.action!.arg ? `(${s.action!.arg})` : "()"}</span>
+                      <span className="font-mono text-[#4ade80]">{s.action!.tool}{s.action!.arg ? `(${s.action!.arg})` : "()"}</span>
                       <span className="text-faint"> → </span><span className="text-muted font-mono">{cleanObs(s.observation)}</span>
                     </div>
                   </div>
@@ -100,7 +100,7 @@ export default function AletheiaPage() {
                   {res.model} · sig {res.receipt?.signature.slice(0, 20)}…
                 </div>
                 <div className="mt-2.5 flex items-center gap-3">
-                  <button onClick={doVerify} className="text-[12px] px-3 py-1 rounded bg-white/[0.06] text-[#a5c3ff] hover:bg-white/[0.12]">Verify this answer</button>
+                  <button onClick={doVerify} className="text-[12px] px-3 py-1 rounded bg-white/[0.06] text-[#86efac] hover:bg-white/[0.12]">Verify this answer</button>
                   {verify && (
                     <span className={`text-[12px] ${verify.valid ? "text-[#5ee68f]" : "text-[#ff8f8f]"}`}>
                       {verify.valid ? `✓ valid — recovers to ${verify.recovered.slice(0, 8)}… (the model)` : "✗ invalid"}
@@ -124,8 +124,8 @@ export default function AletheiaPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
           {[
             ["Signed", "Every answer is wallet-signed by the model key. Recover the signer at /api/verify.", "#5ee68f"],
-            ["Grounded", "Cites live tool data, not training memory — no hallucinated numbers.", "#6ea2ff"],
-            ["Anchored", "Answers land in SIGDA's on-chain-anchored ledger on Robinhood Chain — tamper-evident.", "#a98bff"],
+            ["Grounded", "Cites live tool data, not training memory — no hallucinated numbers.", "#4ade80"],
+            ["Anchored", "Answers land in SIGDA's on-chain-anchored ledger on Robinhood Chain — tamper-evident.", "#4ade80"],
           ].map(([h, d, c]) => (
             <div key={h} className="glass rounded-xl p-4">
               <div className="text-[15px] font-bold" style={{ color: c }}>{h}</div>
@@ -136,9 +136,9 @@ export default function AletheiaPage() {
         </div>
 
         <p className="text-[12px] text-faint mt-8 leading-relaxed">
-          Aletheia powers <a className="text-[#a5c3ff] hover:underline" href="/vera">VERA</a> (the autonomous agent) and the
-          SIGDA <a className="text-[#a5c3ff] hover:underline" href="/brain">brain</a>. API: <span className="font-mono">POST /api/brain2 {`{ goal }`}</span>.
-          Re-verify any answer at <a className="text-[#a5c3ff] hover:underline" href="/verify">/verify</a> (kind <span className="font-mono">aletheia</span>). Don&apos;t trust — verify.
+          Aletheia powers <a className="text-[#86efac] hover:underline" href="/vera">VERA</a> (the autonomous agent) and the
+          SIGDA <a className="text-[#86efac] hover:underline" href="/brain">brain</a>. API: <span className="font-mono">POST /api/brain2 {`{ goal }`}</span>.
+          Re-verify any answer at <a className="text-[#86efac] hover:underline" href="/verify">/verify</a> (kind <span className="font-mono">aletheia</span>). Don&apos;t trust — verify.
         </p>
       </div>
     </div>

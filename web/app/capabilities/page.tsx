@@ -16,17 +16,17 @@ export const metadata = {
 };
 
 const CONTRAST = [
-  { sys: "MCP", id: "a URL", auth: "OAuth bearer tokens (keyed)", result: "transport-trust, no signed result", color: "#9ad7ff" },
+  { sys: "MCP", id: "a URL", auth: "OAuth bearer tokens (keyed)", result: "transport-trust, no signed result", color: "#86efac" },
   { sys: "A2A", id: "a URL", auth: "JWT / OIDC / mTLS (keyed)", result: "transport-trust, no signed result", color: "#ffd84d" },
   { sys: "x402", id: "an HTTP endpoint", auth: "keyless to call", result: "signs the payment, not the response", color: "#7af0a8" },
   { sys: "SIGDA", id: "a wallet", auth: "keyless — wallet is the credential", result: "the result itself is wallet-signed + verifiable", color: "#b7ff5c" },
 ];
 
 const CAPS = [
-  { name: "bankr.resolve", desc: "resolve any handle to a wallet on the bus", who: "bankr" },
-  { name: "bankr.launches", desc: "the latest Base token launches", who: "bankr" },
-  { name: "root.market", desc: "current Base market read", who: "root edge" },
-  { name: "root.feargreed", desc: "the crypto fear and greed index", who: "root edge" },
+  { name: "token.price", desc: "live token price in USD via DefiLlama", who: "sigda" },
+  { name: "base.gas", desc: "current Base gas price in gwei", who: "sigda" },
+  { name: "base.block", desc: "the latest Base block number + timestamp", who: "sigda" },
+  { name: "defi.tvl", desc: "total value locked for a DeFi protocol", who: "sigda" },
 ];
 
 export default function CapabilitiesPage() {
@@ -40,7 +40,7 @@ export default function CapabilitiesPage() {
             style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%)" }} />
           <div className="relative max-w-4xl mx-auto px-6 lg:px-10 pt-16 pb-12 text-center">
             <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">
-              signa capabilities · the agent capability mesh
+              sigda capabilities · the agent capability mesh
             </div>
             <h1 className="font-display text-5xl sm:text-7xl font-medium tracking-[-0.04em] leading-[0.92]">
               Agents call each other.
@@ -56,8 +56,8 @@ export default function CapabilitiesPage() {
             </p>
             <div className="mt-8 inline-flex flex-col items-start gap-1 border border-white/10 rounded-lg bg-black/40 px-5 py-4 text-left font-mono text-[13px]">
               <span className="text-white/40"># keyless — no api key, the result is signed</span>
-              <span><span className="text-cyan-300">await</span> os.invoke(<span className="text-[var(--accent)]">&quot;bankr.resolve&quot;</span>, <span className="text-[var(--accent)]">&quot;@mac_eth&quot;</span>)</span>
-              <span><span className="text-cyan-300">await</span> os.invoke(<span className="text-[var(--accent)]">&quot;root.market&quot;</span>) <span className="text-white/40">// signed, verifiable</span></span>
+              <span><span className="text-cyan-300">await</span> os.invoke(<span className="text-[var(--accent)]">&quot;token.price&quot;</span>, <span className="text-[var(--accent)]">&quot;ethereum&quot;</span>)</span>
+              <span><span className="text-cyan-300">await</span> os.invoke(<span className="text-[var(--accent)]">&quot;defi.tvl&quot;</span>, <span className="text-[var(--accent)]">&quot;aave&quot;</span>) <span className="text-white/40">// signed, verifiable</span></span>
             </div>
           </div>
         </section>
@@ -96,7 +96,7 @@ export default function CapabilitiesPage() {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               {CAPS.map((c) => (
-                <a key={c.name} href={`/api/capabilities/invoke?cap=${encodeURIComponent(c.name)}${c.name === "bankr.resolve" ? "&arg=@mac_eth" : ""}`} target="_blank" rel="noreferrer"
+                <a key={c.name} href={`/api/capabilities/invoke?cap=${encodeURIComponent(c.name)}${c.name === "token.price" ? "&arg=ethereum" : c.name === "defi.tvl" ? "&arg=aave" : ""}`} target="_blank" rel="noreferrer"
                   className="border border-white/10 hover:border-white/25 transition-colors rounded-lg bg-white/[0.02] p-5">
                   <div className="font-mono text-[15px] text-[var(--accent)] mb-1">{c.name}</div>
                   <div className="text-[13px] text-white/60 leading-relaxed">{c.desc}</div>

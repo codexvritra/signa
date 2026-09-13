@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
  *
  * Lets the agent owner (launched_by) advertise an x402 price for the
  * /respond endpoint. v1 is honor-system — we surface the price in the
- * agent-card.json and the GET /respond schema, and trust Bankr's
+ * agent-card.json and the GET /respond schema, and trust the caller's
  * x402 client layer to enforce payment client-side. Server-side
  * verification (HTTP 402 challenge / proof check) is on the roadmap.
  *
@@ -66,7 +66,7 @@ export async function PATCH(
   }
   const currency = body.currency ?? "USDC";
   const chain = body.chain ?? "base";
-  if (!["USDC", "BNKR", "ETH"].includes(currency)) {
+  if (!["USDC", "ETH"].includes(currency)) {
     return NextResponse.json({ error: "invalid_currency" }, { status: 400 });
   }
   if (!["base", "ethereum", "polygon"].includes(chain)) {

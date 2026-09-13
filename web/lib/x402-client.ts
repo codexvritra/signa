@@ -12,7 +12,7 @@
  * mainnet on their next page view — zero code change on our side.
  *
  * The signer is still the visitor's connected wallet (wagmi
- * WalletClient adapted to x402's ClientEvmSigner). SIGNA never holds
+ * WalletClient adapted to x402's ClientEvmSigner). SIGDA never holds
  * a buyer key.
  */
 

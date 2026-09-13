@@ -13,7 +13,6 @@ import { getWatchlist } from "@/lib/watchlist";
 import { useChat } from "@/context/ChatProvider";
 import { isDm } from "@/lib/conversation";
 import { DigestToggle } from "./DigestToggle";
-import { BankrConnect } from "./BankrConnect";
 import type { Position, PortfolioSnapshot } from "@/lib/portfolio";
 
 /**
@@ -106,7 +105,7 @@ export function MeContent() {
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 pt-12 pb-10">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-            $ signa portfolio --address {shortAddress(address)}
+            $ sigda portfolio --address {shortAddress(address)}
           </div>
           <div className="flex items-start gap-4">
             <PeerAvatar address={address} size={56} />
@@ -172,7 +171,7 @@ export function MeContent() {
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-            $ signa positions
+            $ sigda positions
           </div>
           {positions.length === 0 ? (
             <div className="border border-dashed border-white/15 px-6 py-8 font-mono text-[12px] text-white/55">
@@ -208,7 +207,7 @@ export function MeContent() {
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-3 flex items-center justify-between gap-3">
-            <span>$ signa dms --recent</span>
+            <span>$ sigda dms --recent</span>
             <Link
               href="/"
               className="text-[10px] text-white/45 hover:text-white normal-case tracking-normal"
@@ -307,7 +306,7 @@ export function MeContent() {
         <section className="border-b border-white/[0.06]">
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
             <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-              $ signa list-agents --by me
+              $ sigda list-agents --by me
             </div>
             <div className="grid sm:grid-cols-2 gap-2">
               {agents.map((a) => (
@@ -333,7 +332,7 @@ export function MeContent() {
                       {a.address.slice(0, 10)}…{a.address.slice(-4)}
                     </div>
                     {a.bankr_token_address && (
-                      <div className="text-[10px] mt-1 inline-flex items-center gap-1 text-violet-300 font-mono">
+                      <div className="text-[10px] mt-1 inline-flex items-center gap-1 text-green-300 font-mono">
                         ● tokenized
                       </div>
                     )}
@@ -377,15 +376,13 @@ export function MeContent() {
         </div>
       </section>
 
-      <BankrConnect address={address} />
-
       <DigestToggle address={address} />
 
       {/* Quick links — manpage SEE ALSO style */}
       <section className="border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-6 lg:px-10 py-8">
           <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-            $ signa actions
+            $ sigda actions
           </div>
           <table className="font-mono text-[12px] w-full max-w-2xl border-collapse">
             <tbody>
@@ -412,7 +409,7 @@ export function MeContent() {
               <ActionRow
                 href="/holders/BNKR"
                 title="/holders/BNKR"
-                hint="every signa user holding $BNKR"
+                hint="every sigda user holding $BNKR"
               />
               <ActionRow
                 href="/"

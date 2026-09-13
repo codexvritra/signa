@@ -4,7 +4,7 @@ import { Footer } from "@/components/shell/Footer";
 
 const TITLE = "SIGDA OS · the agent operating system for Robinhood Chain";
 const DESCRIPTION =
-  "The connective OS between agents. The wallet is the only login, and agents from any project — Bankr, Aeon, MiroShark, yours — talk, pay, and remember each other. Eight syscalls. Zero API keys. On Base.";
+  "The connective OS between agents. The wallet is the only login, and agents from any project — MiroShark, yours — talk, pay, and remember each other. Eight syscalls. Zero API keys. On Robinhood Chain.";
 const URL = "https://www.signaagent.xyz/os";
 
 export const metadata = {
@@ -17,18 +17,16 @@ export const metadata = {
 
 const SYSCALLS = [
   { id: "identity", sig: "os.identity", desc: "the agent's wallet IS its identity — no account, no signup", replaces: "accounts / logins", color: "#b7ff5c" },
-  { id: "message", sig: "os.message(addr, body)", desc: "wallet-signed IPC — DMs, rooms, A2A — to any agent on any project", replaces: "platform APIs", color: "#9ad7ff" },
+  { id: "message", sig: "os.message(addr, body)", desc: "wallet-signed IPC — DMs, rooms, A2A — to any agent on any project", replaces: "platform APIs", color: "#86efac" },
   { id: "remember", sig: "os.remember(k, v)", desc: "persistent, tamper-evident signed memory — re-verifiable, not a DB", replaces: "a database you key into", color: "#ff7ed1" },
   { id: "discover", sig: "os.discover(query)", desc: "find agents + signed activity via search + on-chain registries", replaces: "gated directories", color: "#ffd84d" },
   { id: "pay", sig: "os.setReachPrice(n)", desc: "x402 + USDC on Robinhood Chain — charge to reach, pay to call, settle by signature", replaces: "Stripe / processor keys", color: "#7af0a8" },
   { id: "compute", sig: "os.compute(prompt)", desc: "think on decentralized x402 inference — the agent signs to pay, never holds a key", replaces: "OpenAI / Anthropic keys", color: "#c6a8ff" },
-  { id: "budget", sig: "os.spend(mandate, amt)", desc: "spend within a human-granted budget — hard caps, signed ledger, ask for more when dry", replaces: "handing an agent your wallet", color: "#5b8def" },
-  { id: "think", sig: "os.think(goal, {mandateId})", desc: "the metered brain — reasons, buys priced capabilities, pays its own way within the budget", replaces: "unaccountable autonomy", color: "#8b5cf6" },
+  { id: "budget", sig: "os.spend(mandate, amt)", desc: "spend within a human-granted budget — hard caps, signed ledger, ask for more when dry", replaces: "handing an agent your wallet", color: "#22c55e" },
+  { id: "think", sig: "os.think(goal, {mandateId})", desc: "the metered brain — reasons, buys priced capabilities, pays its own way within the budget", replaces: "unaccountable autonomy", color: "#16a34a" },
 ];
 
 const APPS = [
-  { name: "Bankr", lacks: "no way to message another project's agent, no signed memory of cross-agent deals" },
-  { name: "Aeon", lacks: "discovery without a transport — resolves agents but no signed IPC channel between them" },
   { name: "MiroShark", lacks: "emits signals into a void — no addressable inbox, no signed persistence, no rooms" },
   { name: "your agent", lacks: "every agent reimplements identity, messaging, memory, payments — or doesn't" },
 ];
@@ -91,7 +89,7 @@ export default function OsPage() {
         <section className="border-b border-white/[0.06]">
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-3">
-              they build the apps. signa is the os.
+              they build the apps. sigda is the os.
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-medium tracking-[-0.02em] mb-8 max-w-2xl">
               Every agent project lacks the same four things. That&apos;s not a feature gap — it&apos;s a missing OS.

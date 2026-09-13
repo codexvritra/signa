@@ -65,8 +65,7 @@ export default async function TokenDetailPage({
   // SIGDA holders community page.
   const knownPartner = getKnownToken(t.symbol);
   const holdersHref =
-    knownPartner?.project &&
-    ["Bankr", "gitlawb", "MiroShark"].includes(knownPartner.project)
+    knownPartner?.project && ["MiroShark"].includes(knownPartner.project)
       ? `/holders/${t.symbol.toUpperCase()}`
       : null;
 
@@ -91,7 +90,7 @@ export default async function TokenDetailPage({
               ../tokens
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa token ${t.symbol || "?"} --network=base
+              $ sigda token ${t.symbol || "?"} --network=base
             </div>
             <div className="flex items-start gap-4">
               {t.image_url ? (
@@ -120,15 +119,17 @@ export default async function TokenDetailPage({
                 </div>
               </div>
               <div className="flex flex-col gap-2 flex-shrink-0">
-                <a
-                  href={`https://bankr.bot/agents/${t.address}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="bg-[var(--accent)] text-black font-semibold rounded-md px-5 py-2.5 text-[14px] uppercase tracking-wide inline-flex items-center gap-2 hover:brightness-110 transition"
-                >
-                  Buy on Bankr
-                  <span aria-hidden className="font-mono">→</span>
-                </a>
+                {t.top_pool_address && (
+                  <a
+                    href={`https://www.geckoterminal.com/base/pools/${t.top_pool_address}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-[var(--accent)] text-black font-semibold rounded-md px-5 py-2.5 text-[14px] uppercase tracking-wide inline-flex items-center gap-2 hover:brightness-110 transition"
+                  >
+                    View chart
+                    <span aria-hidden className="font-mono">→</span>
+                  </a>
+                )}
                 <WatchButton address={t.address} symbol={t.symbol} />
               </div>
             </div>
@@ -162,7 +163,7 @@ export default async function TokenDetailPage({
         <section className="border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-8">
             <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-              $ signa links --token ${t.symbol || "?"}
+              $ sigda links --token ${t.symbol || "?"}
             </div>
             <div className="grid sm:grid-cols-2 gap-2">
               <LinkTile
@@ -179,12 +180,6 @@ export default async function TokenDetailPage({
                   external
                 />
               )}
-              <LinkTile
-                href={`https://bankr.bot/agents/${t.address}`}
-                label="trade on bankr"
-                hint="one-click swap via Bankr's terminal"
-                external
-              />
               {holdersHref && (
                 <LinkTile
                   href={holdersHref}

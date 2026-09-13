@@ -6,7 +6,7 @@ import { FeedTimeline } from "./FeedTimeline";
 
 type EcosystemFeedProps = {
   /** Visual + copy ID — also drives accent color */
-  kind: "miroshark" | "gitlawb" | "bankr";
+  kind: "miroshark";
   /** Bot wallet address resolved server-side from env. Null when not configured. */
   botAddress: string | null;
   /** Project's marketing site */
@@ -33,16 +33,6 @@ const ACCENT: Record<
     bar: "bg-cyan-400",
     tag: "text-cyan-300",
     pill: "border-cyan-400/30 text-cyan-200 bg-cyan-400/10",
-  },
-  gitlawb: {
-    bar: "bg-emerald-400",
-    tag: "text-emerald-300",
-    pill: "border-emerald-400/30 text-emerald-200 bg-emerald-400/10",
-  },
-  bankr: {
-    bar: "bg-violet-400",
-    tag: "text-violet-300",
-    pill: "border-violet-400/30 text-violet-200 bg-violet-400/10",
   },
 };
 

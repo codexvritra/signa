@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ShareInbox } from "./ShareInbox";
 import { sanitizeTo, shortAddr, type SignedNote } from "@/lib/note";
 import { SITE, miniAppEmbedMeta, inboxEmbedImage } from "@/lib/miniapp";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 export const dynamic = "force-dynamic";
 
@@ -72,8 +73,9 @@ export default async function InboxPage({
     <div style={{ minHeight: "100dvh" }} className="bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[600px] mx-auto px-5 py-7">
         <Link href="/mini" className="flex items-center gap-2.5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+          <div className="size-8 rounded-full bg-black flex items-center justify-center">
+            <LogoMark size={16} className="text-white" />
+          </div>
           <div className="font-display font-semibold tracking-tight">SIGDA</div>
         </Link>
 
@@ -87,14 +89,14 @@ export default async function InboxPage({
 
         <Link
           href={`/mini?to=${encodeURIComponent(handle)}`}
-          className="mt-5 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]"
+          className="mt-5 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#22c55e] to-[#16a34a]"
         >
           Send {name} a signed message
         </Link>
 
         {/* owner affordance: share this link to collect signed messages */}
         <div className="mt-3 glass rounded-xl px-3.5 py-3 flex items-center gap-2">
-          <code className="flex-1 text-[12px] text-[#a5c3ff] font-mono truncate">
+          <code className="flex-1 text-[12px] text-[#86efac] font-mono truncate">
             signaagent.xyz/to/{handle}
           </code>
           <ShareInbox handle={handle} />

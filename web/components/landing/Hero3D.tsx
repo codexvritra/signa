@@ -15,7 +15,7 @@ import * as THREE from "three";
  */
 
 const ORIGIN = new THREE.Vector3(0, 0, 0);
-const NODE_COLORS = ["#5b8def", "#8b5cf6", "#22d3ee", "#34d399", "#fbbf24", "#fb7185", "#a78bfa", "#60a5fa", "#e879f9"];
+const NODE_COLORS = ["#22c55e", "#16a34a", "#22d3ee", "#34d399", "#fbbf24", "#fb7185", "#a78bfa", "#60a5fa", "#e879f9"];
 
 /** Fibonacci sphere — evenly distributed points for the node ring. */
 function fibonacciNodes(n: number, radius: number): THREE.Vector3[] {
@@ -89,13 +89,13 @@ function Core() {
     <group>
       <mesh ref={ico}>
         <icosahedronGeometry args={[0.5, 1]} />
-        <meshStandardMaterial color="#5b8def" emissive="#6f7bff" emissiveIntensity={1.3} metalness={0.4} roughness={0.25} toneMapped={false} />
+        <meshStandardMaterial color="#22c55e" emissive="#6f7bff" emissiveIntensity={1.3} metalness={0.4} roughness={0.25} toneMapped={false} />
       </mesh>
       <mesh ref={ring}>
         <sphereGeometry args={[0.78, 24, 24]} />
-        <meshBasicMaterial color="#8b5cf6" transparent opacity={0.2} side={THREE.BackSide} toneMapped={false} />
+        <meshBasicMaterial color="#16a34a" transparent opacity={0.2} side={THREE.BackSide} toneMapped={false} />
       </mesh>
-      <pointLight position={[0, 0, 0]} color="#7c9cff" intensity={8} distance={9} />
+      <pointLight position={[0, 0, 0]} color="#4ade80" intensity={8} distance={9} />
     </group>
   );
 }
@@ -131,11 +131,11 @@ export function HeroGlow() {
     <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
       <div
         className="absolute top-[-10%] right-[-5%] w-[60vw] h-[60vw] rounded-full blur-[140px] opacity-40"
-        style={{ background: "radial-gradient(circle, rgba(91,141,239,0.5), transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, rgba(34,197,94,0.5), transparent 70%)" }}
       />
       <div
         className="absolute bottom-[-20%] left-[-10%] w-[55vw] h-[55vw] rounded-full blur-[150px] opacity-30"
-        style={{ background: "radial-gradient(circle, rgba(139,92,246,0.45), transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, rgba(22,163,74,0.45), transparent 70%)" }}
       />
     </div>
   );

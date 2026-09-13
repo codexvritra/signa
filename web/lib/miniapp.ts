@@ -1,26 +1,26 @@
 /**
- * Farcaster / Base App Mini App wiring — one source of truth for the embed
- * meta tags + manifest + image URLs, built to the current Mini App spec
+ * Farcaster Mini App wiring — one source of truth for the embed meta tags +
+ * manifest + image URLs, built to the current Mini App spec
  * (https://miniapps.farcaster.xyz/docs/specification).
  *
- * The embed is what makes a SIGNA URL render as an interactive card *inside*
+ * The embed is what makes a SIGDA URL render as an interactive card *inside*
  * the feed instead of a plain link: a 3:2 image + a launch button. Tapping it
- * opens the Mini App. That in-feed surface is the whole point — SIGNA stops
- * being an island and lives where the Base crowd already is.
+ * opens the Mini App. That in-feed surface is the whole point — SIGDA stops
+ * being an island and lives where the Farcaster crowd already is.
  */
 
 export const SITE = "https://www.signaagent.xyz";
 
-/** The official SIGNA badge logo (square, opaque) — used as the app icon,
- * splash, header mark, and on every embed card. */
-export const LOGO = `${SITE}/signa-logo.png`;
+/** The Sigda badge mark (square, opaque, generated — see api/og/icon) — used
+ * as the app icon, splash, header mark, and on every embed card. */
+export const LOGO = `${SITE}/api/og/icon`;
 
 export const MINIAPP = {
-  name: "SIGNA",
+  name: "SIGDA",
   // spec dims: icon 1024x1024 (no alpha), splash 200x200, embed 3:2.
-  iconUrl: `${SITE}/signa-logo.png`,
-  splashImageUrl: `${SITE}/signa-logo-200.png`,
-  splashBackgroundColor: "#000000",
+  iconUrl: `${SITE}/api/og/icon`,
+  splashImageUrl: `${SITE}/apple-icon`,
+  splashBackgroundColor: "#0a0a0f",
   homeUrl: `${SITE}/mini`,
 } as const;
 

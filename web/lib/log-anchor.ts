@@ -1,16 +1,16 @@
 /**
- * On-chain anchoring for the SIGNA transparency log (pillar #2).
+ * On-chain anchoring for the SIGDA transparency log (pillar #2).
  *
  * The transparency log (lib/transparency.ts) produces signed, append-only
  * Merkle checkpoints. This module pins those checkpoint roots to Robinhood
  * Chain via the SignaLogAnchor contract, so the log's history is settled
  * on-chain — a later off-chain root that contradicts an anchored one is
- * provably a fork, even if SIGNA itself produced it.
+ * provably a fork, even if SIGDA itself produced it.
  *
  * Reading works as soon as the contract is deployed + SIGNA_LOG_ANCHOR_ADDRESS
  * is set. Writing (broadcasting an anchor) additionally needs the transparency
  * -log signer wallet funded with a little Robinhood Chain ETH for gas; the
- * signer key is deterministic (keccak256("signa:transparency-log:v1")), so no
+ * signer key is deterministic (keccak256("sigda:transparency-log:v1")), so no
  * secret to set. Everything degrades gracefully to { configured:false } when unset.
  */
 import { createPublicClient, createWalletClient, http, type Address, type Hex } from "viem";
@@ -68,7 +68,7 @@ export type OnchainAnchor = {
   count: number;
 };
 
-/** Read SIGNA's latest on-chain anchor (the log anchored by the log signer). */
+/** Read SIGDA's latest on-chain anchor (the log anchored by the log signer). */
 export async function readOnchainAnchor(): Promise<OnchainAnchor | null> {
   const addr = logAnchorAddress();
   if (!addr) return null;

@@ -6,7 +6,7 @@
  *
  * The "universe" is the union of:
  *   - Our tracked tokens in lib/tokens.ts (ETH + USDG on Robinhood Chain;
- *     BNKR/GITLAWB/MIROSHARK on Base — see each token's `chain` field)
+ *     MIROSHARK on Base — see each token's `chain` field)
  *   - The user's watchlist (their bookmarked tokens, assumed to be on
  *     Robinhood Chain) — passed in by the caller from localStorage on the
  *     client OR a watchlist table server-side
@@ -25,7 +25,7 @@ const rhClient = createPublicClient({
   transport: http(RH_RPC),
 });
 
-// Kept only for BNKR/GITLAWB/MIROSHARK — real Base-native partner tokens.
+// Kept only for MIROSHARK — a real Base-native community token.
 const baseClient = createPublicClient({
   chain: base,
   transport: http(process.env.BASE_RPC_URL),

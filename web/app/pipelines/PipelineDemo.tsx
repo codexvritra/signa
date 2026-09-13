@@ -8,9 +8,9 @@ type Run = { ok: boolean; runId: string; steps: Step[]; chain: Link[]; root: str
 type Verdict = { valid: boolean; root_ok: boolean; links: { step: number; cap: string; sig_ok: boolean; chain_ok: boolean; output_hash_ok: boolean | null }[] };
 
 const DEMO_STEPS = [
-  { cap: "root.feargreed", arg: "" },
   { cap: "token.price", arg: "ethereum" },
-  { cap: "signa.reason", arg: "Crypto fear and greed is {{0.label}} ({{0.score}}) and ETH is ${{1.price_usd}}. Give a one sentence read on the Base market. No advice." },
+  { cap: "defi.tvl", arg: "aave" },
+  { cap: "sigda.reason", arg: "ETH is ${{0.price_usd}} and Aave's TVL is ${{1.tvl_usd}}. Give a one sentence read on the market. No advice." },
 ];
 
 const short = (s?: string) => (s && s.length > 16 ? `${s.slice(0, 10)}…${s.slice(-6)}` : s ?? "");
@@ -68,7 +68,7 @@ export function PipelineDemo() {
             {busy === "verify" ? "verifying…" : "re-verify the chain"}
           </button>
         )}
-        <span className="text-[12px] text-white/40 font-mono">root.feargreed → token.price → signa.reason</span>
+        <span className="text-[12px] text-white/40 font-mono">token.price → defi.tvl → sigda.reason</span>
       </div>
 
       {err && <div className="text-[13px] text-red-300/90 mb-3">error: {err}</div>}

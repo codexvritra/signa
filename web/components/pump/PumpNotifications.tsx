@@ -18,8 +18,8 @@ function line(i: Item): { icon: string; text: string; color: string } {
   const sym = i.symbol ? `$${i.symbol}` : short(i.token);
   if (i.kind === "buy") return { icon: "🟢", color: "#5ee68f", text: `${short(i.actor)} bought ${eth(i.eth)} ETH of ${sym}` };
   if (i.kind === "sell") return { icon: "🔴", color: "#ff6b6b", text: `${short(i.actor)} sold ${sym} for ${eth(i.eth)} ETH` };
-  if (i.kind === "launch") return { icon: "🚀", color: "#a98bff", text: `${sym} just launched` };
-  return { icon: "🎓", color: "#6ea2ff", text: `${sym} graduated to Uniswap` };
+  if (i.kind === "launch") return { icon: "🚀", color: "#4ade80", text: `${sym} just launched` };
+  return { icon: "🎓", color: "#4ade80", text: `${sym} graduated to Uniswap` };
 }
 
 export default function PumpNotifications() {

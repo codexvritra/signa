@@ -14,7 +14,7 @@ interface Pulse {
 }
 
 const LAB_COLOR: Record<string, string> = {
-  "Meta · Llama 3.3": "#9ad7ff",
+  "Meta · Llama 3.3": "#86efac",
   "Meta · Llama 4": "#6db8ff",
   "OpenAI · gpt-oss": "#7af0a8",
   "Alibaba · Qwen3": "#ff7ed1",
@@ -84,7 +84,7 @@ export function LivePulse() {
 
         <div className="space-y-2">
           {pulse.map((p) => {
-            const color = p.lab ? LAB_COLOR[p.lab] ?? "#9ad7ff" : "#9ad7ff";
+            const color = p.lab ? LAB_COLOR[p.lab] ?? "#86efac" : "#86efac";
             return (
               <Link
                 key={p.id}

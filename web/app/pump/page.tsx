@@ -117,8 +117,8 @@ export default function PumpPage() {
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <PumpNotifications />
       <div className="max-w-[720px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Pump · bonding curve · Robinhood Chain</div>
-        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a coin. <span className="bg-gradient-to-r from-[#6ea2ff] to-[#a98bff] bg-clip-text text-transparent">Fair curve.</span></h1>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">Pump · bonding curve · Robinhood Chain</div>
+        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a coin. <span className="bg-gradient-to-r from-[#4ade80] to-[#4ade80] bg-clip-text text-transparent">Fair curve.</span></h1>
         <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">
           Launch a token on a bonding curve — it trades instantly, price rises as people buy, and at <span className="text-white">3 ETH</span> it graduates to Uniswap (and shows on DexScreener). Trading fee is 2%: <span className="text-white">1% to you as creator</span>, 1% to the platform. Not affiliated with Robinhood; built on their public chain.
         </p>
@@ -132,22 +132,22 @@ export default function PumpPage() {
         {/* create */}
         <div className="mt-6 glass rounded-2xl p-5 border border-white/[0.07]">
           <div className="flex gap-3">
-            <div onClick={() => fileRef.current?.click()} className="size-20 rounded-xl border border-dashed border-white/20 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 bg-black/30 hover:border-[#a98bff]/50">
+            <div onClick={() => fileRef.current?.click()} className="size-20 rounded-xl border border-dashed border-white/20 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 bg-black/30 hover:border-[#4ade80]/50">
               {imageUrl ? <img src={imageUrl} alt="" className="w-full h-full object-cover" /> : <span className="text-[11px] text-faint text-center px-1">{uploading ? "…" : "upload image"}</span>}
             </div>
             <div className="flex-1 flex flex-col gap-2">
               <div className="flex gap-2">
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name" className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60" />
-                <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="TICKER" maxLength={11} className="w-28 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60" />
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name" className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60" />
+                <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="TICKER" maxLength={11} className="w-28 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60" />
               </div>
-              <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60" />
+              <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60" />
             </div>
           </div>
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={onImage} className="hidden" />
           <div className="grid grid-cols-3 gap-2 mt-2">
-            <input value={tw} onChange={(e) => setTw(e.target.value)} placeholder="X / Twitter link" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#a98bff]/60" />
-            <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="Telegram link" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#a98bff]/60" />
-            <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="Website" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#a98bff]/60" />
+            <input value={tw} onChange={(e) => setTw(e.target.value)} placeholder="X / Twitter link" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#4ade80]/60" />
+            <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="Telegram link" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#4ade80]/60" />
+            <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="Website" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[#4ade80]/60" />
           </div>
           {account ? (
             <button onClick={launch} disabled={busy || uploading} className="w-full mt-3 px-4 py-3 rounded-xl text-[15px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">{busy ? "launching…" : `Launch token${feeEth !== "0" ? ` · ${feeEth} ETH fee` : ""}`}</button>
@@ -156,7 +156,7 @@ export default function PumpPage() {
           )}
           <div className="mt-2 flex items-center gap-3">
             {account && <span className="text-[11px] text-faint font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</span>}
-            <button onClick={addChain} className="text-[11px] text-[#a98bff] underline">+ Add Robinhood Chain to wallet</button>
+            <button onClick={addChain} className="text-[11px] text-[#4ade80] underline">+ Add Robinhood Chain to wallet</button>
           </div>
         </div>
 
@@ -168,7 +168,7 @@ export default function PumpPage() {
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {tokens.length === 0 && <div className="text-[13px] text-faint text-center py-8 col-span-full">{pumpLive ? "No coins yet — launch the first." : "Coins appear here once the launchpad is live."}</div>}
             {tokens.map((t) => (
-              <a key={t.token} href={`/pump/${t.token}`} className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] hover:border-[#a98bff]/30 flex items-center gap-3">
+              <a key={t.token} href={`/pump/${t.token}`} className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] hover:border-[#4ade80]/30 flex items-center gap-3">
                 <div className="size-11 rounded-lg overflow-hidden bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] flex items-center justify-center text-[15px] font-bold text-white shrink-0">
                   {t.meta?.image_url ? <img src={t.meta.image_url} alt="" className="w-full h-full object-cover" /> : (t.symbol?.[0] || "?")}
                 </div>

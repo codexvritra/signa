@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Ecosystem",
   description:
-    "SIGDA integrates with Bankr (trading), AEON (payments), gitlawb (decentralized git for agents), and MiroShark (agent simulation). All native to Base.",
+    "SIGDA integrates with MiroShark (agent simulation).",
 };
 
 export default function EcosystemLayout({

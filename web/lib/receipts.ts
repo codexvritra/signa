@@ -6,10 +6,9 @@
  * lib/room-badges.ts (which is the public-facing source of truth for
  * "what partner does this room belong to"):
  *
- *   bankr     — gate_token_address set         (Bankr-launched holder rooms)
- *   gitlawb   — slug starts with "b-"          (bounty threads)
+ *   bankr     — gate_token_address set         (historical Bankr-launched holder rooms)
+ *   gitlawb   — slug starts with "b-"          (historical bounty threads)
  *   miroshark — slug starts with "sim-"        (sim verdict threads)
- *   aeon      — derived later via on-chain     (no rooms yet, kept for shape)
  *   community — everything else                (user-created rooms)
  *
  * Read-only. Cache for 60s in-memory so the public ledger doesn't
@@ -21,26 +20,22 @@ export type PartnerKey =
   | "bankr"
   | "gitlawb"
   | "miroshark"
-  | "aeon"
   | "community";
 
 export const PARTNER_LABEL: Record<PartnerKey, string> = {
   bankr: "Bankr",
   gitlawb: "Gitlawb",
   miroshark: "MiroShark",
-  aeon: "Aeon",
   community: "Community",
 };
 
 export const PARTNER_DESCRIPTION: Record<PartnerKey, string> = {
   bankr:
-    "Holder rooms auto-created for every Bankr-launched token on Base. Hold-to-chat enforced via viem balanceOf at the message layer.",
+    "Historical holder rooms created for Bankr-launched tokens on Base. Hold-to-chat enforced via viem balanceOf at the message layer.",
   gitlawb:
-    "Bounty threads keyed to gitlawb open tasks. Maintainers and claimants coordinate signed end-to-end.",
+    "Historical bounty threads keyed to gitlawb open tasks. Maintainers and claimants coordinated signed end-to-end.",
   miroshark:
     "Verdict threads opened by the MiroShark webhook the moment a swarm sim finishes. Reads stay open, replies are wallet-signed.",
-  aeon:
-    "DM threads to ERC-8004 agents registered on the Aeon Identity Registry. Each entry is on-chain on Ethereum mainnet.",
   community:
     "Rooms created by community wallets — open for any topic, every message signed locally with the poster's wallet.",
 };
@@ -107,7 +102,6 @@ export async function getPartnerReceipts(): Promise<PartnerReceipt[]> {
     bankr: blank(),
     gitlawb: blank(),
     miroshark: blank(),
-    aeon: blank(),
     community: blank(),
   };
 
@@ -330,5 +324,5 @@ export async function getPartnerDetail(
 }
 
 export function isPartnerKey(s: string): s is PartnerKey {
-  return ["bankr", "gitlawb", "miroshark", "aeon", "community"].includes(s);
+  return ["bankr", "gitlawb", "miroshark", "community"].includes(s);
 }

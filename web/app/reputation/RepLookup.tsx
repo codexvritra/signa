@@ -19,12 +19,12 @@ export function RepLookup() {
         onKeyDown={(e) => e.key === "Enter" && go()}
         placeholder="0x… agent address"
         spellCheck={false}
-        className="flex-1 min-w-[260px] h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.1] text-[14px] font-mono outline-none focus:border-[#5b8def]"
+        className="flex-1 min-w-[260px] h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.1] text-[14px] font-mono outline-none focus:border-[#22c55e]"
       />
       <button
         onClick={go}
         disabled={!valid}
-        className="h-11 px-5 rounded-xl font-semibold text-white text-[14px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6] disabled:opacity-40 shrink-0"
+        className="h-11 px-5 rounded-xl font-semibold text-white text-[14px] bg-gradient-to-br from-[#22c55e] to-[#16a34a] disabled:opacity-40 shrink-0"
       >
         Check reputation
       </button>

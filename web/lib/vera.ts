@@ -1,5 +1,5 @@
 /**
- * VERA — SIGNA's flagship autonomous agent.
+ * VERA — SIGDA's flagship autonomous agent.
  *
  * VERA lives on Base. On a cadence she picks a goal, runs the Brain 2.0
  * multi-step reasoning loop (think → act on the capability mesh → observe →

@@ -51,11 +51,11 @@ export default async function DmOgImage({
         {/* TOP: SIGDA wordmark + prompt */}
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <div style={{ display: "flex", fontSize: 32, fontWeight: 700, letterSpacing: "-0.03em" }}>
-            <span style={{ color: "#5b8def" }}>S</span>
-            <span style={{ color: "#8b5cf6" }}>IGNA</span>
+            <span style={{ color: "#22c55e" }}>S</span>
+            <span style={{ color: "#16a34a" }}>IGNA</span>
           </div>
           <div style={{ display: "flex", opacity: 0.35, fontSize: 22 }}>·</div>
-          <div style={{ display: "flex", color: "#5b8def", fontSize: 22 }}>
+          <div style={{ display: "flex", color: "#22c55e", fontSize: 22 }}>
             $ sigda dm {display}
           </div>
         </div>

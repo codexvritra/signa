@@ -360,7 +360,7 @@ async function run(
   // 1. PLAN — the brain decides which real capabilities to call
   const planPrompt =
     `You are the SIGDA Brain. You can call these capabilities to gather REAL live data before answering:\n${toolsDoc}\n\n` +
-    `Given the user's goal, output ONLY a compact JSON array of the calls to make, e.g. [{"cap":"root.market","arg":""},{"cap":"bankr.resolve","arg":"@jesse"}]. ` +
+    `Given the user's goal, output ONLY a compact JSON array of the calls to make, e.g. [{"cap":"token.price","arg":"ethereum"},{"cap":"defi.tvl","arg":"aave"}]. ` +
     `Use [] if no data is needed. Max 3 calls. No prose.\n\nGoal: ${goal}`;
   let planRaw = "";
   try { planRaw = await reason(origin, planPrompt); } catch { /* gateway hiccup */ }

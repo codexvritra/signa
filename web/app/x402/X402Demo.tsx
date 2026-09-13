@@ -50,7 +50,7 @@ export function X402Demo() {
         <button
           onClick={run}
           disabled={state === "running"}
-          className="h-11 px-5 rounded-xl font-semibold text-white text-[14px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6] disabled:opacity-50 shrink-0"
+          className="h-11 px-5 rounded-xl font-semibold text-white text-[14px] bg-gradient-to-br from-[#22c55e] to-[#16a34a] disabled:opacity-50 shrink-0"
         >
           {state === "running" ? "Running…" : state === "done" ? "Run again" : "Run it live"}
         </button>
@@ -79,8 +79,8 @@ export function X402Demo() {
             <div className="mt-1 text-[11px] text-faint font-mono">hash {short(receipt.delivery_hash)}</div>
           </Part>
 
-          <div className="sm:col-span-2 mt-1 rounded-xl border border-[rgba(91,141,239,0.4)] bg-[rgba(91,141,239,0.07)] p-4">
-            <div className="text-[14px] font-semibold text-[#a5c3ff]">
+          <div className="sm:col-span-2 mt-1 rounded-xl border border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.07)] p-4">
+            <div className="text-[14px] font-semibold text-[#86efac]">
               ✓ receipt issued — all four bound + signed by the SIGDA attestor
             </div>
             <div className="mt-1.5 text-[12px] text-muted font-mono break-all">
@@ -112,7 +112,7 @@ function Part({
     <div className="glass rounded-xl p-3.5">
       <div
         className="text-[10px] uppercase tracking-[0.16em] mb-1.5"
-        style={{ color: tone === "blue" ? "#5b8def" : "#8b5cf6" }}
+        style={{ color: tone === "blue" ? "#22c55e" : "#16a34a" }}
       >
         {label}
       </div>

@@ -44,7 +44,7 @@ export default function ReputationLanding() {
         <div className="mt-6 flex flex-wrap gap-2">
           <span className="text-[12px] text-faint mt-1.5">try:</span>
           {EXAMPLES.map((e) => (
-            <Link key={e.addr} href={`/reputation/${e.addr}`} className="text-[12px] px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] text-[#a5c3ff]">
+            <Link key={e.addr} href={`/reputation/${e.addr}`} className="text-[12px] px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] text-[#86efac]">
               {e.label}
             </Link>
           ))}

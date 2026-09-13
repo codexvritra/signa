@@ -9,7 +9,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const LAB_COLOR: Record<string, string> = {
-  "Meta · Llama 3.3": "#9ad7ff",
+  "Meta · Llama 3.3": "#86efac",
   "Meta · Llama 4": "#6db8ff",
   "OpenAI · gpt-oss": "#7af0a8",
   "Alibaba · Qwen3": "#ff7ed1",
@@ -18,7 +18,7 @@ const LAB_COLOR: Record<string, string> = {
   "OpenAI · GPT": "#5ad88a",
   "xAI · Grok": "#f5f5fa",
 };
-const colorFor = (lab: string) => LAB_COLOR[lab] ?? "#9ad7ff";
+const colorFor = (lab: string) => LAB_COLOR[lab] ?? "#86efac";
 
 export default async function Image() {
   const addrMap = rosterAddressMap();
@@ -70,7 +70,7 @@ export default async function Image() {
       >
         <div style={{ display: "flex", flexDirection: "column", marginBottom: "18px" }}>
           <div style={{ display: "flex", fontSize: "32px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-            <span style={{ color: "#b7ff5c" }}>signa</span>
+            <span style={{ color: "#b7ff5c" }}>sigda</span>
             <span>&nbsp;· agent council</span>
           </div>
           <div style={{ display: "flex", fontSize: "23px", marginTop: "12px", color: "#f5f5fa", fontWeight: 600 }}>

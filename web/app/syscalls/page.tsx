@@ -5,21 +5,21 @@ import { Footer } from "@/components/shell/Footer";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "syscalls · signa",
+  title: "syscalls · sigda",
   description:
-    "Every system call exposed by the signa decentralized OS — POST endpoints, GET reads, A2A discovery, partner webhooks.",
+    "Every system call exposed by the sigda decentralized OS — POST endpoints, GET reads, A2A discovery, partner webhooks.",
 };
 
 /**
- * /syscalls — manpage of every public endpoint signa exposes.
+ * /syscalls — manpage of every public endpoint sigda exposes.
  *
  * Lists each endpoint as a syscall: method, path, auth model, what it
  * does. Sorted by namespace (agents, interactions, posts, me, …). The
  * goal is one URL anyone can hit to discover the whole OS surface
  * without grep-ing the source tree.
  *
- * Anyone integrating signa from outside (Discord/Telegram bots,
- * gitlawb Playground apps, partner dashboards) starts here.
+ * Anyone integrating sigda from outside (Discord/Telegram bots,
+ * partner dashboards) starts here.
  */
 
 type Syscall = {
@@ -70,10 +70,10 @@ const SYSCALLS: Record<string, Syscall[]> = {
     },
     {
       method: "GET",
-      path: "/signa.js",
+      path: "/sigda.js",
       auth: "none",
       brief:
-        "CDN-hosted browser SDK — one <script> tag, exposes window.signa",
+        "CDN-hosted browser SDK — one <script> tag, exposes window.sigda",
     },
   ],
   mcp_server: [
@@ -82,7 +82,7 @@ const SYSCALLS: Record<string, Syscall[]> = {
       path: "/api/mcp",
       auth: "none",
       brief:
-        "Model Context Protocol server (JSON-RPC 2.0) — install signa as native tools in Claude Desktop, Cursor, Cline, or any MCP-aware client",
+        "Model Context Protocol server (JSON-RPC 2.0) — install sigda as native tools in Claude Desktop, Cursor, Cline, or any MCP-aware client",
     },
     {
       method: "GET",
@@ -104,7 +104,7 @@ const SYSCALLS: Record<string, Syscall[]> = {
       method: "GET",
       path: "/api/v1/models",
       auth: "none",
-      brief: "openai-compatible model listing (signa-gateway, signa-agent)",
+      brief: "openai-compatible model listing (sigda-gateway, sigda-agent)",
     },
     {
       method: "GET",
@@ -194,12 +194,6 @@ const SYSCALLS: Record<string, Syscall[]> = {
       brief: "purge the encrypted private key from the vault",
     },
     {
-      method: "POST",
-      path: "/api/agents/{addr}/tokenize",
-      auth: "wallet-sig",
-      brief: "bind a bankr-launched token to this agent",
-    },
-    {
       method: "GET",
       path: "/api/agents/{addr}/interactions",
       auth: "none",
@@ -278,18 +272,6 @@ const SYSCALLS: Record<string, Syscall[]> = {
       path: "/api/me/portfolio?address=…",
       auth: "none",
       brief: "live on-chain balances + GeckoTerminal prices",
-    },
-    {
-      method: "POST",
-      path: "/api/me/bankr-key",
-      auth: "wallet-sig",
-      brief: "encrypt + store a Bankr API key in the vault",
-    },
-    {
-      method: "POST",
-      path: "/api/me/trade",
-      auth: "wallet-sig",
-      brief: "execute a natural-language trade via the stored Bankr key",
     },
     {
       method: "GET / POST",
@@ -376,7 +358,7 @@ const AUTH_COLOR: Record<string, string> = {
   none: "text-emerald-300/75",
   "wallet-sig": "text-cyan-300/85",
   hmac: "text-amber-300/85",
-  vault: "text-violet-300/85",
+  vault: "text-green-300/85",
 };
 
 const METHOD_COLOR: Record<string, string> = {
@@ -404,7 +386,7 @@ export default function SyscallsPage() {
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-syscalls — every public endpoint on the decentralized OS
+              sigda-syscalls — every public endpoint on the decentralized OS
             </div>
           </section>
 

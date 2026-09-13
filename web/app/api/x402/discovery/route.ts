@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
         inputSchema: { type: "object", properties: { arg: { type: "string", description: c.input_hint || "input" } } },
         output: { example: { ok: true, output: "<provider result>", signature: "0x…", gateway: "0x58c6…e147" }, schema: { type: "object" } },
         // SIGDA's trust layer — the half the Bazaar doesn't have
-        signa: {
+        sigda: {
           provider: c.provider_address,
           result_signed_by_gateway: "0x58c69a1dabec795472dfc00b9d0e6cd2fa43e147",
           re_verify: `${origin}/api/verify`,

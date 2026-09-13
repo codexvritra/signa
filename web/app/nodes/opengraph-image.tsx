@@ -5,7 +5,7 @@ import { listFederatedNodes, SIGNA_NODE_REGISTRY } from "@/lib/onchain-nodes";
 // doesn't trip on the multi-child container during `next build`. The
 // receipts OG card uses the same pattern and ships fine.
 export const runtime = "edge";
-export const alt = "signa · federated nodes";
+export const alt = "sigda · federated nodes";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

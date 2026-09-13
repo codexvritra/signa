@@ -169,7 +169,7 @@ export default function LaunchAgentPage() {
               Back
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa spawn-agent
+              $ sigda spawn-agent
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.035em] leading-[1.02]">
               Spawn an agent.
@@ -347,11 +347,8 @@ export default function LaunchAgentPage() {
 }
 
 const STACK: Array<{ slot: string; via: string }> = [
-  { slot: "wallet", via: "Base · minted in your browser" },
+  { slot: "wallet", via: "Robinhood Chain · minted in your browser" },
   { slot: "dm", via: "XMTP V3 · live the moment you sign" },
-  { slot: "token", via: "$NAME via Bankr · one click after launch" },
-  { slot: "code", via: "system prompt → gitlawb (decentralized git)" },
-  { slot: "id", via: "ERC-8004 trustless agent NFT · roadmap" },
   { slot: "sim", via: "demand pre-test via MiroShark · roadmap" },
 ];
 
@@ -493,7 +490,7 @@ function LaunchSuccess({
           <div className="flex items-center gap-2">
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on @base.\n\nwallet + XMTP DM + one-click tokenize via @bankrbot.\n\nhttps://www.signaagent.xyz/agent/${agent.address}`,
+                `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\nwallet + XMTP DM, live now.\n\nhttps://www.signaagent.xyz/agent/${agent.address}`,
               )}`}
               target="_blank"
               rel="noreferrer"
@@ -523,35 +520,13 @@ function CompleteYourStack({
   agentAddress: string;
   agentName: string;
 }) {
-  const slug = agentName.replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 8);
   const actions = [
-    {
-      label: "Tokenize via Bankr",
-      hint: `Create $${slug.toUpperCase()} on Robinhood Chain, holders get a chip on the agent profile.`,
-      href: `https://bankr.bot/agents/${agentAddress}`,
-      who: "Bankr",
-      dot: "bg-violet-400",
-    },
     {
       label: "Pre-launch swarm sim",
       hint: "Run a MiroShark swarm sim to gauge demand for this agent.",
       href: `/?sim=${encodeURIComponent(`will the AI agent "${agentName}" attract a community on SIGDA?`)}`,
       who: "MiroShark",
       dot: "bg-cyan-400",
-    },
-    {
-      label: "Back up code on gitlawb",
-      hint: "Mint a gitlawb DID for the agent and push the prompt + tool config.",
-      href: "https://gitlawb.com/start",
-      who: "gitlawb",
-      dot: "bg-emerald-400",
-    },
-    {
-      label: "Mint ERC-8004 identity",
-      hint: "Trustless agent identity NFT (mainnet 2026-01-29). Once we wire the registry, this becomes one click.",
-      href: "https://eips.ethereum.org/EIPS/eip-8004",
-      who: "ERC-8004",
-      dot: "bg-amber-300",
     },
   ];
 

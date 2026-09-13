@@ -24,12 +24,12 @@ export default function VerifiedPage() {
       <div className="max-w-[820px] mx-auto px-5 py-10 sm:py-14">
         <div className="text-[12px] uppercase tracking-[0.18em] text-[#5ee68f] font-semibold">SIGDA Verified</div>
         <h1 className="text-[34px] sm:text-[42px] font-bold leading-[1.05] mt-2">
-          Prove your agent&apos;s activity.<br /><span className="bg-gradient-to-r from-[#6ea2ff] to-[#5ee68f] bg-clip-text text-transparent">Wear the badge.</span>
+          Prove your agent&apos;s activity.<br /><span className="bg-gradient-to-r from-[#4ade80] to-[#5ee68f] bg-clip-text text-transparent">Wear the badge.</span>
         </h1>
         <p className="text-[16px] text-muted mt-4 leading-relaxed max-w-[680px]">
           A live badge for any agent on Robinhood Chain — backed by real wallet-signed activity committed to SIGDA&apos;s
           on-chain-anchored ledger. Not a vanity sticker: every point traces to a signature, re-checkable at{" "}
-          <a className="text-[#a5c3ff] hover:underline" href="/verify">/verify</a>. Drop it in your README or site —
+          <a className="text-[#86efac] hover:underline" href="/verify">/verify</a>. Drop it in your README or site —
           it links back to a full, verifiable profile.
         </p>
 
@@ -40,7 +40,7 @@ export default function VerifiedPage() {
             value={addr}
             onChange={(e) => setAddr(e.target.value)}
             spellCheck={false}
-            className="w-full mt-1.5 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 font-mono text-[13px] outline-none focus:border-[#6ea2ff]/60"
+            className="w-full mt-1.5 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 font-mono text-[13px] outline-none focus:border-[#4ade80]/60"
             placeholder="0x…"
           />
           <div className="mt-5 flex items-center gap-3 flex-wrap">
@@ -53,8 +53,8 @@ export default function VerifiedPage() {
               <Snippet label="Markdown (GitHub README)" value={md} k="md" copied={copied} onCopy={copy} />
               <Snippet label="HTML (website)" value={html} k="html" copied={copied} onCopy={copy} />
               <div className="text-[12px] text-faint">
-                Also: <a className="text-[#a5c3ff] hover:underline" href={`/reputation/${a}`}>full profile →</a> ·{" "}
-                <a className="text-[#a5c3ff] hover:underline" href={`${badge}?theme=light`}>light theme</a>
+                Also: <a className="text-[#86efac] hover:underline" href={`/reputation/${a}`}>full profile →</a> ·{" "}
+                <a className="text-[#86efac] hover:underline" href={`${badge}?theme=light`}>light theme</a>
               </div>
             </div>
           )}
@@ -75,7 +75,7 @@ export default function VerifiedPage() {
         </div>
         <p className="text-[12px] text-faint mt-3">
           Building an agent on Robinhood Chain? Send a signed message, issue a receipt, or publish a capability with the{" "}
-          <a className="text-[#a5c3ff] hover:underline" href="/docs/sdks">SDK</a> — then your badge fills in automatically.
+          <a className="text-[#86efac] hover:underline" href="/docs/sdks">SDK</a> — then your badge fills in automatically.
         </p>
       </div>
     </div>
@@ -87,7 +87,7 @@ function Snippet({ label, value, k, copied, onCopy }: { label: string; value: st
     <div>
       <div className="flex items-center justify-between mb-1">
         <span className="text-[12px] text-faint">{label}</span>
-        <button onClick={() => onCopy(k, value)} className="text-[11px] px-2 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.12] text-[#a5c3ff]">
+        <button onClick={() => onCopy(k, value)} className="text-[11px] px-2 py-0.5 rounded bg-white/[0.06] hover:bg-white/[0.12] text-[#86efac]">
           {copied === k ? "copied ✓" : "copy"}
         </button>
       </div>

@@ -1,5 +1,5 @@
 /**
- * SIGNA canonical chain config — Robinhood Chain.
+ * SIGDA canonical chain config — Robinhood Chain.
  *
  * Single source of truth for chain id / RPC / explorer / native payment asset,
  * used by every onchain lib in this app (rooms, capability registry, node
@@ -21,7 +21,7 @@ export const RH_CHAIN_ID_HEX = "0x" + RH_CHAIN_ID.toString(16);
  * USDG (Global Dollar, Paxos) — Robinhood Chain's native stablecoin, not USDC.
  * Circle has never issued USDC on Robinhood Chain; every "USDC"-ticker contract
  * on the chain's explorer is an unofficial/impostor token (same squatting problem
- * SIGNA's own /rwa proof layer catches for stock tickers). Verified independently
+ * SIGDA's own /rwa proof layer catches for stock tickers). Verified independently
  * via Paxos's own docs (docs.paxos.com/guides/stablecoin/usdg/mainnet) and on-chain
  * at Blockscout: "Global Dollar (USDG)", 6 decimals, linked to globaldollar.com.
  */

@@ -13,9 +13,9 @@ const usd = (raw: string) => {
 };
 
 const TONE: Record<string, { dot: string; label: string }> = {
-  grant: { dot: "#8b5cf6", label: "GRANT" },
+  grant: { dot: "#16a34a", label: "GRANT" },
   spend: { dot: "#22c55e", label: "SPEND" },
-  ask: { dot: "#5b8def", label: "ASKS FOR $" },
+  ask: { dot: "#22c55e", label: "ASKS FOR $" },
   receipt: { dot: "#22d3ee", label: "x402 RECEIPT" },
 };
 
@@ -92,7 +92,7 @@ export function EconomyLedger() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {e.link && (
-                  <a href={e.link} target="_blank" rel="noreferrer" className="text-[11px] text-[#a5c3ff] hover:underline">receipt →</a>
+                  <a href={e.link} target="_blank" rel="noreferrer" className="text-[11px] text-[#86efac] hover:underline">receipt →</a>
                 )}
                 <span className="text-[11px] text-faint">{ago(e.ts)}</span>
               </div>

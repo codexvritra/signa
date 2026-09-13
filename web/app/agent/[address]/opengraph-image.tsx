@@ -9,8 +9,8 @@ export const contentType = "image/png";
  * OG card for an agent profile.
  *
  * Pulls /api/agents/[address] at render time, renders a manpage-style
- * card with the agent's name, address, gitlawb DID (if linked), and
- * the partner stack lit up by what's wired.
+ * card with the agent's name, address, and the partner stack lit up by
+ * what's wired.
  *
  * When the agent URL gets shared on twitter/farcaster/telegram this
  * is what unfurls. Senior dev aesthetic — no gradients, no display
@@ -25,8 +25,6 @@ export default async function Image({
   let name = "sigda agent";
   let address = rawAddress;
   let tags: string[] = [];
-  let did: string | null = null;
-  let erc8004: string | null = null;
   let bankr: string | null = null;
   let miroshark: string | null = null;
   try {
@@ -40,8 +38,6 @@ export default async function Image({
       name = a.name ?? name;
       address = a.address ?? address;
       tags = Array.isArray(a.tags) ? a.tags.slice(0, 4) : [];
-      did = a.gitlawb_did ?? null;
-      erc8004 = a.erc8004_token_id ?? null;
       bankr = a.bankr_token_address ?? null;
       miroshark = a.miroshark_sim_id ?? null;
     }
@@ -51,9 +47,7 @@ export default async function Image({
 
   const stack: Array<[string, string, boolean]> = [
     ["dm", "xmtp v3 (mls)", true],
-    ["token", bankr ? `via @bankrbot · ${short(bankr)}` : "pending @bankrbot", !!bankr],
-    ["code", did ? short(did, 32) : "pending @gitlawb", !!did],
-    ["id", erc8004 ? `erc-8004 #${erc8004}` : "pending erc-8004", !!erc8004],
+    ["token", bankr ? `$${short(bankr)}` : "no token yet", !!bankr],
     ["sim", miroshark ? `sim #${miroshark}` : "pending @miroshark_", !!miroshark],
   ];
 

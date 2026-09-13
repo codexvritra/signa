@@ -27,7 +27,7 @@ export const maxDuration = 30;
  * Invoke a capability and get back a WALLET-SIGNED, verifiable result. Two
  * kinds of capability resolve through the same endpoint:
  *
- *  - built-ins SIGDA fulfils from real partner sources (Bankr, Root Edge)
+ *  - built-ins SIGDA fulfils from real public data sources
  *  - capabilities any developer registered with one wallet-signed call
  *    (the open marketplace) — proxied through an SSRF-guarded fetch
  *

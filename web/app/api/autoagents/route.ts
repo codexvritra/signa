@@ -12,7 +12,6 @@ export const maxDuration = 60;
  * Unlike a static agent profile, these are SIGDA-hosted autonomous agents: each
  * gets its own deterministic keyless wallet + the ALETHEIA brain, and on a
  * heartbeat it reasons over live data and SIGNS a thought into the network ledger.
- * Bankr launches tokens; SIGDA launches agents.
  *
  * GET  → the directory of autonomous agents.
  * POST { name, mission, persona?, creator } → mint one + run its first cycle now.

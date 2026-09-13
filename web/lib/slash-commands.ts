@@ -1,39 +1,16 @@
 export type SlashRoute = {
-  key: "bankr" | "aeon" | "gitlawb" | "miroshark";
+  key: "miroshark";
   label: string;
   hint: string;
   build: (rest: string) => string; // url to open
 };
 
 /**
- * Slash-command router. Detects `/bankr ...`, `/aeon ...`, `/gitlawb ...`,
- * `/miroshark ...` at the start of the composer and offers a deep-link
- * card. SIGNA stays the messenger — these route traffic to partners.
+ * Slash-command router. Detects `/miroshark ...` at the start of the
+ * composer and offers a deep-link card. SIGDA stays the messenger —
+ * these route traffic to partners.
  */
 export const SLASH_ROUTES: SlashRoute[] = [
-  {
-    key: "bankr",
-    label: "Bankr Terminal",
-    hint: "Trade on Bankr",
-    build: (rest) => {
-      const q = rest.trim();
-      // No public deep-link spec; pass through as a search query.
-      const url = "https://bankr.bot";
-      return q ? `${url}/?q=${encodeURIComponent(q)}` : url;
-    },
-  },
-  {
-    key: "aeon",
-    label: "AEON Pay",
-    hint: "Pay with AEON",
-    build: () => "https://aeon.xyz",
-  },
-  {
-    key: "gitlawb",
-    label: "gitlawb",
-    hint: "Decentralized git for agents",
-    build: () => "https://gitlawb.com",
-  },
   {
     key: "miroshark",
     label: "MiroShark",

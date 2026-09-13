@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * GET /api/interactions
  *
  * Public, paged feed of agent_interactions across ALL agents. The
- * "best answers on signa" feed. Used by /replies on the marketing
+ * "best answers on sigda" feed. Used by /replies on the marketing
  * side and by partner dashboards / Discord bots that want the
  * cross-agent signal.
  *

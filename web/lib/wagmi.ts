@@ -9,7 +9,7 @@ import { injected } from "wagmi/connectors";
 import { rhChain, RH_RPC } from "./chain";
 
 /**
- * SIGNA wagmi config — SERVER-SAFE.
+ * SIGDA wagmi config — SERVER-SAFE.
  *
  * This module is imported from the root layout (server component) for
  * `cookieToInitialState(wagmiConfig, cookieString)`, which hydrates

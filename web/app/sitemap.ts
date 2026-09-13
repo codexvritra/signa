@@ -20,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/deals", 0.95),
     page("/rwa", 0.96),
     page("/pump", 0.95),
-    page("/signa", 0.95),
+    page("/sigda", 0.95),
     page("/docs", 0.95),
     page("/docs/messaging", 0.85),
     page("/docs/brain", 0.85),

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { getBotAddress } from "@/lib/signa-bots";
+import { getBotAddress } from "@/lib/sigda-bots";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  *      written by the cron worker (runMirosharkSimTask) every time an
  *      autonomous task of kind=miroshark_sim ticks.
  *
- *   2. miroshark.bot.signa-authored sim-verdict posts that mention the
+ *   2. miroshark.bot.sigda-authored sim-verdict posts that mention the
  *      agent's address — the verdicts written by the existing
  *      /api/webhooks/miroshark handler when sims complete.
  *

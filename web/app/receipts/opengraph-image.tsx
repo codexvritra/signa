@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "signa · receipts ledger";
+export const alt = "sigda · receipts ledger";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -68,7 +68,7 @@ export default async function Image() {
             Wallet-signed traffic per partner.
           </div>
           <div style={{ color: "#aaa", fontSize: 22, lineHeight: 1.4, maxWidth: 1000 }}>
-            Real receipts for Bankr, gitlawb, Aeon, and MiroShark — each
+            Real receipts across every SIGDA room network — each
             number backed by an EIP-191 signature on a real wallet.
           </div>
         </div>

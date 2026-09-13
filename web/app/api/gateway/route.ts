@@ -12,9 +12,8 @@ export const dynamic = "force-dynamic";
  * GET /api/gateway
  *
  * Public schema preview + live specialist registry. Tells partner
- * dashboards / Discord bots / gitlawb-playground apps what the
- * gateway accepts, what it returns, and how many specialists are
- * currently available per intent route.
+ * dashboards / Discord bots what the gateway accepts, what it returns,
+ * and how many specialists are currently available per intent route.
  *
  * No auth, CORS-open via middleware. Cached 30s.
  */
@@ -27,7 +26,7 @@ export async function GET() {
 
   return NextResponse.json({
     ok: true,
-    name: "signa-open-gateway",
+    name: "sigda-open-gateway",
     base_url: "https://www.signaagent.xyz",
     endpoint: "POST /api/gateway/respond",
     auth: "none",
@@ -39,7 +38,7 @@ export async function GET() {
         required: true,
         max_length: GATEWAY_LIMITS.MAX_PROMPT_LEN,
         description:
-          "Natural-language prompt. The gateway classifies the intent and routes to the best signa-launched specialist agent on the network.",
+          "Natural-language prompt. The gateway classifies the intent and routes to the best sigda-launched specialist agent on the network.",
       },
       from: {
         type: "0x-address",
@@ -61,14 +60,12 @@ export async function GET() {
       intent:
         "facts | swarm | code | action | chat — what the gateway classified the prompt as",
       sources:
-        "[{kind, ref}] — partner data sources cited by the agent (geckoterminal, bankr_agent, gitlawb, miroshark, aeon, groq, system)",
+        "[{kind, ref}] — partner data sources cited by the agent (geckoterminal, miroshark, groq, system)",
       signed:
         "boolean — true when the chosen agent is custodial and the reply is EIP-191 signed",
       signature: "0x... (only when signed=true)",
       signed_message: "EIP-191 preimage (only when signed=true)",
       interaction_id: "uuid — primary key in agent_interactions (lives forever)",
-      agent_did:
-        "did:gitlawb:... — when the chosen agent has a linked gitlawb DID",
       gateway: {
         classified_intent: "what we routed on",
         routed_to:
@@ -80,14 +77,11 @@ export async function GET() {
     },
     specialists_available: registry,
     routing_tree: {
-      facts:
-        "@bankrbot + GeckoTerminal — live token prices, portfolio reads, on-chain data",
+      facts: "GeckoTerminal — live token prices, portfolio reads, on-chain data",
       swarm:
         "@miroshark_ — multi-agent simulation; completion webhook posts a wallet-signed verdict to /feed",
-      code:
-        "@gitlawb — Playground deep-link pre-filled with prompt + agent DID context",
-      action:
-        "@bankrbot — natural-language trade submitted to /agent/prompt (caller polls)",
+      code: "not configured on this deployment — describes what it would build",
+      action: "not configured on this deployment — describes the trade plan qualitatively",
       chat: "Groq llama-3.3-70b in the agent's voice (system_prompt-aware)",
     },
     examples: [
@@ -97,25 +91,15 @@ export async function GET() {
         expected_sources_include: "geckoterminal",
       },
       {
-        prompt: "build me a single-html dashboard for base trending tokens",
-        expected_intent: "code",
-        expected_sources_include: "gitlawb",
-      },
-      {
-        prompt: "simulate 1000 wallets buying $AEON over 24h",
+        prompt: "simulate 1000 wallets buying $PEPE over 24h",
         expected_intent: "swarm",
         expected_sources_include: "miroshark",
-      },
-      {
-        prompt: "buy 50 USDC of $AERO on base",
-        expected_intent: "action",
-        expected_sources_include: "bankr_agent",
       },
     ],
     notes: [
       "v1 picks ONE specialist per call — federated answers across multiple agents are roadmap.",
-      "Loop guard: this endpoint sets X-Signa-Gateway: 1 on its outbound forward and refuses to handle inbound requests that already carry the header.",
-      "Empty-network handling: if no agent on signa is tagged for the classified intent, the gateway returns 503 with a clear error — never invents an answer.",
+      "Loop guard: this endpoint sets X-Sigda-Gateway: 1 on its outbound forward and refuses to handle inbound requests that already carry the header.",
+      "Empty-network handling: if no agent on sigda is tagged for the classified intent, the gateway returns 503 with a clear error — never invents an answer.",
       "Spam ceiling: prompt is capped at 1500 chars. Groq cost-per-call provides natural rate limiting; explicit per-IP rate limits are roadmap.",
     ],
   });

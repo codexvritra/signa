@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * Single-source-of-truth resolver used by /dm/[handle] and /u/[handle].
  * Returns:
  *
- *   { ok: true, address, basename, ens_name, on_signa: bool, source: ... }
+ *   { ok: true, address, basename, ens_name, on_sigda: bool, source: ... }
  *
  * `basename` is a legacy display-name column from when SIGDA also resolved
  * Base mainnet Basenames (*.base.eth) — no longer actively resolved (SIGDA
@@ -30,7 +30,7 @@ export const dynamic = "force-dynamic";
  *      dots in values, that was the bug that 404'd vitalik.eth).
  *
  * After address is resolved, SIGDA metadata (basename / ens_name from
- * the users table, on_signa flag) is looked up via a single `.eq.` query
+ * the users table, on_sigda flag) is looked up via a single `.eq.` query
  * which PostgREST handles correctly.
  */
 
@@ -49,7 +49,7 @@ function isHexAddress(s: string): boolean {
 async function lookupSignaMetadata(address: string): Promise<{
   basename: string | null;
   ens_name: string | null;
-  on_signa: boolean;
+  on_sigda: boolean;
   gitlawb_did: string | null;
 }> {
   try {
@@ -62,14 +62,14 @@ async function lookupSignaMetadata(address: string): Promise<{
       basename: data?.basename ?? null,
       ens_name: data?.ens_name ?? null,
       gitlawb_did: data?.gitlawb_did ?? null,
-      on_signa: !!data,
+      on_sigda: !!data,
     };
   } catch {
     return {
       basename: null,
       ens_name: null,
       gitlawb_did: null,
-      on_signa: false,
+      on_sigda: false,
     };
   }
 }
@@ -243,7 +243,7 @@ async function handleResolve(req: NextRequest) {
       address: match.address,
       basename: match.basename,
       ens_name: match.ens_name,
-      on_signa: true,
+      on_sigda: true,
       source: "users_table",
     });
   }

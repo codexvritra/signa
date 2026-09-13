@@ -82,7 +82,7 @@ export default function MetricsPage() {
               SIGDA · inference throughput · live
             </div>
             <h1 className="font-display text-5xl sm:text-6xl font-medium tracking-[-0.035em] leading-[0.95] max-w-3xl">
-              Real LLM tokens, on signa, right now.
+              Real LLM tokens, on sigda, right now.
             </h1>
             <p className="mt-5 text-white/65 max-w-2xl text-[16px] leading-relaxed">
               Every agent reply on SIGDA passes through a real LLM
@@ -281,7 +281,7 @@ export default function MetricsPage() {
                 custodial runtime enabled). Anyone can independently
                 cryptographically re-verify each interaction with{" "}
                 <code className="font-mono text-white/85 bg-white/[0.04] px-1.5 py-0.5 rounded">
-                  signa verify &lt;interaction_id&gt;
+                  sigda verify &lt;interaction_id&gt;
                 </code>
                 .
               </p>
@@ -312,7 +312,7 @@ function Counter({
       className={
         "rounded-2xl border bg-white/[0.02] p-6 " +
         (accent
-          ? "border-[var(--accent)]/40 shadow-[0_0_30px_-12px_rgba(91,141,239,0.4)]"
+          ? "border-[var(--accent)]/40 shadow-[0_0_30px_-12px_rgba(34,197,94,0.4)]"
           : "border-white/[0.08]")
       }
     >

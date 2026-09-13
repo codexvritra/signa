@@ -29,7 +29,7 @@ export const dynamic = "force-dynamic";
  *     apiKey: "not-required-but-sdk-needs-it",
  *   });
  *   const r = await ai.chat.completions.create({
- *     model: "signa-gateway",
+ *     model: "sigda-gateway",
  *     messages: [{ role: "user", content: "price of $USDC on robinhood chain" }],
  *   });
  *
@@ -39,13 +39,13 @@ export const dynamic = "force-dynamic";
  * /api/gateway/respond. Same data, two surfaces.
  *
  * Models:
- *   "signa-gateway"   → auto-route to best specialist (default)
- *   "signa-agent"     → pin to a specific agent (pass `agent_address`
+ *   "sigda-gateway"   → auto-route to best specialist (default)
+ *   "sigda-agent"     → pin to a specific agent (pass `agent_address`
  *                       in the OpenAI-compatible request as a non-
  *                       standard field; OpenAI SDKs forward unknown
  *                       fields untouched)
  *
- * SIGDA extension: every response carries a top-level `signa` block
+ * SIGDA extension: every response carries a top-level `sigda` block
  * with the interaction_id (permalink), signature, sources cited,
  * intent classification, and routing decision. Strict OpenAI clients
  * ignore unknown top-level fields, so this is purely additive.
@@ -56,8 +56,8 @@ export const dynamic = "force-dynamic";
  */
 
 const SUPPORTED_MODELS = new Set([
-  "signa-gateway",
-  "signa-agent",
+  "sigda-gateway",
+  "sigda-agent",
   // common aliases — some frameworks need a familiar model id
   "gpt-4",
   "gpt-4o",
@@ -243,7 +243,7 @@ export async function POST(req: NextRequest) {
   // tool_calls — exactly what every OpenAI tool-using framework
   // (LangChain agents, OpenAI assistants API, Mastra, etc.) expects.
   //
-  // The signa extension is omitted in tools mode because we didn't
+  // The sigda extension is omitted in tools mode because we didn't
   // route through a sigda agent — the caller opted into the
   // raw-LLM-with-tools workflow. They can still get signed replies
   // by calling the endpoint without tools, which uses our agent
@@ -289,19 +289,19 @@ export async function POST(req: NextRequest) {
       });
 
       // Override the model name in the response so consumers see the
-      // signa-* model id they requested, not Groq's internal name.
+      // sigda-* model id they requested, not Groq's internal name.
       const id = `chatcmpl-${groqRes.id?.slice(-24) ?? chatId().slice(9)}`;
       return NextResponse.json({
         id,
         object: "chat.completion",
         created: Math.floor(Date.now() / 1000),
-        model: body.model ?? "signa-gateway",
+        model: body.model ?? "sigda-gateway",
         choices: groqRes.choices,
         usage: groqRes.usage,
         // SIGDA extension still present, but minimal — flags that
         // this response came from the tools path so consumers know
         // there's no signed reply attached.
-        signa: {
+        sigda: {
           mode: "tools_passthrough",
           backend: "groq",
           backend_model: GROQ_MODEL,
@@ -333,12 +333,12 @@ export async function POST(req: NextRequest) {
   const host = req.nextUrl.host;
   const from = isValidAddress(body.from) ? body.from!.toLowerCase() : null;
 
-  const model = body.model ?? "signa-gateway";
+  const model = body.model ?? "sigda-gateway";
   if (!SUPPORTED_MODELS.has(model)) {
     return NextResponse.json(
       {
         error: {
-          message: `model "${model}" is not supported. Use "signa-gateway" (default) or "signa-agent" with agent_address.`,
+          message: `model "${model}" is not supported. Use "sigda-gateway" (default) or "sigda-agent" with agent_address.`,
           type: "invalid_request_error",
           code: "model_not_found",
           param: "model",
@@ -358,7 +358,7 @@ export async function POST(req: NextRequest) {
   } | null = null;
   let classifiedIntent: GatewayIntent;
 
-  if (model === "signa-agent" && isValidAddress(body.agent_address)) {
+  if (model === "sigda-agent" && isValidAddress(body.agent_address)) {
     // Pinned call — caller already knows which agent.
     targetUrl = `${proto}//${host}/api/agents/${body.agent_address!.toLowerCase()}/respond`;
     classifiedIntent = body.hint_intent ?? classifyIntent(prompt);
@@ -377,7 +377,7 @@ export async function POST(req: NextRequest) {
         {
           error: {
             message:
-              "No launched agents on signa network. Spawn the first one at /launch-agent.",
+              "No launched agents on sigda network. Spawn the first one at /launch-agent.",
             type: "service_unavailable",
             code: "no_agents_on_network",
           },
@@ -409,7 +409,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "content-type": "application/json",
         // loop guard against gateway forwarding into itself
-        "x-signa-gateway": "1",
+        "x-sigda-gateway": "1",
       },
       body: JSON.stringify({ message: prompt, from }),
       signal: controller.signal,
@@ -448,7 +448,7 @@ export async function POST(req: NextRequest) {
   const id = chatId();
   const created = Math.floor(Date.now() / 1000);
 
-  // Common signa extension block — same data on both code paths.
+  // Common sigda extension block — same data on both code paths.
   const signaBlock = {
     interaction_id: fwd.interaction_id ?? null,
     intent: fwd.intent ?? classifiedIntent,
@@ -484,7 +484,7 @@ export async function POST(req: NextRequest) {
         completion_tokens: completionTokens,
         total_tokens: promptTokens + completionTokens,
       },
-      signa: signaBlock,
+      sigda: signaBlock,
     });
   }
 
@@ -505,10 +505,10 @@ export async function POST(req: NextRequest) {
   // The 12ms delay also keeps connections warm — Vercel functions
   // close idle TCP after a few seconds.
   //
-  // The final chunk includes the signa extension on the chunk object
+  // The final chunk includes the sigda extension on the chunk object
   // itself. OpenAI's chat.completion.chunk schema permits unknown
   // top-level fields, so strict parsers ignore it; consumers that
-  // know about signa can read the verifiable signature off the stream.
+  // know about sigda can read the verifiable signature off the stream.
 
   const encoder = new TextEncoder();
   const chunkSize = 24;
@@ -564,7 +564,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // 3) Final chunk — empty delta + finish_reason + signa extension.
+      // 3) Final chunk — empty delta + finish_reason + sigda extension.
       send({
         id,
         object: "chat.completion.chunk",
@@ -583,7 +583,7 @@ export async function POST(req: NextRequest) {
           completion_tokens: completionTokens,
           total_tokens: promptTokens + completionTokens,
         },
-        signa: signaBlock,
+        sigda: signaBlock,
       });
 
       // 4) Terminator per OpenAI spec.

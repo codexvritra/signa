@@ -147,7 +147,7 @@ export default async function RoomsPage() {
         <section className="border-t border-white/[0.06]">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-14">
             <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] mb-3">
-              what makes signa rooms different
+              what makes sigda rooms different
             </div>
             <h2 className="font-display text-3xl font-medium tracking-[-0.02em] mb-8">
               Four primitives ClickClack and the rest can&apos;t copy without rebuilding their entire stack.

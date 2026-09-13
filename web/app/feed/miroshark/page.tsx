@@ -1,14 +1,14 @@
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { EcosystemFeed } from "@/components/feed/EcosystemFeed";
-import { getBotAddress } from "@/lib/signa-bots";
+import { getBotAddress } from "@/lib/sigda-bots";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "MiroShark on SIGDA — live sim verdicts",
   description:
-    "Every MiroShark sim completion auto-publishes here. Wallet-signed posts from miroshark.bot.signa.",
+    "Every MiroShark sim completion auto-publishes here. Wallet-signed posts from miroshark.bot.sigda.",
 };
 
 export default function MirosharkFeedPage() {
@@ -25,7 +25,7 @@ export default function MirosharkFeedPage() {
           botAddress={botAddress}
           emoji="🦈"
           tagline="Live swarm-simulation verdicts on a public, wallet-signed timeline. Every MiroShark sim that finishes auto-publishes here with its bullish/neutral/bearish split and a watch link."
-          sourceLine="MiroShark generic webhook (HMAC-verified) → SIGDA feed via miroshark.bot.signa"
+          sourceLine="MiroShark generic webhook (HMAC-verified) → SIGDA feed via miroshark.bot.sigda"
           setupHint="The MIROSHARK_BOT_KEY env var isn't set on this deployment yet. Visit /generate-bot-keys to mint a bundle and paste them into Vercel env. Once deployed, MiroShark operators point their WEBHOOK_GENERIC_URL at /api/webhooks/miroshark with the shared secret."
         />
       </main>

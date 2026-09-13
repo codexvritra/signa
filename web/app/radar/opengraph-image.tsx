@@ -44,7 +44,7 @@ export default async function Image() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "22px" }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", fontSize: "34px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-              <span style={{ color: "#b7ff5c" }}>signa</span>
+              <span style={{ color: "#b7ff5c" }}>sigda</span>
               <span style={{ color: "#f5f5fa" }}>&nbsp;· signal desk</span>
             </div>
             <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.5)", marginTop: "8px" }}>

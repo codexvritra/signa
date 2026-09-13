@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { serverClient } from "@/lib/supabase";
-import { botPost } from "@/lib/signa-bots";
+import { botPost } from "@/lib/sigda-bots";
 import { getPortfolio } from "@/lib/portfolio";
 import { formatUsd, formatPct, tokenInfo } from "@/lib/geckoterminal";
 
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
  *   3. Hand the packet to Groq (llama-3.3-70b-versatile) with a tight
  *      system prompt that asks for a 3-line wallet-native digest.
  *   4. Post the Groq-generated text as a wallet-signed feed post via
- *      bankr.bot.signa (existing bot). The post is real, signed,
+ *      digest.bot.sigda (existing bot). The post is real, signed,
  *      auditable. The text inside is real AI output.
  *   5. Stamp users.last_digest_at = now() so the 23h floor holds.
  *
@@ -219,7 +219,7 @@ export async function GET(req: NextRequest) {
         ? `📬 daily for ${display}\n\n${groqText}\n\nsee /me · signaagent.xyz/me`
         : `${templateDigest(facts)}\n\nsee /me · signaagent.xyz/me`;
 
-      const post = await botPost("bankr", content);
+      const post = await botPost("digest", content);
       if (!post.ok) {
         results.push({ address: u.address, ok: false, reason: post.reason });
         continue;

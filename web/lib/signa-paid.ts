@@ -3,7 +3,7 @@
  *
  * Set a price for your inbox; a sender attaches >= that value and it's forwarded
  * to you in full, in the same transaction that records a readable `PaidMessage`
- * event. SIGNA custodies nothing and takes no fee. The chain is the index —
+ * event. SIGDA custodies nothing and takes no fee. The chain is the index —
  * inbox/feed/price are read straight from the contract.
  *
  * Set SIGNA_PAID_ADDRESS (+ NEXT_PUBLIC_…) once redeployed to Robinhood Chain —

@@ -4,22 +4,12 @@ import Groq from "groq-sdk";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Hex } from "viem";
 import { serverClient } from "@/lib/supabase";
-import { decryptAgentKey, decryptOpaque } from "@/lib/key-vault";
+import { decryptAgentKey } from "@/lib/key-vault";
 import { tokenInfo, formatUsd, formatPct } from "@/lib/geckoterminal";
-import {
-  bankrSubmitPrompt,
-  bankrPortfolio,
-  BankrError,
-} from "@/lib/skills/bankr";
-import { gitlawbPlaygroundUrl, gitlawbProfileForDid } from "@/lib/skills/gitlawb";
 import {
   mirosharkCreateSim,
   mirosharkConfigured,
 } from "@/lib/skills/miroshark";
-import {
-  aeonAgentRegistration,
-  aeonEtherscanUrl,
-} from "@/lib/skills/aeon";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,8 +22,8 @@ export const dynamic = "force-dynamic";
  * Used by:
  *
  *   - human DMs in any SIGDA chat (composer hits this for non-user peers)
- *   - third-party clients (Discord/TG bots, dashboards, gitlawb Playground
- *     apps) — same shape, same auth model
+ *   - third-party clients (Discord/TG bots, dashboards, embedded apps)
+ *     — same shape, same auth model
  *   - other agents talking to this agent
  *
  * Request shape (v1, intentionally tiny):
@@ -49,27 +39,24 @@ export const dynamic = "force-dynamic";
  *     signed: boolean,                  // true iff agent has runtime custody
  *     signature?: 0x...,                // EIP-191 over the response body
  *     signed_message?: string,          // exact preimage used
- *     agent_did?: string,               // gitlawb DID if linked
+ *     agent_did?: string,               // gitlawb DID if linked (legacy field)
  *     interaction_id: uuid,             // for future rating + replay
  *   }
  *
- * Architecture — partners are load-bearing, not garnish:
+ * Architecture:
  *
  *   1. Intent classifier (Groq llama-3.3-70b-versatile) → one of
  *      {facts, swarm, code, chat, action}. Real LLM, real classification,
  *      no regex hacks.
  *
- *   2. Tool router executes the intent against the partner stack:
- *        facts  → GeckoTerminal direct on Base (free, structured) +
- *                 optional Bankr /agent/prompt fallback for natural-lang
- *                 market questions (when agent owner has a Bankr key)
+ *   2. Tool router executes the intent:
+ *        facts  → GeckoTerminal direct on Base (free, structured)
  *        swarm  → MiroShark simulation create (env-gated; falls back to a
  *                 graceful "MiroShark not wired on this deploy" line)
- *        code   → agent's gitlawb_did + a deep-link to a fresh Playground
- *                 prompt that reuses the asked context (build with them)
+ *        code   → not wired on this deployment (describes qualitatively)
  *        chat   → plain Groq reply with the agent's system prompt
- *        action → Bankr /agent/prompt routed through the AGENT's own
- *                 bankr key if it has one (custodial trade)
+ *        action → not wired on this deployment (describes qualitatively,
+ *                 never claims a trade executed)
  *
  *   3. Synthesizer takes the raw tool output + the agent's system prompt
  *      and asks Groq to write the final reply in the agent's voice. The
@@ -86,13 +73,13 @@ export const dynamic = "force-dynamic";
  *   5. Persist into agent_interactions for future reputation + replay.
  *
  * This is the primitive — every higher-level surface (DM autoreply,
- * Discord bot, Playground app) calls this. We build the network effect
+ * Discord bot, embedded app) calls this. We build the network effect
  * by making the cheapest place to host an agent be inside SIGDA.
  */
 
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-// Bankr + MiroShark URLs/keys live inside lib/skills/* — pulled
-// through the typed wrappers (bankrSubmitPrompt, mirosharkCreateSim).
+// MiroShark URLs/keys live inside lib/skills/miroshark — pulled
+// through the typed wrapper (mirosharkCreateSim).
 const MAX_MESSAGE_LEN = 1500;
 
 type Intent = "facts" | "swarm" | "code" | "chat" | "action";
@@ -102,8 +89,7 @@ type Source = {
    * Free-form so federation can wrap nested partner sources like
    * `fwd:geckoterminal` without us having to enumerate every cross
    * product up-front. The common values are still:
-   *   geckoterminal · bankr_agent · miroshark · gitlawb · groq ·
-   *   system · federation · fwd:<inner>
+   *   geckoterminal · miroshark · groq · system · federation · fwd:<inner>
    */
   kind: string;
   ref: string;
@@ -122,12 +108,6 @@ type AgentRow = {
   miroshark_sim_id: string | null;
   encrypted_key: string | null;
   runtime_enabled: boolean | null;
-  /**
-   * NOT a column on agents — populated at request time by looking up the
-   * launcher's row in users. Agents borrow Bankr-execution capacity from
-   * whoever launched them (and connected their personal Bankr Agent key).
-   */
-  bankr_api_key_encrypted: string | null;
 };
 
 function classify(message: string): Intent {
@@ -325,49 +305,6 @@ async function runFacts(
     sources.push({ kind: "geckoterminal", ref: addr });
   }
 
-  // Optional: if agent owner has a Bankr key, route a natural-lang query
-  // through the typed Bankr skill lib for richer answers (Bankr can
-  // answer market questions, not just trade). The skill lib centralizes
-  // headers + error handling — see lib/skills/bankr.ts.
-  if (agent.bankr_api_key_encrypted && lines.length === 0) {
-    try {
-      const apiKey = decryptOpaque(agent.bankr_api_key_encrypted);
-      const submit = await bankrSubmitPrompt(apiKey, message);
-      const txt = submit.response;
-      if (txt) {
-        lines.push(`bankr: ${txt}`);
-        sources.push({
-          kind: "bankr_agent",
-          ref: submit.jobId ?? submit.id ?? "prompt",
-        });
-      }
-    } catch (e) {
-      // best-effort — never hard-fail facts on a missing partner. We do
-      // log BankrError so misconfigured keys surface in vercel logs.
-      if (e instanceof BankrError) {
-        console.error("[respond:facts] bankr", e.status, e.body);
-      }
-    }
-  }
-
-  // If the agent has an ERC-8004 token id, fetch its on-chain
-  // registration and cite it as a source. This proves the agent's
-  // identity is mainnet-verifiable — adds a `aeon` source to the
-  // facts response without changing the synthesized text.
-  if (agent.erc8004_token_id) {
-    try {
-      const reg = await aeonAgentRegistration(agent.erc8004_token_id);
-      if (reg) {
-        sources.push({
-          kind: "aeon",
-          ref: `erc-8004 #${agent.erc8004_token_id} · owner ${reg.owner.slice(0, 10)}…`,
-        });
-      }
-    } catch {
-      // identity citation is decoration — don't fail facts on rpc miss
-    }
-  }
-
   if (lines.length === 0) {
     lines.push(
       "no tokens parsed from message — try mentioning a $TICKER or 0xADDRESS",
@@ -395,7 +332,6 @@ async function runSwarm(
   const sim = await mirosharkCreateSim({
     prompt: message,
     agentAddress: agent.address,
-    agentDid: agent.gitlawb_did ?? undefined,
   });
   if (!sim) {
     return {
@@ -413,117 +349,20 @@ async function runSwarm(
   };
 }
 
-async function runCode(
-  message: string,
-  agent: AgentRow,
-): Promise<{ context: string; sources: Source[] }> {
-  // gitlawb Playground deep-link with prompt + agent context pre-filled.
-  // The skill lib (lib/skills/gitlawb.ts) centralizes both the URL build
-  // and the read-side calls to node.gitlawb.com.
-  const playground = gitlawbPlaygroundUrl({
-    prompt: message,
-    agentName: agent.name,
-    agentAddress: agent.address,
-    agentDid: agent.gitlawb_did ?? undefined,
-  });
-  const did = agent.gitlawb_did;
-  const lines: string[] = ["CODE CONTEXT:"];
-  lines.push(`gitlawb_playground_url: ${playground}`);
-
-  const sources: Source[] = [
-    { kind: "gitlawb", ref: did ?? "playground_only" },
-  ];
-
-  if (did) {
-    lines.push(`agent_gitlawb_did: ${did}`);
-    // Resolve the DID against node.gitlawb.com to surface real repo
-    // count + open tasks. Best-effort — code intent must still respond
-    // when the node is unreachable.
-    try {
-      const profile = await gitlawbProfileForDid(did);
-      if (profile && profile.repos.length > 0) {
-        const repoNames = profile.repos
-          .slice(0, 3)
-          .map((r) => `${r.owner}/${r.name}`)
-          .filter(Boolean)
-          .join(", ");
-        lines.push(
-          `agent_repos: ${profile.repos.length} on node.gitlawb.com (${repoNames})`,
-        );
-        lines.push(
-          `agent_open_tasks: ${profile.open_tasks} · recent_commits: ${profile.recent_commits}`,
-        );
-        sources.push({
-          kind: "gitlawb_node",
-          ref: `${profile.repos.length} repos · ${profile.open_tasks} tasks`,
-        });
-      } else {
-        lines.push(
-          `# DID resolved but node has no public repos under this owner yet`,
-        );
-      }
-    } catch {
-      // gitlawb node read is best-effort
-    }
-    lines.push(
-      `Tell the user: you can scaffold their idea via the gitlawb Playground URL above. If your DID has live repos, mention them by name.`,
-    );
-  } else {
-    lines.push(
-      `This agent has no gitlawb DID linked yet — still share the playground URL so the user can scaffold their idea.`,
-    );
-  }
-  return { context: lines.join("\n"), sources };
+async function runCode(): Promise<{ context: string; sources: Source[] }> {
+  return {
+    context:
+      "CODE CONTEXT:\nCode scaffolding isn't wired on this deployment. Respond by describing what you'd build, but make clear you can't generate a live app right now.",
+    sources: [{ kind: "system", ref: "code_not_configured" }],
+  };
 }
 
-async function runAction(
-  message: string,
-  agent: AgentRow,
-): Promise<{ context: string; sources: Source[] }> {
-  // Custodial trade — only if the agent's owner has a Bankr key bound to
-  // the agent. v1: we don't actually execute the trade automatically (too
-  // dangerous for a public endpoint); we return what Bankr says the
-  // intent is so the human can confirm out-of-band.
-  if (!agent.bankr_api_key_encrypted) {
-    return {
-      context:
-        "ACTION CONTEXT:\nThis agent has no Bankr Agent API key bound — it can describe the trade plan but cannot execute one. Suggest the user execute via /trade on /me.",
-      sources: [{ kind: "system", ref: "no_bankr_key" }],
-    };
-  }
-  try {
-    const apiKey = decryptOpaque(agent.bankr_api_key_encrypted);
-    // The Bankr skill lib (lib/skills/bankr.ts) handles auth + thread
-    // semantics. Submit-only (no poll) — /respond should answer in <2s;
-    // caller polls /agent/job/{id} independently if they need settlement.
-    const submit = await bankrSubmitPrompt(apiKey, message);
-    const jobId = submit.jobId || submit.id;
-    const lines: string[] = ["ACTION CONTEXT (Bankr agent):"];
-    if (jobId) {
-      lines.push(`bankr_job_id: ${jobId}`);
-      lines.push(`bankr_poll_url: https://api.bankr.bot/agent/job/${jobId}`);
-    }
-    if (submit.threadId) {
-      lines.push(`bankr_thread_id: ${submit.threadId} (continue with threadId)`);
-    }
-    if (submit.response) lines.push(`bankr_preview: ${submit.response}`);
-    if (submit.error) lines.push(`bankr_error: ${submit.error}`);
-    return {
-      context: lines.join("\n"),
-      sources: [{ kind: "bankr_agent", ref: jobId ?? "submitted" }],
-    };
-  } catch (e) {
-    if (e instanceof BankrError) {
-      return {
-        context: `ACTION CONTEXT:\nBankr rejected the prompt (HTTP ${e.status}). Describe the intended trade qualitatively without claiming it executed.`,
-        sources: [{ kind: "bankr_agent", ref: `http_${e.status}` }],
-      };
-    }
-    return {
-      context: `ACTION CONTEXT:\nBankr submit failed (${e instanceof Error ? e.message : String(e)}). Describe the intended trade qualitatively without claiming it executed.`,
-      sources: [{ kind: "bankr_agent", ref: "submit_failed" }],
-    };
-  }
+async function runAction(): Promise<{ context: string; sources: Source[] }> {
+  return {
+    context:
+      "ACTION CONTEXT:\nThis agent can't execute trades — describe the trade plan qualitatively without claiming it executed.",
+    sources: [{ kind: "system", ref: "action_not_configured" }],
+  };
 }
 
 /**
@@ -573,10 +412,10 @@ async function synthesize(args: {
     swarm:
       "Use the SWARM CONTEXT to describe what's being simulated. If the sim was queued, say so honestly.",
     code:
-      "Share the gitlawb Playground URL from CODE CONTEXT verbatim. Be encouraging — the user can ship in minutes.",
+      "Use the CODE CONTEXT. Code scaffolding isn't wired on this deployment — describe what you'd build, but make clear you can't generate a live app right now.",
     chat: "Reply in character. Keep it brief.",
     action:
-      "Use the ACTION CONTEXT — share the Bankr job id if present. Never claim a trade settled unless Bankr confirmed; recommend the user poll the job url.",
+      "Use the ACTION CONTEXT. This agent can't execute trades — describe the trade plan qualitatively without claiming it executed.",
   };
   const sys = [
     agentVoice,
@@ -586,7 +425,7 @@ async function synthesize(args: {
     `- ${intentRules[intent]}`,
     "- Reply ≤ 600 chars. No filler. Mono-space-friendly. No emoji storms.",
     "- If a user asks about something outside your tags, say so honestly.",
-    "- You're talking inside SIGDA (signaagent.xyz). If asked about it, say SIGDA is a wallet-native messaging platform on Base.",
+    "- You're talking inside SIGDA (signaagent.xyz). If asked about it, say SIGDA is a wallet-native messaging platform on Robinhood Chain.",
   ].join("\n");
   const user = [
     from ? `from: ${from}` : "from: anonymous",
@@ -648,10 +487,10 @@ async function pickSpecialist(
   exclude: string,
 ): Promise<{ address: string; name: string } | null> {
   const tagHints: Record<Intent, string[]> = {
-    facts: ["facts", "markets", "defi", "trading", "bankr"],
+    facts: ["facts", "markets", "defi", "trading"],
     swarm: ["swarm", "simulation", "miroshark", "monte-carlo"],
-    code: ["code", "build", "gitlawb", "playground", "dev"],
-    action: ["trade", "trading", "defi", "execution", "bankr"],
+    code: ["code", "build", "dev"],
+    action: ["trade", "trading", "defi", "execution"],
     chat: ["chat", "companion"],
   };
   const hints = tagHints[intent];
@@ -718,7 +557,7 @@ export async function POST(
     )
     .eq("address", agentAddress)
     .is("deleted_at", null)
-    .maybeSingle<Omit<AgentRow, "bankr_api_key_encrypted">>();
+    .maybeSingle<AgentRow>();
   if (agentErr) {
     return NextResponse.json({ error: agentErr.message }, { status: 500 });
   }
@@ -726,22 +565,7 @@ export async function POST(
     return NextResponse.json({ error: "agent_not_found" }, { status: 404 });
   }
 
-  // Hydrate bankr_api_key_encrypted from the launcher's row — agents
-  // don't carry their own trading credentials; they borrow capacity from
-  // whoever launched them (and explicitly bound a Bankr Agent API key).
-  let launcherBankrKey: string | null = null;
-  if (rawAgent.launched_by) {
-    const { data: launcher } = await db
-      .from("users")
-      .select("bankr_api_key_encrypted")
-      .eq("address", rawAgent.launched_by.toLowerCase())
-      .maybeSingle<{ bankr_api_key_encrypted: string | null }>();
-    launcherBankrKey = launcher?.bankr_api_key_encrypted ?? null;
-  }
-  const agentData: AgentRow = {
-    ...rawAgent,
-    bankr_api_key_encrypted: launcherBankrKey,
-  };
+  const agentData: AgentRow = rawAgent;
 
   // Groq is optional — when missing, classification falls back to the
   // lexical pre-classifier and synthesis falls back to a deterministic
@@ -768,11 +592,11 @@ export async function POST(
       toolCtx = r.context;
       sources = r.sources;
     } else if (intent === "code") {
-      const r = await runCode(message, agentData);
+      const r = await runCode();
       toolCtx = r.context;
       sources = r.sources;
     } else if (intent === "action") {
-      const r = await runAction(message, agentData);
+      const r = await runAction();
       toolCtx = r.context;
       sources = r.sources;
     } else {
@@ -943,8 +767,8 @@ export async function POST(
 }
 
 /** GET /api/agents/[address]/respond?address=…  — schema introspection so
- *  third-party builders (gitlawb Playground apps especially) can render
- *  a "this is what the endpoint returns" preview. */
+ *  third-party builders can render a "this is what the endpoint
+ *  returns" preview. */
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ address: string }> },
@@ -1000,20 +824,20 @@ export async function GET(
       signed: "boolean — true iff agent has runtime custody",
       signature: "0x... (only if signed)",
       signed_message: "EIP-191 preimage (only if signed)",
-      agent_did: "gitlawb DID if linked",
+      agent_did: "gitlawb DID if linked (legacy field)",
       interaction_id: "uuid for replay/rating",
     },
     // x402 advertising — only present when the agent has set a price.
     // For v1 this is informational only; server-side payment enforcement
-    // is roadmap. Clients calling via @bankrbot's x402 layer will
-    // auto-handle payment per the bankr skill spec.
+    // is roadmap. Clients calling with their own x402 client layer will
+    // auto-handle payment per the x402 spec.
     ...(x402 ? { x402 } : {}),
     notes: [
-      "CORS open — call from any origin (gitlawb Playground apps, Discord/TG bots, dashboards).",
+      "CORS open — call from any origin (Discord/TG bots, dashboards, third-party apps).",
       x402
         ? `Paid endpoint: ${x402.price} ${x402.currency} per call on ${x402.chain}. Payment to ${x402.pay_to}. v1 is honor-system — server-side enforcement coming.`
         : "No auth required — free, public, signed-when-possible.",
-      "Routing tree: facts→Bankr+GeckoTerminal | swarm→MiroShark | code→gitlawb | action→Bankr | chat→Groq.",
+      "Routing tree: facts→GeckoTerminal | swarm→MiroShark | code→not configured | action→not configured | chat→Groq.",
       "When GROQ_API_KEY is absent the endpoint still works — classification falls back to a lexical rule-set and synthesis falls back to a deterministic template (you'll see [note: ... LLM is offline ...] in the reply).",
     ],
   });

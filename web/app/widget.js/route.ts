@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
  *
  * Auto-discovers ALL data-signa-room containers on the page so a
  * partner can drop multiple rooms (e.g. a tabbed UI listing several
- * Bankr token rooms) by adding more containers.
+ * token-gated rooms) by adding more containers.
  *
  * Pure vanilla JS — no React / Vue / dependencies. Ships < 2 KB.
  * Served as application/javascript with a 1-hour edge cache so

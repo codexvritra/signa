@@ -1,9 +1,9 @@
 import { cn } from "@/lib/cn";
 
 /**
- * "Built with" pill for entries SIGDA integrates on top of (Bankr, gitlawb,
- * AEON, MiroShark). Deliberately NOT called "Partner" — they haven't
- * signed anything with us; SIGDA is built using their primitives.
+ * "Built with" pill for entries SIGDA integrates on top of (MiroShark).
+ * Deliberately NOT called "Partner" — they haven't signed anything with
+ * us; SIGDA is built using their primitives.
  *
  * Visual lineage:
  *   - AgentBadge    → registered XMTP agent (violet pill)

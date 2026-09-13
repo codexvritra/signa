@@ -1,16 +1,15 @@
 /**
- * SIGNA bot accounts — wallet-signed feed publishers for ecosystem bridges.
+ * SIGDA bot accounts — wallet-signed feed publishers for ecosystem bridges.
  *
- * Each bridge (MiroShark webhook receiver, gitlawb poller, Bankr chain
- * listener) has its own bot wallet that signs every post it publishes.
- * The signature on each post is verifiable proof that the bridge — not a
- * random spammer — wrote it. Posts show up in the standard SIGNA feed
- * with the bot's basename (e.g. `miroshark.bot.signa`).
+ * Each bridge (MiroShark webhook receiver, the daily-digest cron) has its
+ * own bot wallet that signs every post it publishes. The signature on each
+ * post is verifiable proof that the bridge — not a random spammer — wrote
+ * it. Posts show up in the standard SIGDA feed with the bot's basename
+ * (e.g. `miroshark.bot.sigda`).
  *
  * Setup: visit /admin/generate-bot-keys once, copy the printed private
- * keys into Vercel env (`MIROSHARK_BOT_KEY`, `GITLAWB_BOT_KEY`,
- * `BANKR_BOT_KEY`). The bridges auto-register their bot wallet in the
- * users table on first post.
+ * keys into Vercel env (`MIROSHARK_BOT_KEY`, `DIGEST_BOT_KEY`). The
+ * bridges auto-register their bot wallet in the users table on first post.
  */
 
 import { privateKeyToAccount } from "viem/accounts";
@@ -18,18 +17,16 @@ import type { Hex } from "viem";
 import { serverClient } from "./supabase";
 import { buildMessageToSign, MAX_POST_LENGTH } from "./feed-types";
 
-export type BotKind = "miroshark" | "gitlawb" | "bankr";
+export type BotKind = "miroshark" | "digest";
 
 const BOT_BASENAMES: Record<BotKind, string> = {
-  miroshark: "miroshark.bot.signa",
-  gitlawb: "gitlawb.bot.signa",
-  bankr: "bankr.bot.signa",
+  miroshark: "miroshark.bot.sigda",
+  digest: "digest.bot.sigda",
 };
 
 const BOT_ENV_KEYS: Record<BotKind, string> = {
   miroshark: "MIROSHARK_BOT_KEY",
-  gitlawb: "GITLAWB_BOT_KEY",
-  bankr: "BANKR_BOT_KEY",
+  digest: "DIGEST_BOT_KEY",
 };
 
 /** Returns null if the bot's private key isn't configured. */
@@ -64,12 +61,12 @@ async function ensureRegistered(kind: BotKind, address: string) {
   if (error) {
     // Don't throw — registration is best-effort. The post insert below
     // will fail with a clearer error if the user isn't actually present.
-    console.error(`[signa-bots] register ${kind} failed:`, error.message);
+    console.error(`[sigda-bots] register ${kind} failed:`, error.message);
   }
 }
 
 /**
- * Publish a wallet-signed post to the SIGNA feed as the named bot.
+ * Publish a wallet-signed post to the SIGDA feed as the named bot.
  *
  * Returns `{ ok: true, postId }` on success or `{ ok: false, reason }`
  * on failure. Idempotent registration of the bot is handled automatically.

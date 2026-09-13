@@ -12,11 +12,11 @@ export type TokenInfo = {
   project?: string;
   homepage?: string;
   /**
-   * Which chain this token's contract actually lives on. SIGNA itself runs
-   * on Robinhood Chain, but BNKR/GITLAWB/MIROSHARK are real third-party
-   * community tokens deployed on Base — they aren't SIGNA infra, so they
-   * stay reachable on the chain they actually exist on rather than being
-   * mislabeled or dropped. Defaults to "robinhood" when omitted.
+   * Which chain this token's contract actually lives on. SIGDA itself runs
+   * on Robinhood Chain, but MIROSHARK is a real third-party community token
+   * deployed on Base — it isn't SIGDA infra, so it stays reachable on the
+   * chain it actually exists on rather than being mislabeled or dropped.
+   * Defaults to "robinhood" when omitted.
    */
   chain?: "robinhood" | "base";
 };
@@ -25,10 +25,10 @@ export type TokenInfo = {
  * Featured tokens for in-chat tipping.
  * - ETH: native gas + universal tip (works on any EVM chain incl. Robinhood Chain)
  * - USDG: Robinhood Chain's native stablecoin (Paxos Global Dollar)
- * - BNKR / GITLAWB / MIROSHARK: ecosystem amplification — every token holder
- *   community has a reason to mention SIGNA when they can tip in their token.
- *   These are real external community tokens that live on Base; SIGNA reads
- *   their balances there regardless of which chain SIGNA itself runs on.
+ * - MIROSHARK: ecosystem amplification — the community has a reason to
+ *   mention SIGDA when they can tip in their token. A real external
+ *   community token that lives on Base; SIGDA reads its balance there
+ *   regardless of which chain SIGDA itself runs on.
  */
 export const TOKENS: TokenInfo[] = [
   {
@@ -48,28 +48,8 @@ export const TOKENS: TokenInfo[] = [
     homepage: "https://www.globaldollar.com",
   },
   {
-    symbol: "BNKR",
-    name: "BankrCoin",
-    address: "0x22af33fe49fd1fa80c7149773dde5890d3c76f3b",
-    decimals: 18,
-    presets: ["10", "50", "100", "500"],
-    project: "Bankr",
-    homepage: "https://bankr.bot",
-    chain: "base",
-  },
-  {
-    symbol: "GITLAWB",
-    name: "gitlawb",
-    address: "0x5f980dcfc4c0fa3911554cf5ab288ed0eb13dba3",
-    decimals: 18,
-    presets: ["100", "500", "1000", "5000"],
-    project: "gitlawb",
-    homepage: "https://gitlawb.com",
-    chain: "base",
-  },
-  {
     // On-chain symbol returned by contract: "MiroShark" (per eth_call to 0x95d89b41).
-    // We expose it in upper-case "MIROSHARK" for visual parity with BNKR / GITLAWB chips.
+    // We expose it in upper-case "MIROSHARK" for chip-style visual consistency.
     symbol: "MIROSHARK",
     name: "MiroShark",
     address: "0xd7bc6a05a56655fb2052f742b012d1dfd66e1ba3",

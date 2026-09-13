@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  *
  *   {
  *     "mcpServers": {
- *       "signa": {
+ *       "sigda": {
  *         "url": "https://www.signaagent.xyz/api/mcp",
  *         "transport": "http"
  *       }
@@ -21,12 +21,12 @@ export const dynamic = "force-dynamic";
  *
  * Why this matters:
  *   - Distribution. Every Claude Desktop / Cursor / Cline user can
- *     install signa in 30 seconds and gain native access to every
- *     signa-launched agent through their existing AI client.
+ *     install sigda in 30 seconds and gain native access to every
+ *     sigda-launched agent through their existing AI client.
  *   - Symmetry with our other surfaces. /api/v1/chat/completions is
  *     for app builders. MCP is for AI clients. Same backend, two
  *     transports.
- *   - Reciprocity. Bankr, gitlawb, Anthropic, OpenAI all publish MCP
+ *   - Reciprocity. Anthropic, OpenAI, and others all publish MCP
  *     servers. By publishing ours, we slot into the same ecosystem.
  *
  * Protocol:
@@ -71,16 +71,16 @@ type Tool = {
 
 const TOOLS: Tool[] = [
   {
-    name: "signa_ask",
+    name: "sigda_ask",
     description:
-      "Send a natural-language prompt to the signa network. The server picks the best specialist agent (facts/code/swarm/action/chat) and returns a wallet-signed reply with cited sources. Free, no auth.",
+      "Send a natural-language prompt to the sigda network. The server picks the best specialist agent (facts/code/swarm/action/chat) and returns a wallet-signed reply with cited sources. Free, no auth.",
     inputSchema: {
       type: "object",
       properties: {
         prompt: {
           type: "string",
           description:
-            "Plain-English question or instruction. Examples: 'what is the price of $USDC on robinhood chain?', 'build me a single-html dashboard for base trending tokens', 'simulate 1000 wallets buying $AEON over 24h'.",
+            "Plain-English question or instruction. Examples: 'what is the price of $USDC on robinhood chain?', 'build me a single-html dashboard for base trending tokens', 'simulate 1000 wallets buying $PEPE over 24h'.",
         },
         hint_intent: {
           type: "string",
@@ -93,16 +93,16 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "signa_ask_agent",
+    name: "sigda_ask_agent",
     description:
-      "Ask a SPECIFIC signa-launched agent (by 0x address). Returns the same wallet-signed reply shape as signa_ask but pinned to one agent.",
+      "Ask a SPECIFIC sigda-launched agent (by 0x address). Returns the same wallet-signed reply shape as sigda_ask but pinned to one agent.",
     inputSchema: {
       type: "object",
       properties: {
         agent_address: {
           type: "string",
           pattern: "^0x[a-fA-F0-9]{40}$",
-          description: "Agent's Base mainnet wallet address.",
+          description: "Agent's Robinhood Chain wallet address.",
         },
         prompt: {
           type: "string",
@@ -113,13 +113,13 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "signa_list_agents",
+    name: "sigda_list_agents",
     description:
-      "List every launched agent on the SIGDA network with name, address, tags, and partner-stack metadata (gitlawb DID, ERC-8004 token, Bankr token).",
+      "List every launched agent on the SIGDA network with name, address, tags, and partner-stack metadata (MiroShark sim id, agent token address).",
     inputSchema: { type: "object", properties: {} },
   },
   {
-    name: "signa_get_agent",
+    name: "sigda_get_agent",
     description:
       "Fetch one agent's full profile + partner stack + runtime status.",
     inputSchema: {
@@ -134,7 +134,7 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "signa_search_replies",
+    name: "sigda_search_replies",
     description:
       "Browse cross-agent top-rated wallet-signed replies on the SIGDA network. Sort by `top` (rating signal) or `new` (chronological). Optional intent filter.",
     inputSchema: {
@@ -150,9 +150,9 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "signa_get_interaction",
+    name: "sigda_get_interaction",
     description:
-      "Fetch a single Q&A by interaction_id. Returns the wallet signature + signed_message preimage so the caller can verify the agent's reply cryptographically without trusting signa's servers.",
+      "Fetch a single Q&A by interaction_id. Returns the wallet signature + signed_message preimage so the caller can verify the agent's reply cryptographically without trusting sigda's servers.",
     inputSchema: {
       type: "object",
       properties: {
@@ -162,7 +162,7 @@ const TOOLS: Tool[] = [
     },
   },
   {
-    name: "signa_get_stats",
+    name: "sigda_get_stats",
     description:
       "Platform-wide counters — total agents launched, signed replies, posts, rating signal, intent distribution.",
     inputSchema: { type: "object", properties: {} },
@@ -170,28 +170,28 @@ const TOOLS: Tool[] = [
 
   // ─────────────── the capability gateway (one URL = the whole mesh) ───────────────
   {
-    name: "signa_capabilities",
+    name: "sigda_capabilities",
     description:
-      "Browse the SIGDA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier registered directly on Robinhood Chain. Invoke any by name with signa_invoke.",
+      "Browse the SIGDA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (token price, gas, TVL reads), capabilities developers registered with one wallet signature, and the trustless on-chain tier registered directly on Robinhood Chain. Invoke any by name with sigda_invoke.",
     inputSchema: { type: "object", properties: {} },
   },
   {
-    name: "signa_invoke",
+    name: "sigda_invoke",
     description:
-      "Invoke any capability on the SIGDA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. e.g. cap='root.market', or cap='bankr.resolve' with arg='@jesse'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. Priced capabilities return their x402 challenge instead of charging you.",
+      "Invoke any capability on the SIGDA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. e.g. cap='token.price' with arg='ethereum', or cap='defi.tvl' with arg='aave'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. Priced capabilities return their x402 challenge instead of charging you.",
     inputSchema: {
       type: "object",
       properties: {
-        cap: { type: "string", description: "Capability name, e.g. 'root.market', 'bankr.launches'." },
+        cap: { type: "string", description: "Capability name, e.g. 'token.price', 'defi.tvl'." },
         arg: { type: "string", description: "Optional input string (a handle, URL, or query)." },
       },
       required: ["cap"],
     },
   },
   {
-    name: "signa_brain",
+    name: "sigda_brain",
     description:
-      "Ask the SIGDA brain a goal in plain language. It reasons on decentralized inference, decides which network capabilities to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'.",
+      "Ask the SIGDA brain a goal in plain language. It reasons on decentralized inference, decides which network capabilities to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the market doing and name one opportunity'.",
     inputSchema: {
       type: "object",
       properties: {
@@ -221,7 +221,7 @@ async function callSignaApi(
       // MCP server is allowed to forward into /respond — it's the
       // entry point, not a recursion source. We still tag it so
       // /respond's internal call audit knows where it came from.
-      "x-signa-mcp": "1",
+      "x-sigda-mcp": "1",
       ...(init.headers ?? {}),
     },
   });
@@ -267,7 +267,7 @@ async function callTool(
   args: Record<string, unknown>,
 ): Promise<ReturnType<typeof textResult>> {
   switch (name) {
-    case "signa_ask": {
+    case "sigda_ask": {
       const prompt = String(args.prompt ?? "");
       if (!prompt) return errorResult("prompt is required");
       const hint = args.hint_intent ? String(args.hint_intent) : undefined;
@@ -280,7 +280,7 @@ async function callTool(
       return textResult(body);
     }
 
-    case "signa_ask_agent": {
+    case "sigda_ask_agent": {
       const addr = String(args.agent_address ?? "").toLowerCase();
       const prompt = String(args.prompt ?? "");
       if (!/^0x[a-f0-9]{40}$/.test(addr))
@@ -297,12 +297,12 @@ async function callTool(
       return textResult(body);
     }
 
-    case "signa_list_agents": {
+    case "sigda_list_agents": {
       const body = await callSignaApi(req, "/api/agents");
       return textResult(body);
     }
 
-    case "signa_get_agent": {
+    case "sigda_get_agent": {
       const addr = String(args.agent_address ?? "").toLowerCase();
       if (!/^0x[a-f0-9]{40}$/.test(addr))
         return errorResult("invalid agent_address");
@@ -310,7 +310,7 @@ async function callTool(
       return textResult(body);
     }
 
-    case "signa_search_replies": {
+    case "sigda_search_replies": {
       const sort = args.sort === "new" ? "new" : "top";
       const intent = args.intent ? String(args.intent) : "";
       const limit = Number(args.limit ?? 10);
@@ -321,7 +321,7 @@ async function callTool(
       return textResult(body);
     }
 
-    case "signa_get_interaction": {
+    case "sigda_get_interaction": {
       const id = String(args.interaction_id ?? "");
       if (!/^[0-9a-f-]{36}$/i.test(id))
         return errorResult("invalid interaction_id (must be uuid)");
@@ -329,17 +329,17 @@ async function callTool(
       return textResult(body);
     }
 
-    case "signa_get_stats": {
+    case "sigda_get_stats": {
       const body = await callSignaApi(req, "/api/stats");
       return textResult(body);
     }
 
-    case "signa_capabilities": {
+    case "sigda_capabilities": {
       const body = await callSignaApi(req, "/api/capabilities");
       return textResult(body);
     }
 
-    case "signa_invoke": {
+    case "sigda_invoke": {
       const cap = String(args.cap ?? "").trim();
       const arg = args.arg ? String(args.arg) : "";
       if (!cap) return errorResult("cap is required");
@@ -350,7 +350,7 @@ async function callTool(
       return textResult(body);
     }
 
-    case "signa_brain": {
+    case "sigda_brain": {
       const goal = String(args.goal ?? "").trim();
       if (goal.length < 2) return errorResult("goal is required (2-600 chars)");
       const body = await callSignaApi(req, "/api/brain", {
@@ -369,7 +369,7 @@ async function callTool(
 
 const PROTOCOL_VERSION = "2024-11-05";
 const SERVER_INFO = {
-  name: "signa",
+  name: "sigda",
   version: "1.1.0",
 };
 
@@ -483,7 +483,7 @@ export function GET() {
     install: {
       claude_desktop_config: {
         mcpServers: {
-          signa: {
+          sigda: {
             url: "https://www.signaagent.xyz/api/mcp",
             transport: "http",
           },
@@ -494,7 +494,7 @@ export function GET() {
         mcp: {
           servers: [
             {
-              name: "signa",
+              name: "sigda",
               url: "https://www.signaagent.xyz/api/mcp",
               transport: "http",
             },

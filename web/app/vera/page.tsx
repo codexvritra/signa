@@ -80,7 +80,7 @@ export default function VeraPage() {
         {/* live run */}
         {(thinking || live) && (
           <div className="mt-7 glass-strong rounded-2xl p-5 sm:p-6">
-            <div className="text-[12px] uppercase tracking-wider text-[#a5c3ff] font-semibold mb-2">Live cycle</div>
+            <div className="text-[12px] uppercase tracking-wider text-[#86efac] font-semibold mb-2">Live cycle</div>
             {live ? (
               <>
                 <div className="text-[15px] text-muted mb-3"><span className="text-faint">Goal:</span> {live.goal}</div>
@@ -116,7 +116,7 @@ export default function VeraPage() {
               <div className="text-[14px] leading-relaxed">{t.answer}</div>
               <div className="flex items-center gap-2 flex-wrap mt-2.5">
                 {(t.tools_used || []).map((tool) => (
-                  <span key={tool} className="text-[10.5px] font-mono px-2 py-0.5 rounded bg-white/[0.05] text-[#a5c3ff]">{tool}</span>
+                  <span key={tool} className="text-[10.5px] font-mono px-2 py-0.5 rounded bg-white/[0.05] text-[#86efac]">{tool}</span>
                 ))}
                 <span className="text-[10.5px] text-[#5ee68f]">✓ signed by VERA</span>
                 {t.dm_id && <a className="text-[10.5px] text-faint hover:text-white" href={`/verify`}>verify</a>}
@@ -127,10 +127,10 @@ export default function VeraPage() {
         </div>
 
         <p className="text-[12px] text-faint mt-6 leading-relaxed">
-          VERA runs on <a className="text-[#a5c3ff] hover:underline" href="/brain">Brain 2.0</a> — a multi-step agentic
-          loop over the keyless <a className="text-[#a5c3ff] hover:underline" href="/capabilities">capability mesh</a>.
-          Every thought is a wallet signature re-checkable at <a className="text-[#a5c3ff] hover:underline" href="/verify">/verify</a>{" "}
-          and committed to the <a className="text-[#a5c3ff] hover:underline" href="/docs/transparency">network ledger</a>.
+          VERA runs on <a className="text-[#86efac] hover:underline" href="/brain">Brain 2.0</a> — a multi-step agentic
+          loop over the keyless <a className="text-[#86efac] hover:underline" href="/capabilities">capability mesh</a>.
+          Every thought is a wallet signature re-checkable at <a className="text-[#86efac] hover:underline" href="/verify">/verify</a>{" "}
+          and committed to the <a className="text-[#86efac] hover:underline" href="/docs/transparency">network ledger</a>.
           Don&apos;t trust — verify.
         </p>
       </div>
@@ -141,11 +141,11 @@ export default function VeraPage() {
 function StepRow({ s }: { s: Step }) {
   return (
     <div className="flex items-start gap-3 bg-black/20 border border-white/[0.06] rounded-lg px-3 py-2">
-      <span className="text-[11px] font-bold text-[#6ea2ff] mt-0.5 shrink-0">#{s.n}</span>
+      <span className="text-[11px] font-bold text-[#4ade80] mt-0.5 shrink-0">#{s.n}</span>
       <div className="min-w-0">
         {s.action ? (
           <div className="text-[12.5px]">
-            <span className="font-mono text-[#a98bff]">{s.action.tool}{s.action.arg ? `(${s.action.arg})` : "()"}</span>
+            <span className="font-mono text-[#4ade80]">{s.action.tool}{s.action.arg ? `(${s.action.arg})` : "()"}</span>
             <span className="text-faint"> → </span>
             <span className="text-muted">{s.observation}</span>
           </div>

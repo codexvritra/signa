@@ -11,16 +11,14 @@ import { useChat } from "@/context/ChatProvider";
 /**
  * /feed — public wallet-signed post stream.
  *
- * Rendered as a manpage-style index with three flat ecosystem-feed
- * shortcuts (miroshark · gitlawb · bankr) followed by composer +
- * timeline. No emoji-decorated cards, no display-font hero, no chip
- * buttons — same aesthetic as /, /me, /launchpad/top.
+ * Rendered as a manpage-style index with a flat ecosystem-feed shortcut
+ * (miroshark) followed by composer + timeline. No emoji-decorated cards,
+ * no display-font hero, no chip buttons — same aesthetic as /, /me,
+ * /launchpad/top.
  */
 
 const ECOSYSTEM_FEEDS: Array<[string, string, string]> = [
   ["/feed/miroshark", "miroshark", "swarm-sim verdicts, live"],
-  ["/feed/gitlawb", "gitlawb", "new repos on the decentralized git net"],
-  ["/feed/bankr", "bankr", "$BNKR whale alerts on base"],
 ];
 
 export default function FeedPage() {
@@ -47,7 +45,7 @@ export default function FeedPage() {
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-feed — wallet-signed posts on robinhood chain
+              sigda-feed — wallet-signed posts on robinhood chain
             </div>
           </section>
 
@@ -62,7 +60,7 @@ export default function FeedPage() {
                 personal_sign
               </code>{" "}
               and verifiable on the agent_interactions / posts tables.
-              tag any signa user with{" "}
+              tag any sigda user with{" "}
               <code className="text-white bg-white/[0.05] rounded px-1">
                 @
               </code>

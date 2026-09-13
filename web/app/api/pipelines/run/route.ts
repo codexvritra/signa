@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   try { body = await req.json(); } catch { return NextResponse.json({ ok: false, error: "bad_json" }, { status: 400, headers: CORS }); }
 
   const raw = Array.isArray(body?.steps) ? body.steps : [];
-  if (raw.length < 1) return NextResponse.json({ ok: false, error: "no_steps", hint: 'POST { steps: [{ cap: "root.feargreed" }, { cap: "signa.reason", arg: "given {{prev.label}} sentiment, one line on Robinhood Chain" }] }' }, { status: 400, headers: CORS });
+  if (raw.length < 1) return NextResponse.json({ ok: false, error: "no_steps", hint: 'POST { steps: [{ cap: "token.price", arg: "ethereum" }, { cap: "sigda.reason", arg: "given {{prev.price_usd}} price, one line on Robinhood Chain" }] }' }, { status: 400, headers: CORS });
   if (raw.length > 6) return NextResponse.json({ ok: false, error: "too_many_steps", max: 6 }, { status: 400, headers: CORS });
 
   const steps: PipelineStep[] = [];

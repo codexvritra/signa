@@ -12,13 +12,13 @@
   --surface: #0e0e15;
   --surface-raised: #14141d;
   --surface-hover: #1a1a25;
-  /* SIGDA accent system — neon blue primary, violet secondary */
-  --accent: #5b8def;            /* electric blue, primary action + active states */
-  --accent-strong: #4a7adb;     /* hover */
-  --accent-dim: rgba(91, 141, 239, 0.14);
-  --accent-text: #a5c3ff;       /* muted blue for text */
-  --accent-2: #8b5cf6;          /* violet, secondary highlights */
-  --accent-2-dim: rgba(139, 92, 246, 0.15);
+  /* SIGDA accent system — green primary, matching the landing page + CLI */
+  --accent: #22c55e;            /* green, primary action + active states */
+  --accent-strong: #16a34a;     /* hover */
+  --accent-dim: rgba(34,197,94, 0.14);
+  --accent-text: #86efac;       /* muted green for text */
+  --accent-2: #16a34a;          /* deeper green, secondary highlights */
+  --accent-2-dim: rgba(22,163,74, 0.15);
   --warning: #fbbf24;
   --error: #f87171;
   --online: #22c55e;
@@ -36,7 +36,7 @@ html,
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -45,8 +45,8 @@ body {
   min-height: 100vh;
   /* very subtle depth — not gradient-as-decoration, just barely-there atmosphere */
   background-image:
-    radial-gradient(ellipse 60% 40% at 80% -10%, rgba(91, 141, 239, 0.05), transparent 60%),
-    radial-gradient(ellipse 50% 35% at 0% 100%, rgba(139, 92, 246, 0.04), transparent 60%);
+    radial-gradient(ellipse 60% 40% at 80% -10%, rgba(34,197,94, 0.05), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 0% 100%, rgba(22,163,74, 0.04), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -82,7 +82,7 @@ textarea::placeholder {
 }
 
 ::selection {
-  background: rgba(91, 141, 239, 0.32);
+  background: rgba(34,197,94, 0.32);
   color: white;
 }
 
@@ -120,12 +120,12 @@ textarea::placeholder {
 
 /* subtle glow utility — restrained, used on focus rings and primary actions */
 .glow-accent {
-  box-shadow: 0 0 0 1px rgba(91, 141, 239, 0.4), 0 0 24px -8px rgba(91, 141, 239, 0.35);
+  box-shadow: 0 0 0 1px rgba(34,197,94, 0.4), 0 0 24px -8px rgba(34,197,94, 0.35);
 }
 
 .focus-glow:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 1.5px var(--accent), 0 0 16px -4px rgba(91, 141, 239, 0.4);
+  box-shadow: 0 0 0 1.5px var(--accent), 0 0 16px -4px rgba(34,197,94, 0.4);
 }
 
 /* typing dots */

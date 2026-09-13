@@ -44,13 +44,13 @@ export function X402Verify({ fields }: { fields: Record<string, unknown> }) {
         <div
           className={`mt-3 rounded-xl p-4 text-[13px] border ${
             good
-              ? "border-[rgba(91,141,239,0.4)] bg-[rgba(91,141,239,0.07)]"
+              ? "border-[rgba(34,197,94,0.4)] bg-[rgba(34,197,94,0.07)]"
               : "border-[rgba(248,113,113,0.4)] bg-[rgba(248,113,113,0.06)]"
           }`}
         >
           {res.ok ? (
             <>
-              <div className={`font-semibold ${good ? "text-[#a5c3ff]" : "text-[var(--error)]"}`}>
+              <div className={`font-semibold ${good ? "text-[#86efac]" : "text-[var(--error)]"}`}>
                 {good ? "✓ Receipt valid — signed by the SIGDA attestor" : "✗ Does not verify"}
               </div>
               <div className="mt-2 font-mono text-[11px] text-faint break-all leading-relaxed">

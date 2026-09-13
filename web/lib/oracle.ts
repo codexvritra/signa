@@ -1,7 +1,7 @@
 /**
  * THE SIGNED ORACLE — the AI that can't delete its calls.
  *
- * Once a day the SIGNA brain makes one binary call on the Base Fear & Greed
+ * Once a day the SIGDA brain makes one binary call on the Base Fear & Greed
  * index, wallet-signs it, and stores it as a signed DM to a dedicated oracle
  * archive address. 24h later it resolves the call against the live signed feed
  * and signs the verdict too. Both records are EIP-191 signatures by the brain

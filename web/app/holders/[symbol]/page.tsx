@@ -97,7 +97,8 @@ export default async function HoldersPage({
             </h1>
             <p className="text-white/65 max-w-lg mt-5 text-[15px] leading-relaxed">
               every SIGDA-registered wallet currently holding{" "}
-              <span className="text-white">{token.name}</span> on @base.
+              <span className="text-white">{token.name}</span> on{" "}
+              {token.chain === "base" ? "Base" : "Robinhood Chain"}.
               on-chain verified, sorted by balance. DM any of them with one
               click — your wallet is your identity.
             </p>
@@ -114,22 +115,17 @@ export default async function HoldersPage({
                 </a>
               )}
               <a
-                href={`https://basescan.org/token/${token.address}`}
+                href={
+                  token.chain === "base"
+                    ? `https://basescan.org/token/${token.address}`
+                    : `https://robinhoodchain.blockscout.com/token/${token.address}`
+                }
                 target="_blank"
                 rel="noreferrer"
                 className="text-[12px] text-white/55 hover:text-white inline-flex items-center gap-1.5 font-mono"
               >
                 <ExternalLink className="size-3" />
                 contract
-              </a>
-              <a
-                href={`https://bankr.bot/agents/${token.address}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[12px] text-white/55 hover:text-white inline-flex items-center gap-1.5 font-mono"
-              >
-                <ExternalLink className="size-3" />
-                trade on bankr
               </a>
             </div>
           </div>
@@ -141,16 +137,8 @@ export default async function HoldersPage({
               <div className="border border-dashed border-white/15 px-6 py-10 font-mono text-[12px] text-white/55 max-w-xl">
                 <div className="text-white/85 mb-2">{`>`} no SIGDA users hold ${symbol} yet.</div>
                 <div className="text-white/40 mb-3">
-                  {`>`} be first — buy on Bankr, then revisit this page.
+                  {`>`} be first — hold ${symbol}, then revisit this page.
                 </div>
-                <a
-                  href={`https://bankr.bot/agents/${token.address}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[var(--accent)] hover:brightness-125 underline underline-offset-4"
-                >
-                  trade ${symbol} on bankr →
-                </a>
               </div>
             ) : (
               <div className="border border-white/10 bg-black/30 font-mono text-[12px] leading-[1.7]">

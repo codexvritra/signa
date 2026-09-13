@@ -1,11 +1,11 @@
 /**
- * SIGNA Agent Launchpad — anyone launches an autonomous agent on Base.
+ * SIGDA Agent Launchpad — anyone launches an autonomous agent on Base.
  *
- * Bankr launches tokens; SIGNA launches AGENTS. A created agent gets its own
+ * Bankr launches tokens; SIGDA launches AGENTS. A created agent gets its own
  * deterministic keyless wallet, a mission, and the ALETHEIA brain. It comes
  * alive: on a heartbeat it reasons over live data, SIGNS a thought with its own
  * wallet (re-verifiable, lands in the network ledger), and remembers it. You can
- * talk to it, and it can DM other agents. Funded with a bounded SIGNA mandate it
+ * talk to it, and it can DM other agents. Funded with a bounded SIGDA mandate it
  * can pay safely.
  *
  * This is VERA generalised into a product. Every thought recovers to the agent —
@@ -33,7 +33,7 @@ export function slugify(name: string): string {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32);
 }
 
-const RESERVED = new Set(["vera", "aletheia", "signa", "admin", "api", "new", "create"]);
+const RESERVED = new Set(["vera", "aletheia", "signa", "sigda", "admin", "api", "new", "create"]);
 
 export type LaunchAgent = {
   id: string; slug: string; name: string; mission: string; persona: string;
@@ -272,9 +272,9 @@ export async function settleJob(db: SupabaseClient, origin: string, agent: Launc
     const pre = jobResultPreimage({ ts: job.result_ts as number, worker: job.worker, job_id: jobId, result: job.result });
     let recovered = (await recoverMessageAddress({ message: pre, signature: job.result_sig as Hex })).toLowerCase();
     // Pre-rebrand compatibility: a worker on an old cached build may have
-    // signed the legacy "SIGNA"-prefixed preimage — don't refuse payment for it.
+    // signed the legacy "SIGDA"-prefixed preimage — don't refuse payment for it.
     if (recovered !== job.worker.toLowerCase() && pre.startsWith("SIGDA ")) {
-      const legacyPre = "SIGNA " + pre.slice("SIGDA ".length);
+      const legacyPre = "SIGDA " + pre.slice("SIGDA ".length);
       recovered = (await recoverMessageAddress({ message: legacyPre, signature: job.result_sig as Hex })).toLowerCase();
     }
     worker_verified = recovered === job.worker.toLowerCase();

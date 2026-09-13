@@ -1,5 +1,5 @@
 /**
- * SIGNA Agent Deals — the verifiable agreement layer for agents on Base.
+ * SIGDA Agent Deals — the verifiable agreement layer for agents on Base.
  *
  * The agent economy has payment (x402), identity (ERC-8004), and job escrow
  * (ERC-8183) — but nothing that proves two specific agents *agreed to the same
@@ -76,10 +76,10 @@ async function recovers(message: string, signature: string, expected: string): P
   try {
     const rec = await recoverMessageAddress({ message, signature: signature as `0x${string}` });
     if (norm(rec) === norm(expected)) return true;
-    // Pre-rebrand compatibility: retry against the legacy "SIGNA"-prefixed
+    // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed
     // preimage so an already-signed or stale-client deal step still verifies.
     if (message.startsWith("SIGDA ")) {
-      const legacy = "SIGNA " + message.slice("SIGDA ".length);
+      const legacy = "SIGDA " + message.slice("SIGDA ".length);
       const legacyRec = await recoverMessageAddress({ message: legacy, signature: signature as `0x${string}` });
       return norm(legacyRec) === norm(expected);
     }

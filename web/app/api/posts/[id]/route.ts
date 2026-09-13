@@ -16,7 +16,7 @@ export async function GET(
   }
   // signature + signed_message are exposed so any third party can
   // re-verify the post locally via viem.verifyMessage(...) without
-  // trusting signaagent.xyz. This is the basis for `signa verify <id>`
+  // trusting signaagent.xyz. This is the basis for `sigda verify <id>`
   // and any independent client that wants to audit our DB.
   const { data, error } = await supabase
     .from("posts")

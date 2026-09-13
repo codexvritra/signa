@@ -14,7 +14,6 @@ import { headers } from "next/headers";
 import { getHolderStatus } from "@/lib/holder-status";
 import { AgentRespondWidget } from "@/components/agent/AgentRespondWidget";
 import { RunSimButton } from "@/components/agent/RunSimButton";
-import { BuildOnGitlawbButton } from "@/components/agent/BuildOnGitlawbButton";
 import { DmAgentPanel } from "@/components/agent/DmAgentPanel";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +29,6 @@ type Agent = {
   avatar_seed: string | null;
   launched_at: string | null;
   launched_by: string | null;
-  gitlawb_did: string | null;
-  erc8004_token_id: string | null;
   bankr_token_address: string | null;
   miroshark_sim_id: string | null;
   runtime_enabled?: boolean;
@@ -65,50 +62,26 @@ type MirosharkStats = {
   latest_fired_at: string | null;
 };
 
-type GitlawbStats = {
-  ok: boolean;
-  gitlawb_did: string;
-  repo_count: number;
-  open_tasks: number;
-  recent_commits: number;
-  top_repos: Array<{
-    owner: string | null;
-    name: string | null;
-    description: string | null;
-    updated_at: string | null;
-  }>;
-};
-
 async function getPartnerStats(address: string): Promise<{
   miroshark: MirosharkStats | null;
-  gitlawb: GitlawbStats | null;
 }> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
   const host = h.get("host") || "www.signaagent.xyz";
-  const [m, g] = await Promise.all([
-    fetch(`${proto}://${host}/api/agents/${address}/miroshark-stats`, {
-      cache: "no-store",
-    })
-      .then((r) => (r.ok ? (r.json() as Promise<MirosharkStats>) : null))
-      .catch(() => null),
-    fetch(`${proto}://${host}/api/agents/${address}/gitlawb-stats`, {
-      cache: "no-store",
-    })
-      // 404 (no DID bound) is the common case — we just render the
-      // "not yet bound" placeholder, not an error.
-      .then((r) => (r.ok ? (r.json() as Promise<GitlawbStats>) : null))
-      .catch(() => null),
-  ]);
-  return { miroshark: m, gitlawb: g };
+  const m = await fetch(`${proto}://${host}/api/agents/${address}/miroshark-stats`, {
+    cache: "no-store",
+  })
+    .then((r) => (r.ok ? (r.json() as Promise<MirosharkStats>) : null))
+    .catch(() => null);
+  return { miroshark: m };
 }
 
 /** Compose a viral share-tweet URL pre-filled for this agent. */
 function shareTweetUrl(agent: Agent): string {
   const url = `https://www.signaagent.xyz/agent/${agent.address}`;
   const text =
-    `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on @base.\n\n` +
-    `wallet + XMTP DM + one-click tokenize via @bankrbot.\n\n` +
+    `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\n` +
+    `wallet + XMTP DM, live now.\n\n` +
     url;
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
 }
@@ -137,10 +110,9 @@ export default async function AgentProfilePage({
     // best-effort; chip just doesn't render on RPC failure
   }
 
-  // Live partner activity — read in parallel with the agent. Both endpoints
-  // are no-store, so the agent profile reflects the network state at request
-  // time. miroshark counts come from wallet-signed feed posts; gitlawb is
-  // pulled live from node.gitlawb.com against the agent's bound DID.
+  // Live partner activity — read in parallel with the agent. no-store, so
+  // the agent profile reflects the network state at request time. counts
+  // come from wallet-signed feed posts.
   const partner = await getPartnerStats(agent.address);
 
   return (
@@ -211,24 +183,14 @@ export default async function AgentProfilePage({
                   <MessageCircle className="size-3.5" />
                   DM
                 </Link>
-                {agent.bankr_token_address ? (
+                {agent.bankr_token_address && (
                   <Link
                     href={`/tokens/${agent.bankr_token_address}`}
-                    className="border border-violet-400/40 text-violet-200 text-sm font-semibold rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-violet-400/[0.06] transition uppercase tracking-wide"
+                    className="border border-green-400/40 text-green-200 text-sm font-semibold rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-green-400/[0.06] transition uppercase tracking-wide"
                     title="Open this agent's token page on SIGDA"
                   >
                     Trade
                   </Link>
-                ) : (
-                  <a
-                    href={`https://bankr.bot/agents/${agent.address}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="border border-violet-400/30 text-violet-300/80 text-sm rounded-md px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-violet-400/[0.04] transition"
-                    title="Tokenize on Bankr"
-                  >
-                    Tokenize
-                  </a>
                 )}
                 <a
                   href={shareTweetUrl(agent)}
@@ -267,65 +229,15 @@ export default async function AgentProfilePage({
                   href={`/?to=${agent.address}`}
                   cta="open"
                 />
-                <StackLine
-                  slot="token"
-                  status={agent.bankr_token_address ? "live" : "pending"}
-                  value={
-                    agent.bankr_token_address
-                      ? `via @bankrbot · ${shortAddress(agent.bankr_token_address)}`
-                      : "tokenize via @bankrbot — one click"
-                  }
-                  href={
-                    agent.bankr_token_address
-                      ? `https://bankr.bot/agents/${agent.bankr_token_address}`
-                      : `https://bankr.bot/agents/${agent.address}`
-                  }
-                  cta={
-                    agent.bankr_token_address ? "trade ↗" : "tokenize ↗"
-                  }
-                />
-                <StackLine
-                  slot="code"
-                  status={
-                    partner.gitlawb && partner.gitlawb.ok ? "live" : "pending"
-                  }
-                  value={
-                    partner.gitlawb && partner.gitlawb.ok
-                      ? `${partner.gitlawb.repo_count} repo${partner.gitlawb.repo_count === 1 ? "" : "s"} · ${partner.gitlawb.open_tasks} open task${partner.gitlawb.open_tasks === 1 ? "" : "s"} · ${partner.gitlawb.recent_commits} recent commit${partner.gitlawb.recent_commits === 1 ? "" : "s"} via @gitlawb`
-                      : agent.gitlawb_did
-                        ? `${agent.gitlawb_did.slice(0, 28)}… (gitlawb node offline)`
-                        : "push prompt → @gitlawb (decentralized git)"
-                  }
-                  href={
-                    partner.gitlawb && partner.gitlawb.ok
-                      ? `https://gitlawb.com/agents/${encodeURIComponent(partner.gitlawb.gitlawb_did)}`
-                      : agent.gitlawb_did
-                        ? `https://gitlawb.com/agents/${encodeURIComponent(agent.gitlawb_did)}`
-                        : "https://gitlawb.com/start"
-                  }
-                  cta={
-                    partner.gitlawb && partner.gitlawb.ok
-                      ? "view ↗"
-                      : agent.gitlawb_did
-                        ? "view ↗"
-                        : "set up ↗"
-                  }
-                />
-                <StackLine
-                  slot="id"
-                  status={agent.erc8004_token_id ? "live" : "pending"}
-                  value={
-                    agent.erc8004_token_id
-                      ? `ERC-8004 #${agent.erc8004_token_id}`
-                      : "ERC-8004 · trustless agent identity (roadmap)"
-                  }
-                  href={
-                    agent.erc8004_token_id
-                      ? `https://basescan.org/address/${agent.address}`
-                      : "https://eips.ethereum.org/EIPS/eip-8004"
-                  }
-                  cta={agent.erc8004_token_id ? "on-chain ↗" : "read EIP ↗"}
-                />
+                {agent.bankr_token_address && (
+                  <StackLine
+                    slot="token"
+                    status="live"
+                    value={`$${shortAddress(agent.bankr_token_address)}`}
+                    href={`/tokens/${agent.bankr_token_address}`}
+                    cta="trade ↗"
+                  />
+                )}
                 <StackLine
                   slot="sim"
                   status={
@@ -426,9 +338,9 @@ export default async function AgentProfilePage({
 
         {/* Public partner-action surfaces. Always render — the value is
             the public on-ramp itself (not a state readout). Any visitor
-            can fire a real MiroShark sim or seed a gitlawb repo against
-            this agent without a wallet. Verdicts + audit casts auto-post
-            back via the existing webhook + bot.signa paths. */}
+            can fire a real MiroShark sim against this agent without a
+            wallet. Verdicts auto-post back via the existing webhook +
+            bot.sigda paths. */}
         <section className="border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-8 space-y-4">
             <div>
@@ -436,15 +348,6 @@ export default async function AgentProfilePage({
                 $ sigda miroshark fire --agent {agent.address.slice(0, 10)}…
               </div>
               <RunSimButton
-                agentAddress={agent.address}
-                agentName={agent.name}
-              />
-            </div>
-            <div>
-              <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-                $ sigda gitlawb build --agent {agent.address.slice(0, 10)}…
-              </div>
-              <BuildOnGitlawbButton
                 agentAddress={agent.address}
                 agentName={agent.name}
               />
@@ -463,90 +366,12 @@ export default async function AgentProfilePage({
 
         {/* Ecosystem activity — LIVE partner data for this agent.
             Only renders if there's something to show. The whole panel
-            disappears for an agent that hasn't touched MiroShark or
-            gitlawb so it doesn't add noise to brand-new agents. */}
+            disappears for an agent that hasn't touched MiroShark yet
+            so it doesn't add noise to brand-new agents. */}
         <EcosystemActivityPanel
           agentAddress={agent.address}
           miroshark={partner.miroshark}
-          gitlawb={partner.gitlawb}
         />
-
-        {/* ERC-8004 / AEON — trustless agent identity */}
-        <section className="border-b border-white/[0.06]">
-          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-8 font-mono text-[12.5px] leading-[1.75] text-white/85">
-            <div className="text-[var(--accent)]/85 mb-3 text-[11px]">
-              $ erc-8004 register --address {agent.address.slice(0, 10)}…
-            </div>
-            <div className="pl-4 border-l border-white/[0.06]">
-              {agent.erc8004_token_id ? (
-                <>
-                  <div>
-                    <span className="text-emerald-300/85">✓ registered</span>
-                    {" "}on the AEON Identity Registry as token{" "}
-                    <a
-                      href={`https://etherscan.io/nft/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432/${agent.erc8004_token_id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[var(--accent)] hover:underline underline-offset-4"
-                    >
-                      #{agent.erc8004_token_id} ↗
-                    </a>
-                  </div>
-                  <div className="text-white/40 mt-1">
-                    metadata served from{" "}
-                    <a
-                      href={`/agent/${agent.address}/registration.json`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-white/70 hover:text-white underline underline-offset-4"
-                    >
-                      this signa-hosted JSON
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="text-white/65">
-                    not yet registered on Ethereum mainnet. signa hosts a
-                    ready-to-use registration JSON at:
-                  </div>
-                  <div className="mt-1 break-all">
-                    <a
-                      href={`/agent/${agent.address}/registration.json`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[var(--accent)] hover:underline underline-offset-4"
-                    >
-                      https://www.signaagent.xyz/agent/{agent.address}/registration.json
-                    </a>
-                  </div>
-                  <div className="text-white/35 mt-3 text-[11px]">
-                    # to register on mainnet (~$5-20 gas):
-                  </div>
-                  <pre className="text-[11px] text-white/70 bg-white/[0.02] p-2 mt-1 overflow-x-auto">
-                    {`REGISTRATION_URL='https://www.signaagent.xyz/agent/${agent.address}/registration.json' ./scripts/register-http.sh`}
-                  </pre>
-                  <div className="text-white/35 mt-3 text-[11px]">
-                    # or via the 8004.org web UI:
-                  </div>
-                  <div className="mt-1">
-                    <a
-                      href="https://www.8004.org"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[var(--accent)] hover:underline underline-offset-4"
-                    >
-                      [ open 8004.org ↗ ]
-                    </a>{" "}
-                    <span className="text-white/30 ml-2">
-                      paste the JSON contents when prompted
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
 
         <AgentRespondWidget address={agent.address} agentName={agent.name} />
 
@@ -614,22 +439,19 @@ function StackLine({
 
 /**
  * Renders a live "ecosystem activity" section for an agent — surfaces
- * MiroShark + gitlawb activity pulled from the v0.19 stats endpoints.
- * Hidden entirely if neither partner has anything to show, so blank
- * new agents don't get a noisy empty panel.
+ * MiroShark activity pulled from the v0.19 stats endpoint. Hidden
+ * entirely if there's nothing to show, so blank new agents don't get
+ * a noisy empty panel.
  */
 function EcosystemActivityPanel({
   agentAddress,
   miroshark,
-  gitlawb,
 }: {
   agentAddress: string;
   miroshark: MirosharkStats | null;
-  gitlawb: GitlawbStats | null;
 }) {
   const hasMiroshark = !!miroshark && miroshark.sims_fired > 0;
-  const hasGitlawb = !!gitlawb && gitlawb.ok;
-  if (!hasMiroshark && !hasGitlawb) return null;
+  if (!hasMiroshark) return null;
 
   return (
     <section className="border-b border-white/[0.06]">
@@ -693,64 +515,6 @@ function EcosystemActivityPanel({
               ) : (
                 <div className="mt-3 pt-3 border-t border-white/[0.06] text-[11px] text-white/45">
                   awaiting first swarm verdict…
-                </div>
-              )}
-            </div>
-          )}
-
-          {hasGitlawb && (
-            <div className="border border-white/10 bg-black/30 p-4 rounded-sm">
-              <div className="flex items-baseline justify-between mb-3">
-                <div className="font-mono text-[11px] text-emerald-300/85">
-                  gitlawb
-                </div>
-                <a
-                  href={`https://gitlawb.com/agents/${encodeURIComponent(gitlawb!.gitlawb_did)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[10px] text-[var(--accent)] hover:underline underline-offset-4"
-                >
-                  @gitlawb ↗
-                </a>
-              </div>
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <Stat label="repos" value={gitlawb!.repo_count} />
-                <Stat
-                  label="open tasks"
-                  value={gitlawb!.open_tasks}
-                  tint={gitlawb!.open_tasks > 0 ? "yellow" : "dim"}
-                />
-                <Stat
-                  label="commits"
-                  value={gitlawb!.recent_commits}
-                  tint="emerald"
-                />
-              </div>
-              <div className="text-[10px] font-mono text-white/35 truncate mb-2">
-                did: {gitlawb!.gitlawb_did}
-              </div>
-              {gitlawb!.top_repos.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                  <div className="text-[10px] uppercase tracking-wider text-white/35 mb-2">
-                    Top repos
-                  </div>
-                  <div className="space-y-1.5">
-                    {gitlawb!.top_repos.slice(0, 3).map((r, i) => (
-                      <div
-                        key={`${r.owner}/${r.name}-${i}`}
-                        className="text-[12px] leading-snug"
-                      >
-                        <span className="font-mono text-white/85">
-                          {r.owner ?? "?"}/{r.name ?? "?"}
-                        </span>
-                        {r.description && (
-                          <div className="text-[11px] text-white/50">
-                            {r.description.slice(0, 64)}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>

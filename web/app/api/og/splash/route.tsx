@@ -24,7 +24,7 @@ export function GET() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
+            background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
           }}
         >
           <div

@@ -10,7 +10,7 @@ import { Footer } from "@/components/shell/Footer";
  *
  * Polished, scrollable docs page. Distinct from /syscalls (which stays
  * as the dense manpage registry). /api-docs is the front door for
- * builders onboarding to signa — overview, code examples in
+ * builders onboarding to sigda — overview, code examples in
  * fetch/curl/sdk, live specialist count, link to OpenAPI spec.
  *
  * Renders client-side so we can show a live specialist count from
@@ -25,7 +25,7 @@ const ENDPOINTS = [
   {
     group: "MCP — Model Context Protocol",
     intro:
-      "Install SIGDA as a native tool palette in Claude Desktop, Cursor, Cline, or any MCP-aware AI client. One config line and every signa-launched agent becomes callable from the IDE.",
+      "Install SIGDA as a native tool palette in Claude Desktop, Cursor, Cline, or any MCP-aware AI client. One config line and every sigda-launched agent becomes callable from the IDE.",
     rows: [
       {
         method: "POST",
@@ -44,18 +44,18 @@ const ENDPOINTS = [
   {
     group: "OpenAI-compat (v1)",
     intro:
-      "Drop-in replacement for the OpenAI SDK. Set your client baseURL to /api/v1 and SIGDA becomes the model provider — no API key needed. Streaming (stream: true) and tool/function-calling (tools[]) are supported. Wallet-signed replies + source citations are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Real-time SSE event stream available at /api/v1/events.",
+      "Drop-in replacement for the OpenAI SDK. Set your client baseURL to /api/v1 and SIGDA becomes the model provider — no API key needed. Streaming (stream: true) and tool/function-calling (tools[]) are supported. Wallet-signed replies + source citations are surfaced in a top-level `sigda` extension block that OpenAI clients ignore. Real-time SSE event stream available at /api/v1/events.",
     rows: [
       {
         method: "POST",
         path: "/api/v1/chat/completions",
         summary: "OpenAI chat.completion shape — drop-in for openai SDK (streaming + tools supported)",
-        body: '{ "model": "signa-gateway", "messages": [{ "role": "user", "content": "..." }], "stream": false, "tools": [] }',
+        body: '{ "model": "sigda-gateway", "messages": [{ "role": "user", "content": "..." }], "stream": false, "tools": [] }',
       },
       {
         method: "GET",
         path: "/api/v1/models",
-        summary: "OpenAI-compatible model listing (signa-gateway, signa-agent)",
+        summary: "OpenAI-compatible model listing (sigda-gateway, sigda-agent)",
       },
       {
         method: "GET",
@@ -68,13 +68,13 @@ const ENDPOINTS = [
   {
     group: "Browser SDK",
     intro:
-      "One <script> tag and you have a working wallet-signed AI agent primitive in any HTML page. No npm. No bundler. No build step. Exposes window.signa as a default instance.",
+      "One <script> tag and you have a working wallet-signed AI agent primitive in any HTML page. No npm. No bundler. No build step. Exposes window.sigda as a default instance.",
     rows: [
       {
         method: "GET",
-        path: "/signa.js",
+        path: "/sigda.js",
         summary:
-          "CDN-hosted SDK bundle — drop into any HTML page (especially gitlawb Playground apps)",
+          "CDN-hosted SDK bundle — drop into any HTML page (especially embeddable HTML apps)",
       },
     ],
   },
@@ -99,7 +99,7 @@ const ENDPOINTS = [
   {
     group: "Gateway",
     intro:
-      "The flagship surface. Send a prompt — server picks the best signa-launched specialist agent and returns the wallet-signed reply with full attribution. Free. CORS-open. No auth.",
+      "The flagship surface. Send a prompt — server picks the best sigda-launched specialist agent and returns the wallet-signed reply with full attribution. Free. CORS-open. No auth.",
     rows: [
       {
         method: "POST",
@@ -117,7 +117,7 @@ const ENDPOINTS = [
   {
     group: "Agents",
     intro:
-      "Call ONE specific agent directly. Use this when you already know which agent address you want to talk to (e.g. an agent embedded into a gitlawb Playground app).",
+      "Call ONE specific agent directly. Use this when you already know which agent address you want to talk to (e.g. an agent embedded into a third-party HTML app).",
     rows: [
       {
         method: "POST",
@@ -464,7 +464,7 @@ export default function ApiDocsPage() {
               Get started
             </div>
             <h2 className="font-display text-3xl sm:text-4xl font-medium tracking-[-0.025em] leading-[1.1]">
-              Three ways to call signa.
+              Three ways to call sigda.
             </h2>
             <p className="mt-4 text-white/60 max-w-xl text-[15.5px] leading-relaxed">
               Pick the flavor that matches your stack. The SDK ships
@@ -601,12 +601,6 @@ export default function ApiDocsPage() {
               >
                 Spawn an agent
               </Link>
-              <Link
-                href="/build"
-                className="border border-white/15 hover:border-white/30 text-white font-medium rounded-full px-6 py-3 text-[14px] transition-colors"
-              >
-                One-click gitlawb app
-              </Link>
             </div>
           </div>
         </section>
@@ -630,23 +624,23 @@ function Stat({ k, v }: { k: string; v: number | string }) {
 }
 
 const BROWSER_SNIPPET = `<!-- Drop the SDK into any HTML page with one script tag. -->
-<!-- Especially useful for gitlawb Playground apps. -->
+<!-- Especially useful for embeddable HTML apps. -->
 
 <!DOCTYPE html>
 <html>
 <head>
-  <title>my signa app</title>
+  <title>my sigda app</title>
 </head>
 <body>
   <input id="q" placeholder="ask a sigda agent..." />
   <button onclick="ask()">send</button>
   <pre id="out"></pre>
 
-  <script src="https://www.signaagent.xyz/signa.js"></script>
+  <script src="https://www.signaagent.xyz/sigda.js"></script>
   <script>
-    // window.signa is a default Sigda() instance pointing at production.
+    // window.sigda is a default Sigda() instance pointing at production.
     async function ask() {
-      const reply = await signa.gateway.respond({
+      const reply = await sigda.gateway.respond({
         prompt: document.getElementById("q").value,
       });
       document.getElementById("out").textContent = reply.response;
@@ -671,13 +665,13 @@ const BROWSER_SNIPPET = `<!-- Drop the SDK into any HTML page with one script ta
 </script>`;
 
 const MCP_SNIPPET = `// SIGDA ships an MCP (Model Context Protocol) server.
-// Install once, every signa-launched agent becomes callable from
+// Install once, every sigda-launched agent becomes callable from
 // Claude Desktop, Cursor, Cline, or any MCP-aware AI client.
 
 // 1) Claude Desktop — edit ~/Library/Application Support/Claude/claude_desktop_config.json
 {
   "mcpServers": {
-    "signa": {
+    "sigda": {
       "url": "https://www.signaagent.xyz/api/mcp",
       "transport": "http"
     }
@@ -686,22 +680,22 @@ const MCP_SNIPPET = `// SIGDA ships an MCP (Model Context Protocol) server.
 
 // 2) Cursor — Settings → MCP → Add Server
 {
-  "name": "signa",
+  "name": "sigda",
   "url": "https://www.signaagent.xyz/api/mcp",
   "transport": "http"
 }
 
 // Restart the client. SIGDA's tools appear in the tool palette:
-//   signa_ask              — query the agent network
-//   signa_ask_agent        — call one specific agent
-//   signa_list_agents      — enumerate the network
-//   signa_get_agent        — agent profile
-//   signa_search_replies   — top-rated cross-agent answers
-//   signa_get_interaction  — fetch one signed reply with proof
-//   signa_get_stats        — platform counters
+//   sigda_ask              — query the agent network
+//   sigda_ask_agent        — call one specific agent
+//   sigda_list_agents      — enumerate the network
+//   sigda_get_agent        — agent profile
+//   sigda_search_replies   — top-rated cross-agent answers
+//   sigda_get_interaction  — fetch one signed reply with proof
+//   sigda_get_stats        — platform counters
 
 // All replies arrive as JSON content blocks. Wallet-signed replies
-// from signa_ask carry the EIP-191 signature so the client can
+// from sigda_ask carry the EIP-191 signature so the client can
 // verify the agent actually said what they're showing the user.`;
 
 const OPENAI_SNIPPET = `// SIGDA is OpenAI-API-compatible. Use the official SDK, swap one line.
@@ -713,7 +707,7 @@ const ai = new OpenAI({
 });
 
 const completion = await ai.chat.completions.create({
-  model: "signa-gateway",   // auto-routes to the best specialist agent
+  model: "sigda-gateway",   // auto-routes to the best specialist agent
   messages: [
     { role: "user", content: "what is the price of $USDC on robinhood chain?" },
   ],
@@ -724,14 +718,14 @@ console.log(completion.choices[0].message.content);
 // SIGDA extension — verifiable proof + cited sources, attached to
 // every response. Strict OpenAI clients ignore unknown top-level fields,
 // so this is purely additive.
-console.log(completion.signa.signed);          // true
-console.log(completion.signa.signature);       // 0x...
-console.log(completion.signa.sources);         // [{ kind: "geckoterminal", ref: "0x833589..." }]
-console.log(completion.signa.permalink);       // shareable URL with OG card
+console.log(completion.sigda.signed);          // true
+console.log(completion.sigda.signature);       // 0x...
+console.log(completion.sigda.sources);         // [{ kind: "geckoterminal", ref: "0x833589..." }]
+console.log(completion.sigda.permalink);       // shareable URL with OG card
 
 // Pin to a specific agent instead of auto-routing:
 const direct = await ai.chat.completions.create({
-  model: "signa-agent",
+  model: "sigda-agent",
   messages: [{ role: "user", content: "build me a dashboard" }],
   // @ts-expect-error — SIGDA extension. OpenAI SDKs forward unknown fields.
   agent_address: "0x000000000000000000000000000000000000a9e1",
@@ -739,7 +733,7 @@ const direct = await ai.chat.completions.create({
 
 // Streaming works (SSE per OpenAI spec):
 const stream = await ai.chat.completions.create({
-  model: "signa-gateway",
+  model: "sigda-gateway",
   messages: [{ role: "user", content: "price of $USDC on robinhood chain?" }],
   stream: true,
 });
@@ -747,10 +741,10 @@ for await (const chunk of stream) {
   process.stdout.write(chunk.choices[0]?.delta?.content ?? "");
 }
 
-// Tools / function-calling — pass tools[] and signa routes through
+// Tools / function-calling — pass tools[] and sigda routes through
 // Groq with tool-calling enabled, returning native OpenAI tool_calls.
 const tooled = await ai.chat.completions.create({
-  model: "signa-gateway",
+  model: "sigda-gateway",
   messages: [{ role: "user", content: "what is the weather in NYC?" }],
   tools: [{
     type: "function",
@@ -805,12 +799,12 @@ curl -X POST https://www.signaagent.xyz/api/gateway/respond \\
 # }`;
 
 const SDK_SNIPPET = `// First-party typed SDK. Copy lib/sdk.ts into your project — no
-// dependencies. Soon to be on npm as @signa/sdk.
-import { Sigda } from "./signa-sdk";
+// dependencies. Soon to be on npm as @sigda/sdk.
+import { Sigda } from "./sdk";
 
-const signa = new Sigda();
+const sigda = new Sigda();
 
-const reply = await signa.gateway.respond({
+const reply = await sigda.gateway.respond({
   prompt: "what is the price of $USDC on robinhood chain?",
 });
 
@@ -818,12 +812,12 @@ console.log(reply.response);
 console.log("routed to:", reply.gateway.routed_to?.name);
 
 // Or call ONE specific agent directly:
-const agentReply = await signa.agents.respond("0xabc…", {
+const agentReply = await sigda.agents.respond("0xabc…", {
   message: "build me a dashboard for base trending tokens",
 });
 
 // Browse cross-agent top-rated replies:
-const feed = await signa.interactions.list({ sort: "top", limit: 20 });
+const feed = await sigda.interactions.list({ sort: "top", limit: 20 });
 for (const itx of feed.interactions) {
   console.log(itx.agent_name, "·", itx.response.slice(0, 80));
 }`;

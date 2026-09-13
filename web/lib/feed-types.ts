@@ -64,7 +64,7 @@ export type SignedAction =
     }
   | {
       /**
-       * Full SIGNA agent launchpad commit. Signed by the **agent's** wallet
+       * Full SIGDA agent launchpad commit. Signed by the **agent's** wallet
        * (which is minted in-browser at launch time), proving ownership of
        * that wallet. The agent_submit message embeds extra launchpad
        * fields below — we hash the system prompt rather than putting the
@@ -84,7 +84,7 @@ export type SignedAction =
     }
   | {
       /**
-       * Signed by the agent wallet to authorize SIGNA to take custody
+       * Signed by the agent wallet to authorize SIGDA to take custody
        * of the private key and run the agent on its behalf.
        */
       kind: "agent_runtime_enable";
@@ -93,8 +93,8 @@ export type SignedAction =
     }
   | {
       /**
-       * Bind a gitlawb DID to your SIGNA user record. Signed by the
-       * user's SIGNA wallet. We don't currently verify ownership of
+       * Bind a gitlawb DID to your SIGDA user record. Signed by the
+       * user's SIGDA wallet. We don't currently verify ownership of
        * the gitlawb DID itself — that requires a UCAN signing flow
        * out of band. v1 accepts the claim; v2 will verify the DID.
        */
@@ -106,7 +106,7 @@ export type SignedAction =
   | {
       /**
        * Add/remove a token bookmark to the user's server-side
-       * watchlist. Signed by their SIGNA wallet so we know the change
+       * watchlist. Signed by their SIGDA wallet so we know the change
        * came from them.
        */
       kind: "watchlist_toggle";
@@ -118,7 +118,7 @@ export type SignedAction =
   | {
       /**
        * Toggle the user's daily AI digest opt-in flag. When enabled,
-       * digest.bot.signa DMs the user a personalized portfolio + alpha
+       * digest.bot.sigda DMs the user a personalized portfolio + alpha
        * summary once per 24h.
        */
       kind: "digest_toggle";
@@ -128,7 +128,7 @@ export type SignedAction =
     }
   | {
       /**
-       * Authorize SIGNA to take custody of the user's Bankr Agent API
+       * Authorize SIGDA to take custody of the user's Bankr Agent API
        * key (encrypted server-side) so they can type /trade <natural
        * language> in any chat and have Bankr execute the trade against
        * their Bankr-managed wallet. Passing connect=false purges the
@@ -211,7 +211,7 @@ export type SignedAction =
        *                Default "text". Recipients can ignore.
        *   protocol   — protocol identifier. Default "signa.dm.v1". Agents
        *                can declare custom protocols to handshake on top of
-       *                the SIGNA substrate.
+       *                the SIGDA substrate.
        *   in_reply_to — optional uuid of the DM this is replying to.
        *                Server validates that referenced DM exists.
        *   ts         — unix ms at sign time. Freshness window enforced
@@ -258,13 +258,13 @@ export type SignedAction =
        * v0.28 — Agent platform bridge self-registration.
        *
        * A wallet declares itself as a forwarding bridge between the
-       * SIGNA DM substrate and an external AI platform (Hermes via
+       * SIGDA DM substrate and an external AI platform (Hermes via
        * Ollama, OpenAI, Anthropic, Groq, OpenRouter, custom). The
        * wallet's signature on this envelope IS the proof that the
        * operator controls the bridge — no separate auth needed.
        *
        * Once registered the bridge is publicly discoverable via
-       * GET /api/bridges and other SIGNA agents can route DMs to its
+       * GET /api/bridges and other SIGDA agents can route DMs to its
        * address knowing they'll be forwarded to (platform, platform_model).
        */
       kind: "agent_bridge_register";
@@ -298,11 +298,11 @@ export type SignedAction =
     }
   | {
       /**
-       * v0.39 — Create a public or private SIGNA room. The wallet
+       * v0.39 — Create a public or private SIGDA room. The wallet
        * that signs this envelope becomes the room's creator/admin.
        * Slug is a URL-safe lowercase identifier the wallet picks at
        * create time; it is the canonical handle for the room across
-       * every federated SIGNA node.
+       * every federated SIGDA node.
        */
       kind: "signa_room_create";
       address: string;
@@ -324,9 +324,9 @@ export type SignedAction =
     }
   | {
       /**
-       * v0.39 — Post a wallet-signed message into a SIGNA room.
+       * v0.39 — Post a wallet-signed message into a SIGDA room.
        * Any wallet can post into any public room; the receiving
-       * SIGNA node re-verifies the signature before persisting.
+       * SIGDA node re-verifies the signature before persisting.
        */
       kind: "signa_room_message";
       address: string;
@@ -356,7 +356,7 @@ export type SignedAction =
   | {
       /**
        * v0.80 — Post a wallet-signed encrypted message into a private
-       * SIGNA room. Plaintext never reaches the server; the sender
+       * SIGDA room. Plaintext never reaches the server; the sender
        * encrypts plaintext once per member with libsodium sealed-box
        * and submits N ciphertexts alongside one envelope. The envelope
        * commits to the sha256 digest of the canonical
@@ -373,7 +373,7 @@ export type SignedAction =
     }
   | {
       /**
-       * v0.80 — Add a member to a private (encrypted) SIGNA room.
+       * v0.80 — Add a member to a private (encrypted) SIGDA room.
        * Signed by the room creator. The member can then read messages
        * encrypted for them and post new encrypted messages.
        */
@@ -385,12 +385,12 @@ export type SignedAction =
     }
   | {
       /**
-       * v0.84 — Set (or clear) a price on this wallet's SIGNA inbox.
+       * v0.84 — Set (or clear) a price on this wallet's SIGDA inbox.
        *
        * When set, anyone DMing this address must attach an x402 payment
        * (an EIP-3009 transferWithAuthorization signature over the asset,
        * USDC on Base by default) authorizing `price_raw` base units from
-       * the sender to `pay_to`. SIGNA verifies the authorization and
+       * the sender to `pay_to`. SIGDA verifies the authorization and
        * records it as the DM's payment receipt; settlement is a
        * permissionless broadcast performed out of band.
        *
@@ -748,7 +748,7 @@ export const MAX_DM_BODY_LENGTH = 8000;
 export const MAX_ROOM_MESSAGE_LENGTH = 8000;
 /** Slug regex for room handles: 3-32 chars, lowercase ascii + digits + dashes. */
 export const ROOM_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
-/** Default DM protocol id for the SIGNA wallet-signed substrate. */
+/** Default DM protocol id for the SIGDA wallet-signed substrate. */
 export const DEFAULT_DM_PROTOCOL = "signa.dm.v1";
 
 export type HolderChip = {

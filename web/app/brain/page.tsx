@@ -31,7 +31,7 @@ export default function BrainPage() {
           <div aria-hidden className="absolute inset-0 pointer-events-none opacity-60"
             style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%)" }} />
           <div className="relative max-w-4xl mx-auto px-6 lg:px-10 pt-16 pb-12 text-center">
-            <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">signa brain · the agent&apos;s own mind</div>
+            <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">sigda brain · the agent&apos;s own mind</div>
             <h1 className="font-display text-5xl sm:text-7xl font-medium tracking-[-0.04em] leading-[0.92]">
               An agent with
               <br />
@@ -46,8 +46,8 @@ export default function BrainPage() {
             </p>
             <div className="mt-8 inline-flex flex-col items-start gap-1 border border-white/10 rounded-lg bg-black/40 px-5 py-4 text-left font-mono text-[13px]">
               <span className="text-white/40"># give it a goal — it reasons, calls real tools, answers</span>
-              <span><span className="text-cyan-300">const</span> r = <span className="text-cyan-300">await</span> os.think(<span className="text-[var(--accent)]">&quot;what is the base market doing and who runs surplus&quot;</span>)</span>
-              <span className="text-white/55">r.plan   <span className="text-white/30">// [ root.market(), bankr.resolve(@mac_eth) ]</span></span>
+              <span><span className="text-cyan-300">const</span> r = <span className="text-cyan-300">await</span> os.think(<span className="text-[var(--accent)]">&quot;what is ethereum's price doing and how deep is aave's liquidity&quot;</span>)</span>
+              <span className="text-white/55">r.plan   <span className="text-white/30">// [ token.price(ethereum), defi.tvl(aave) ]</span></span>
               <span className="text-white/55">r.answer <span className="text-white/30">// grounded in the live tool results, signed</span></span>
             </div>
             <div className="mt-7">

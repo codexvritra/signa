@@ -5,7 +5,7 @@ import { getPartnerReceipts, type PartnerKey } from "@/lib/receipts";
 
 const TITLE = "Receipts · SIGDA";
 const DESCRIPTION =
-  "Public ledger of wallet-signed activity SIGDA produces for Bankr, gitlawb, Aeon, and MiroShark. Counts the rooms, messages, and unique signers per partner network.";
+  "Public ledger of wallet-signed room activity on SIGDA, classified by network (including historical Bankr and gitlawb rooms, plus MiroShark). Counts the rooms, messages, and unique signers per network.";
 const URL = "https://www.signaagent.xyz/receipts";
 
 export const metadata = {
@@ -33,7 +33,6 @@ const TONE: Record<PartnerKey, string> = {
   bankr: "text-[var(--accent)] border-[var(--accent)]/40",
   gitlawb: "text-cyan-300 border-cyan-300/40",
   miroshark: "text-fuchsia-300 border-fuchsia-300/40",
-  aeon: "text-emerald-300 border-emerald-300/40",
   community: "text-white/60 border-white/15",
 };
 
@@ -84,13 +83,11 @@ export default async function ReceiptsPage() {
               Receipts.
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
-              Every wallet-signed room and message SIGDA produces for the
-              Bankr, gitlawb, Aeon, and MiroShark networks, counted live.
-              Each row classifies by partner so the team behind each one
-              can see exactly what cross-network identity their users
-              show up with on SIGDA. No tracking pixels, no analytics
-              vendor — just rows in the database, each one signed by a
-              real wallet.
+              Every wallet-signed room and message on SIGDA, counted live
+              and classified by network — historical Bankr and gitlawb
+              rooms, plus the live MiroShark and community networks. No
+              tracking pixels, no analytics vendor — just rows in the
+              database, each one signed by a real wallet.
             </p>
             <div className="mt-8 grid grid-cols-3 gap-6 max-w-2xl">
               <Stat label="rooms" value={totals.rooms} />
@@ -169,8 +166,7 @@ export default async function ReceiptsPage() {
               <div>
                 <div className="font-medium text-white mb-1.5">No middleman.</div>
                 <p>
-                  When SIGDA introduces a partner to their own community,
-                  the proof of traffic is here, signed by real wallets,
+                  The proof of traffic is here, signed by real wallets,
                   not a screenshot we control.
                 </p>
               </div>

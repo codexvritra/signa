@@ -5,7 +5,7 @@
  * federation cron at /api/cron/sync-nodes pulls peer URLs from. Set
  * SIGNA_NODE_REGISTRY once redeployed there (see contracts/script/Deploy.s.sol).
  *
- * Used by /nodes UI to render every federated SIGNA node, plus an
+ * Used by /nodes UI to render every federated SIGDA node, plus an
  * optional liveness check against each node's /api/node/info endpoint.
  *
  * The contract is permissionless: any wallet can register a node URL.

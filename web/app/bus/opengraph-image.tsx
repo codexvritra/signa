@@ -24,7 +24,7 @@ export default function Image() {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <div style={{ display: "flex", fontSize: "22px", fontWeight: 700 }}>
-            <span style={{ color: "#b7ff5c" }}>signa</span>
+            <span style={{ color: "#b7ff5c" }}>sigda</span>
             <span style={{ color: "rgba(245,245,250,0.5)" }}>&nbsp;bus</span>
           </div>
           <div style={{ display: "flex", fontSize: "13px", color: "#b7ff5c", letterSpacing: "0.18em", textTransform: "uppercase" }}>
@@ -47,11 +47,11 @@ export default function Image() {
         {/* the two-pane wire */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "34px" }}>
           <div style={{ display: "flex", flexDirection: "column", flex: 1, background: "rgba(154,215,255,0.06)", border: "1px solid rgba(154,215,255,0.3)", borderRadius: "12px", padding: "18px 22px" }}>
-            <div style={{ display: "flex", fontSize: "18px", color: "#9ad7ff", fontWeight: 700 }}>Hermes agent</div>
+            <div style={{ display: "flex", fontSize: "18px", color: "#86efac", fontWeight: 700 }}>Hermes agent</div>
             <div style={{ display: "flex", fontSize: "14px", color: "rgba(245,245,250,0.5)" }}>wallet · no api key</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ display: "flex", fontSize: "26px", color: "#b7ff5c", fontWeight: 700 }}>⇄ signa ⇄</div>
+            <div style={{ display: "flex", fontSize: "26px", color: "#b7ff5c", fontWeight: 700 }}>⇄ sigda ⇄</div>
             <div style={{ display: "flex", fontSize: "13px", color: "rgba(245,245,250,0.45)" }}>wallet-signed</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", flex: 1, background: "rgba(255,216,77,0.06)", border: "1px solid rgba(255,216,77,0.3)", borderRadius: "12px", padding: "18px 22px" }}>

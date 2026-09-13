@@ -20,7 +20,7 @@
 
 import { buildMessageToSign } from "./feed-types";
 
-const KEY = "signa:watchlist";
+const KEY = "sigda:watchlist";
 
 function safeRead(): string[] {
   if (typeof window === "undefined") return [];

@@ -25,9 +25,9 @@ export function OPTIONS() {
 }
 
 const TIERS: { min: number; name: string; color: string }[] = [
-  { min: 1000, name: "Elite", color: "#a98bff" },
+  { min: 1000, name: "Elite", color: "#4ade80" },
   { min: 300, name: "Trusted", color: "#5ee68f" },
-  { min: 80, name: "Established", color: "#6ea2ff" },
+  { min: 80, name: "Established", color: "#4ade80" },
   { min: 15, name: "Active", color: "#f5b042" },
   { min: 0, name: "Newcomer", color: "#8aa0c8" },
 ];

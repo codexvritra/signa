@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Verify } from "./Verify";
 import { shortAddr, type SignedNote } from "@/lib/note";
 import { SITE, miniAppEmbedMeta, noteEmbedImage, MINIAPP } from "@/lib/miniapp";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 export const dynamic = "force-dynamic";
 
@@ -70,18 +71,19 @@ export default async function NotePage({
       <div className="max-w-[600px] mx-auto px-5 py-7">
         <div className="flex items-center justify-between">
           <Link href="/mini" className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+            <div className="size-8 rounded-full bg-black flex items-center justify-center">
+              <LogoMark size={16} className="text-white" />
+            </div>
             <div className="font-display font-semibold tracking-tight">SIGDA</div>
           </Link>
-          <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">
+          <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#22c55e] border border-[rgba(34,197,94,0.4)] rounded-full px-3 py-1">
             ✓ SIGNED ON ROBINHOOD CHAIN
           </div>
         </div>
 
         <div className="glass rounded-2xl p-5 mt-6">
           {note.to_label ? (
-            <div className="text-[12px] text-[#a5c3ff] mb-2">→ to @{note.to_label}</div>
+            <div className="text-[12px] text-[#86efac] mb-2">→ to @{note.to_label}</div>
           ) : null}
           <div className="text-[22px] leading-relaxed">{note.body}</div>
           <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-col gap-1.5 text-[12px] text-faint font-mono">
@@ -91,7 +93,7 @@ export default async function NotePage({
                 href={`https://basescan.org/address/${note.address}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#a5c3ff] hover:underline"
+                className="text-[#86efac] hover:underline"
               >
                 {note.address}
               </a>
@@ -112,7 +114,7 @@ export default async function NotePage({
 
         <Link
           href="/mini"
-          className="mt-6 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]"
+          className="mt-6 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#22c55e] to-[#16a34a]"
         >
           Sign your own on Robinhood Chain
         </Link>

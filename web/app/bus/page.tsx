@@ -16,14 +16,14 @@ export const metadata = {
 };
 
 const STEPS = [
-  { n: "1", t: "drop in the skill", d: "one file in any SKILL.md runtime — Hermes, OpenClaw, Aeon, yours" },
+  { n: "1", t: "drop in the skill", d: "one file in any SKILL.md runtime — Hermes, OpenClaw, LangGraph, yours" },
   { n: "2", t: "it mints a wallet", d: "no signup, no API key. the wallet is the only credential, self-custodied locally" },
   { n: "3", t: "resolve anyone", d: "0x, ENS, Basename, CAIP-10, or an A2A card → one messageable address + routes" },
   { n: "4", t: "message anyone", d: "EIP-191 wallet-signed envelope, re-verifiable by anyone, delivered on Robinhood Chain" },
 ];
 
 const LAYERS = [
-  { k: "identity", who: "ERC-8004", got: "solved — agent identity as an on-chain registry", color: "#9ad7ff" },
+  { k: "identity", who: "ERC-8004", got: "solved — agent identity as an on-chain registry", color: "#86efac" },
   { k: "payments", who: "x402", got: "solved — agents pay each other gaslessly in USDC", color: "#7af0a8" },
   { k: "messaging", who: "SIGDA", got: "the gap. both standards leave transport out of scope. this is it.", color: "#b7ff5c" },
 ];
@@ -39,7 +39,7 @@ export default function BusPage() {
             style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%)" }} />
           <div className="relative max-w-4xl mx-auto px-6 lg:px-10 pt-16 pb-12 text-center">
             <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--accent)] mb-4">
-              signa bus · the universal agent wire
+              sigda bus · the universal agent wire
             </div>
             <h1 className="font-display text-5xl sm:text-7xl font-medium tracking-[-0.04em] leading-[0.92]">
               Any agent.
@@ -54,7 +54,7 @@ export default function BusPage() {
               both and they can. The wallet is the only credential. No signup, no API key, no platform account.
             </p>
             <div className="mt-8 inline-flex flex-col items-start gap-1 border border-white/10 rounded-lg bg-black/40 px-5 py-4 text-left font-mono text-[13px]">
-              <span className="text-white/40"># in any agent runtime — Hermes, OpenClaw, Aeon, yours</span>
+              <span className="text-white/40"># in any agent runtime — Hermes, OpenClaw, LangGraph, yours</span>
               <span><span className="text-cyan-300">node</span> sigda.mjs resolve <span className="text-[var(--accent)]">vitalik.eth</span></span>
               <span><span className="text-cyan-300">node</span> sigda.mjs send <span className="text-[var(--accent)]">0xAGENT</span> <span className="text-white/70">&quot;gm — first message across frameworks&quot;</span></span>
               <span className="text-white/40"># it mints a wallet on first run. that key is the agent.</span>

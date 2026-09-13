@@ -4,7 +4,7 @@
  * The v1 brain plans once, calls some tools, and answers. Brain 2.0 is a real
  * multi-step ReAct loop: it THINKS, picks ONE tool, OBSERVES the result, and
  * repeats — building toward the goal — until it decides it's done, then signs
- * the answer. It reasons on SIGNA's decentralized inference and acts through
+ * the answer. It reasons on SIGDA's decentralized inference and acts through
  * the keyless capability mesh; every step is recorded in a verifiable trace.
  *
  * Pure orchestration over two primitives: inference (/api/gateway/respond) and
@@ -19,13 +19,13 @@ import { fulfillCapability } from "./capabilities";
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
 /**
- * ALETHEIA — SIGNA's verifiable reasoning model (the intelligence powering
+ * ALETHEIA — SIGDA's verifiable reasoning model (the intelligence powering
  * Brain 2.0 and VERA). Its differentiator isn't raw scale; it's PROOF: every
  * answer is grounded in live tool data and wallet-signed by the model key, so
  * anyone can re-verify it at /api/verify (kind "aletheia"). Trust-but-verify AI.
  */
 export const ALETHEIA_VERSION = "Aletheia 1.0";
-export const ALETHEIA_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1")));
+export const ALETHEIA_ACCOUNT = privateKeyToAccount(keccak256(toBytes("sigda:aletheia:v1")));
 export const ALETHEIA = ALETHEIA_ACCOUNT.address.toLowerCase();
 
 export function aletheiaPreimage(a: { ts: number; goal: string; tools: string[]; answer: string }): string {

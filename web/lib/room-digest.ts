@@ -1,12 +1,12 @@
 /**
  * Room digest summarizer (v0.68).
  *
- * Given a window of wallet-signed messages from a SIGNA room, return a
+ * Given a window of wallet-signed messages from a SIGDA room, return a
  * short Groq-generated digest. Pure helper — no DB writes, no
  * signing. The caller composes the final wallet-signed post.
  *
  * Falls back to a deterministic template if GROQ_API_KEY is unset so
- * the digest endpoint stays useful in dev / self-hosted SIGNA nodes
+ * the digest endpoint stays useful in dev / self-hosted SIGDA nodes
  * without an LLM provider configured.
  */
 import Groq from "groq-sdk";

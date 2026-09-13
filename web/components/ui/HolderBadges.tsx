@@ -2,10 +2,8 @@ import { cn } from "@/lib/cn";
 import type { HolderChip } from "@/lib/feed-types";
 
 const COLORS: Record<string, string> = {
-  BNKR: "border-violet-400/30 text-violet-200 bg-violet-400/10",
-  GITLAWB: "border-emerald-400/30 text-emerald-200 bg-emerald-400/10",
   MIROSHARK: "border-cyan-400/30 text-cyan-200 bg-cyan-400/10",
-  USDC: "border-blue-400/30 text-blue-200 bg-blue-400/10",
+  USDG: "border-[var(--accent)]/30 text-[var(--accent-text)] bg-[var(--accent-dim)]",
 };
 
 /**
@@ -57,7 +55,7 @@ export function EcosystemPill({ className }: { className?: string }) {
         "rounded-sm font-medium uppercase tracking-[0.08em] inline-flex items-center text-[9px] px-1.5 py-0 border border-[var(--accent)]/30 bg-[var(--accent-dim)] text-[var(--accent)]",
         className,
       )}
-      title="Wallet holds at least one partner token (BNKR / GITLAWB / MIROSHARK)"
+      title="Wallet holds at least one ecosystem token (MIROSHARK)"
     >
       Ecosystem
     </span>

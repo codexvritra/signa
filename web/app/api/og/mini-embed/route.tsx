@@ -17,7 +17,7 @@ export function GET() {
           justifyContent: "space-between",
           background: "#0a0a0f",
           backgroundImage:
-            "radial-gradient(ellipse 70% 55% at 85% -10%, rgba(91,141,239,0.30), transparent 60%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(139,92,246,0.26), transparent 60%)",
+            "radial-gradient(ellipse 70% 55% at 85% -10%, rgba(34,197,94,0.30), transparent 60%), radial-gradient(ellipse 60% 50% at 0% 110%, rgba(22,163,74,0.26), transparent 60%)",
           padding: 72,
           fontFamily: "sans-serif",
         }}
@@ -43,7 +43,7 @@ export function GET() {
           >
             Sign a message on Robinhood Chain.
           </div>
-          <div style={{ color: "#a5c3ff", fontSize: 38, fontWeight: 500 }}>
+          <div style={{ color: "#86efac", fontSize: 38, fontWeight: 500 }}>
             One tap. No account. Your wallet signature is the proof.
           </div>
         </div>
@@ -58,9 +58,9 @@ export function GET() {
           }}
         >
           <div style={{ display: "flex", gap: 16 }}>
-            <span style={{ color: "#5b8def" }}>wallet-signed</span>
+            <span style={{ color: "#22c55e" }}>wallet-signed</span>
             <span>·</span>
-            <span style={{ color: "#8b5cf6" }}>re-verifiable</span>
+            <span style={{ color: "#16a34a" }}>re-verifiable</span>
             <span>·</span>
             <span>on Robinhood Chain</span>
           </div>

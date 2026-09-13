@@ -15,12 +15,12 @@
  *
  * Witness shape: matches the convention already live on Robinhood Chain's
  * Canopy x402 facilitator (facilitator.canopyfinance.io) — `X402Witness(address
- * to, bytes32 serviceId)` — rather than inventing a SIGNA-specific shape, so
+ * to, bytes32 serviceId)` — rather than inventing a SIGDA-specific shape, so
  * a signed payment stays interoperable with other x402 facilitators on this
  * chain. `to` binds the actual payee (Permit2's own fields only commit a
  * `spender` — the address allowed to call permitWitnessTransferFrom — which
  * may be a facilitator relaying on the payee's behalf, not the payee itself);
- * `serviceId` scopes the signature to one SIGNA payment surface so it can't
+ * `serviceId` scopes the signature to one SIGDA payment surface so it can't
  * be replayed as payment for a different service.
  */
 import { keccak256, encodeAbiParameters, toBytes, type Address, type Hex } from "viem";
@@ -51,9 +51,9 @@ export const PERMIT2_WITNESS_TYPES = {
   ],
 } as const;
 
-/** Stable per-surface service id — scopes a signature to one SIGNA payment kind. */
+/** Stable per-surface service id — scopes a signature to one SIGDA payment kind. */
 export function serviceId(surface: string): Hex {
-  return keccak256(toBytes(`signa:x402:${surface}:v1`));
+  return keccak256(toBytes(`sigda:x402:${surface}:v1`));
 }
 
 export const PAID_DM_SERVICE_ID = serviceId("paid-dm");
@@ -91,7 +91,7 @@ export function buildPermit2WitnessMessage(a: {
  * The on-chain witness hash Permit2's `hashWithWitness` expects as its
  * `witness` calldata argument (a pre-hashed bytes32 — Permit2 itself never
  * parses witness contents). Only needed by code that actually BROADCASTS a
- * `permitWitnessTransferFrom` call; pure sign/verify (SIGNA's role) never
+ * `permitWitnessTransferFrom` call; pure sign/verify (SIGDA's role) never
  * needs this; that side uses the full nested `witness: {to, serviceId}`
  * object in typed-data `message` so wallets display + hash it per normal
  * EIP-712 nested-struct rules.

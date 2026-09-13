@@ -3,7 +3,7 @@ import { Footer } from "@/components/shell/Footer";
 import { VerifyForm } from "./VerifyForm";
 
 export const metadata = {
-  title: "verify signature · signa",
+  title: "verify signature · sigda",
   description:
     "Paste any EIP-191 signature + signed message + address, run the check in-browser. No server, no trust.",
 };
@@ -39,7 +39,7 @@ export default function VerifyPage() {
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-verify — eip-191 signature checker (client-side, no
+              sigda-verify — eip-191 signature checker (client-side, no
               server round-trip)
             </div>
           </section>
@@ -56,7 +56,7 @@ export default function VerifyPage() {
               </code>{" "}
               in your browser — works for EOA (secp256k1) and ERC-1271
               (smart-account) signatures. signature recovery happens on
-              your machine; signa servers see nothing.
+              your machine; sigda servers see nothing.
             </div>
           </section>
 

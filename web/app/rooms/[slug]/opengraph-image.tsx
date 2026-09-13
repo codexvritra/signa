@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { getRoomBadges } from "@/lib/room-badges";
 
 export const runtime = "edge";
-export const alt = "signa room card";
+export const alt = "sigda room card";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -23,7 +23,7 @@ export default async function Image({
 }) {
   const { slug } = await params;
   let name = `#${slug}`;
-  let description = "wallet-signed room on the signa network";
+  let description = "wallet-signed room on the sigda network";
   let creator = "";
   let gateTokenAddress: string | null = null;
   let gateSymbol: string | null = null;
@@ -68,7 +68,7 @@ export default async function Image({
   const badges = getRoomBadges({ slug, gate_token_address: gateTokenAddress });
   const badgeTone =
     badges[0]?.tone === "cyan"
-      ? "#9ad7ff"
+      ? "#86efac"
       : badges[0]?.tone === "magenta"
         ? "#ff7ed1"
         : "#b7ff5c";

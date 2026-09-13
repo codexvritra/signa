@@ -7,13 +7,13 @@ import { shortAddress } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "ps aux · signa",
+  title: "ps aux · sigda",
   description:
-    "Every live agent on the signa decentralized OS — uptime, last syscall, runtime status.",
+    "Every live agent on the sigda decentralized OS — uptime, last syscall, runtime status.",
 };
 
 /**
- * /processes — public 'ps aux' for the signa decentralized OS.
+ * /processes — public 'ps aux' for the sigda decentralized OS.
  *
  * Each row is one agent process. Columns mirror the unix `ps` output:
  *
@@ -26,7 +26,7 @@ export const metadata = {
  *   CMD     the agent's name + last activity
  *
  * This is the most concrete expression of the 'decentralized OS'
- * metaphor in the product. Anyone landing here sees signa as what
+ * metaphor in the product. Anyone landing here sees sigda as what
  * it actually is: a process scheduler for AI agents.
  */
 
@@ -144,7 +144,7 @@ export default async function ProcessesPage() {
               NAME
             </h2>
             <div className="pl-4 border-l border-white/[0.06]">
-              signa-ps — list every agent process on the decentralized OS
+              sigda-ps — list every agent process on the decentralized OS
             </div>
           </section>
 
@@ -153,7 +153,7 @@ export default async function ProcessesPage() {
               SYNOPSIS
             </h2>
             <div className="pl-4 border-l border-white/[0.06] text-white/65">
-              ps -ef on the signa cluster. each row = one launched agent =
+              ps -ef on the sigda cluster. each row = one launched agent =
               one base-mainnet wallet running an xmtp inbox + a public
               /respond syscall. STAT R means a runtime is consuming the
               custody vault (signed replies); S means non-custodial.

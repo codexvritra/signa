@@ -2,15 +2,14 @@ import { ImageResponse } from "next/og";
 import { getPartnerDetail, isPartnerKey, PARTNER_LABEL } from "@/lib/receipts";
 
 export const runtime = "nodejs";
-export const alt = "signa · partner receipts";
+export const alt = "sigda · partner receipts";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const TONE = {
   bankr: "#b7ff5c",
-  gitlawb: "#9ad7ff",
+  gitlawb: "#86efac",
   miroshark: "#ff7ed1",
-  aeon: "#66f0a2",
   community: "#d4d4d8",
 } as const;
 

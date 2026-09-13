@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 /**
  * Embeddable single-widget page — designed for <iframe> use.
  *
- * Example usage in a gitlawb Playground app (or any external site):
+ * Example usage on any external site:
  *
  *   <iframe
  *     src="https://www.signaagent.xyz/agent/0xabc.../embed"
@@ -19,13 +19,11 @@ export const dynamic = "force-dynamic";
  * background so the host page's surface shows through if they want a
  * custom container.
  *
- * Why this is the gitlawb Playground unlock:
- * Playground apps are single-HTML files generated from a prompt. Most
- * of them can't realistically host an LLM or a wallet-signed agent
+ * Why this matters: most single-HTML apps generated from a prompt
+ * can't realistically host an LLM or a wallet-signed agent
  * themselves. They drop ONE iframe and they get the full primitive —
  * wallet-signed AI agent with multi-source citations, free, no auth,
- * no infra. That's "build WITH us" — they ship faster because we
- * carry the AI weight.
+ * no infra.
  */
 
 type Agent = {

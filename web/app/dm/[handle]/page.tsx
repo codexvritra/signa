@@ -13,7 +13,7 @@ type ResolvedUser = {
   address: string;
   basename: string | null;
   ens_name: string | null;
-  on_signa: boolean;
+  on_sigda: boolean;
   source: string;
 };
 
@@ -79,10 +79,10 @@ export default async function DmHandlePage({
           <section className="border-b border-white/[0.06]">
             <div className="max-w-2xl mx-auto px-6 lg:px-10 pt-20 pb-16">
               <div className="font-mono text-[11px] text-amber-300 mb-4">
-                $ signa resolve {handle}
+                $ sigda resolve {handle}
               </div>
               <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.035em] leading-tight">
-                not on signa yet.
+                not on sigda yet.
               </h1>
               <p className="text-white/65 mt-5 text-[15px] leading-relaxed max-w-lg">
                 <span className="font-mono text-white">{handle}</span> doesn&apos;t
@@ -110,7 +110,7 @@ export default async function DmHandlePage({
           address={resolved.address}
           basename={resolved.basename}
           ensName={resolved.ens_name}
-          onSigna={resolved.on_signa}
+          onSigna={resolved.on_sigda}
           source={resolved.source}
         />
       </main>

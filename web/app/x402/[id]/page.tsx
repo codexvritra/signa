@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { X402Verify } from "./X402Verify";
 import { SITE, miniAppEmbedMeta } from "@/lib/miniapp";
+import { LogoMark } from "@/components/ui/LogoMark";
 
 export const dynamic = "force-dynamic";
 
@@ -91,11 +92,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
       <div className="max-w-[620px] mx-auto px-5 py-8">
         <div className="flex items-center justify-between">
           <Link href="/x402" className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/signa-logo.png" alt="SIGDA" className="size-8 rounded-full" />
+            <div className="size-8 rounded-full bg-black flex items-center justify-center">
+              <LogoMark size={16} className="text-white" />
+            </div>
             <div className="font-display font-semibold tracking-tight">SIGDA · x402</div>
           </Link>
-          <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#5b8def] border border-[rgba(91,141,239,0.4)] rounded-full px-3 py-1">
+          <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#22c55e] border border-[rgba(34,197,94,0.4)] rounded-full px-3 py-1">
             ✓ x402 RECEIPT
           </div>
         </div>
@@ -107,19 +109,19 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         <div className="text-[14px] text-muted mt-1">{r.request?.item ?? "agent purchase"}</div>
 
         <div className="grid sm:grid-cols-2 gap-3 mt-5">
-          <Row label="1 · request" c="#5b8def">
+          <Row label="1 · request" c="#22c55e">
             <div className="text-[13px]">{r.request?.item ?? "agent purchase"}</div>
             <div className="mt-1 text-[11px] text-faint font-mono">buyer {short(r.buyer)}</div>
           </Row>
-          <Row label="2 · terms" c="#8b5cf6">
+          <Row label="2 · terms" c="#16a34a">
             <div className="text-[13px]">{r.terms?.description ?? usdg(r.amount)}</div>
             <div className="mt-1 text-[11px] text-faint font-mono">payTo {short(r.seller)}</div>
           </Row>
-          <Row label="3 · x402 payment" c="#5b8def">
+          <Row label="3 · x402 payment" c="#22c55e">
             <div className="text-[13px]">Permit2 witness-transfer authorization ✓ verified</div>
             <div className="mt-1 text-[11px] text-faint font-mono break-all">sig {short(r.payment?.signature ?? "")}</div>
           </Row>
-          <Row label="4 · delivery" c="#8b5cf6">
+          <Row label="4 · delivery" c="#16a34a">
             <div className="text-[13px]">{r.output?.delivered ? "delivered ✓" : "—"}</div>
             <div className="mt-1 text-[11px] text-faint font-mono">hash {short(r.delivery_hash)}</div>
           </Row>
@@ -128,13 +130,13 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         <div className="glass rounded-2xl p-4 mt-4 text-[12px] text-faint font-mono flex flex-col gap-1.5">
           <div>
             buyer:{" "}
-            <a href={`https://robinhoodchain.blockscout.com/address/${r.buyer}`} target="_blank" rel="noreferrer" className="text-[#a5c3ff] hover:underline">
+            <a href={`https://robinhoodchain.blockscout.com/address/${r.buyer}`} target="_blank" rel="noreferrer" className="text-[#86efac] hover:underline">
               {r.buyer}
             </a>
           </div>
           <div>
             seller:{" "}
-            <a href={`https://robinhoodchain.blockscout.com/address/${r.seller}`} target="_blank" rel="noreferrer" className="text-[#a5c3ff] hover:underline">
+            <a href={`https://robinhoodchain.blockscout.com/address/${r.seller}`} target="_blank" rel="noreferrer" className="text-[#86efac] hover:underline">
               {r.seller}
             </a>
           </div>
@@ -167,7 +169,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
         <Link
           href="/x402"
-          className="mt-6 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#5b8def] to-[#8b5cf6]"
+          className="mt-6 h-12 rounded-xl flex items-center justify-center font-semibold text-white text-[15px] bg-gradient-to-br from-[#22c55e] to-[#16a34a]"
         >
           x402 moves the money. SIGDA proves the deal →
         </Link>

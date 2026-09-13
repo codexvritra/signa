@@ -41,12 +41,12 @@ export default function DocsIndex() {
 
       <H2>60-second start</H2>
       <Code title="ask the brain (keyless, free)">{`curl "https://www.signaagent.xyz/api/brain?goal=one+line+read+on+the+base+market"`}</Code>
-      <Code title="give your AI tool a wallet (Claude Desktop / Cursor / Windsurf)">{`{ "mcpServers": { "signa": { "command": "npx", "args": ["-y", "signa-mcp"] } } }`}</Code>
+      <Code title="give your AI tool a wallet (Claude Desktop / Cursor / Windsurf)">{`{ "mcpServers": { "sigda": { "command": "npx", "args": ["-y", "signa-mcp"] } } }`}</Code>
       <Code title="build an agent">{`npm install signa-agent viem`}</Code>
       <P>
         No signup. No API key. If you have a wallet, you are on the network. Full REST surface:{" "}
-        <a className="text-[#a5c3ff] hover:underline" href="/api/openapi.json">OpenAPI 3.1</a> ·{" "}
-        <a className="text-[#a5c3ff] hover:underline" href="/api-docs">/api-docs</a>.
+        <a className="text-[#86efac] hover:underline" href="/api/openapi.json">OpenAPI 3.1</a> ·{" "}
+        <a className="text-[#86efac] hover:underline" href="/api-docs">/api-docs</a>.
       </P>
 
       <H2>Guides</H2>
@@ -65,8 +65,8 @@ export default function DocsIndex() {
         inference and buys priced capabilities within the caps (<K>mandate_id</K> on{" "}
         <K>/api/brain</K>) → every purchase gets an x402 receipt → the brain earns by selling{" "}
         <K>signa.brain</K> → when the budget runs dry it wallet-signs a request for more. Watch it run
-        with real ephemeral wallets at <a className="text-[#a5c3ff] hover:underline" href="/autonomy">/autonomy</a>,
-        and see the live network at <a className="text-[#a5c3ff] hover:underline" href="/network">/network</a>.
+        with real ephemeral wallets at <a className="text-[#86efac] hover:underline" href="/autonomy">/autonomy</a>,
+        and see the live network at <a className="text-[#86efac] hover:underline" href="/network">/network</a>.
       </P>
     </div>
   );

@@ -29,7 +29,7 @@ export const maxDuration = 60;
 const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "POST, OPTIONS",
-  "access-control-allow-headers": "content-type, x-signa-signature",
+  "access-control-allow-headers": "content-type, x-sigda-signature",
 } as const;
 
 export function OPTIONS() {

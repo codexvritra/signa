@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { bankrResolveRecipient } from "@/lib/skills/bankr";
 import { resolveHandle } from "@/lib/mail";
 
 export const runtime = "nodejs";
@@ -26,10 +25,10 @@ export const dynamic = "force-dynamic";
  *   {
  *     ok, query, address, caip10,
  *     display: { basename, ens_name, label },
- *     on_signa,
- *     reachable_via: ["signa","a2a",("bridge")],
+ *     on_sigda,
+ *     reachable_via: ["sigda","a2a",("bridge")],
  *     routes: {
- *       signa: { dm_url, inbox_url },        // every wallet has an inbox
+ *       sigda: { dm_url, inbox_url },        // every wallet has an inbox
  *       a2a:   { card_url, endpoint },        // every wallet has an A2A card
  *       bridge:{ platform, model, alive, capabilities } | null,
  *       external_a2a: { endpoint } | null,    // if id was an external card
@@ -100,10 +99,10 @@ async function lookupBridge(address: string): Promise<BridgeRoute> {
   }
 }
 
-async function lookupSignaMeta(address: string): Promise<{
+async function lookupSigdaMeta(address: string): Promise<{
   basename: string | null;
   ens_name: string | null;
-  on_signa: boolean;
+  on_sigda: boolean;
 }> {
   try {
     const { data } = await supabase
@@ -114,10 +113,10 @@ async function lookupSignaMeta(address: string): Promise<{
     return {
       basename: data?.basename ?? null,
       ens_name: data?.ens_name ?? null,
-      on_signa: !!data,
+      on_sigda: !!data,
     };
   } catch {
-    return { basename: null, ens_name: null, on_signa: false };
+    return { basename: null, ens_name: null, on_sigda: false };
   }
 }
 
@@ -135,7 +134,7 @@ async function resolveAgentCard(
     // SIGDA cards carry the wallet under metadata; any card carries `.url`.
     const meta = (card.metadata ?? card) as Record<string, unknown>;
     const addrRaw =
-      (meta["signa.address"] as string) ||
+      (meta["sigda.address"] as string) ||
       (meta["address"] as string) ||
       "";
     const address = isHexAddress(addrRaw) ? addrRaw.toLowerCase() : null;
@@ -166,7 +165,7 @@ export async function GET(req: NextRequest) {
   let chainId = DEFAULT_CHAIN;
   let basename: string | null = null;
   let ens_name: string | null = null;
-  let on_signa = false;
+  let on_sigda = false;
   let source = "";
   let externalA2A: { endpoint: string } | null = null;
   let socialLabel: string | null = null;
@@ -209,58 +208,13 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 4. social handle via Bankr — @handle, twitter:, x:, farcaster:, fc:
-  //    This is the Bankr on-ramp: any social identity Bankr knows becomes
-  //    addressable on the SIGDA wire. Resolve the handle to a wallet and
-  //    every wallet already has a SIGDA inbox + A2A card.
-  if (!address) {
-    let sType: "twitter" | "farcaster" | null = null;
-    let sHandle: string | null = null;
-    if (raw.startsWith("@")) {
-      sType = "twitter";
-      sHandle = raw.slice(1);
-    } else {
-      const m = raw.match(/^(twitter|x|farcaster|fc):(.+)$/i);
-      if (m) {
-        const p = m[1].toLowerCase();
-        sType = p === "farcaster" || p === "fc" ? "farcaster" : "twitter";
-        sHandle = m[2];
-      }
-    }
-    if (sHandle) {
-      // try the hinted type first, then the other social network as a fallback
-      const order: Array<"twitter" | "farcaster"> = sType === "farcaster" ? ["farcaster", "twitter"] : ["twitter", "farcaster"];
-      for (const t of order) {
-        const res = await bankrResolveRecipient(sHandle, t);
-        const addr = res?.address;
-        if (addr && isHexAddress(addr)) {
-          address = addr.toLowerCase();
-          socialLabel = (res as any)?.displayName ?? `@${sHandle}`;
-          source = `bankr:${t}`;
-          break;
-        }
-      }
-      if (!address) {
-        return NextResponse.json(
-          {
-            ok: false,
-            query: raw,
-            error: "unresolvable",
-            message: `Bankr could not resolve the social handle "${sHandle}". it may not be linked to a wallet yet.`,
-          },
-          { status: 404, headers: CORS },
-        );
-      }
-    }
-  }
-
-  // 4.5 SIGDA Mail handle — you@signa / you.signa / a bare claimed handle.
+  // 4.5 SIGDA Mail handle — you@sigda / you.sigda / a bare claimed handle.
   //     Re-verified against the claim signature inside resolveHandle().
   if (!address) {
     const h = await resolveHandle(supabase, raw);
     if (h) {
       address = h.address;
-      socialLabel = `${h.handle}@signa`;
+      socialLabel = `${h.handle}@sigda`;
       source = "signa_handle";
     }
   }
@@ -277,14 +231,14 @@ export async function GET(req: NextRequest) {
         address?: string;
         basename?: string | null;
         ens_name?: string | null;
-        on_signa?: boolean;
+        on_sigda?: boolean;
         source?: string;
       } = await r.json();
       if (j.ok && j.address && isHexAddress(j.address)) {
         address = j.address.toLowerCase();
         basename = j.basename ?? null;
         ens_name = j.ens_name ?? null;
-        on_signa = !!j.on_signa;
+        on_sigda = !!j.on_sigda;
         source = j.source ? `users.resolve:${j.source}` : "users.resolve";
       }
     } catch {
@@ -307,12 +261,12 @@ export async function GET(req: NextRequest) {
 
   // enrich display + reachability (cheap, parallel)
   const [meta, bridge] = await Promise.all([
-    basename || ens_name ? Promise.resolve({ basename, ens_name, on_signa }) : lookupSignaMeta(address),
+    basename || ens_name ? Promise.resolve({ basename, ens_name, on_sigda }) : lookupSigdaMeta(address),
     lookupBridge(address),
   ]);
 
   const label = socialLabel ?? bridge?.label ?? meta.basename ?? meta.ens_name ?? null;
-  const reachable_via = ["signa", "a2a", ...(bridge ? ["bridge"] : []), ...(externalA2A ? ["external_a2a"] : [])];
+  const reachable_via = ["sigda", "a2a", ...(bridge ? ["bridge"] : []), ...(externalA2A ? ["external_a2a"] : [])];
 
   return NextResponse.json(
     {
@@ -321,11 +275,11 @@ export async function GET(req: NextRequest) {
       address,
       caip10: `eip155:${chainId}:${address}`,
       display: { basename: meta.basename, ens_name: meta.ens_name, label },
-      on_signa: meta.on_signa,
+      on_sigda: meta.on_sigda,
       reachable_via,
       routes: {
         // every wallet is reachable on SIGDA — no API key, no signup
-        signa: {
+        sigda: {
           dm_url: `${origin}/api/agents/${address}/dm`,
           inbox_url: `${origin}/api/agents/${address}/inbox`,
         },

@@ -1,5 +1,5 @@
 /**
- * Server-side helper to fire a SIGNA cron route in the background
+ * Server-side helper to fire a SIGDA cron route in the background
  * when a relevant page is visited. Keeps feeds fresh without relying
  * on GitHub Actions / Vercel cron schedules (which are flaky on free
  * tiers).

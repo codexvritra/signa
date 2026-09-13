@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     parts: [{ kind: "text", text }],
     messageId,
     ...(body?.contextId ? { contextId: String(body.contextId) } : {}),
-    metadata: { from, via: "signa.a2a.outbound" },
+    metadata: { from, via: "sigda.a2a.outbound" },
   };
 
   const rpcReq = {

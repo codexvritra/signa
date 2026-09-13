@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { ArrowLeft, ArrowUpRight, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 import { formatUsd, formatPct, type TokenSummary } from "@/lib/geckoterminal";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Tokens on Base · SIGDA",
   description:
-    "Trending and recently launched tokens on Base mainnet. Discovery powered by GeckoTerminal, trading via Bankr.",
+    "Trending and recently launched tokens on Base mainnet. Discovery powered by GeckoTerminal.",
 };
 
 async function fetchTokens(kind: "trending" | "new"): Promise<TokenSummary[]> {
@@ -54,17 +54,16 @@ export default async function TokensPage({
               ..
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa tokens --network=base
+              $ sigda tokens --network=base
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.035em] leading-[1.02]">
               Tokens on Base.
             </h1>
             <p className="text-white/65 max-w-xl mt-5 text-[15px] leading-relaxed">
               live discovery surface for every ERC-20 on Base. trending
-              from GeckoTerminal (the same source Bankr routes to
-              internally), recent launches, search any address. click a
-              token to see its pool, holders, the feed talking about it,
-              and one-click trade via @bankrbot.
+              from GeckoTerminal, recent launches, search any address.
+              click a token to see its pool, holders, and the feed
+              talking about it.
             </p>
             <div className="mt-6">
               <TokensTabs current={tab} />
@@ -99,8 +98,7 @@ export default async function TokensPage({
               </div>
             )}
             <div className="mt-3 text-[11px] text-white/35 font-mono">
-              source: api.geckoterminal.com · cached 60s · trade exec via
-              bankr.bot
+              source: api.geckoterminal.com · cached 60s
             </div>
           </div>
         </section>
@@ -160,16 +158,14 @@ function TokenRow({ rank, token }: { rank: number; token: TokenSummary }) {
       <div className="text-right text-white/70 tabular-nums">
         {formatUsd(token.volume_24h_usd)}
       </div>
-      <a
-        href={`https://bankr.bot/agents/${token.address}`}
-        target="_blank"
-        rel="noreferrer"
+      <Link
+        href={`/tokens/${token.address}`}
         className="text-[var(--accent)] hover:brightness-125 inline-flex items-center justify-end gap-1 text-[11px] uppercase tracking-wide font-mono"
-        title={`Trade $${token.symbol} on Bankr`}
+        title={`View $${token.symbol}`}
       >
-        Buy
+        View
         <ArrowUpRight className="size-3" />
-      </a>
+      </Link>
     </div>
   );
 }

@@ -42,7 +42,7 @@ export async function GET(
           justifyContent: "space-between",
           background: "#0a0a0f",
           backgroundImage:
-            "radial-gradient(ellipse 70% 55% at 90% -15%, rgba(91,141,239,0.28), transparent 60%), radial-gradient(ellipse 60% 50% at -5% 115%, rgba(139,92,246,0.24), transparent 60%)",
+            "radial-gradient(ellipse 70% 55% at 90% -15%, rgba(34,197,94,0.28), transparent 60%), radial-gradient(ellipse 60% 50% at -5% 115%, rgba(22,163,74,0.24), transparent 60%)",
           padding: 72,
           fontFamily: "sans-serif",
         }}
@@ -64,11 +64,11 @@ export async function GET(
               display: "flex",
               alignItems: "center",
               gap: 12,
-              color: signed ? "#5b8def" : "#666",
+              color: signed ? "#22c55e" : "#666",
               fontSize: 24,
               fontWeight: 600,
               letterSpacing: 2,
-              border: `1px solid ${signed ? "rgba(91,141,239,0.5)" : "#333"}`,
+              border: `1px solid ${signed ? "rgba(34,197,94,0.5)" : "#333"}`,
               borderRadius: 999,
               padding: "10px 22px",
             }}
@@ -85,7 +85,7 @@ export async function GET(
             fontWeight: 700,
             lineHeight: 1.18,
             letterSpacing: -1,
-            borderLeft: "5px solid #5b8def",
+            borderLeft: "5px solid #22c55e",
             paddingLeft: 32,
             maxHeight: 360,
             overflow: "hidden",
@@ -103,7 +103,7 @@ export async function GET(
             fontSize: 28,
           }}
         >
-          <div style={{ display: "flex", color: "#a5c3ff" }}>— {who}</div>
+          <div style={{ display: "flex", color: "#86efac" }}>— {who}</div>
           <div style={{ display: "flex" }}>re-verify at signaagent.xyz</div>
         </div>
       </div>

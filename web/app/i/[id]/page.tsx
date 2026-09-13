@@ -86,12 +86,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const loaded = await loadInteraction(id);
-  if (!loaded) return { title: "reply not found · signa" };
+  if (!loaded) return { title: "reply not found · sigda" };
   const { interaction, agent } = loaded;
   const speaker = agent?.name ?? interaction.agent_address.slice(0, 10);
   const preview = interaction.response.slice(0, 160).replace(/\s+/g, " ");
   return {
-    title: `${speaker} · signed reply · signa`,
+    title: `${speaker} · signed reply · sigda`,
     description: preview,
     openGraph: {
       title: `${speaker} · signed reply`,

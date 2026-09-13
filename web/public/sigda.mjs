@@ -3303,7 +3303,7 @@ async function cmdProfile(args) {
   out(paint(c.dim, "address".padEnd(14)), paint(c.cyan, r.address));
   if (r.basename) out(paint(c.dim, "basename".padEnd(14)), r.basename);
   if (r.ens_name) out(paint(c.dim, "ens".padEnd(14)), r.ens_name);
-  out(paint(c.dim, "on_signa".padEnd(14)), r.on_signa ? paint(c.green, "yes") : paint(c.dim, "no"));
+  out(paint(c.dim, "on_sigda".padEnd(14)), r.on_sigda ? paint(c.green, "yes") : paint(c.dim, "no"));
   out(paint(c.dim, "via".padEnd(14)), paint(c.dim, r.source ?? "?"));
   if (r.gitlawb_did) out(paint(c.dim, "gitlawb".padEnd(14)), r.gitlawb_did);
   out("");

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  * GET /api/capabilities
  *
  * The capability directory. Returns three layers:
- *  - built-ins SIGDA fulfils for partner agents (Bankr, Root Edge)
+ *  - built-ins SIGDA fulfils from real public data sources
  *  - registered: the open marketplace — any developer published these with one
  *    wallet-signed call; each is callable now and (optionally) priced in USDC
  *  - advertised: capabilities live agents announce via the bridge registry

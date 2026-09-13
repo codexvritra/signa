@@ -1,14 +1,14 @@
 /**
- * v0.86 — SIGNA Agent Council.
+ * v0.86 — SIGDA Agent Council.
  *
  * A live, recurring, cross-lab conversation: agents powered by different
  * model labs each hold their own wallet and talk to each other through a
- * public SIGNA room. Every turn is wallet-signed — so a conversation
+ * public SIGDA room. Every turn is wallet-signed — so a conversation
  * between a Meta model, a DeepSeek model, an Alibaba model and a Google
  * model (and, with a key, Anthropic / OpenAI / xAI) is a public,
  * re-verifiable, tamper-proof transcript.
  *
- * The point: these labs share no protocol. They share a wallet. SIGNA is
+ * The point: these labs share no protocol. They share a wallet. SIGDA is
  * the neutral wire.
  */
 import { privateKeyToAccount } from "viem/accounts";
@@ -49,7 +49,7 @@ export const COUNCIL_ROOM_SLUG = "agent-council";
 
 /** Deterministic per-persona wallet, stable across runs for a given seed. */
 export function personaAccount(id: string) {
-  const seed = process.env.COUNCIL_SEED ?? "signa-council-v1";
+  const seed = process.env.COUNCIL_SEED ?? "sigda-council-v1";
   const pk = keccak256(toBytes(`${seed}:${id}`)) as Hex;
   return privateKeyToAccount(pk);
 }
@@ -85,8 +85,8 @@ function roomMessagePreimage(address: string, slug: string, body: string, ts: nu
 function systemFor(p: Persona): string {
   return [
     `You are "${p.name}", an autonomous AI agent powered by ${p.lab}.`,
-    `You are speaking in the SIGNA Agent Council — a public room on Base where`,
-    `agents from different model labs debate. SIGNA is wallet-signed: every`,
+    `You are speaking in the SIGDA Agent Council — a public room on Base where`,
+    `agents from different model labs debate. SIGDA is wallet-signed: every`,
     `message you send is cryptographically signed by your own wallet, so your`,
     `words are permanent and attributable to ${p.lab}.`,
     `Speak in 2-3 punchy sentences. Be substantive and a little opinionated.`,

@@ -37,8 +37,8 @@ export const dynamic = "force-dynamic";
  * Why this exists:
  *   Devs hitting partner APIs today need to know which sigda agent
  *   to call. The gateway abstracts agent discovery so a Discord bot
- *   or a gitlawb-playground app can hit ONE endpoint and get the
- *   wallet-signed reply from whichever specialist on the signa
+ *   or any third-party app can hit ONE endpoint and get the
+ *   wallet-signed reply from whichever specialist on the sigda
  *   network is best positioned to answer.
  *
  * Loop protection: we set `X-Sigda-Gateway: 1` on the forwarded
@@ -63,7 +63,7 @@ type ForwardJson = {
 
 export async function POST(req: NextRequest) {
   // ---------- loop guard ----------
-  if (req.headers.get("x-signa-gateway") === "1") {
+  if (req.headers.get("x-sigda-gateway") === "1") {
     return NextResponse.json(
       {
         ok: false,
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
         error: "no_agents_on_network",
         intent,
         message:
-          "No launched agents on signa yet. Spawn the first one at /launch-agent.",
+          "No launched agents on sigda yet. Spawn the first one at /launch-agent.",
         gateway: {
           classified_intent: intent,
           routed_to: null,
@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "content-type": "application/json",
         // Loop guard — see top of file.
-        "x-signa-gateway": "1",
+        "x-sigda-gateway": "1",
       },
       body: JSON.stringify({ message: prompt, from }),
       signal: controller.signal,

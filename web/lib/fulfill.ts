@@ -2,7 +2,7 @@
  * Unified capability resolver — the one place that turns a capability name +
  * arg into a real output plus its provenance (which provider produced it).
  * Resolution order mirrors /api/capabilities/invoke:
- *   1. built-in (SIGNA gateway fulfils from a real source)
+ *   1. built-in (SIGDA gateway fulfils from a real source)
  *   2. registered off-chain (one-signature marketplace)
  *   3. on-chain (SignaCapabilityRegistry on Base)
  *

@@ -15,7 +15,7 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
 type BotWallet = {
-  kind: "MIROSHARK" | "GITLAWB" | "BANKR";
+  kind: "MIROSHARK" | "DIGEST";
   basename: string;
   privateKey: string;
   address: string;
@@ -43,9 +43,8 @@ function mintOne(kind: BotWallet["kind"], basename: string): BotWallet {
 function mint(): Bundle {
   return {
     bots: [
-      mintOne("MIROSHARK", "miroshark.bot.signa"),
-      mintOne("GITLAWB", "gitlawb.bot.signa"),
-      mintOne("BANKR", "bankr.bot.signa"),
+      mintOne("MIROSHARK", "miroshark.bot.sigda"),
+      mintOne("DIGEST", "digest.bot.sigda"),
     ],
     mirosharkWebhookSecret: randomHex(32),
   };
@@ -92,11 +91,11 @@ export default function GenerateBotKeysPage() {
               Generate SIGDA bot wallets
             </h1>
             <p className="text-white/55 max-w-xl mt-4 text-[15px] leading-relaxed">
-              Mints three wallets — one each for the MiroShark, gitlawb, and
-              Bankr event-bridge bots — plus a HMAC secret for the MiroShark
-              webhook receiver. Everything is generated locally in your
-              browser. Paste the values into Vercel env, then the bridges go
-              live on the next deploy.
+              Mints two wallets — one for the MiroShark event bridge, one
+              for the daily-digest cron — plus a HMAC secret for the
+              MiroShark webhook receiver. Everything is generated locally
+              in your browser. Paste the values into Vercel env, then the
+              bridges go live on the next deploy.
             </p>
           </div>
         </section>
@@ -199,7 +198,7 @@ export default function GenerateBotKeysPage() {
               What to do next
             </div>
             <ol className="text-sm text-white/75 space-y-3 list-decimal pl-5">
-              <li>Copy all 7 values into a password manager first.</li>
+              <li>Copy all 5 values into a password manager first.</li>
               <li>
                 Open the SIGDA Vercel project → <strong>Settings → Environment Variables</strong>. Add:
                 <ul className="mt-2 space-y-1 text-[13px] text-white/60 list-disc pl-5">
@@ -210,12 +209,7 @@ export default function GenerateBotKeysPage() {
                   </li>
                   <li>
                     <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5">
-                      GITLAWB_BOT_KEY
-                    </code>
-                  </li>
-                  <li>
-                    <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5">
-                      BANKR_BOT_KEY
+                      DIGEST_BOT_KEY
                     </code>
                   </li>
                   <li>

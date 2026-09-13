@@ -24,8 +24,8 @@ export function GET() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(135deg, #5b8def 0%, #8b5cf6 100%)",
-            boxShadow: "0 0 120px 0 rgba(124,156,255,0.45)",
+            background: "linear-gradient(135deg, #22c55e 0%, #0ea34f 100%)",
+            boxShadow: "0 0 120px 0 rgba(34,197,94,0.45)",
           }}
         >
           <div

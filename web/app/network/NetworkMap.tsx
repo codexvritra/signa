@@ -5,22 +5,18 @@ import { useCallback, useEffect, useState } from "react";
 /**
  * The SIGDA network — a live hub-and-spoke status board. Each node pings a real
  * SIGDA surface and flips to ONLINE when it responds. Not a mockup: the lines
- * animate, the counters are live from /api/stats, and Root shows its live read.
+ * animate and the counters are live from /api/stats.
  */
 
 type Status = "checking" | "online" | "down";
 
 const HUB = { x: 500, y: 330 };
 const NODES = [
-  { key: "aeon", label: "Aeon", sub: "registry · merged", x: 300, y: 120, group: "aeon" },
-  { key: "claude", label: "Claude Code", sub: "via MCP", x: 700, y: 120, group: "mcp" },
-  { key: "bankr", label: "Bankr", sub: "identity rail", x: 880, y: 230, group: "bankr" },
-  { key: "root", label: "Root", sub: "rootAI", x: 880, y: 430, group: "root" },
-  { key: "cursor", label: "Cursor", sub: "via MCP", x: 700, y: 545, group: "mcp" },
-  { key: "windsurf", label: "Windsurf", sub: "via MCP", x: 300, y: 545, group: "mcp" },
-  { key: "gitlawb", label: "gitlawb", sub: "bounties", x: 120, y: 430, group: "gitlawb" },
-  { key: "miroshark", label: "MiroShark", sub: "sims", x: 120, y: 230, group: "miroshark" },
-  { key: "a2a", label: "Any A2A agent", sub: "A2A v0.3", x: 500, y: 600, group: "a2a" },
+  { key: "claude", label: "Claude Code", sub: "via MCP", x: 500, y: 100, group: "mcp" },
+  { key: "cursor", label: "Cursor", sub: "via MCP", x: 720, y: 200, group: "mcp" },
+  { key: "a2a", label: "Any A2A agent", sub: "A2A v0.3", x: 650, y: 460, group: "a2a" },
+  { key: "miroshark", label: "MiroShark", sub: "sims", x: 350, y: 460, group: "miroshark" },
+  { key: "windsurf", label: "Windsurf", sub: "via MCP", x: 280, y: 200, group: "mcp" },
 ] as const;
 
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -39,10 +35,8 @@ async function reachable(url: string, timeoutMs = 6000): Promise<Response | null
 
 export function NetworkMap() {
   const [st, setSt] = useState<Record<string, Status>>({
-    core: "checking", aeon: "checking", mcp: "checking", root: "checking", a2a: "checking",
-    bankr: "checking", gitlawb: "checking", miroshark: "checking",
+    core: "checking", mcp: "checking", a2a: "checking", miroshark: "checking",
   });
-  const [rootText, setRootText] = useState<string>("");
   const [subText, setSubText] = useState<Record<string, string>>({});
   const [caps, setCaps] = useState<number | null>(null);
   const [stats, setStats] = useState<{ interactions: number; posts: number; agents: number; users: number } | null>(null);
@@ -64,41 +58,6 @@ export function NetworkMap() {
     reachable("/api/mcp").then((r) => setSt((s) => ({ ...s, mcp: r && r.status < 500 ? "online" : "down" })));
     // A2A transport
     reachable("/api/a2a").then((r) => setSt((s) => ({ ...s, a2a: r && r.status < 500 ? "online" : "down" })));
-    // Root — live signed read
-    reachable("/api/capabilities/invoke?cap=root.feargreed").then(async (r) => {
-      let ok = false;
-      try { const j = await r?.json(); if (j?.ok && j?.output) { ok = true; setRootText(`${j.output.label} ${j.output.score}`); } } catch { /* */ }
-      setSt((s) => ({ ...s, root: ok ? "online" : r ? "online" : "down" }));
-    });
-    // Bankr — a REAL identity resolve round-trip through api.bankr.bot
-    reachable("/api/capabilities/invoke?cap=bankr.resolve&arg=@jesse", 9000).then(async (r) => {
-      let ok = false;
-      try {
-        const j = await r?.json();
-        const addr = j?.output?.address ?? j?.output?.evmAddress;
-        if (j?.ok && addr) { ok = true; setSubText((t) => ({ ...t, bankr: `@jesse → ${String(addr).slice(0, 6)}…` })); }
-      } catch { /* */ }
-      setSt((s) => ({ ...s, bankr: ok ? "online" : "down" }));
-    });
-    // Aeon — the live ERC-8004 directory (the skill pack is merged in their registry)
-    reachable("/api/partners/aeon/directory", 9000).then(async (r) => {
-      let ok = false;
-      try {
-        const j = await r?.json();
-        const n = (j?.agents ?? []).length;
-        if (j?.ok !== false && n > 0) { ok = true; setSubText((t) => ({ ...t, aeon: `${n} agents · merged` })); }
-      } catch { /* */ }
-      setSt((s) => ({ ...s, aeon: ok ? "online" : r ? "online" : "down" }));
-    });
-    // gitlawb — live open-bounty read from node.gitlawb.com
-    reachable("/api/partners/gitlawb/bounties", 9000).then(async (r) => {
-      let ok = false;
-      try {
-        const j = await r?.json();
-        if (j?.ok) { ok = true; setSubText((t) => ({ ...t, gitlawb: `${j.count ?? 0} open bounties` })); }
-      } catch { /* */ }
-      setSt((s) => ({ ...s, gitlawb: ok ? "online" : "down" }));
-    });
     // MiroShark — the signed-activity ledger for the sims integration
     reachable("/api/receipts", 9000).then(async (r) => {
       let ok = false;
@@ -136,23 +95,23 @@ export function NetworkMap() {
   return (
     <div className="relative w-full">
       <style>{`
-        @keyframes signa-march { to { stroke-dashoffset: -28; } }
-        @keyframes signa-pulse { 0%,100% { opacity:.45 } 50% { opacity:1 } }
-        @keyframes signa-hub { 0%,100% { opacity:.5; transform:scale(1) } 50% { opacity:.8; transform:scale(1.05) } }
-        .signa-flow { stroke-dasharray:5 9; animation: signa-march 1.1s linear infinite; }
-        .signa-dot-checking { animation: signa-pulse 1s ease-in-out infinite; }
-        .signa-hubglow { transform-origin:center; animation: signa-hub 3.2s ease-in-out infinite; }
+        @keyframes sigda-march { to { stroke-dashoffset: -28; } }
+        @keyframes sigda-pulse { 0%,100% { opacity:.45 } 50% { opacity:1 } }
+        @keyframes sigda-hub { 0%,100% { opacity:.5; transform:scale(1) } 50% { opacity:.8; transform:scale(1.05) } }
+        .sigda-flow { stroke-dasharray:5 9; animation: sigda-march 1.1s linear infinite; }
+        .sigda-dot-checking { animation: sigda-pulse 1s ease-in-out infinite; }
+        .sigda-hubglow { transform-origin:center; animation: sigda-hub 3.2s ease-in-out infinite; }
       `}</style>
 
       <svg viewBox="0 0 1000 660" className="w-full h-auto block" role="img" aria-label="SIGDA live network">
         <defs>
-          <linearGradient id="signa-line" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#6ea2ff" /><stop offset="1" stopColor="#a98bff" />
+          <linearGradient id="sigda-line" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#4ade80" /><stop offset="1" stopColor="#4ade80" />
           </linearGradient>
-          <radialGradient id="signa-hubg" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#6382ff" stopOpacity="0.5" />
-            <stop offset="60%" stopColor="#8b5cf6" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+          <radialGradient id="sigda-hubg" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#16a34a" stopOpacity="0.5" />
+            <stop offset="60%" stopColor="#16a34a" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#16a34a" stopOpacity="0" />
           </radialGradient>
         </defs>
 
@@ -161,23 +120,26 @@ export function NetworkMap() {
           const live = st[n.group] === "online";
           return (
             <line key={`l-${n.key}`} x1={HUB.x} y1={HUB.y} x2={n.x} y2={n.y}
-              stroke="url(#signa-line)" strokeWidth={live ? 2.2 : 1.4}
+              stroke="url(#sigda-line)" strokeWidth={live ? 2.2 : 1.4}
               strokeOpacity={live ? 0.95 : 0.35} strokeLinecap="round"
-              className={live ? "signa-flow" : ""} />
+              className={live ? "sigda-flow" : ""} />
           );
         })}
 
         {/* hub */}
-        <circle className="signa-hubglow" cx={HUB.x} cy={HUB.y} r={120} fill="url(#signa-hubg)" />
+        <circle className="sigda-hubglow" cx={HUB.x} cy={HUB.y} r={120} fill="url(#sigda-hubg)" />
         <rect x={HUB.x - 72} y={HUB.y - 72} width={144} height={144} rx={34}
           fill="#0e1424" stroke="rgba(138,164,255,.5)" strokeWidth={1.5} />
-        <image href="/signa-logo-200.png" x={HUB.x - 50} y={HUB.y - 50} width={100} height={100} />
+        <g transform={`translate(${HUB.x - 32}, ${HUB.y - 27})`}>
+          <rect x="0.5" y="0.5" width="39" height="25" rx="6" stroke="#eef2fb" strokeWidth="2.4" fill="none" />
+          <rect x="23" y="23" width="41" height="32" rx="7" fill="#eef2fb" />
+        </g>
 
         {/* nodes */}
         {NODES.map((n) => {
           const s = st[n.group];
           const c = color(s);
-          const sub = n.key === "root" && rootText ? rootText : (subText[n.key] ?? n.sub);
+          const sub = subText[n.key] ?? n.sub;
           const label = s === "online" ? "LIVE" : s === "checking" ? "CHECKING" : "DOWN";
           return (
             <g key={n.key} transform={`translate(${n.x - 95}, ${n.y - 32})`}>
@@ -186,7 +148,7 @@ export function NetworkMap() {
               <text x={16} y={27} fill="#eef2fb" fontSize={19} fontWeight={700}
                 fontFamily="system-ui, -apple-system, Segoe UI, sans-serif">{n.label}</text>
               <circle cx={22} cy={45} r={5} fill={c}
-                className={s === "checking" ? "signa-dot-checking" : ""} />
+                className={s === "checking" ? "sigda-dot-checking" : ""} />
               <text x={36} y={50} fill={c} fontSize={12} fontWeight={800} letterSpacing="1.5"
                 fontFamily="system-ui, sans-serif">{label}</text>
               {sub ? (

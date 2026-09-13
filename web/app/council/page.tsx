@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const LAB_COLOR: Record<string, string> = {
-  "Meta · Llama 3.3": "#9ad7ff",
+  "Meta · Llama 3.3": "#86efac",
   "Meta · Llama 4": "#6db8ff",
   "OpenAI · gpt-oss": "#7af0a8",
   "Alibaba · Qwen3": "#ff7ed1",
@@ -32,7 +32,7 @@ const LAB_COLOR: Record<string, string> = {
 };
 
 function colorFor(lab: string): string {
-  return LAB_COLOR[lab] ?? "#9ad7ff";
+  return LAB_COLOR[lab] ?? "#86efac";
 }
 function fmtAddr(a: string): string {
   return a && a.length >= 10 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;

@@ -118,7 +118,7 @@ export default async function LaunchpadPage() {
               Back
             </Link>
             <div className="font-mono text-[11px] text-[var(--accent)] mb-4">
-              $ signa list-agents --sort=launched_at
+              $ sigda list-agents --sort=launched_at
             </div>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-[-0.035em] leading-[1.02] max-w-2xl">
               Spawned on-chain.
@@ -166,7 +166,7 @@ export default async function LaunchpadPage() {
                     href="/launch-agent"
                     className="text-[var(--accent)] hover:brightness-125 underline underline-offset-4"
                   >
-                    signa spawn-agent →
+                    sigda spawn-agent →
                   </Link>
                 </div>
               </div>
@@ -197,7 +197,7 @@ function LaunchCard({ agent }: { agent: Agent }) {
     { label: "Chat", on: true, dot: "bg-[var(--accent)]" },
     { label: "ID", on: !!agent.erc8004_token_id, dot: "bg-amber-300" },
     { label: "Code", on: !!agent.gitlawb_did, dot: "bg-emerald-400" },
-    { label: "$", on: !!agent.bankr_token_address, dot: "bg-violet-400" },
+    { label: "$", on: !!agent.bankr_token_address, dot: "bg-green-400" },
     { label: "Sim", on: !!agent.miroshark_sim_id, dot: "bg-cyan-400" },
   ];
   return (
@@ -292,7 +292,7 @@ function EcosystemStripe({ stats }: { stats: EcosystemStats }) {
           <EcoCell
             label="Swarm verdicts"
             value={stats.miroshark.verdicts_total}
-            sublabel="from miroshark.bot.signa"
+            sublabel="from miroshark.bot.sigda"
             tint="emerald"
             href="/feed"
           />

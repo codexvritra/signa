@@ -91,7 +91,7 @@ export default function PayPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[560px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">Pay to reach · settled on Robinhood Chain</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">Pay to reach · settled on Robinhood Chain</div>
         <h1 className="text-[32px] sm:text-[40px] font-bold leading-tight mt-1 tracking-tight">{payMode ? "Pay to reach this wallet." : "Charge to reach your inbox."}</h1>
         <p className="text-[15px] text-muted mt-2 leading-relaxed">
           A message with payment attached — the full amount settles to the recipient in the <span className="text-white">same Base transaction</span>, recorded on-chain. SIGDA holds nothing and takes no fee.
@@ -102,9 +102,9 @@ export default function PayPage() {
         {/* PAY MODE */}
         {payMode && (
           <div className="mt-7 glass rounded-2xl p-5 border border-white/[0.07]">
-            <div className="text-[13px] text-faint">To <span className="text-[#c4b4ff] font-mono">{short(to) || toRaw}</span></div>
+            <div className="text-[13px] text-faint">To <span className="text-[#86efac] font-mono">{short(to) || toRaw}</span></div>
             <div className="text-[15px] mt-1">Price to reach: <span className="text-[#5ee68f] font-semibold">{toPrice ? `${toPrice} ETH` : "free"}</span></div>
-            <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="your message…" className="w-full mt-3 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60 min-h-[90px]" />
+            <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="your message…" className="w-full mt-3 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60 min-h-[90px]" />
             <button onClick={payAndSend} disabled={busy || !isConnected} className="w-full mt-3 px-4 py-3 rounded-xl text-[15px] font-semibold bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] text-white disabled:opacity-60 hover:brightness-110">
               {isConnected ? `Pay ${toPrice || "0"} ETH + send` : "Connect to send"}
             </button>
@@ -116,12 +116,12 @@ export default function PayPage() {
           <div className="mt-7 glass rounded-2xl p-5 border border-white/[0.07]">
             <div className="text-[13px] text-faint">Your inbox price: <span className="text-white font-semibold">{myPrice} ETH</span></div>
             <div className="flex gap-2 mt-2">
-              <input value={priceInput} onChange={(e) => setPriceInput(e.target.value)} placeholder="0.001" inputMode="decimal" className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#a98bff]/60" />
-              <button onClick={setPrice} disabled={busy} className="px-4 py-2.5 rounded-lg text-[14px] font-semibold bg-white/[0.07] text-[#c4b4ff] hover:bg-white/[0.12] disabled:opacity-60">Set price (ETH)</button>
+              <input value={priceInput} onChange={(e) => setPriceInput(e.target.value)} placeholder="0.001" inputMode="decimal" className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[#4ade80]/60" />
+              <button onClick={setPrice} disabled={busy} className="px-4 py-2.5 rounded-lg text-[14px] font-semibold bg-white/[0.07] text-[#86efac] hover:bg-white/[0.12] disabled:opacity-60">Set price (ETH)</button>
             </div>
             {myLink && (
               <div className="mt-3 flex items-center gap-2">
-                <code className="text-[12px] text-[#c4b4ff] bg-black/30 rounded px-2 py-1.5 flex-1 truncate">{myLink}</code>
+                <code className="text-[12px] text-[#86efac] bg-black/30 rounded px-2 py-1.5 flex-1 truncate">{myLink}</code>
                 <button onClick={() => { navigator.clipboard?.writeText(`https://${myLink}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="px-3 py-1.5 rounded text-[12px] font-semibold bg-white/[0.07] text-white hover:bg-white/[0.12]">{copied ? "copied" : "copy link"}</button>
               </div>
             )}
@@ -141,7 +141,7 @@ export default function PayPage() {
               {inbox.map((m) => (
                 <div key={m.tx + m.id} className="glass rounded-xl px-4 py-3 border border-white/[0.06]">
                   <div className="flex items-center gap-2 text-[12px] text-faint font-mono">
-                    <span className="text-[#c4b4ff]">{short(m.from)}</span>
+                    <span className="text-[#86efac]">{short(m.from)}</span>
                     <span className="text-[#5ee68f]">paid {m.value_eth} ETH</span>
                     <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="ml-auto text-[#5ee68f] underline">⛓ ↗</a>
                   </div>

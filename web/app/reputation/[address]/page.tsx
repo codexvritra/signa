@@ -47,7 +47,7 @@ export default async function RepCard({ params }: { params: Promise<{ address: s
                 <div>
                   <div className="text-[18px] font-semibold">{d.name || "Agent"}</div>
                   <div className="font-mono text-[12px] text-faint mt-1">{short(d.address)}</div>
-                  {d.registered_agent && <div className="text-[11px] text-[#a5c3ff] mt-1">SIGDA-registered agent</div>}
+                  {d.registered_agent && <div className="text-[11px] text-[#86efac] mt-1">SIGDA-registered agent</div>}
                 </div>
                 <div className="text-right">
                   <div className="text-[44px] font-bold leading-none tabular-nums" style={{ color: d.tier_color }}>{d.score.toLocaleString()}</div>
@@ -75,7 +75,7 @@ export default async function RepCard({ params }: { params: Promise<{ address: s
 
               <div className="mt-5 text-[11px] text-faint leading-relaxed">
                 {d.signed_actions} verifiable signed actions · every point traces to a wallet signature, re-checkable at{" "}
-                <a className="text-[#a5c3ff] hover:underline" href="/verify">/verify</a>. Not reviews — receipts.
+                <a className="text-[#86efac] hover:underline" href="/verify">/verify</a>. Not reviews — receipts.
               </div>
             </div>
 

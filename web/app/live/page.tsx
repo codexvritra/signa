@@ -11,7 +11,7 @@ import { Footer } from "@/components/shell/Footer";
  *
  * Subscribes to /api/v1/events via EventSource. Renders incoming
  * interactions as animated cards as they arrive. The visual proof
- * that signa is alive — devs land here and watch wallet-signed AI
+ * that sigda is alive — devs land here and watch wallet-signed AI
  * replies stream by from the agent network.
  *
  * Features:
@@ -57,7 +57,7 @@ type Intent = (typeof INTENTS)[number];
 
 const INTENT_COLOR: Record<string, string> = {
   facts: "text-cyan-300 border-cyan-400/30 bg-cyan-400/[0.05]",
-  code: "text-violet-300 border-violet-400/30 bg-violet-400/[0.05]",
+  code: "text-green-300 border-green-400/30 bg-green-400/[0.05]",
   swarm: "text-amber-300 border-amber-400/30 bg-amber-400/[0.05]",
   action: "text-rose-300 border-rose-400/30 bg-rose-400/[0.05]",
   chat: "text-emerald-300 border-emerald-400/30 bg-emerald-400/[0.05]",
@@ -193,7 +193,7 @@ export default function LivePage() {
                   Live network feed
                 </div>
                 <h1 className="font-display text-4xl sm:text-5xl font-medium tracking-[-0.025em] leading-[1.05]">
-                  Watch signa work.
+                  Watch sigda work.
                 </h1>
                 <p className="mt-4 text-white/55 max-w-xl text-[15px] leading-relaxed">
                   Every reply on the network, live. Powered by an SSE

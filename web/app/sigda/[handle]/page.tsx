@@ -16,12 +16,12 @@ async function lookup(handle: string): Promise<{ address: string } | null> {
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle: raw } = await params;
   const handle = decodeURIComponent(raw).toLowerCase();
-  const title = `${handle}@signa · DM on Robinhood Chain`;
-  const description = `Send ${handle}@signa a wallet-signed message on Robinhood Chain — no account, no API key. Verified, re-checkable by anyone.`;
+  const title = `${handle}@sigda · DM on Robinhood Chain`;
+  const description = `Send ${handle}@sigda a wallet-signed message on Robinhood Chain — no account, no API key. Verified, re-checkable by anyone.`;
   return {
     title,
     description,
-    openGraph: { title, description, url: `${SITE}/signa/${handle}`, type: "profile" },
+    openGraph: { title, description, url: `${SITE}/sigda/${handle}`, type: "profile" },
     twitter: { card: "summary_large_image", title, description },
   };
 }
@@ -35,29 +35,29 @@ export default async function HandleProfile({ params }: { params: Promise<{ hand
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[520px] mx-auto px-5 py-14 sm:py-20">
-        <Link href="/signa" className="text-[12px] text-faint hover:text-white">← SIGDA Mail directory</Link>
+        <Link href="/sigda" className="text-[12px] text-faint hover:text-white">← SIGDA Mail directory</Link>
 
-        <div className="mt-6 glass rounded-3xl p-7 border border-[#a98bff]/25 text-center">
+        <div className="mt-6 glass rounded-3xl p-7 border border-[#4ade80]/25 text-center">
           <div className="size-16 mx-auto rounded-full bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] flex items-center justify-center text-[26px] font-bold text-white">{handle[0]?.toUpperCase()}</div>
-          <div className="mt-4 text-[26px] font-bold text-[#c4b4ff]">{handle}@signa</div>
+          <div className="mt-4 text-[26px] font-bold text-[#86efac]">{handle}@sigda</div>
 
           {found ? (
             <>
               <div className="mt-1 text-[12px] text-faint font-mono">{short(found.address)} · ✓ verified on Robinhood Chain</div>
               <div className="mt-2 text-[13.5px] text-muted leading-relaxed">A wallet-native inbox. Send {handle} a message signed by your own wallet — no account, no API key, re-verifiable by anyone.</div>
-              <Link href={`/messages?to=${handle}@signa`} className="mt-5 inline-flex items-center justify-center w-full h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] hover:brightness-110">Send {handle} a message</Link>
-              <a href={`${SITE}/api/resolve?id=${handle}@signa`} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[11px] text-faint hover:text-white underline">verify this name resolves →</a>
+              <Link href={`/messages?to=${handle}@sigda`} className="mt-5 inline-flex items-center justify-center w-full h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] hover:brightness-110">Send {handle} a message</Link>
+              <a href={`${SITE}/api/resolve?id=${handle}@sigda`} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[11px] text-faint hover:text-white underline">verify this name resolves →</a>
             </>
           ) : (
             <>
               <div className="mt-2 text-[13.5px] text-muted leading-relaxed">This SIGDA address isn&apos;t claimed yet. Claim it for your wallet and people can DM you by name.</div>
-              <Link href="/messages" className="mt-5 inline-flex items-center justify-center w-full h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] hover:brightness-110">Claim {handle}@signa</Link>
+              <Link href="/messages" className="mt-5 inline-flex items-center justify-center w-full h-12 rounded-xl font-semibold text-white text-[15px] bg-gradient-to-r from-[#7c3aed] to-[#3b6fe0] hover:brightness-110">Claim {handle}@sigda</Link>
             </>
           )}
         </div>
 
         <p className="text-[11px] text-faint mt-8 text-center">
-          SIGDA Mail · wallet-native messaging on Robinhood Chain. Your wallet is your identity; the signature is the receipt.<br />signaagent.xyz/signa/{handle}
+          SIGDA Mail · wallet-native messaging on Robinhood Chain. Your wallet is your identity; the signature is the receipt.<br />signaagent.xyz/sigda/{handle}
         </p>
       </div>
     </div>

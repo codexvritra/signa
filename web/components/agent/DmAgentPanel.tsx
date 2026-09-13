@@ -175,7 +175,7 @@ export function DmAgentPanel({
         aria-expanded={open}
       >
         <div className="flex items-baseline gap-3">
-          <span className="font-mono text-[11px] text-violet-300/90">
+          <span className="font-mono text-[11px] text-green-300/90">
             $ sigda a2a send
           </span>
           <span className="text-[12.5px] text-white/80">
@@ -193,7 +193,7 @@ export function DmAgentPanel({
             Send a wallet-signed DM to this agent over the SIGDA{" "}
             <a
               href="/a2a"
-              className="text-violet-300/95 hover:underline underline-offset-4"
+              className="text-green-300/95 hover:underline underline-offset-4"
             >
               A2A protocol
             </a>
@@ -206,7 +206,7 @@ export function DmAgentPanel({
             <button
               type="button"
               onClick={openConnectModal}
-              className="w-full bg-violet-400/95 text-black font-semibold text-[12.5px] rounded-sm px-3.5 py-2 uppercase tracking-wide hover:brightness-110 transition"
+              className="w-full bg-green-400/95 text-black font-semibold text-[12.5px] rounded-sm px-3.5 py-2 uppercase tracking-wide hover:brightness-110 transition"
             >
               Connect wallet to message
             </button>
@@ -220,7 +220,7 @@ export function DmAgentPanel({
                 disabled={submitting}
                 placeholder={`Type your message to ${agentName}…`}
                 rows={3}
-                className="w-full bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-[13px] text-white/90 placeholder:text-white/30 font-mono focus:outline-none focus:border-violet-400/60 resize-y"
+                className="w-full bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-[13px] text-white/90 placeholder:text-white/30 font-mono focus:outline-none focus:border-green-400/60 resize-y"
               />
 
               <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -232,7 +232,7 @@ export function DmAgentPanel({
                   type="button"
                   onClick={send}
                   disabled={!canSend}
-                  className="bg-violet-400/95 text-black font-semibold text-[12.5px] rounded-sm px-3.5 py-1.5 uppercase tracking-wide hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="bg-green-400/95 text-black font-semibold text-[12.5px] rounded-sm px-3.5 py-1.5 uppercase tracking-wide hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {submitting ? "signing in wallet…" : "send DM →"}
                 </button>
@@ -250,9 +250,9 @@ export function DmAgentPanel({
           )}
 
           {result && result.ok && (
-            <div className="text-[12px] font-mono leading-relaxed px-3 py-2 border rounded-sm border-violet-400/30 bg-violet-400/[0.05] text-violet-100/95">
+            <div className="text-[12px] font-mono leading-relaxed px-3 py-2 border rounded-sm border-green-400/30 bg-green-400/[0.05] text-green-100/95">
               <div>✓ DM delivered to {agentName}&apos;s inbox</div>
-              <div className="text-violet-100/65 mt-1">
+              <div className="text-green-100/65 mt-1">
                 id {result.dm.id} · thread {result.thread_id.slice(0, 18)}…
               </div>
               <div className="mt-1">
@@ -260,7 +260,7 @@ export function DmAgentPanel({
                   href={`/api/dm/${result.dm.id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-violet-300/95 hover:underline underline-offset-4"
+                  className="text-green-300/95 hover:underline underline-offset-4"
                 >
                   verify on-the-wire ↗
                 </a>

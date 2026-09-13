@@ -3,16 +3,16 @@ import { base } from "viem/chains";
 import { rhChain, RH_RPC } from "./chain";
 import { ERC20_TRANSFER_ABI, TOKENS, type TokenInfo } from "./tokens";
 
-// Robinhood Chain client for SIGNA's own tokens (ETH, USDG). Public RPC is
+// Robinhood Chain client for SIGDA's own tokens (ETH, USDG). Public RPC is
 // fine for low traffic; swap for a private RPC if rate-limited.
 const rhClient = createPublicClient({
   chain: rhChain,
   transport: http(RH_RPC),
 });
 
-// Base mainnet client — kept only for BNKR/GITLAWB/MIROSHARK, real
-// third-party community tokens that live on Base regardless of which chain
-// SIGNA itself runs on (see the `chain` field in lib/tokens.ts).
+// Base mainnet client — kept only for MIROSHARK, a real third-party
+// community token that lives on Base regardless of which chain SIGDA
+// itself runs on (see the `chain` field in lib/tokens.ts).
 const baseClient = createPublicClient({
   chain: base,
   transport: http(process.env.BASE_RPC_URL),
@@ -44,11 +44,11 @@ export type HolderStatus = {
   holdings: HolderEntry[]; // tokens with non-zero balance only
   /** number of distinct partner tokens held (non-USDG, non-ETH) */
   partnerCount: number;
-  /** Eligibility: holds at least one partner token (BNKR / GITLAWB / MIROSHARK) */
+  /** Eligibility: holds at least one partner token (MIROSHARK) */
   isEcosystemMember: boolean;
 };
 
-const PARTNER_SYMBOLS = new Set(["BNKR", "GITLAWB", "MIROSHARK"]);
+const PARTNER_SYMBOLS = new Set(["MIROSHARK"]);
 
 // In-memory cache, 5-min TTL. Per-server-instance, ephemeral. Good enough
 // for low traffic; replace with Redis/Supabase cache for scale.

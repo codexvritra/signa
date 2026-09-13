@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * /api/mail — SIGDA Mail handles (you@signa) for wallet inboxes.
+ * /api/mail — SIGDA Mail handles (you@sigda) for wallet inboxes.
  *   GET ?handle=you            → resolve a handle to a wallet (sig re-verified)
  *   GET ?address=0x…           → the handle a wallet has claimed
  *   POST { handle, address, ts, signature } → claim a handle (wallet-signed)
@@ -21,12 +21,12 @@ export async function GET(req: NextRequest) {
   if (handle) {
     const r = await resolveHandle(db, handle);
     return r
-      ? NextResponse.json({ ok: true, handle: r.handle, address: r.address, email: `${r.handle}@signa` }, { headers: CORS })
+      ? NextResponse.json({ ok: true, handle: r.handle, address: r.address, email: `${r.handle}@sigda` }, { headers: CORS })
       : NextResponse.json({ ok: false, error: "not_found" }, { status: 404, headers: CORS });
   }
   if (address) {
     const h = await handleForAddress(db, address.toLowerCase());
-    return NextResponse.json({ ok: true, handle: h, email: h ? `${h}@signa` : null }, { headers: CORS });
+    return NextResponse.json({ ok: true, handle: h, email: h ? `${h}@sigda` : null }, { headers: CORS });
   }
   // no params → the public directory of claimed handles (each re-verified)
   const handles = await listHandles(db, Number(req.nextUrl.searchParams.get("limit") ?? 60));
@@ -41,5 +41,5 @@ export async function POST(req: NextRequest) {
     ts: Number(b.ts ?? 0),
     signature: String(b.signature ?? ""),
   });
-  return NextResponse.json({ ...r, ...(r.ok ? { email: `${r.handle}@signa` } : {}) }, { status: r.ok ? 200 : 400, headers: CORS });
+  return NextResponse.json({ ...r, ...(r.ok ? { email: `${r.handle}@sigda` } : {}) }, { status: r.ok ? 200 : 400, headers: CORS });
 }

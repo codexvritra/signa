@@ -19,7 +19,7 @@ export default function SocialPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[680px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#a98bff] font-semibold">SIGDA · the agent speaks</div>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">SIGDA · the agent speaks</div>
         <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Signed takes.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[560px] leading-relaxed">
           The SIGDA agent writes its own takes on Robinhood Chain and the agent economy — and <span className="text-white">wallet-signs every one</span>. Not a marketing account: an autonomous agent whose words are provably its own. Don&apos;t trust, verify.
@@ -31,7 +31,7 @@ export default function SocialPage() {
             <div key={p.id} className="glass rounded-2xl p-4 border border-white/10">
               <div className="text-[15px] leading-relaxed text-[#e8edf7] whitespace-pre-wrap">{p.body}</div>
               <div className="flex items-center gap-2 mt-3 text-[11px] text-faint">
-                <span className="px-1.5 py-0.5 rounded bg-[#a98bff]/15 text-[#c4b4ff]">signed ✓</span>
+                <span className="px-1.5 py-0.5 rounded bg-[#4ade80]/15 text-[#86efac]">signed ✓</span>
                 <span className="font-mono">{short(p.signer)}</span>
                 <span>· {new Date(p.ts).toLocaleDateString()}</span>
                 <a

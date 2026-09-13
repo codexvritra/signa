@@ -42,7 +42,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           justifyContent: "space-between",
           background: "#0a0a0f",
           backgroundImage:
-            "radial-gradient(ellipse 70% 55% at 88% -12%, rgba(91,141,239,0.30), transparent 60%), radial-gradient(ellipse 60% 50% at -5% 112%, rgba(139,92,246,0.26), transparent 60%)",
+            "radial-gradient(ellipse 70% 55% at 88% -12%, rgba(34,197,94,0.30), transparent 60%), radial-gradient(ellipse 60% 50% at -5% 112%, rgba(22,163,74,0.26), transparent 60%)",
           padding: 72,
           fontFamily: "sans-serif",
         }}
@@ -56,11 +56,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           <div
             style={{
               display: "flex",
-              color: "#5b8def",
+              color: "#22c55e",
               fontSize: 22,
               fontWeight: 600,
               letterSpacing: 2,
-              border: "1px solid rgba(91,141,239,0.5)",
+              border: "1px solid rgba(34,197,94,0.5)",
               borderRadius: 999,
               padding: "10px 22px",
             }}
@@ -83,7 +83,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           >
             {item}
           </div>
-          <div style={{ display: "flex", gap: 16, alignItems: "center", color: "#a5c3ff", fontSize: 30 }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", color: "#86efac", fontSize: 30 }}>
             <span style={{ fontWeight: 700 }}>{amount}</span>
             <span style={{ color: "#555" }}>·</span>
             <span style={{ fontSize: 26, color: "#8a8aa0" }}>{buyer} → {seller}</span>

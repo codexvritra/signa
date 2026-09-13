@@ -421,7 +421,7 @@ export function CreateRoomDialog() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="ex: signa-builders"
+              placeholder="ex: sigda-builders"
               className="w-full text-[14px] bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-white focus:outline-none focus:border-white/30"
             />
           </div>
@@ -431,7 +431,7 @@ export function CreateRoomDialog() {
               type="text"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              placeholder="ex: signa-builders"
+              placeholder="ex: sigda-builders"
               spellCheck={false}
               className="w-full font-mono text-[13px] bg-black/40 border border-white/10 rounded-sm px-3 py-2 text-white focus:outline-none focus:border-white/30 lowercase"
             />

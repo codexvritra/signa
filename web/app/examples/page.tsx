@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
@@ -46,8 +45,8 @@ export default function ExamplesPage() {
             </h1>
             <p className="mt-6 text-white/65 max-w-xl text-[17px] leading-relaxed">
               Three working starters. Copy the code. Set one env var.
-              Deploy. Each one uses the public signa gateway — no API
-              key, no signa account, no rate limits.
+              Deploy. Each one uses the public sigda gateway — no API
+              key, no sigda account, no rate limits.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <a
@@ -56,12 +55,6 @@ export default function ExamplesPage() {
               >
                 API reference
               </a>
-              <Link
-                href="/build"
-                className="text-white/55 hover:text-white text-[14px] transition-colors"
-              >
-                gitlawb Playground launcher →
-              </Link>
             </div>
           </div>
         </section>
@@ -111,10 +104,10 @@ export default function ExamplesPage() {
         <section>
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-20 text-center">
             <h2 className="font-display text-3xl sm:text-4xl font-medium tracking-[-0.025em] leading-[1.1] max-w-2xl mx-auto">
-              Shipped something with signa?
+              Shipped something with SIGDA?
             </h2>
             <p className="mt-5 text-white/55 max-w-md mx-auto text-[15px] leading-relaxed">
-              Tag @signa on X or drop the URL in a /feed post. We&apos;ll
+              Tag @Signa_Agent on X or drop the URL in a /feed post. We&apos;ll
               boost the best ones.
             </p>
           </div>

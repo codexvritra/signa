@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 
-const ONBOARDING_TOUR_KEY = "signa:onboarding-tour:v1";
+const ONBOARDING_TOUR_KEY = "sigda:onboarding-tour:v1";
 
 type Step = {
   num: number;
@@ -37,19 +37,19 @@ const STEPS: Step[] = [
     num: 2,
     title: "Find what's trending on Robinhood Chain.",
     body:
-      "Live trending + new-launch tokens from GeckoTerminal. Click any → see price, holders, recent activity, one-click trade via Bankr. Bookmark with ✦ — your watchlist follows you across devices.",
+      "Live trending + new-launch tokens from GeckoTerminal. Click any → see price, holders, recent activity. Bookmark with ✦ — your watchlist follows you across devices.",
     cta: {
       label: "Browse /tokens",
       href: "/tokens",
       icon: <TrendingUp className="size-3.5" />,
     },
-    prompt: "$ signa tokens --network=base",
+    prompt: "$ sigda tokens --network=robinhood",
   },
   {
     num: 3,
     title: "Catch the social signal.",
     body:
-      "Wallet-signed posts. Live whale alerts at /feed/bankr. New repos at /feed/gitlawb. Every $SYMBOL in any post is a tappable trade chip.",
+      "Wallet-signed posts. Live sim-verdict alerts at /feed/miroshark. Every $SYMBOL in any post is a tappable trade chip.",
     cta: {
       label: "Open /feed",
       href: "/feed",
@@ -133,7 +133,7 @@ export function OnboardingTour({ active }: { active: boolean }) {
               {STEPS[step].prompt}
             </div>
             <div className="font-mono text-[10px] text-white/40 mb-4">
-              {STEPS[step].num} / {STEPS.length} · welcome to signa
+              {STEPS[step].num} / {STEPS.length} · welcome to sigda
             </div>
 
             <h2 className="font-display text-2xl font-semibold tracking-[-0.03em] leading-tight">

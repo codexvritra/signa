@@ -215,7 +215,7 @@ export function SearchClient() {
             <li>vorxis</li>
             <li>0x9994bb1e0873d63747d6e2570086cd5c39fbb97b</li>
             <li>swarm</li>
-            <li>bankr</li>
+            <li>miroshark</li>
           </ul>
         </div>
       )}

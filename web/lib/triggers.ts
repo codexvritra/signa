@@ -1,12 +1,12 @@
 /**
- * SIGNA Triggers — wallet-signed conditional agent automations.
+ * SIGDA Triggers — wallet-signed conditional agent automations.
  *
- * An agent signs a rule: WHEN <verifiable condition> DO <action>. SIGNA
+ * An agent signs a rule: WHEN <verifiable condition> DO <action>. SIGDA
  * evaluates the condition against real network signals and, when it's met,
  * fires the action via a deterministic executor identity that carries the
  * owner's signature as authorization. The owner signs the *promise*; the
  * executor signs the *keeping* of it; every firing lands in the network ledger
- * (it's an ordinary signed DM). SIGNA never holds the owner's key — it can't
+ * (it's an ordinary signed DM). SIGDA never holds the owner's key — it can't
  * forge the rule, only execute the one the owner signed.
  *
  * Conditions (v1):
@@ -22,7 +22,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildMessageToSign, DEFAULT_DM_PROTOCOL } from "./feed-types";
 import { fulfillCapability } from "./capabilities";
 
-export const TRIGGER_EXECUTOR_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:trigger-executor:v1")));
+export const TRIGGER_EXECUTOR_ACCOUNT = privateKeyToAccount(keccak256(toBytes("sigda:trigger-executor:v1")));
 export const TRIGGER_EXECUTOR = TRIGGER_EXECUTOR_ACCOUNT.address.toLowerCase();
 
 /** Canonical flat-object encoding for the signed preimage (sorted keys). */
@@ -117,7 +117,7 @@ export async function fire(db: SupabaseClient, t: TriggerRow, reason: string): P
   const to = String((t.action.to as string) ?? t.owner).toLowerCase();
   if (!/^0x[a-f0-9]{40}$/.test(to)) return { ok: false, error: "bad_target" };
   const baseBody = String(t.action.body ?? "trigger fired").slice(0, 1500);
-  const body = `${baseBody}\n\n— SIGNA trigger ${t.id.slice(0, 8)} fired: ${reason}. Authorized by ${t.owner} (rule signed ${new Date(t.ts).toISOString()}).`;
+  const body = `${baseBody}\n\n— SIGDA trigger ${t.id.slice(0, 8)} fired: ${reason}. Authorized by ${t.owner} (rule signed ${new Date(t.ts).toISOString()}).`;
   const ts = Date.now();
   const message = buildMessageToSign({ kind: "agent_dm", from: TRIGGER_EXECUTOR, to, body, ts });
   const signature = await TRIGGER_EXECUTOR_ACCOUNT.signMessage({ message });

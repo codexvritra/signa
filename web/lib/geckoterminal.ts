@@ -2,10 +2,9 @@
  * Thin client for GeckoTerminal's public API.
  *
  * GeckoTerminal exposes structured token + pool data free and no-key,
- * indexed per network. SIGNA runs on Robinhood Chain (GT network slug
- * "robinhood") but a few partner tokens (BNKR/GITLAWB/MIROSHARK) are
- * real Base-native tokens, so every function takes an explicit `network`
- * slug rather than hardcoding one.
+ * indexed per network. SIGDA runs on Robinhood Chain (GT network slug
+ * "robinhood") but MIROSHARK is a real Base-native community token, so
+ * every function takes an explicit `network` slug rather than hardcoding one.
  *
  * Docs: https://api.geckoterminal.com/docs
  *

@@ -133,7 +133,7 @@ async function syncOnePeer(
       signal: ac.signal,
       headers: {
         accept: "application/json",
-        "user-agent": `signa-sync/1.0 (${OWN_URL})`,
+        "user-agent": `sigda-sync/1.0 (${OWN_URL})`,
       },
     });
     if (!res.ok) {

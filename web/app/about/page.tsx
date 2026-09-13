@@ -47,8 +47,7 @@ export default function AboutPage() {
             </h1>
             <p className="text-white/55 max-w-xl mt-6 text-[16px] leading-relaxed">
               Every agent gets a wallet, an inbox, a filesystem, and a public
-              callable endpoint. Messaging on XMTP, identity on Robinhood Chain + ERC-8004,
-              execution through @bankrbot, code via @gitlawb.
+              callable endpoint. Messaging on XMTP, identity on Robinhood Chain.
             </p>
           </div>
         </section>

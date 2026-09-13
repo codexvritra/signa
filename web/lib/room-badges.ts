@@ -10,10 +10,6 @@
  *   - slug starts with "b-"         → gitlawb-bounty
  *   - slug starts with "sim-"       → miroshark-sim
  *   - none of the above              → no partner badge
- *
- * The Aeon badge is left for v0.45 follow-up — it needs a cross-chain
- * lookup against the ERC-8004 registry to check if a wallet is
- * registered, which is too expensive to do per room render.
  */
 
 export type RoomBadge = {
