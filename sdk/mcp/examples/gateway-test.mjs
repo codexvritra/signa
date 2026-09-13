@@ -1,15 +1,15 @@
 /**
  * Verify the v0.7.0 capability-gateway tools over real MCP stdio JSON-RPC,
  * the same way Claude Desktop / Cursor / Windsurf drive the server. Hits prod
- * SIGNA for the live data. Proves: tools/list exposes the gateway tools, and
- * signa_capabilities + signa_invoke + signa_brain return real results.
+ * SIGDA for the live data. Proves: tools/list exposes the gateway tools, and
+ * sigda_capabilities + sigda_invoke + sigda_brain return real results.
  */
 import { spawn } from "node:child_process";
 import { generatePrivateKey } from "viem/accounts";
 
 const proc = spawn("node", ["dist/index.js"], {
   cwd: process.cwd(),
-  env: { ...process.env, SIGNA_PRIVATE_KEY: generatePrivateKey() },
+  env: { ...process.env, SIGDA_PRIVATE_KEY: generatePrivateKey() },
   stdio: ["pipe", "pipe", "pipe"],
 });
 
@@ -45,21 +45,21 @@ async function main() {
 
   const list = await call("tools/list", {});
   const names = (list.result?.tools ?? []).map((t) => t.name);
-  const need = ["signa_capabilities", "signa_invoke", "signa_publish", "signa_brain"];
+  const need = ["sigda_capabilities", "sigda_invoke", "sigda_publish", "sigda_brain"];
   ok(need.every((n) => names.includes(n)), `tools/list exposes the gateway tools (${names.length} total): ${need.join(", ")}`);
 
-  const caps = await call("tools/call", { name: "signa_capabilities", arguments: {} });
+  const caps = await call("tools/call", { name: "sigda_capabilities", arguments: {} });
   const capsText = caps.result?.content?.[0]?.text ?? "";
-  ok(/marketplace/i.test(capsText) && /built-in/i.test(capsText), `signa_capabilities returns the live directory`);
+  ok(/marketplace/i.test(capsText) && /built-in/i.test(capsText), `sigda_capabilities returns the live directory`);
   console.log("    " + capsText.split("\n").slice(0, 3).join("\n    "));
 
-  const inv = await call("tools/call", { name: "signa_invoke", arguments: { cap: "bankr.launches" } });
+  const inv = await call("tools/call", { name: "sigda_invoke", arguments: { cap: "defi.tvl", arg: "aave" } });
   const invText = inv.result?.content?.[0]?.text ?? "";
-  ok(/signed by gateway 0x/i.test(invText), `signa_invoke returns a wallet-signed result`);
+  ok(/signed by gateway 0x/i.test(invText), `sigda_invoke returns a wallet-signed result`);
 
-  const brain = await call("tools/call", { name: "signa_brain", arguments: { goal: "in one sentence, what is the base market doing right now" } });
+  const brain = await call("tools/call", { name: "sigda_brain", arguments: { goal: "in one sentence, what is the base market doing right now" } });
   const brainText = brain.result?.content?.[0]?.text ?? "";
-  ok(/signed by: brain 0x/i.test(brainText), `signa_brain answers and signs a receipt`);
+  ok(/signed by: brain 0x/i.test(brainText), `sigda_brain answers and signs a receipt`);
   console.log("    " + brainText.split("\n").slice(0, 4).join("\n    "));
 
   console.log(fails === 0 ? "\n[OK] capability gateway verified over MCP stdio — the whole mesh through one server." : `\n[FAIL] ${fails} check(s) failed`);

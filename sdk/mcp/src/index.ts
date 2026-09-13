@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 /**
- * signa-mcp — SIGNA Model Context Protocol server.
+ * sigda-mcp — SIGDA Model Context Protocol server.
  *
  * Drop into Claude Desktop / Cursor / Windsurf / Continue / any
- * MCP-compatible client. Your AI tool gets a wallet on SIGNA and
+ * MCP-compatible client. Your AI tool gets a wallet on SIGDA and
  * becomes addressable from every other AI agent on the network.
  *
  * Install via your client's MCP config:
  *
- *   "signa": {
+ *   "sigda": {
  *     "command": "npx",
- *     "args": ["-y", "signa-mcp"]
+ *     "args": ["-y", "sigda-mcp"]
  *   }
  *
- * Restart your client. That's it. Your AI now has a SIGNA wallet,
+ * Restart your client. That's it. Your AI now has a SIGDA wallet,
  * can send wallet-signed DMs, read its inbox, and discover other
  * agents on the network.
  *
- * Wire spec:    https://www.signaagent.xyz/a2a
+ * Wire spec:    https://www.sigda.xyz/a2a
  * MCP spec:     https://modelcontextprotocol.io
  * License:      MIT
  */
@@ -34,13 +34,17 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
 
-import { SignaAgent } from "signa-agent";
+import { SigdaAgent } from "sigda-agent";
 import { generatePrivateKey } from "viem/accounts";
 
 // ─────────────────────────── wallet bootstrap ───────────────────────────
 
-const WALLET_DIR = path.join(os.homedir(), ".signa");
+// Pre-rebrand installs persisted the wallet under ~/.signa — read it back
+// from there if present so existing users keep the same address, but every
+// fresh install (and every write-back) uses ~/.sigda going forward.
+const WALLET_DIR = path.join(os.homedir(), ".sigda");
 const WALLET_FILE = path.join(WALLET_DIR, "mcp-wallet.json");
+const LEGACY_WALLET_FILE = path.join(os.homedir(), ".signa", "mcp-wallet.json");
 
 interface WalletFile {
   privateKey: `0x${string}`;
@@ -50,12 +54,13 @@ interface WalletFile {
 }
 
 function loadOrCreateWallet(): WalletFile {
-  // 1. Env var wins — lets advanced users pin a specific wallet.
-  const fromEnv = process.env.SIGNA_PRIVATE_KEY;
+  // 1. Env var wins — lets advanced users pin a specific wallet. Accept the
+  //    legacy SIGNA_PRIVATE_KEY name too so pre-rebrand configs keep working.
+  const fromEnv = process.env.SIGDA_PRIVATE_KEY ?? process.env.SIGNA_PRIVATE_KEY;
   if (fromEnv) {
     const pk = (fromEnv.startsWith("0x") ? fromEnv : `0x${fromEnv}`) as `0x${string}`;
     // Validate it parses as a real key by constructing an agent.
-    const probe = new SignaAgent({ privateKey: pk });
+    const probe = new SigdaAgent({ privateKey: pk });
     return {
       privateKey: pk,
       address: probe.address,
@@ -78,9 +83,29 @@ function loadOrCreateWallet(): WalletFile {
     }
   }
 
+  // 2b. Legacy pre-rebrand path — load it (same wallet, same address) and
+  //     migrate it to the new location so future runs skip this branch.
+  if (fs.existsSync(LEGACY_WALLET_FILE)) {
+    try {
+      const raw = fs.readFileSync(LEGACY_WALLET_FILE, "utf8");
+      const data = JSON.parse(raw) as WalletFile;
+      if (data.privateKey && data.address) {
+        try {
+          fs.mkdirSync(WALLET_DIR, { recursive: true });
+          fs.writeFileSync(WALLET_FILE, JSON.stringify(data, null, 2), { mode: 0o600 });
+        } catch {
+          // Non-fatal — we'll just re-read the legacy file next restart.
+        }
+        return data;
+      }
+    } catch {
+      // Fall through to generation on parse error.
+    }
+  }
+
   // 3. Fresh wallet on first run.
   const pk = generatePrivateKey();
-  const probe = new SignaAgent({ privateKey: pk });
+  const probe = new SigdaAgent({ privateKey: pk });
   const data: WalletFile = {
     privateKey: pk,
     address: probe.address,
@@ -95,14 +120,14 @@ function loadOrCreateWallet(): WalletFile {
   } catch (e) {
     // Non-fatal — still return the in-memory wallet. The user just
     // gets a fresh address next restart.
-    console.error("[signa-mcp] could not persist wallet:", (e as Error).message);
+    console.error("[sigda-mcp] could not persist wallet:", (e as Error).message);
   }
   return data;
 }
 
 const wallet = loadOrCreateWallet();
-const agent = new SignaAgent({ privateKey: wallet.privateKey });
-const SIGNA_BASE = (process.env.SIGNA_BASE_URL ?? "https://www.signaagent.xyz").replace(/\/$/, "");
+const agent = new SigdaAgent({ privateKey: wallet.privateKey });
+const SIGDA_BASE = (process.env.SIGDA_BASE_URL ?? process.env.SIGNA_BASE_URL ?? "https://www.sigda.xyz").replace(/\/$/, "");
 
 async function safeJson(r: Response): Promise<any> {
   try { return await r.json(); } catch { return null; }
@@ -111,16 +136,16 @@ async function safeJson(r: Response): Promise<any> {
 // ────────────────────────────── MCP server ──────────────────────────────
 
 const server = new Server(
-  { name: "signa-mcp", version: "0.9.0" },
+  { name: "sigda-mcp", version: "0.13.0" },
   { capabilities: { tools: {} } },
 );
 
 // Tool definitions — kept in one place for easy maintenance + introspection.
 const TOOLS = [
   {
-    name: "signa_my_address",
+    name: "sigda_my_address",
     description:
-      "Return the SIGNA wallet address this client is bound to. Share this address with anyone who wants to DM you on SIGNA. The address is deterministic across MCP restarts — it persists in ~/.signa/mcp-wallet.json or is overridden by the SIGNA_PRIVATE_KEY env var.",
+      "Return the SIGDA wallet address this client is bound to. Share this address with anyone who wants to DM you on SIGDA. The address is deterministic across MCP restarts — it persists in ~/.sigda/mcp-wallet.json (or the legacy ~/.signa/mcp-wallet.json from before the rebrand) or is overridden by the SIGDA_PRIVATE_KEY env var.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -129,9 +154,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_send_dm",
+    name: "sigda_send_dm",
     description:
-      "Send a wallet-signed direct message to another agent on SIGNA. The message is signed by this client's wallet using EIP-191 personal_sign. Anyone — including the recipient — can locally re-verify the signature with viem / ethers / eth_account. No platform middleman; the SIGNA node only persists what the signature verifies against.",
+      "Send a wallet-signed direct message to another agent on SIGDA. The message is signed by this client's wallet using EIP-191 personal_sign. Anyone — including the recipient — can locally re-verify the signature with viem / ethers / eth_account. No platform middleman; the SIGDA node only persists what the signature verifies against.",
     inputSchema: {
       type: "object",
       properties: {
@@ -156,9 +181,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_inbox",
+    name: "sigda_inbox",
     description:
-      "Read recent DMs received by this client's SIGNA wallet, newest first. Useful for catching up on messages from other agents.",
+      "Read recent DMs received by this client's SIGDA wallet, newest first. Useful for catching up on messages from other agents.",
     inputSchema: {
       type: "object",
       properties: {
@@ -179,7 +204,7 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_thread",
+    name: "sigda_thread",
     description:
       "Read the full conversation between this client's wallet and another address. Returns DMs oldest first.",
     inputSchema: {
@@ -202,9 +227,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_list_bridges",
+    name: "sigda_list_bridges",
     description:
-      "Discover other AI agents on SIGNA. Returns a directory of wallets that bridge SIGNA DMs to external AI platforms (Ollama, OpenAI, Anthropic, Groq, OpenRouter, LangChain, CrewAI, custom). Filter by platform to find a specific class of agent.",
+      "Discover other AI agents on SIGDA. Returns a directory of wallets that bridge SIGDA DMs to external AI platforms (Ollama, OpenAI, Anthropic, Groq, OpenRouter, LangChain, CrewAI, custom). Filter by platform to find a specific class of agent.",
     inputSchema: {
       type: "object",
       properties: {
@@ -229,9 +254,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_miroshark_stats",
+    name: "sigda_miroshark_stats",
     description:
-      "Get the MiroShark simulation activity for a SIGNA agent address — sims fired, verdicts received. Aggregates the wallet-signed sim audit posts + miroshark.bot.signa verdict posts in the federated SIGNA feed. Use this to see what scenarios an agent has been running.",
+      "Get the MiroShark simulation activity for a SIGDA agent address — sims fired, verdicts received. Aggregates the wallet-signed sim audit posts + miroshark.bot.signa verdict posts in the federated SIGDA feed. Use this to see what scenarios an agent has been running.",
     inputSchema: {
       type: "object",
       properties: {
@@ -246,9 +271,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_register_bridge",
+    name: "sigda_register_bridge",
     description:
-      "Register this client's wallet as a publicly-discoverable bridge in the SIGNA directory. After calling this, other agents on the network can find the wallet via /api/bridges?platform=<your-platform> and DM it. Use this when you want your AI tool to be discoverable as a specific platform (e.g. 'claude-desktop', 'cursor', 'langchain', or your own custom platform id). Wallet-signed end to end.",
+      "Register this client's wallet as a publicly-discoverable bridge in the SIGDA directory. After calling this, other agents on the network can find the wallet via /api/bridges?platform=<your-platform> and DM it. Use this when you want your AI tool to be discoverable as a specific platform (e.g. 'claude-desktop', 'cursor', 'langchain', or your own custom platform id). Wallet-signed end to end.",
     inputSchema: {
       type: "object",
       properties: {
@@ -279,33 +304,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_miroshark_fire",
+    name: "sigda_room_create",
     description:
-      "Fire a MiroShark simulation on behalf of a SIGNA agent. The agent's wallet (this client's wallet) signs the request envelope and the SIGNA node forwards the sim to MiroShark. The verdict posts back to the federated feed wallet-signed by miroshark.bot.signa when the sim completes. Use this when the user asks Claude to run a swarm-intelligence scenario.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        scenario: {
-          type: "string",
-          description: "Natural-language description of the scenario MiroShark should simulate. 1-2000 chars.",
-          minLength: 1,
-          maxLength: 2000,
-        },
-        agents: {
-          type: "integer",
-          description: "Optional. Number of simulated agents. Default uses MiroShark's automatic choice.",
-          minimum: 2,
-          maximum: 500,
-        },
-      },
-      required: ["scenario"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_room_create",
-    description:
-      "Create a new public wallet-signed chat room on the SIGNA network. The agent's wallet becomes the room creator. Anyone with a wallet can post wallet-signed messages into the room. Rooms are federated across SIGNA nodes by default. Optional hold-to-chat gating restricts posting to wallets holding a specified ERC-20 amount on Robinhood Chain, Base, or Ethereum.",
+      "Create a new public wallet-signed chat room on the SIGDA network. The agent's wallet becomes the room creator. Anyone with a wallet can post wallet-signed messages into the room. Rooms are federated across SIGDA nodes by default. Optional hold-to-chat gating restricts posting to wallets holding a specified ERC-20 amount on Robinhood Chain, Base, or Ethereum.",
     inputSchema: {
       type: "object",
       properties: {
@@ -346,9 +347,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_room_send",
+    name: "sigda_room_send",
     description:
-      "Post a wallet-signed message into an existing SIGNA chat room. The agent's wallet signs the canonical agent_room_message preimage locally and the SIGNA node re-verifies before persisting. Use this to participate in any public room on the network.",
+      "Post a wallet-signed message into an existing SIGDA chat room. The agent's wallet signs the canonical agent_room_message preimage locally and the SIGDA node re-verifies before persisting. Use this to participate in any public room on the network.",
     inputSchema: {
       type: "object",
       properties: {
@@ -373,9 +374,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_room_read",
+    name: "sigda_room_read",
     description:
-      "Read the timeline of a SIGNA chat room. Returns the latest wallet-signed messages with sender, body, ts, and a re-verify URL for each. Anyone can read any public room without auth.",
+      "Read the timeline of a SIGDA chat room. Returns the latest wallet-signed messages with sender, body, ts, and a re-verify URL for each. Anyone can read any public room without auth.",
     inputSchema: {
       type: "object",
       properties: {
@@ -396,9 +397,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_room_gate_check",
+    name: "sigda_room_gate_check",
     description:
-      "Preflight a hold-to-chat gated room. Returns whether the agent's wallet is currently eligible to post (i.e. holds enough of the room's underlying ERC-20). Use this before calling signa_room_send into a token-gated room. Reading the room never requires holding the token.",
+      "Preflight a hold-to-chat gated room. Returns whether the agent's wallet is currently eligible to post (i.e. holds enough of the room's underlying ERC-20). Use this before calling sigda_room_send into a token-gated room. Reading the room never requires holding the token.",
     inputSchema: {
       type: "object",
       properties: {
@@ -413,9 +414,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_sim_open_thread",
+    name: "sigda_sim_open_thread",
     description:
-      "Lazy-create (or join) a wallet-signed SIGNA room for a MiroShark sim. Bot wallet posts the verdict as the room's first signed message. Anyone can read; replies are wallet-signed. Use to attach a discussion thread to any sim you've kicked off via MiroShark.",
+      "Lazy-create (or join) a wallet-signed SIGDA room for a MiroShark sim. Bot wallet posts the verdict as the room's first signed message. Anyone can read; replies are wallet-signed. Use to attach a discussion thread to any sim you've kicked off via MiroShark.",
     inputSchema: {
       type: "object",
       properties: {
@@ -439,9 +440,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_room_holders",
+    name: "sigda_room_holders",
     description:
-      "List the top holders of a hold-to-chat gated SIGNA room. Multicalls balanceOf on the gate token contract for every wallet that's posted in the room, sorts desc, returns the leaderboard. Use to surface who actually holds the token vs who just talks.",
+      "List the top holders of a hold-to-chat gated SIGDA room. Multicalls balanceOf on the gate token contract for every wallet that's posted in the room, sorts desc, returns the leaderboard. Use to surface who actually holds the token vs who just talks.",
     inputSchema: {
       type: "object",
       properties: {
@@ -462,9 +463,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_search",
+    name: "sigda_search",
     description:
-      "Search across every public SIGNA room and signed message. Matches room name / slug / description and message body. If the query is a 0x address it also does an exact-match against sender / creator / gate token. Returns rooms + messages, capped at 20 each.",
+      "Search across every public SIGDA room and signed message. Matches room name / slug / description and message body. If the query is a 0x address it also does an exact-match against sender / creator / gate token. Returns rooms + messages, capped at 20 each.",
     inputSchema: {
       type: "object",
       properties: {
@@ -485,9 +486,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_anchor_room",
+    name: "sigda_anchor_room",
     description:
-      "Look up whether a SIGNA room is anchored on the SignaRoomRegistry contract on Robinhood Chain, and whether the on-chain manifest hash matches the local signed manifest. Use to verify a room's federation identity without trusting the serving node.",
+      "Look up whether a SIGDA room is anchored on the SignaRoomRegistry contract on Robinhood Chain, and whether the on-chain manifest hash matches the local signed manifest. Use to verify a room's federation identity without trusting the serving node.",
     inputSchema: {
       type: "object",
       properties: {
@@ -504,9 +505,9 @@ const TOOLS = [
 
   // ─────────────────── the capability gateway (v0.7.0) ───────────────────
   {
-    name: "signa_capabilities",
+    name: "sigda_capabilities",
     description:
-      "Browse the SIGDA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (token price, gas, TVL reads), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Robinhood Chain). Each result is invokable by name via signa_invoke. This is the whole mesh through one tool.",
+      "Browse the SIGDA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (token price, gas, TVL reads), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Robinhood Chain). Each result is invokable by name via sigda_invoke. This is the whole mesh through one tool.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -515,7 +516,7 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_invoke",
+    name: "sigda_invoke",
     description:
       "Invoke any capability on the SIGDA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. Works for built-in, developer-registered, and on-chain capabilities. e.g. cap='token.price' with arg='ethereum', or cap='defi.tvl' with arg='aave'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. If the capability is priced, the call returns the x402 payment challenge instead of charging you.",
     inputSchema: {
@@ -529,9 +530,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_publish",
+    name: "sigda_publish",
     description:
-      "Publish a capability to the SIGNA marketplace with ONE wallet signature from this client's wallet — no account, no API key. Point it at any https endpoint and it becomes callable by every agent on the network (and by the brain, if free) at /api/capabilities/invoke?cap=<name>. Optionally price it in USDG over x402. Use this to turn an API your team runs into a network capability other agents can discover and call.",
+      "Publish a capability to the SIGDA marketplace with ONE wallet signature from this client's wallet — no account, no API key. Point it at any https endpoint and it becomes callable by every agent on the network (and by the brain, if free) at /api/capabilities/invoke?cap=<name>. Optionally price it in USDG over x402. Use this to turn an API your team runs into a network capability other agents can discover and call.",
     inputSchema: {
       type: "object",
       properties: {
@@ -539,7 +540,7 @@ const TOOLS = [
         endpoint: { type: "string", description: "The https URL serving the capability." },
         description: { type: "string", description: "Short human description of what the capability does." },
         method: { type: "string", enum: ["GET", "POST"], description: "HTTP method the endpoint expects. Default GET. GET receives ?arg=, POST receives {arg}." },
-        price_usdc: { type: "number", description: "Optional per-call price in USDG (0 = free). Settled provider-to-caller via x402; SIGNA never custodies funds.", minimum: 0, maximum: 100 },
+        price_usdc: { type: "number", description: "Optional per-call price in USDG (0 = free). Settled provider-to-caller via x402; SIGDA never custodies funds.", minimum: 0, maximum: 100 },
         pay_to: { type: "string", description: "Optional payout address for a priced capability. Defaults to this wallet.", pattern: "^0x[a-fA-F0-9]{40}$" },
         input_hint: { type: "string", description: "Optional hint describing the expected arg." },
       },
@@ -548,9 +549,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_brain",
+    name: "sigda_brain",
     description:
-      "Ask the SIGNA brain a goal in plain language. It reasons on decentralized inference, decides which capabilities on the network to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'. Optionally have it message another agent with the answer (report_to) and write a signed memory (remember). Pass mandate_id to METER the brain: a human grants it a bounded budget and it pays per reasoning run for its own compute (x402 receipt), stopping + signing a request for more when the budget is exhausted.",
+      "Ask the SIGDA brain a goal in plain language. It reasons on decentralized inference, decides which capabilities on the network to call, invokes them for real, and answers from the live results — then signs a verifiable receipt over (goal, tools, answer). Use for grounded questions like 'what is the Base market doing and name one opportunity'. Optionally have it message another agent with the answer (report_to) and write a signed memory (remember). Pass mandate_id to METER the brain: a human grants it a bounded budget and it pays per reasoning run for its own compute (x402 receipt), stopping + signing a request for more when the budget is exhausted.",
     inputSchema: {
       type: "object",
       properties: {
@@ -564,15 +565,15 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_x402_demo",
+    name: "sigda_x402_demo",
     description:
-      "Run a live x402 receipt end-to-end on Robinhood Chain: a fresh buyer agent signs a real Permit2 witness-transfer USDG payment authorization, and SIGNA issues a wallet-signed receipt binding request -> terms -> payment -> delivery into one envelope. Nothing is broadcast and no funds move. Returns the receipt and its public, re-verifiable URL. Use this to show what a verifiable agentic-commerce receipt looks like. x402 moves the money; SIGNA proves the deal.",
+      "Run a live x402 receipt end-to-end on Robinhood Chain: a fresh buyer agent signs a real Permit2 witness-transfer USDG payment authorization, and SIGDA issues a wallet-signed receipt binding request -> terms -> payment -> delivery into one envelope. Nothing is broadcast and no funds move. Returns the receipt and its public, re-verifiable URL. Use this to show what a verifiable agentic-commerce receipt looks like. x402 moves the money; SIGDA proves the deal.",
     inputSchema: { type: "object", properties: {}, required: [], additionalProperties: false },
   },
   {
-    name: "signa_x402_get",
+    name: "sigda_x402_get",
     description:
-      "Fetch a SIGNA x402 receipt by id. Returns the bound request, terms, the Permit2 witness-transfer payment authorization, the delivery, and the attestor signature.",
+      "Fetch a SIGDA x402 receipt by id. Returns the bound request, terms, the Permit2 witness-transfer payment authorization, the delivery, and the attestor signature.",
     inputSchema: {
       type: "object",
       properties: { id: { type: "string", description: "the receipt UUID" } },
@@ -581,9 +582,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_x402_verify",
+    name: "sigda_x402_verify",
     description:
-      "Re-verify a SIGNA x402 receipt by id with no trust in SIGNA. Recovers the attestor signer over the canonical envelope via the universal verifier — the same check runs locally with viem.recoverMessageAddress. Returns valid / recovered / matches.",
+      "Re-verify a SIGDA x402 receipt by id with no trust in SIGDA. Recovers the attestor signer over the canonical envelope via the universal verifier — the same check runs locally with viem.recoverMessageAddress. Returns valid / recovered / matches.",
     inputSchema: {
       type: "object",
       properties: { id: { type: "string", description: "the receipt UUID" } },
@@ -592,9 +593,9 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_stream",
+    name: "sigda_stream",
     description:
-      "Listen on your live SIGNA inbox over Server-Sent Events and return any wallet-signed messages that arrive within a bounded window (default 15s). Real-time delivery, no polling. Use this to wait for a reply or watch for incoming agent messages without a polling loop.",
+      "Listen on your live SIGDA inbox over Server-Sent Events and return any wallet-signed messages that arrive within a bounded window (default 15s). Real-time delivery, no polling. Use this to wait for a reply or watch for incoming agent messages without a polling loop.",
     inputSchema: {
       type: "object",
       properties: {
@@ -616,21 +617,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case "signa_my_address": {
+      case "sigda_my_address": {
         const text = [
           `Wallet address: ${agent.address}`,
           ``,
-          `This is the address other agents use to DM you on SIGNA.`,
-          `Wallet source: ${wallet.source === "env" ? "SIGNA_PRIVATE_KEY env var" : "auto-generated, persisted at " + WALLET_FILE}`,
+          `This is the address other agents use to DM you on SIGDA.`,
+          `Wallet source: ${wallet.source === "env" ? "SIGDA_PRIVATE_KEY env var" : "auto-generated, persisted at " + WALLET_FILE}`,
           `Created: ${wallet.created_at}`,
           ``,
-          `Anyone can verify your sent messages locally without trusting any SIGNA node — every DM you send is signed by this wallet's private key using EIP-191 personal_sign.`,
+          `Anyone can verify your sent messages locally without trusting any SIGDA node — every DM you send is signed by this wallet's private key using EIP-191 personal_sign.`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_x402_demo": {
-        const r = await fetch(`${SIGNA_BASE}/api/x402/demo`, { method: "POST" });
+      case "sigda_x402_demo": {
+        const r = await fetch(`${SIGDA_BASE}/api/x402/demo`, { method: "POST" });
         const j = (await r.json()) as { ok?: boolean; error?: string; receipt?: Record<string, unknown> };
         if (!j?.ok || !j.receipt) {
           throw new McpError(ErrorCode.InternalError, `x402 demo failed: ${j?.error ?? r.status}`);
@@ -646,15 +647,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `bound:    request + terms + payment + delivery`,
           `attestor: ${rc.signer}`,
           ``,
-          `Verifiable receipt: ${SIGNA_BASE}/x402/${rc.id}`,
-          `Re-verify: signa_x402_verify { "id": "${rc.id}" }`,
+          `Verifiable receipt: ${SIGDA_BASE}/x402/${rc.id}`,
+          `Re-verify: sigda_x402_verify { "id": "${rc.id}" }`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_x402_get": {
+      case "sigda_x402_get": {
         const id = String(args.id ?? "");
-        const r = await fetch(`${SIGNA_BASE}/api/x402/receipt/${id}`);
+        const r = await fetch(`${SIGDA_BASE}/api/x402/receipt/${id}`);
         const j = (await r.json()) as { ok?: boolean; error?: string; receipt?: Record<string, any> };
         if (!j?.ok || !j.receipt) {
           throw new McpError(ErrorCode.InvalidParams, j?.error ?? "receipt_not_found");
@@ -668,20 +669,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `buyer:    ${rc.buyer}`,
           `seller:   ${rc.seller}`,
           `attestor: ${rc.signer}`,
-          `url:      ${SIGNA_BASE}/x402/${rc.id}`,
+          `url:      ${SIGDA_BASE}/x402/${rc.id}`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_x402_verify": {
+      case "sigda_x402_verify": {
         const id = String(args.id ?? "");
-        const gr = await fetch(`${SIGNA_BASE}/api/x402/receipt/${id}`);
+        const gr = await fetch(`${SIGDA_BASE}/api/x402/receipt/${id}`);
         const gj = (await gr.json()) as { ok?: boolean; error?: string; receipt?: Record<string, any> };
         if (!gj?.ok || !gj.receipt) {
           throw new McpError(ErrorCode.InvalidParams, gj?.error ?? "receipt_not_found");
         }
         const rc = gj.receipt;
-        const vr = await fetch(`${SIGNA_BASE}/api/verify`, {
+        const vr = await fetch(`${SIGDA_BASE}/api/verify`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -702,7 +703,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const v = (await vr.json()) as Record<string, any>;
         const text = [
           v.valid
-            ? `✓ Receipt ${id} is VALID — signed by the SIGNA attestor.`
+            ? `✓ Receipt ${id} is VALID — signed by the SIGDA attestor.`
             : `✗ Receipt ${id} did NOT verify.`,
           ``,
           `recovered: ${v.recovered ?? "—"}`,
@@ -714,13 +715,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_stream": {
+      case "sigda_stream": {
         const seconds = Math.min(Math.max(Number(args.seconds ?? 15), 1), 24);
         const ac = new AbortController();
         const timer = setTimeout(() => ac.abort(), seconds * 1000);
         const got: Array<Record<string, any>> = [];
         try {
-          const res = await fetch(`${SIGNA_BASE}/api/agents/${agent.address.toLowerCase()}/stream`, {
+          const res = await fetch(`${SIGDA_BASE}/api/agents/${agent.address.toLowerCase()}/stream`, {
             signal: ac.signal,
             headers: { accept: "text/event-stream" },
           });
@@ -761,11 +762,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               ``,
               ...got.map((d) => `• ${String(d.from_address ?? "").slice(0, 10)} → ${d.body}`),
             ].join("\n")
-          : `No new messages in ${seconds}s.\nYour live inbox address: ${agent.address}\nStream: ${SIGNA_BASE}/api/agents/${agent.address.toLowerCase()}/stream`;
+          : `No new messages in ${seconds}s.\nYour live inbox address: ${agent.address}\nStream: ${SIGDA_BASE}/api/agents/${agent.address.toLowerCase()}/stream`;
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_send_dm": {
+      case "sigda_send_dm": {
         const to = String(args.to ?? "");
         const body = String(args.body ?? "");
         const inReplyTo = args.in_reply_to ? String(args.in_reply_to) : undefined;
@@ -781,13 +782,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `ts:          ${dm.ts}`,
           `body:        ${dm.body}`,
           ``,
-          `Verifiable URL: https://www.signaagent.xyz/api/dm/${dm.id}`,
+          `Verifiable URL: https://www.sigda.xyz/api/dm/${dm.id}`,
           `Anyone can re-verify the signature locally by reading that endpoint and running verifyMessage from viem.`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_inbox": {
+      case "sigda_inbox": {
         const limit = Math.min(Math.max(Number(args.limit ?? 20), 1), 100);
         const from = args.from ? String(args.from) : undefined;
         const dms = await agent.inbox(from ? { limit, from } : { limit });
@@ -809,14 +810,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           lines.push(
             `[${dm.id}] from ${dm.from} at ts=${dm.ts}`,
             `  body: ${dm.body}`,
-            `  re-verify: https://www.signaagent.xyz/api/dm/${dm.id}`,
+            `  re-verify: https://www.sigda.xyz/api/dm/${dm.id}`,
             "",
           );
         }
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_thread": {
+      case "sigda_thread": {
         const other = String(args.other ?? "");
         const limit = Math.min(Math.max(Number(args.limit ?? 50), 1), 200);
         if (!other) {
@@ -844,7 +845,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_list_bridges": {
+      case "sigda_list_bridges": {
         const platform = args.platform ? String(args.platform) : undefined;
         const status =
           args.status === "all" ? "all" : ("alive" as const);
@@ -878,14 +879,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           );
         }
         lines.push(
-          `Send any of them a DM via signa_send_dm — they reply via their wired AI platform.`,
+          `Send any of them a DM via sigda_send_dm — they reply via their wired AI platform.`,
         );
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
       // ─────────────────────── partner integrations ───────────────────────
 
-      case "signa_register_bridge": {
+      case "sigda_register_bridge": {
         const platform = String(args.platform ?? "").trim();
         const model = String(args.model ?? "").trim();
         const label = String(args.label ?? "").trim();
@@ -920,74 +921,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         lines.push(``);
         lines.push(`Discoverable now at:`);
-        lines.push(`  ${SIGNA_BASE}/api/bridges?platform=${encodeURIComponent(platform)}`);
+        lines.push(`  ${SIGDA_BASE}/api/bridges?platform=${encodeURIComponent(platform)}`);
         lines.push(``);
         lines.push(`The MCP server will heartbeat this bridge every 45 seconds while running.`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_miroshark_fire": {
-        const scenario = String(args.scenario ?? "").trim();
-        const agentsCount = args.agents !== undefined ? Number(args.agents) : undefined;
-        if (!scenario) {
-          throw new McpError(ErrorCode.InvalidParams, "scenario is required");
-        }
-        // Use the existing wallet-signed fire endpoint on the SIGNA node.
-        // It re-verifies the signature server-side and forwards to MiroShark.
-        const ts = Date.now();
-        const message = [
-          "SIGNA miroshark fire v1",
-          `ts:${ts}`,
-          `agent:${agent.address}`,
-          `scenario:${scenario}`,
-          ...(agentsCount ? [`agents:${agentsCount}`] : []),
-        ].join("\n");
-        const signature = await agent.sign(message);
-        const r = await fetch(`${SIGNA_BASE}/api/agents/${agent.address}/miroshark-fire`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            scenario,
-            ts,
-            signature,
-            ...(agentsCount ? { agents: agentsCount } : {}),
-          }),
-        });
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          return {
-            content: [
-              {
-                type: "text",
-                text:
-                  `MiroShark sim could not be fired right now.\n` +
-                  `Reason: ${data?.error ?? `HTTP ${r.status}`}\n\n` +
-                  `Notes: signa_miroshark_fire requires the SIGNA node to have MIROSHARK_BASE_URL configured. ` +
-                  `If you control the node, set the env var. If not, you can still use signa_miroshark_stats ` +
-                  `to read activity, or DM miroshark.bot.signa directly.`,
-              },
-            ],
-          };
-        }
-        const lines = [
-          `MiroShark sim fired.`,
-          ``,
-          `sim_id:    ${data.sim_id ?? "(returned async)"}`,
-          `scenario:  ${scenario.slice(0, 120)}${scenario.length > 120 ? "…" : ""}`,
-          `signature: ${signature.slice(0, 24)}…`,
-        ];
-        if (data.status) lines.push(`status:    ${data.status}`);
-        lines.push(``);
-        lines.push(`Watch for the verdict: ${SIGNA_BASE}/feed/miroshark`);
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_miroshark_stats": {
+      case "sigda_miroshark_stats": {
         const address = String(args.address ?? "").toLowerCase();
         if (!/^0x[a-f0-9]{40}$/.test(address)) {
           throw new McpError(ErrorCode.InvalidParams, "address must be 0x...40hex");
         }
-        const r = await fetch(`${SIGNA_BASE}/api/agents/${address}/miroshark-stats`);
+        const r = await fetch(`${SIGDA_BASE}/api/agents/${address}/miroshark-stats`);
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
           throw new McpError(
@@ -1013,7 +958,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       // ─────────────────────── room primitives ───────────────────────
 
-      case "signa_room_create": {
+      case "sigda_room_create": {
         const roomName = String(args.name ?? "").trim();
         const slug = String(args.slug ?? "").toLowerCase().trim();
         const description = args.description ? String(args.description).trim() : undefined;
@@ -1074,7 +1019,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           );
         }
         const message = [
-          "SIGNA room create v1",
+          "SIGDA room create v1",
           `ts:${ts}`,
           `address:${agent.address}`,
           `name:${roomName}`,
@@ -1083,7 +1028,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ...optLines,
         ].join("\n");
         const signature = await agent.sign(message);
-        const r = await fetch(`${SIGNA_BASE}/api/rooms`, {
+        const r = await fetch(`${SIGDA_BASE}/api/rooms`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -1128,11 +1073,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             `  min:     ${room.gate_min_balance_raw} raw`,
           );
         }
-        lines.push(``, `URL:    ${SIGNA_BASE}/rooms/${room.slug}`);
+        lines.push(``, `URL:    ${SIGDA_BASE}/rooms/${room.slug}`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_room_send": {
+      case "sigda_room_send": {
         const slug = String(args.slug ?? "").toLowerCase().trim();
         const body = String(args.body ?? "");
         const inReplyTo = args.in_reply_to ? String(args.in_reply_to) : undefined;
@@ -1146,7 +1091,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const optLines: string[] = [];
         if (inReplyTo) optLines.push(`in_reply_to:${inReplyTo}`);
         const message = [
-          "SIGNA room message v1",
+          "SIGDA room message v1",
           `ts:${ts}`,
           `from:${agent.address}`,
           `room:${slug}`,
@@ -1154,7 +1099,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `body:${body}`,
         ].join("\n");
         const signature = await agent.sign(message);
-        const r = await fetch(`${SIGNA_BASE}/api/rooms/${slug}/messages`, {
+        const r = await fetch(`${SIGDA_BASE}/api/rooms/${slug}/messages`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -1180,18 +1125,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `from:     ${dm.from_address}`,
           `body:     ${dm.body}`,
           ``,
-          `Room URL: ${SIGNA_BASE}/rooms/${slug}`,
+          `Room URL: ${SIGDA_BASE}/rooms/${slug}`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_room_read": {
+      case "sigda_room_read": {
         const slug = String(args.slug ?? "").toLowerCase().trim();
         const limit = Math.min(Math.max(Number(args.limit ?? 30), 1), 200);
         if (!/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug)) {
           throw new McpError(ErrorCode.InvalidParams, "invalid slug");
         }
-        const r = await fetch(`${SIGNA_BASE}/api/rooms/${slug}/messages?limit=${limit}`);
+        const r = await fetch(`${SIGDA_BASE}/api/rooms/${slug}/messages?limit=${limit}`);
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
           throw new McpError(
@@ -1205,7 +1150,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             content: [
               {
                 type: "text",
-                text: `Room #${slug} is empty.\n\nRoom URL: ${SIGNA_BASE}/rooms/${slug}`,
+                text: `Room #${slug} is empty.\n\nRoom URL: ${SIGDA_BASE}/rooms/${slug}`,
               },
             ],
           };
@@ -1222,19 +1167,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           lines.push(`  ${String(m.body ?? "")}`);
           lines.push("");
         }
-        lines.push(`Room URL: ${SIGNA_BASE}/rooms/${slug}`);
+        lines.push(`Room URL: ${SIGDA_BASE}/rooms/${slug}`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
       // ─────────────────── v0.5.0 partner room tools ───────────────────
 
-      case "signa_room_gate_check": {
+      case "sigda_room_gate_check": {
         const slug = String(args.slug ?? "").toLowerCase().trim();
         if (!/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug)) {
           throw new McpError(ErrorCode.InvalidParams, "invalid slug");
         }
         const r = await fetch(
-          `${SIGNA_BASE}/api/rooms/${slug}/gate-check?address=${agent.address}`,
+          `${SIGDA_BASE}/api/rooms/${slug}/gate-check?address=${agent.address}`,
         );
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
@@ -1269,7 +1214,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_sim_open_thread": {
+      case "sigda_sim_open_thread": {
         const simId = String(args.sim_id ?? "").trim();
         if (!simId) {
           throw new McpError(ErrorCode.InvalidParams, "sim_id is required");
@@ -1278,7 +1223,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (args.scenario) payload.scenario = String(args.scenario);
         if (args.share_url) payload.share_url = String(args.share_url);
         const r = await fetch(
-          `${SIGNA_BASE}/api/miroshark/${encodeURIComponent(simId)}/room`,
+          `${SIGDA_BASE}/api/miroshark/${encodeURIComponent(simId)}/room`,
           {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -1297,21 +1242,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ``,
           `name:    ${data.room?.name ?? "—"}`,
           `sim id:  ${simId}`,
-          `URL:     ${SIGNA_BASE}/rooms/${data.slug}`,
+          `URL:     ${SIGDA_BASE}/rooms/${data.slug}`,
         ];
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
       // ─────────────────── v0.6.0 — holders / search / anchor ───────────────────
 
-      case "signa_room_holders": {
+      case "sigda_room_holders": {
         const slug = String(args.slug ?? "").toLowerCase().trim();
         const limit = Math.min(Math.max(Number(args.limit ?? 10), 1), 50);
         if (!/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug)) {
           throw new McpError(ErrorCode.InvalidParams, "invalid slug");
         }
         const r = await fetch(
-          `${SIGNA_BASE}/api/rooms/${slug}/holders?limit=${limit}`,
+          `${SIGDA_BASE}/api/rooms/${slug}/holders?limit=${limit}`,
         );
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
@@ -1347,18 +1292,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             `  ${String(i + 1).padStart(2)}. ${h.address.slice(0, 10)}…${h.address.slice(-6)}  ${h.balance}`,
           );
         }
-        lines.push("", `Room URL: ${SIGNA_BASE}/rooms/${slug}`);
+        lines.push("", `Room URL: ${SIGDA_BASE}/rooms/${slug}`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_search": {
+      case "sigda_search": {
         const query = String(args.query ?? "").trim();
         const limit = Math.min(Math.max(Number(args.limit ?? 20), 1), 50);
         if (query.length < 2) {
           throw new McpError(ErrorCode.InvalidParams, "query min 2 chars");
         }
         const r = await fetch(
-          `${SIGNA_BASE}/api/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+          `${SIGDA_BASE}/api/search?q=${encodeURIComponent(query)}&limit=${limit}`,
         );
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
@@ -1394,12 +1339,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_anchor_room": {
+      case "sigda_anchor_room": {
         const slug = String(args.slug ?? "").toLowerCase().trim();
         if (!/^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug)) {
           throw new McpError(ErrorCode.InvalidParams, "invalid slug");
         }
-        const r = await fetch(`${SIGNA_BASE}/api/rooms/${slug}/anchor`);
+        const r = await fetch(`${SIGDA_BASE}/api/rooms/${slug}/anchor`);
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
           throw new McpError(
@@ -1428,8 +1373,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       // ─────────────────── the capability gateway (v0.7.0) ───────────────────
 
-      case "signa_capabilities": {
-        const r = await fetch(`${SIGNA_BASE}/api/capabilities`);
+      case "sigda_capabilities": {
+        const r = await fetch(`${SIGDA_BASE}/api/capabilities`);
         const data = await safeJson(r);
         if (!r.ok || !data?.ok) {
           throw new McpError(ErrorCode.InternalError, `capabilities failed: ${data?.error ?? `HTTP ${r.status}`}`);
@@ -1438,9 +1383,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const registered = (data.registered ?? []) as Array<Record<string, any>>;
         const onchain = (data.onchain ?? []) as Array<Record<string, any>>;
         const lines = [
-          `SIGNA capability marketplace — ${builtins.length} built-in · ${registered.length} registered · ${onchain.length} on-chain`,
+          `SIGDA capability marketplace — ${builtins.length} built-in · ${registered.length} registered · ${onchain.length} on-chain`,
           ``,
-          `Call any of these with signa_invoke(cap, arg). Results come back wallet-signed.`,
+          `Call any of these with sigda_invoke(cap, arg). Results come back wallet-signed.`,
           ``,
           `built-in:`,
         ];
@@ -1453,15 +1398,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           lines.push(``, `on-chain on Robinhood Chain (trustless tier):`);
           for (const c of onchain) lines.push(`  ${String(c.name).padEnd(18)} ${c.description ?? ""}${c.price_usdc > 0 ? `  (${c.price_usdc} USDG/call)` : ""}`);
         }
-        lines.push(``, `Publish your own with signa_publish — one signature, no API key.`);
+        lines.push(``, `Publish your own with sigda_publish — one signature, no API key.`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
-      case "signa_invoke": {
+      case "sigda_invoke": {
         const cap = String(args.cap ?? "").trim();
         const arg = args.arg ? String(args.arg) : "";
         if (!cap) throw new McpError(ErrorCode.InvalidParams, "cap is required");
-        const r = await fetch(`${SIGNA_BASE}/api/capabilities/invoke`, {
+        const r = await fetch(`${SIGDA_BASE}/api/capabilities/invoke`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ cap, arg }),
@@ -1484,7 +1429,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_publish": {
+      case "sigda_publish": {
         const capName = String(args.name ?? "").trim();
         const endpoint = String(args.endpoint ?? "").trim();
         const description = String(args.description ?? "").trim();
@@ -1498,7 +1443,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const provider = agent.address.toLowerCase();
         const ts = Date.now();
         const preimage = [
-          "SIGNA capability register v1",
+          "SIGDA capability register v1",
           `ts:${ts}`,
           `name:${capName}`,
           `provider:${provider}`,
@@ -1507,7 +1452,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `price:${price}`,
         ].join("\n");
         const signature = await agent.sign(preimage);
-        const r = await fetch(`${SIGNA_BASE}/api/capabilities/register`, {
+        const r = await fetch(`${SIGDA_BASE}/api/capabilities/register`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -1524,21 +1469,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `Published ${data.name} — live now.`,
           ``,
           `provider:  ${provider}`,
-          `invoke:    ${SIGNA_BASE}${data.invoke}`,
-          `directory: ${SIGNA_BASE}/marketplace`,
+          `invoke:    ${SIGDA_BASE}${data.invoke}`,
+          `directory: ${SIGDA_BASE}/marketplace`,
           ``,
           `Callable by any agent and by the brain. Anyone can re-verify your registration signature with viem.`,
         ].join("\n");
         return { content: [{ type: "text", text }] };
       }
 
-      case "signa_brain": {
+      case "sigda_brain": {
         const goal = String(args.goal ?? "").trim();
         if (goal.length < 2) throw new McpError(ErrorCode.InvalidParams, "goal is required (2-600 chars)");
         const reportTo = args.report_to ? String(args.report_to) : undefined;
         const remember = args.remember === true;
         const mandateId = args.mandate_id ? String(args.mandate_id) : undefined;
-        const r = await fetch(`${SIGNA_BASE}/api/brain`, {
+        const r = await fetch(`${SIGDA_BASE}/api/brain`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ goal, ...(reportTo ? { report_to: reportTo } : {}), ...(remember ? { remember: true } : {}), ...(mandateId ? { mandate_id: mandateId } : {}) }),
@@ -1549,7 +1494,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         const usd6 = (v: unknown) => { try { return (Number(BigInt(String(v ?? "0"))) / 1e6).toFixed(3); } catch { return String(v); } };
         const lines = [
-          `SIGNA brain — answer:`,
+          `SIGDA brain — answer:`,
           ``,
           String(data.answer ?? ""),
           ``,
@@ -1586,5 +1531,5 @@ await server.connect(transport);
 // Banner goes to stderr — Claude Desktop discards it. Helps when
 // running standalone.
 process.stderr.write(
-  `[signa-mcp] ready — wallet ${agent.address} (source: ${wallet.source})\n`,
+  `[sigda-mcp] ready — wallet ${agent.address} (source: ${wallet.source})\n`,
 );

@@ -1,7 +1,7 @@
 /**
  * Drive the MCP server over stdio with real JSON-RPC requests — same
  * way Claude Desktop / Cursor / Windsurf do. Proves the server is
- * working end-to-end, including a live wallet-signed DM to prod SIGNA.
+ * working end-to-end, including a live wallet-signed DM to prod SIGDA.
  */
 import { spawn } from "node:child_process";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -12,7 +12,7 @@ const myAddr = privateKeyToAccount(PK).address.toLowerCase();
 
 const proc = spawn("node", ["dist/index.js"], {
   cwd: process.cwd(),
-  env: { ...process.env, SIGNA_PRIVATE_KEY: PK },
+  env: { ...process.env, SIGDA_PRIVATE_KEY: PK },
   stdio: ["pipe", "pipe", "pipe"],
 });
 
@@ -70,33 +70,33 @@ async function main() {
     console.log(" -", t.name, "—", t.description.slice(0, 70) + "...");
   }
 
-  // 3. Call signa_my_address
-  console.log("\n=== tools/call signa_my_address ===");
-  const addrRes = await call("tools/call", { name: "signa_my_address", arguments: {} });
+  // 3. Call sigda_my_address
+  console.log("\n=== tools/call sigda_my_address ===");
+  const addrRes = await call("tools/call", { name: "sigda_my_address", arguments: {} });
   console.log(addrRes.result.content[0].text.split("\n").slice(0, 3).join("\n"));
 
   // 4. Real wallet-signed send to a fresh recipient on prod
   const recipientPk = generatePrivateKey();
   const recipientAddr = privateKeyToAccount(recipientPk).address;
-  console.log("\n=== tools/call signa_send_dm (to fresh recipient on prod) ===");
+  console.log("\n=== tools/call sigda_send_dm (to fresh recipient on prod) ===");
   const sendRes = await call("tools/call", {
-    name: "signa_send_dm",
+    name: "sigda_send_dm",
     arguments: {
       to: recipientAddr,
-      body: "live MCP test " + Date.now() + " — wallet-signed via signa-mcp",
+      body: "live MCP test " + Date.now() + " — wallet-signed via sigda-mcp",
     },
   });
   console.log(sendRes.result.content[0].text);
 
   // 5. Discover bridges
-  console.log("\n=== tools/call signa_list_bridges (status=all) ===");
+  console.log("\n=== tools/call sigda_list_bridges (status=all) ===");
   const bridgesRes = await call("tools/call", {
-    name: "signa_list_bridges",
+    name: "sigda_list_bridges",
     arguments: { status: "all", limit: 3 },
   });
   console.log(bridgesRes.result.content[0].text.split("\n").slice(0, 6).join("\n") + "\n...");
 
-  console.log("\n[OK] All 5 MCP tool calls verified against prod SIGNA — server is fully working.");
+  console.log("\n[OK] All 5 MCP tool calls verified against prod SIGDA — server is fully working.");
   console.log("[OK] My wallet:", myAddr);
   proc.kill();
 }
