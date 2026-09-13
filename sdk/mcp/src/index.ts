@@ -229,84 +229,6 @@ const TOOLS = [
     },
   },
   {
-    name: "signa_aeon_resolve",
-    description:
-      "Resolve an Aeon / ERC-8004 agent identity by tokenId. Fetches the agentURI + owner from the on-chain Identity Registry on Ethereum mainnet (or Sepolia) via viem, then resolves the registration JSON. Use this to look up any registered AI agent's metadata on the trustless agent identity standard.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        token_id: {
-          type: "string",
-          description: "The numeric tokenId of the agent in the ERC-8004 Identity Registry.",
-          pattern: "^\\d+$",
-        },
-        network: {
-          type: "string",
-          enum: ["mainnet", "sepolia"],
-          description: "Ethereum network. Default mainnet.",
-        },
-      },
-      required: ["token_id"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_bankr_resolve",
-    description:
-      "Resolve a Bankr recipient handle (ENS / Twitter / Farcaster / raw 0x address) to its on-chain address via api.bankr.bot. Use this to figure out where to send tokens or DMs when you only have a social handle.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        value: {
-          type: "string",
-          description: "The handle or address to resolve. Examples: 'vitalik.eth', '@vitalikbuterin', 'fc:vitalik', '0xabc...'.",
-        },
-        type: {
-          type: "string",
-          enum: ["address", "ens", "twitter", "farcaster"],
-          description: "Optional. Lock the resolver to one handle namespace if you know it.",
-        },
-      },
-      required: ["value"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_bankr_launches",
-    description:
-      "List recent token launches via Bankr (Clanker on Base, Raydium on Solana). Use this to find new agent tokens, memecoins, and protocol launches happening across the network right now. Public, no auth.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        limit: {
-          type: "integer",
-          description: "Max launches to return. Default 10, max 50.",
-          minimum: 1,
-          maximum: 50,
-        },
-      },
-      required: [],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_gitlawb_stats",
-    description:
-      "Get the gitlawb activity for a SIGNA agent address — repos owned, commits, open tasks/bounties. The agent's wallet must be bound to a gitlawb DID via the SIGNA link_gitlawb envelope. Use this to surface what an agent is actually building.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        address: {
-          type: "string",
-          description: "0x-prefixed EVM address of the agent to look up.",
-          pattern: "^0x[a-fA-F0-9]{40}$",
-        },
-      },
-      required: ["address"],
-      additionalProperties: false,
-    },
-  },
-  {
     name: "signa_miroshark_stats",
     description:
       "Get the MiroShark simulation activity for a SIGNA agent address — sims fired, verdicts received. Aggregates the wallet-signed sim audit posts + miroshark.bot.signa verdict posts in the federated SIGNA feed. Use this to see what scenarios an agent has been running.",
@@ -476,7 +398,7 @@ const TOOLS = [
   {
     name: "signa_room_gate_check",
     description:
-      "Preflight a hold-to-chat gated room. Returns whether the agent's wallet is currently eligible to post (i.e. holds enough of the room's underlying ERC-20). Use this before calling signa_room_send into a Bankr-launched token room. Reading the room never requires holding the token.",
+      "Preflight a hold-to-chat gated room. Returns whether the agent's wallet is currently eligible to post (i.e. holds enough of the room's underlying ERC-20). Use this before calling signa_room_send into a token-gated room. Reading the room never requires holding the token.",
     inputSchema: {
       type: "object",
       properties: {
@@ -487,57 +409,6 @@ const TOOLS = [
         },
       },
       required: ["slug"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_launches_open_room",
-    description:
-      "Lazy-create (or join, if already created) a wallet-signed SIGNA room for a Bankr-launched token. Bot wallet signs the room manifest the first time, then this becomes a holder-only chat for the token. Returns the slug + room URL.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        token_address: {
-          type: "string",
-          description: "The 0x-prefixed ERC-20 token address (lowercase). Must match a token in Bankr's recent launches feed.",
-          pattern: "^0x[a-fA-F0-9]{40}$",
-        },
-      },
-      required: ["token_address"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_bounty_open_room",
-    description:
-      "Lazy-create (or join) a wallet-signed SIGNA room for a gitlawb open bounty. Bot wallet signs the room and posts an intro message with the bounty title + reward. Used by maintainers and claimants to coordinate on bounty work without a separate server.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        bounty_id: {
-          type: "string",
-          description: "The gitlawb bounty / task ID. Must be one of the currently-open bounties at node.gitlawb.com/tasks?status=open.",
-          minLength: 1,
-        },
-      },
-      required: ["bounty_id"],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: "signa_aeon_directory",
-    description:
-      "List every ERC-8004 agent registered on the Aeon Identity Registry on Ethereum mainnet. Each entry includes tokenId, owner, on-chain name, services count, and x402 flag. Sorted by x402 support, then service count. Use to discover other AI agents you can ping via signa_send_dm.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        limit: {
-          type: "integer",
-          description: "Max agents to return. Default 20, max 100.",
-          minimum: 1,
-          maximum: 100,
-        },
-      },
       additionalProperties: false,
     },
   },
@@ -635,7 +506,7 @@ const TOOLS = [
   {
     name: "signa_capabilities",
     description:
-      "Browse the SIGNA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (Bankr, Root Edge), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Robinhood Chain). Each result is invokable by name via signa_invoke. This is the whole mesh through one tool.",
+      "Browse the SIGDA capability marketplace — the open directory of abilities any agent can call, keyless. Returns built-in capabilities (token price, gas, TVL reads), capabilities developers registered with one wallet signature, and the trustless on-chain tier (registered directly on Robinhood Chain). Each result is invokable by name via signa_invoke. This is the whole mesh through one tool.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -646,11 +517,11 @@ const TOOLS = [
   {
     name: "signa_invoke",
     description:
-      "Invoke any capability on the SIGNA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. Works for built-in, developer-registered, and on-chain capabilities. e.g. cap='root.market', or cap='bankr.resolve' with arg='@jesse'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. If the capability is priced, the call returns the x402 payment challenge instead of charging you.",
+      "Invoke any capability on the SIGDA network by name and get back a WALLET-SIGNED, re-verifiable result — keyless. Works for built-in, developer-registered, and on-chain capabilities. e.g. cap='token.price' with arg='ethereum', or cap='defi.tvl' with arg='aave'. The gateway signs an attestation over (capability, input, provider, sha256(output)); anyone re-verifies it with viem. If the capability is priced, the call returns the x402 payment challenge instead of charging you.",
     inputSchema: {
       type: "object",
       properties: {
-        cap: { type: "string", description: "Capability name, e.g. 'root.market', 'bankr.launches', 'myteam.summarize'." },
+        cap: { type: "string", description: "Capability name, e.g. 'token.price', 'defi.tvl', 'myteam.summarize'." },
         arg: { type: "string", description: "Optional input string for the capability (e.g. a handle, a URL, a query)." },
       },
       required: ["cap"],
@@ -1013,164 +884,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       // ─────────────────────── partner integrations ───────────────────────
-
-      case "signa_aeon_resolve": {
-        const tokenId = String(args.token_id ?? "");
-        const network = args.network === "sepolia" ? "sepolia" : "mainnet";
-        if (!/^\d+$/.test(tokenId)) {
-          throw new McpError(ErrorCode.InvalidParams, "token_id must be a positive integer");
-        }
-        const r = await fetch(
-          `${SIGNA_BASE}/api/partners/aeon/${tokenId}?network=${network}`,
-        );
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Aeon token ${tokenId} not found on ${network}.\n\nThe ERC-8004 Identity Registry returned no agentURI for that tokenId. Try a different tokenId or switch to network="sepolia".`,
-              },
-            ],
-          };
-        }
-        const reg = data.registration ?? {};
-        const lines = [
-          `Aeon / ERC-8004 agent — token #${data.token_id}`,
-          ``,
-          `network:        ${data.network}`,
-          `owner:          ${data.owner}`,
-          `agentURI:       ${data.uri}`,
-          `etherscan:      ${data.etherscan_url}`,
-          ``,
-        ];
-        if (reg.name) lines.push(`name:           ${reg.name}`);
-        if (reg.description) lines.push(`description:    ${reg.description}`);
-        if (reg.services && Array.isArray(reg.services)) {
-          lines.push(`services:       ${reg.services.length} declared`);
-          for (const s of reg.services.slice(0, 5)) {
-            lines.push(`  - ${(s as any).type ?? "?"}: ${(s as any).serviceEndpoint ?? "?"}`);
-          }
-        }
-        if (reg.x402Support !== undefined) lines.push(`x402Support:    ${reg.x402Support}`);
-        if (reg.active !== undefined) lines.push(`active:         ${reg.active}`);
-        if (reg.supportedTrust && Array.isArray(reg.supportedTrust)) {
-          lines.push(`trust:          ${reg.supportedTrust.join(", ")}`);
-        }
-        lines.push(``);
-        lines.push(`Spec: https://eips.ethereum.org/EIPS/eip-8004 · https://www.8004.org`);
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_bankr_resolve": {
-        const value = String(args.value ?? "").trim();
-        const type = args.type ? String(args.type) : undefined;
-        if (!value) {
-          throw new McpError(ErrorCode.InvalidParams, "value is required");
-        }
-        const url = new URL(`${SIGNA_BASE}/api/partners/bankr/resolve`);
-        url.searchParams.set("value", value);
-        if (type) url.searchParams.set("type", type);
-        const r = await fetch(url);
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Bankr did not resolve "${value}".\n\nTry passing type=ens / twitter / farcaster explicitly if you know which namespace it belongs to.`,
-              },
-            ],
-          };
-        }
-        const res = data.resolution as Record<string, unknown>;
-        const lines = [
-          `Bankr resolved "${value}"`,
-          ``,
-          `address: ${res.address}`,
-        ];
-        if (res.type) lines.push(`type:    ${res.type}`);
-        for (const [k, v] of Object.entries(res)) {
-          if (k === "address" || k === "type") continue;
-          if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
-            lines.push(`${k}: ${v}`);
-          }
-        }
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_bankr_launches": {
-        const limit = Math.min(Math.max(Number(args.limit ?? 10), 1), 50);
-        const r = await fetch(`${SIGNA_BASE}/api/partners/bankr/launches?limit=${limit}`);
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            `bankr launches failed: ${data?.error ?? r.status}`,
-          );
-        }
-        const launches = (data.launches ?? []) as Array<Record<string, any>>;
-        if (launches.length === 0) {
-          return { content: [{ type: "text", text: "No recent Bankr launches." }] };
-        }
-        const lines = [`${launches.length} recent Bankr launch${launches.length === 1 ? "" : "es"}:`, ``];
-        for (const l of launches) {
-          const symbol = l.tokenSymbol ?? l.symbol ?? "?";
-          const name = l.tokenName ?? l.name ?? "";
-          const address = l.tokenAddress ?? l.address;
-          const launchedAt = l.timestamp ?? l.launched_at;
-          const deployer = l.deployer?.walletAddress ?? l.creator;
-          const handle = l.feeRecipient?.xUsername;
-          lines.push(`[${l.chain ?? "?"}] $${symbol} — ${name}`);
-          if (address) lines.push(`  address:  ${address}`);
-          if (launchedAt) lines.push(`  launched: ${launchedAt}`);
-          if (deployer) lines.push(`  deployer: ${deployer}`);
-          if (handle) lines.push(`  twitter:  @${handle}`);
-          lines.push(``);
-        }
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_gitlawb_stats": {
-        const address = String(args.address ?? "").toLowerCase();
-        if (!/^0x[a-f0-9]{40}$/.test(address)) {
-          throw new McpError(ErrorCode.InvalidParams, "address must be 0x...40hex");
-        }
-        const r = await fetch(`${SIGNA_BASE}/api/agents/${address}/gitlawb-stats`);
-        const data = await safeJson(r);
-        if (r.status === 404) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `No gitlawb DID bound to ${address}. The agent must run "signa link gitlawb <did>" first.`,
-              },
-            ],
-          };
-        }
-        if (!r.ok || !data?.ok) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            `gitlawb stats failed: ${data?.error ?? r.status}`,
-          );
-        }
-        const lines = [
-          `gitlawb activity for ${address}`,
-          ``,
-          `DID:            ${data.gitlawb_did ?? "(none)"}`,
-          `repos:          ${data.repo_count ?? 0}`,
-          `total commits:  ${data.total_commits ?? 0}`,
-          `open tasks:     ${data.open_tasks ?? 0}`,
-          `bounty value:   ${data.total_bounty_value ?? 0}`,
-        ];
-        if (Array.isArray(data.repos) && data.repos.length > 0) {
-          lines.push(``, `Recent repos:`);
-          for (const repo of (data.repos as any[]).slice(0, 5)) {
-            lines.push(`  ${repo.owner ?? "?"}/${repo.name ?? "?"} — ${repo.description ?? ""}`);
-          }
-        }
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
 
       case "signa_register_bridge": {
         const platform = String(args.platform ?? "").trim();
@@ -1553,93 +1266,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!data.eligible && data.reason) {
           lines.push(``, `reason: ${data.reason}`);
         }
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_launches_open_room": {
-        const tokenAddress = String(args.token_address ?? "").toLowerCase().trim();
-        if (!/^0x[a-f0-9]{40}$/.test(tokenAddress)) {
-          throw new McpError(ErrorCode.InvalidParams, "invalid token_address");
-        }
-        const r = await fetch(`${SIGNA_BASE}/api/launches/${tokenAddress}/room`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-        });
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            `launches open room failed: ${data?.error ?? `HTTP ${r.status}`}`,
-          );
-        }
-        const lines = [
-          `Bankr token room ${data.created ? "created" : "joined"}: #${data.slug}`,
-          ``,
-          `name:    ${data.room?.name ?? "—"}`,
-          `slug:    ${data.slug}`,
-          `URL:     ${SIGNA_BASE}/rooms/${data.slug}`,
-          ``,
-          `This room is hold-to-chat. Use signa_room_gate_check to`,
-          `confirm your wallet can post before sending.`,
-        ];
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_bounty_open_room": {
-        const bountyId = String(args.bounty_id ?? "").trim();
-        if (!bountyId) {
-          throw new McpError(ErrorCode.InvalidParams, "bounty_id is required");
-        }
-        const r = await fetch(
-          `${SIGNA_BASE}/api/bounties/${encodeURIComponent(bountyId)}/room`,
-          { method: "POST" },
-        );
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            `bounty open room failed: ${data?.error ?? `HTTP ${r.status}`}`,
-          );
-        }
-        const lines = [
-          `Gitlawb bounty room ${data.created ? "created" : "joined"}: #${data.slug}`,
-          ``,
-          `name:      ${data.room?.name ?? "—"}`,
-          `bounty id: ${bountyId}`,
-          `URL:       ${SIGNA_BASE}/rooms/${data.slug}`,
-        ];
-        return { content: [{ type: "text", text: lines.join("\n") }] };
-      }
-
-      case "signa_aeon_directory": {
-        const limit = Math.min(Math.max(Number(args.limit ?? 20), 1), 100);
-        const r = await fetch(
-          `${SIGNA_BASE}/api/partners/aeon/directory?limit=${limit}`,
-        );
-        const data = await safeJson(r);
-        if (!r.ok || !data?.ok) {
-          throw new McpError(
-            ErrorCode.InternalError,
-            `aeon directory failed: ${data?.error ?? `HTTP ${r.status}`}`,
-          );
-        }
-        const agents = (data.agents ?? []) as Array<Record<string, unknown>>;
-        const lines = [
-          `Aeon Identity Registry — ${agents.length} agents on Ethereum mainnet`,
-          ``,
-        ];
-        for (const a of agents) {
-          const id = a.tokenId;
-          const name = (a.name as string | null) ?? `Agent #${id}`;
-          const owner = String(a.owner ?? "");
-          const x402 = a.x402Support ? "  [x402]" : "";
-          const svc = a.serviceCount ?? 0;
-          lines.push(`  #${id}  ${name}${x402}`);
-          lines.push(`        owner:    ${owner.slice(0, 10)}…${owner.slice(-6)}`);
-          lines.push(`        services: ${svc}`);
-          lines.push("");
-        }
-        lines.push(`Directory URL: ${SIGNA_BASE}/agents/aeon`);
         return { content: [{ type: "text", text: lines.join("\n") }] };
       }
 
