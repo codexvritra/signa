@@ -15,25 +15,25 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { SignaAgent } from "signa-agent";
+import { SigdaAgent } from "sigda-agent";
 
 const pkSender = generatePrivateKey();
 const pkRecipient = generatePrivateKey();
 const recipient = privateKeyToAccount(pkRecipient);
 
-const sender = new SignaAgent({ privateKey: pkSender });
+const sender = new SigdaAgent({ privateKey: pkSender });
 console.log("[js sender]    ", sender.address);
 console.log("[py recipient] ", recipient.address.toLowerCase());
 
-const body = `cross-sdk handshake ${Date.now()} — wallet-signed via signa-agent`;
+const body = `cross-sdk handshake ${Date.now()} — wallet-signed via sigda-agent`;
 const dm = await sender.send(recipient.address, body);
 console.log("\n[js sent] id:", dm.id);
 
 const script = `
 import sys
 sys.path.insert(0, r"${process.cwd().replace(/\\/g, "/")}/../../python")
-from signa_agent import SignaAgent
-agent = SignaAgent(private_key="${pkRecipient}")
+from sigda_agent import SigdaAgent
+agent = SigdaAgent(private_key="${pkRecipient}")
 inbox = agent.inbox(limit=5)
 hit = next((m for m in inbox if m["id"] == "${dm.id}"), None)
 assert hit, f"DM not found in python inbox: {inbox}"
@@ -45,7 +45,7 @@ print("[py body   ]", hit["body"])
 print("[py sig    ]", hit["signature"][:30] + "...")
 `;
 
-const tmp = join(tmpdir(), `signa-handshake-${Date.now()}.py`);
+const tmp = join(tmpdir(), `sigda-handshake-${Date.now()}.py`);
 writeFileSync(tmp, script);
 try {
   const r = spawnSync("python", [tmp], { encoding: "utf8" });
@@ -58,4 +58,4 @@ try {
   } catch {}
 }
 
-console.log("\n[OK] cross-SDK handshake — signa-agent (JS) → signa-agent (Python) verified live on prod.");
+console.log("\n[OK] cross-SDK handshake — sigda-agent (JS) → sigda-agent (Python) verified live on prod.");

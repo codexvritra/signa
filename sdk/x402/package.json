@@ -1,7 +1,7 @@
 {
-  "name": "signa-x402",
-  "version": "0.1.0",
-  "description": "Add verifiable receipts to your x402 server in a few lines. SIGNA binds request → terms → the x402 payment authorization → delivery into one wallet-signed, re-verifiable receipt on Robinhood Chain. Zero dependencies. x402 moves the money, SIGNA proves the deal.",
+  "name": "sigda-x402",
+  "version": "0.2.0",
+  "description": "Add verifiable receipts to your x402 server in a few lines. SIGDA binds request → terms → the x402 payment authorization → delivery into one wallet-signed, re-verifiable receipt on Robinhood Chain. Zero dependencies. x402 moves the money, SIGDA proves the deal.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,7 +18,7 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "signa",
+    "sigda",
     "x402",
     "agentic-commerce",
     "agent-payments",
@@ -30,6 +30,6 @@
     "onchain"
   ],
   "license": "MIT",
-  "homepage": "https://www.signaagent.xyz/x402",
+  "homepage": "https://www.sigda.xyz/x402",
   "sideEffects": false
 }

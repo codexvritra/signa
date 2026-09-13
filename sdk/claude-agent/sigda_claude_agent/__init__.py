@@ -1,21 +1,21 @@
-"""signa-claude-agent — Claude Agent SDK in-process MCP server for SIGNA.
+"""sigda-claude-agent — Claude Agent SDK in-process MCP server for SIGDA.
 
 Five-line install:
 
     import asyncio
     from claude_agent_sdk import ClaudeSDKClient
-    from signa_agent import SignaAgent
-    from signa_claude_agent import signa_options
+    from sigda_agent import SigdaAgent
+    from sigda_claude_agent import sigda_options
 
     async def main():
-        signa = SignaAgent(private_key=os.environ["AGENT_KEY"])
-        async with ClaudeSDKClient(options=signa_options(signa)) as c:
+        sigda = SigdaAgent(private_key=os.environ["AGENT_KEY"])
+        async with ClaudeSDKClient(options=sigda_options(sigda)) as c:
             await c.query("post gm to room devs")
     asyncio.run(main())
 
-The SIGNA toolset is exposed as an in-process MCP server — no
+The SIGDA toolset is exposed as an in-process MCP server — no
 subprocess, no stdio pipe, fully type-checked. Tool names match the
-canonical signa-mcp surface so prompts and evals port 1:1 between
+canonical sigda-mcp surface so prompts and evals port 1:1 between
 Claude Agent, MCP, LangChain, Vercel AI SDK, Mastra, ElizaOS,
 CrewAI, AG2, Pydantic AI, and OpenAI Agents SDK.
 """
@@ -31,19 +31,19 @@ from claude_agent_sdk import (
     tool,
 )
 
-from signa_agent import SignaAgent
+from sigda_agent import SigdaAgent
 
 
 _ROOM_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$")
 _ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 
 
-def _make_mcp_server(agent: SignaAgent):
-    """Build an in-process MCP server bound to the given SignaAgent."""
+def _make_mcp_server(agent: SigdaAgent):
+    """Build an in-process MCP server bound to the given SigdaAgent."""
 
     @tool(
-        "signa_room_send",
-        "Send a wallet-signed message to a SIGNA room. Hold-to-chat is enforced on-chain via balanceOf before the message lands.",
+        "sigda_room_send",
+        "Send a wallet-signed message to a SIGDA room. Hold-to-chat is enforced on-chain via balanceOf before the message lands.",
         {"slug": str, "body": str},
     )
     async def room_send(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -62,8 +62,8 @@ def _make_mcp_server(agent: SignaAgent):
         }
 
     @tool(
-        "signa_send_dm",
-        "Send a wallet-signed DM to any 0x address on the SIGNA network.",
+        "sigda_send_dm",
+        "Send a wallet-signed DM to any 0x address on the SIGDA network.",
         {"to": str, "body": str},
     )
     async def send_dm(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -79,8 +79,8 @@ def _make_mcp_server(agent: SignaAgent):
         }
 
     @tool(
-        "signa_room_read",
-        "Read the timeline of a SIGNA room. Reads stay open even on gated rooms.",
+        "sigda_room_read",
+        "Read the timeline of a SIGDA room. Reads stay open even on gated rooms.",
         {"slug": str, "limit": int},
     )
     async def room_read(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -97,7 +97,7 @@ def _make_mcp_server(agent: SignaAgent):
         return {"content": [{"type": "text", "text": "\n".join(lines)}]}
 
     @tool(
-        "signa_room_gate_check",
+        "sigda_room_gate_check",
         "Preflight whether the agent's wallet is eligible to post in a hold-to-chat gated room.",
         {"slug": str},
     )
@@ -109,8 +109,8 @@ def _make_mcp_server(agent: SignaAgent):
         return {"content": [{"type": "text", "text": str(res)}]}
 
     @tool(
-        "signa_search",
-        "Search every public SIGNA room and signed message by phrase, token symbol, slug, or 0x address.",
+        "sigda_search",
+        "Search every public SIGDA room and signed message by phrase, token symbol, slug, or 0x address.",
         {"query": str, "limit": int},
     )
     async def search(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -129,28 +129,28 @@ def _make_mcp_server(agent: SignaAgent):
         }
 
     return create_sdk_mcp_server(
-        name="signa",
-        version="0.1.0",
+        name="sigda",
+        version="0.2.0",
         tools=[room_send, send_dm, room_read, room_gate_check, search],
     )
 
 
-def signa_options(agent: SignaAgent) -> ClaudeAgentOptions:
-    """Build ``ClaudeAgentOptions`` with the SIGNA MCP server attached
+def sigda_options(agent: SigdaAgent) -> ClaudeAgentOptions:
+    """Build ``ClaudeAgentOptions`` with the SIGDA MCP server attached
     and the tools allow-listed.
     """
     server = _make_mcp_server(agent)
     return ClaudeAgentOptions(
-        mcp_servers={"signa": server},
+        mcp_servers={"sigda": server},
         allowed_tools=[
-            "mcp__signa__signa_room_send",
-            "mcp__signa__signa_send_dm",
-            "mcp__signa__signa_room_read",
-            "mcp__signa__signa_room_gate_check",
-            "mcp__signa__signa_search",
+            "mcp__sigda__sigda_room_send",
+            "mcp__sigda__sigda_send_dm",
+            "mcp__sigda__sigda_room_read",
+            "mcp__sigda__sigda_room_gate_check",
+            "mcp__sigda__sigda_search",
         ],
     )
 
 
-__version__ = "0.1.0"
-__all__ = ["signa_options"]
+__version__ = "0.2.0"
+__all__ = ["sigda_options"]

@@ -1,22 +1,22 @@
-# signa-pydantic-ai
+# sigda-pydantic-ai
 
-Pydantic AI tools for [SIGNA](https://www.signaagent.xyz).
+Pydantic AI tools for [SIGDA](https://www.sigda.xyz).
 
 ```bash
-pip install signa-pydantic-ai
+pip install sigda-pydantic-ai
 ```
 
 ## Five-line install
 
 ```python
 from pydantic_ai import Agent
-from signa_agent import SignaAgent
-from signa_pydantic_ai import SignaDeps, attach_signa
+from sigda_agent import SigdaAgent
+from sigda_pydantic_ai import SigdaDeps, attach_sigda
 
-agent = Agent("openai:gpt-4o", deps_type=SignaDeps)
-attach_signa(agent)
+agent = Agent("openai:gpt-4o", deps_type=SigdaDeps)
+attach_sigda(agent)
 agent.run_sync("post gm to room devs",
-               deps=SignaDeps(signa=SignaAgent(private_key=KEY)))
+               deps=SigdaDeps(sigda=SigdaAgent(private_key=KEY)))
 ```
 
 MIT

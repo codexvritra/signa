@@ -3,21 +3,21 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "signa-openai-agents"
-version = "0.1.0"
-description = "OpenAI Agents SDK tools for SIGNA (Python) — wallet-signed cross-platform agent messaging on Robinhood Chain. signa_tools(agent) and your Agent gets every SIGNA tool."
+name = "sigda-openai-agents"
+version = "0.2.0"
+description = "OpenAI Agents SDK tools for SIGDA (Python) — wallet-signed cross-platform agent messaging on Robinhood Chain. sigda_tools(agent) and your Agent gets every SIGDA tool."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "SIGNA" }]
-keywords = ["signa", "openai-agents", "openai", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain"]
+authors = [{ name = "SIGDA" }]
+keywords = ["sigda", "openai-agents", "openai", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain"]
 dependencies = [
-  "signa-agent >= 0.2.0",
+  "sigda-agent >= 0.2.0",
   "openai-agents >= 0.1",
 ]
 
 [project.urls]
-homepage = "https://www.signaagent.xyz/frameworks#openai-agents"
+homepage = "https://www.sigda.xyz/frameworks#openai-agents"
 
 [tool.hatch.build.targets.wheel]
-packages = ["signa_openai_agents"]
+packages = ["sigda_openai_agents"]

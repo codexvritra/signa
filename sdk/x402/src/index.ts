@@ -1,19 +1,19 @@
 /**
- * signa-x402 — verifiable receipts for x402 agentic commerce on Robinhood Chain.
+ * sigda-x402 — verifiable receipts for x402 agentic commerce on Robinhood Chain.
  *
- * x402 moves the money. SIGNA proves the deal: it binds request → terms →
+ * x402 moves the money. SIGDA proves the deal: it binds request → terms →
  * the x402 payment authorization (Permit2 witness-transfer) → delivery into
- * one envelope, signed by the SIGNA attestor and re-verifiable by anyone.
+ * one envelope, signed by the SIGDA attestor and re-verifiable by anyone.
  *
  * Zero dependencies — just fetch. Drop it into any x402 server: after you
  * verify a payment, issue a receipt and hand the buyer a proof URL.
  *
- *   import { issueReceipt, receiptHeaders } from "signa-x402";
+ *   import { issueReceipt, receiptHeaders } from "sigda-x402";
  *   const receipt = await issueReceipt({ request, terms, payment, output });
  *   // attach receiptHeaders(receipt) to your response, or return receipt.id
  */
 
-export const DEFAULT_BASE = "https://www.signaagent.xyz";
+export const DEFAULT_BASE = "https://www.sigda.xyz";
 
 export type X402Terms = {
   /** raw base units, e.g. "50000" for 0.05 USDG */
@@ -84,7 +84,7 @@ function f(opts?: Options): typeof fetch {
 }
 
 /**
- * Issue a SIGNA receipt for an x402 deal. The buyer's Permit2 witness-transfer
+ * Issue a SIGDA receipt for an x402 deal. The buyer's Permit2 witness-transfer
  * authorization is verified server-side before the receipt is signed — throws
  * if it doesn't recover to `payment.owner`.
  */
@@ -97,7 +97,7 @@ export async function issueReceipt(deal: X402Deal, opts: Options = {}): Promise<
   });
   const j = await res.json().catch(() => ({}));
   if (!res.ok || !j?.ok) {
-    throw new Error(`signa-x402: issue failed: ${j?.error ?? `HTTP ${res.status}`}`);
+    throw new Error(`sigda-x402: issue failed: ${j?.error ?? `HTTP ${res.status}`}`);
   }
   return j.receipt as X402Receipt;
 }
@@ -112,10 +112,10 @@ export async function getReceipt(id: string, opts: Options = {}): Promise<X402Re
 }
 
 /**
- * Re-verify a receipt against the SIGNA universal verifier. Returns the
+ * Re-verify a receipt against the SIGDA universal verifier. Returns the
  * recovered signer + whether it matches the attestor. The same check runs
  * locally with viem.recoverMessageAddress over `receipt.signed_message` — no
- * trust in SIGNA required.
+ * trust in SIGDA required.
  */
 export async function verifyReceipt(
   receipt: Pick<
@@ -158,8 +158,8 @@ export function receiptUrl(id: string, opts: Options = {}): string {
  */
 export function receiptHeaders(receipt: X402Receipt, opts: Options = {}): Record<string, string> {
   return {
-    "x-signa-receipt": receiptUrl(receipt.id, opts),
-    "x-signa-receipt-id": receipt.id,
+    "x-sigda-receipt": receiptUrl(receipt.id, opts),
+    "x-sigda-receipt-id": receipt.id,
   };
 }
 

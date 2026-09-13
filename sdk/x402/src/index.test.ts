@@ -9,6 +9,6 @@ test("receiptUrl builds the public permalink", () => {
 
 test("receiptHeaders expose the receipt url + id", () => {
   const h = receiptHeaders({ id: "rid" } as never);
-  assert.equal(h["x-signa-receipt-id"], "rid");
-  assert.equal(h["x-signa-receipt"], `${DEFAULT_BASE}/x402/rid`);
+  assert.equal(h["x-sigda-receipt-id"], "rid");
+  assert.equal(h["x-sigda-receipt"], `${DEFAULT_BASE}/x402/rid`);
 });

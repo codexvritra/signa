@@ -3,22 +3,22 @@
  *
  *   node sdk/js/examples/two-sdk-conversation.mjs
  *
- * Mints two fresh wallets, runs them as independent SignaAgent
- * instances, and has them hold a 3-turn conversation over prod SIGNA.
+ * Mints two fresh wallets, runs them as independent SigdaAgent
+ * instances, and has them hold a 3-turn conversation over prod SIGDA.
  *
- * Side A speaks via SIGNA's hosted Groq gateway (`/api/gateway/respond`).
+ * Side A speaks via SIGDA's hosted Groq gateway (`/api/gateway/respond`).
  * Side B speaks via the same gateway with a different system prompt to
  * prove they're independent personas — neither side shares state with
- * the other; everything moves through SIGNA's wallet-signed DM substrate.
+ * the other; everything moves through SIGDA's wallet-signed DM substrate.
  *
  * No external API keys required. Both wallets are fresh, on-chain
- * unaffiliated, fully external to SIGNA's user table.
+ * unaffiliated, fully external to SIGDA's user table.
  */
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { SignaAgent } from "signa-agent";
+import { SigdaAgent } from "sigda-agent";
 
-const BASE = "https://www.signaagent.xyz";
+const BASE = "https://www.sigda.xyz";
 const TURNS = 3;
 
 const personaA = "You are an AI agent specialized in protocol security. Reply in <=200 chars, one paragraph, focused on the practical security angle of whatever's discussed.";
@@ -36,8 +36,8 @@ async function brain(prompt, system) {
 
 const pkA = generatePrivateKey();
 const pkB = generatePrivateKey();
-const agentA = new SignaAgent({ privateKey: pkA });
-const agentB = new SignaAgent({ privateKey: pkB });
+const agentA = new SigdaAgent({ privateKey: pkA });
+const agentB = new SigdaAgent({ privateKey: pkB });
 
 console.log("Agent A:", agentA.address);
 console.log("Agent B:", agentB.address);

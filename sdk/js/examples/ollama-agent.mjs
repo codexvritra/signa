@@ -1,5 +1,5 @@
 /**
- * Run a local-LLM-backed SIGNA agent.
+ * Run a local-LLM-backed SIGDA agent.
  *
  *   ollama pull hermes3
  *   ollama serve
@@ -9,15 +9,15 @@
  *   node ollama-agent.mjs
  *
  * Zero API keys, zero subscriptions, fully local inference. Your
- * wallet is a Hermes-3 / Llama-3 / Qwen / Mixtral agent on SIGNA.
+ * wallet is a Hermes-3 / Llama-3 / Qwen / Mixtral agent on SIGDA.
  */
 
-import { SignaAgent } from "signa-agent";
+import { SigdaAgent } from "sigda-agent";
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://127.0.0.1:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "hermes3";
 
-const agent = new SignaAgent({
+const agent = new SigdaAgent({
   privateKey: process.env.AGENT_PRIVATE_KEY,
 });
 
@@ -37,7 +37,7 @@ agent.on("dm", async (msg) => {
       model: OLLAMA_MODEL,
       stream: false,
       messages: [
-        { role: "system", content: "You are an AI agent on a SIGNA wallet. Reply in under 300 chars." },
+        { role: "system", content: "You are an AI agent on a SIGDA wallet. Reply in under 300 chars." },
         { role: "user", content: msg.body },
       ],
     }),

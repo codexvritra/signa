@@ -1,30 +1,30 @@
 /**
- * signa-eliza — ElizaOS plugin for SIGNA.
+ * sigda-eliza — ElizaOS plugin for SIGDA.
  *
- * Wire any Eliza agent up with a wallet on Base mainnet, cross-platform
+ * Wire any Eliza agent up with a wallet on Robinhood Chain, cross-platform
  * signed DMs, and hold-to-chat ERC-20 gated rooms.
  *
  * ```ts
  * import { AgentRuntime } from "@elizaos/core";
- * import { signaPlugin } from "signa-eliza";
+ * import { sigdaPlugin } from "sigda-eliza";
  *
  * const runtime = new AgentRuntime({
  *   character: yourCharacter,
- *   plugins: [signaPlugin],
+ *   plugins: [sigdaPlugin],
  *   settings: {
- *     SIGNA_PRIVATE_KEY: process.env.AGENT_KEY,
- *     SIGNA_BASE_URL: "https://www.signaagent.xyz",   // optional, default
+ *     SIGDA_PRIVATE_KEY: process.env.AGENT_KEY,
+ *     SIGDA_BASE_URL: "https://www.sigda.xyz",   // optional, default
  *   },
  * });
  * ```
  *
  * The plugin exposes:
- *  - Actions: SIGNA_ROOM_SEND, SIGNA_SEND_DM
- *  - Provider: SIGNA_INBOX (recent DMs in context)
+ *  - Actions: SIGDA_ROOM_SEND, SIGDA_SEND_DM
+ *  - Provider: SIGDA_INBOX (recent DMs in context)
  *
- * Tool names match the canonical signa-mcp surface so character
+ * Tool names match the canonical sigda-mcp surface so character
  * prompts port 1:1 between ElizaOS, MCP, LangChain, Vercel AI SDK,
- * Mastra, and every other framework adapter SIGNA ships.
+ * Mastra, and every other framework adapter SIGDA ships.
  */
 import type {
   Action,
@@ -35,28 +35,28 @@ import type {
   Provider,
   State,
 } from "@elizaos/core";
-import { SignaAgent } from "signa-agent";
+import { SigdaAgent } from "sigda-agent";
 
 const ROOM_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
 const ADDR_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
 // Module-level cache so subsequent action invocations reuse the same
-// SignaAgent instance (and therefore the same inbox polling loop).
-const agentCache = new WeakMap<IAgentRuntime, SignaAgent>();
+// SigdaAgent instance (and therefore the same inbox polling loop).
+const agentCache = new WeakMap<IAgentRuntime, SigdaAgent>();
 
-function getOrCreateAgent(runtime: IAgentRuntime): SignaAgent {
+function getOrCreateAgent(runtime: IAgentRuntime): SigdaAgent {
   const existing = agentCache.get(runtime);
   if (existing) return existing;
-  const raw = runtime.getSetting("SIGNA_PRIVATE_KEY");
+  const raw = runtime.getSetting("SIGDA_PRIVATE_KEY");
   const privateKey = typeof raw === "string" ? raw : undefined;
   if (!privateKey) {
     throw new Error(
-      "signa-eliza: set SIGNA_PRIVATE_KEY in the runtime settings.",
+      "sigda-eliza: set SIGDA_PRIVATE_KEY in the runtime settings.",
     );
   }
-  const baseRaw = runtime.getSetting("SIGNA_BASE_URL");
+  const baseRaw = runtime.getSetting("SIGDA_BASE_URL");
   const baseUrl = typeof baseRaw === "string" ? baseRaw : undefined;
-  const agent = new SignaAgent({ privateKey, baseUrl });
+  const agent = new SigdaAgent({ privateKey, baseUrl });
   agentCache.set(runtime, agent);
   return agent;
 }
@@ -69,10 +69,10 @@ function getOrCreateAgent(runtime: IAgentRuntime): SignaAgent {
 function extractRoomSend(
   text: string,
 ): { slug: string; body: string } | null {
-  // Patterns: signal "BODY" to #SLUG, post "BODY" to #SLUG, signa post BODY to #SLUG
+  // Patterns: signal "BODY" to #SLUG, post "BODY" to #SLUG, sigda post BODY to #SLUG
   const m =
     text.match(
-      /(?:signal|post|signa post|send)[^"#]*"([^"]+)"[^"#]*#([a-z0-9][a-z0-9-]{1,30}[a-z0-9])/i,
+      /(?:signal|post|sigda post|send)[^"#]*"([^"]+)"[^"#]*#([a-z0-9][a-z0-9-]{1,30}[a-z0-9])/i,
     ) ||
     text.match(
       /#([a-z0-9][a-z0-9-]{1,30}[a-z0-9])\s+(?:msg|message|signal|post|send)\s+(.+)$/i,
@@ -85,12 +85,12 @@ function extractRoomSend(
 }
 
 const sendRoomAction: Action = {
-  name: "SIGNA_ROOM_SEND",
-  similes: ["POST_TO_ROOM", "SIGNAL", "SIGNA_POST"],
-  description: "Post a wallet-signed message to a SIGNA room on Base",
+  name: "SIGDA_ROOM_SEND",
+  similes: ["POST_TO_ROOM", "SIGNAL", "SIGDA_POST"],
+  description: "Post a wallet-signed message to a SIGDA room on Robinhood Chain",
   validate: async (_runtime: IAgentRuntime, message: Memory) => {
     const t = (message.content?.text ?? "").toString();
-    return /\b(signa|signal|post to room|#[a-z0-9-]+)\b/i.test(t);
+    return /\b(sigda|signal|post to room|#[a-z0-9-]+)\b/i.test(t);
   },
   handler: async (
     runtime: IAgentRuntime,
@@ -104,14 +104,14 @@ const sendRoomAction: Action = {
     if (!parsed || !ROOM_SLUG_REGEX.test(parsed.slug)) {
       await callback?.({
         text: 'usage: signal "<body>" to #<room-slug>',
-        action: "SIGNA_ROOM_SEND",
+        action: "SIGDA_ROOM_SEND",
       });
       return;
     }
     const sent = await agent.rooms.send(parsed.slug, parsed.body);
     await callback?.({
       text: `posted to #${parsed.slug} (sig ${sent.signature?.slice(0, 10) ?? "—"}…)`,
-      action: "SIGNA_ROOM_SEND",
+      action: "SIGDA_ROOM_SEND",
     });
   },
   examples: [
@@ -119,17 +119,17 @@ const sendRoomAction: Action = {
       { name: "{{user1}}", content: { text: 'signal "gm" to #devs' } },
       {
         name: "{{agent}}",
-        content: { text: "posted to #devs (sig 0x…)", action: "SIGNA_ROOM_SEND" },
+        content: { text: "posted to #devs (sig 0x…)", action: "SIGDA_ROOM_SEND" },
       },
     ],
   ],
 };
 
 const sendDmAction: Action = {
-  name: "SIGNA_SEND_DM",
-  similes: ["DM_WALLET", "SIGNA_DM"],
+  name: "SIGDA_SEND_DM",
+  similes: ["DM_WALLET", "SIGDA_DM"],
   description:
-    "Send a wallet-signed DM to any 0x address on the SIGNA network",
+    "Send a wallet-signed DM to any 0x address on the SIGDA network",
   validate: async (_runtime: IAgentRuntime, message: Memory) => {
     const t = (message.content?.text ?? "").toString();
     return /0x[a-fA-F0-9]{40}/.test(t);
@@ -147,18 +147,18 @@ const sendDmAction: Action = {
     if (!addrMatch || !ADDR_REGEX.test(addrMatch[0])) {
       await callback?.({
         text: "I need a 0x wallet address to DM.",
-        action: "SIGNA_SEND_DM",
+        action: "SIGDA_SEND_DM",
       });
       return;
     }
     // Body: everything after the address.
     const body =
       text.slice(text.indexOf(addrMatch[0]) + addrMatch[0].length).trim() ||
-      "hi from a SIGNA agent.";
+      "hi from a SIGDA agent.";
     const dm = await agent.send(addrMatch[0].toLowerCase(), body);
     await callback?.({
       text: `dm sent to ${addrMatch[0]} (id ${dm.id.slice(0, 8)}…)`,
-      action: "SIGNA_SEND_DM",
+      action: "SIGDA_SEND_DM",
     });
   },
   examples: [
@@ -173,7 +173,7 @@ const sendDmAction: Action = {
         name: "{{agent}}",
         content: {
           text: "dm sent to 0x9994bb1e0873d63747d6e2570086cd5c39fbb97b (id 0x…)",
-          action: "SIGNA_SEND_DM",
+          action: "SIGDA_SEND_DM",
         },
       },
     ],
@@ -181,8 +181,8 @@ const sendDmAction: Action = {
 };
 
 const inboxProvider: Provider = {
-  name: "SIGNA_INBOX",
-  description: "Recent wallet-signed DMs received on the SIGNA network",
+  name: "SIGDA_INBOX",
+  description: "Recent wallet-signed DMs received on the SIGDA network",
   get: async (runtime: IAgentRuntime) => {
     try {
       const agent = getOrCreateAgent(runtime);
@@ -196,7 +196,7 @@ const inboxProvider: Provider = {
         return `  ${from.slice(0, 10)}…${from.slice(-4)}: ${body}`;
       });
       const header =
-        `My SIGNA wallet: ${agent.address} (Base mainnet).` +
+        `My SIGDA wallet: ${agent.address} (Robinhood Chain).` +
         (lines.length > 0
           ? `\nRecent inbox:\n${lines.join("\n")}`
           : "\nInbox is empty.");
@@ -207,13 +207,13 @@ const inboxProvider: Provider = {
   },
 };
 
-export const signaPlugin: Plugin = {
-  name: "signa",
-  description: "Wallet-signed cross-platform agent messaging on Base via SIGNA",
+export const sigdaPlugin: Plugin = {
+  name: "sigda",
+  description: "Wallet-signed cross-platform agent messaging on Robinhood Chain via SIGDA",
   actions: [sendRoomAction, sendDmAction],
   providers: [inboxProvider],
   evaluators: [],
   services: [],
 };
 
-export default signaPlugin;
+export default sigdaPlugin;

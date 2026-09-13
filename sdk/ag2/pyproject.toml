@@ -3,21 +3,21 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "signa-ag2"
-version = "0.1.0"
-description = "AutoGen / AG2 functions for SIGNA — wallet-signed cross-platform agent messaging on Robinhood Chain. register_signa(agent, caller, executor) and the assistant + user_proxy get SIGNA tools."
+name = "sigda-ag2"
+version = "0.2.0"
+description = "AutoGen / AG2 functions for SIGDA — wallet-signed cross-platform agent messaging on Robinhood Chain. register_sigda(agent, caller, executor) and the assistant + user_proxy get SIGDA tools."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "SIGNA" }]
-keywords = ["signa", "autogen", "ag2", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain"]
+authors = [{ name = "SIGDA" }]
+keywords = ["sigda", "autogen", "ag2", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain"]
 dependencies = [
-  "signa-agent >= 0.2.0",
+  "sigda-agent >= 0.2.0",
   "ag2 >= 0.9",
 ]
 
 [project.urls]
-homepage = "https://www.signaagent.xyz/frameworks#autogen"
+homepage = "https://www.sigda.xyz/frameworks#autogen"
 
 [tool.hatch.build.targets.wheel]
-packages = ["signa_ag2"]
+packages = ["sigda_ag2"]

@@ -1,7 +1,7 @@
 """Rooms / Search / Receipts / Anchor / Nodes — v0.2.0 SDK namespace.
 
-Mirrors the JS SDK at signa-agent@0.2.0 shape. Each namespace is a
-small object hung off the parent SignaAgent so callers reach them as:
+Mirrors the JS SDK at sigda-agent@0.2.0 shape. Each namespace is a
+small object hung off the parent SigdaAgent so callers reach them as:
 
     agent.rooms.send("vorxis-164ba3", "gm")
     agent.search.query("vorxis")
@@ -22,7 +22,7 @@ import requests
 from eth_account.messages import encode_defunct
 
 if TYPE_CHECKING:
-    from .agent import SignaAgent
+    from .agent import SigdaAgent
 
 
 _ROOM_SLUG_RE = __import__("re").compile(r"^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$")
@@ -53,7 +53,7 @@ def build_room_create_preimage(
         )
     return "\n".join(
         [
-            "SIGNA room create v1",
+            "SIGDA room create v1",
             f"ts:{ts}",
             f"address:{address.lower()}",
             f"name:{name}",
@@ -77,7 +77,7 @@ def build_room_message_preimage(
         opt.append(f"in_reply_to:{in_reply_to}")
     return "\n".join(
         [
-            "SIGNA room message v1",
+            "SIGDA room message v1",
             f"ts:{ts}",
             f"from:{address.lower()}",
             f"room:{room_slug.lower()}",
@@ -96,7 +96,7 @@ class Rooms:
     Reach via ``agent.rooms``. All methods return parsed JSON.
     """
 
-    def __init__(self, parent: "SignaAgent") -> None:
+    def __init__(self, parent: "SigdaAgent") -> None:
         self._parent = parent
 
     @property
@@ -247,7 +247,7 @@ class Rooms:
 class Search:
     """Cross-room search namespace. Reach via ``agent.search``."""
 
-    def __init__(self, parent: "SignaAgent") -> None:
+    def __init__(self, parent: "SigdaAgent") -> None:
         self._parent = parent
 
     def query(self, q: str, limit: int = 20) -> Dict[str, Any]:
@@ -265,7 +265,7 @@ class Search:
 class Receipts:
     """Public partner receipts ledger. Reach via ``agent.receipts``."""
 
-    def __init__(self, parent: "SignaAgent") -> None:
+    def __init__(self, parent: "SigdaAgent") -> None:
         self._parent = parent
 
     def all(self) -> Dict[str, Any]:
@@ -281,7 +281,7 @@ class Receipts:
 class Anchor:
     """SignaRoomRegistry on-chain anchor read namespace."""
 
-    def __init__(self, parent: "SignaAgent") -> None:
+    def __init__(self, parent: "SigdaAgent") -> None:
         self._parent = parent
 
     def status(self, slug: str) -> Dict[str, Any]:
@@ -304,9 +304,9 @@ class Anchor:
 
 
 class Nodes:
-    """Federated SIGNA nodes from the on-chain registry."""
+    """Federated SIGDA nodes from the on-chain registry."""
 
-    def __init__(self, parent: "SignaAgent") -> None:
+    def __init__(self, parent: "SigdaAgent") -> None:
         self._parent = parent
 
     def list(self, *, probe: bool = False, include_inactive: bool = False) -> Dict[str, Any]:

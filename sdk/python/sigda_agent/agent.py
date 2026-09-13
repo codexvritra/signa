@@ -1,7 +1,7 @@
-"""Core SignaAgent class + canonical preimage builders.
+"""Core SigdaAgent class + canonical preimage builders.
 
 The preimage builders must stay bit-for-bit identical to
-web/lib/feed-types.ts buildMessageToSign, otherwise the SIGNA node
+web/lib/feed-types.ts buildMessageToSign, otherwise the SIGDA node
 rejects the signature.
 """
 
@@ -16,11 +16,11 @@ import requests
 from eth_account import Account
 from eth_account.messages import encode_defunct
 
-DEFAULT_BASE_URL = "https://www.signaagent.xyz"
+DEFAULT_BASE_URL = "https://www.sigda.xyz"
 DEFAULT_POLL_INTERVAL_S = 5.0
 DEFAULT_HEARTBEAT_INTERVAL_S = 45.0
 
-# Agent spend mandates default to USDC on Base.
+# Agent spend mandates default to USDG on Robinhood Chain.
 USDG_ROBINHOOD = "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
 NETWORK_ROBINHOOD = "eip155:4663"
 
@@ -50,7 +50,7 @@ def build_dm_preimage(
         opt.append(f"in_reply_to:{in_reply_to}")
     return "\n".join(
         [
-            "SIGNA agent dm v1",
+            "SIGDA agent dm v1",
             f"ts:{ts}",
             f"from:{from_addr.lower()}",
             f"to:{to_addr.lower()}",
@@ -78,15 +78,15 @@ def build_bridge_register_preimage(
         opt.append("capabilities:" + ",".join(capabilities))
     return "\n".join(
         [
-            "SIGNA agent bridge register v1",
+            "SIGDA agent bridge register v1",
             f"ts:{ts}",
             f"address:{address.lower()}",
             f"platform:{platform.lower()}",
             f"model:{model}",
             f"label:{label}",
             *opt,
-            "I am operating an agent bridge between SIGNA's DM substrate and",
-            f"the {platform} platform. My wallet receives DMs on SIGNA",
+            "I am operating an agent bridge between SIGDA's DM substrate and",
+            f"the {platform} platform. My wallet receives DMs on SIGDA",
             "and forwards them to the model above, then signs the reply and",
             "posts it back. I can deregister at any time.",
         ]
@@ -97,7 +97,7 @@ def build_bridge_heartbeat_preimage(address: str, ts: int) -> str:
     """Canonical preimage for an agent_bridge_heartbeat v1 envelope."""
     return "\n".join(
         [
-            "SIGNA agent bridge heartbeat v1",
+            "SIGDA agent bridge heartbeat v1",
             f"ts:{ts}",
             f"address:{address.lower()}",
         ]
@@ -122,7 +122,7 @@ def build_mandate_preimage(
     """Canonical preimage for a spend mandate (a human funds an agent)."""
     return "\n".join(
         [
-            "SIGNA spend mandate v1",
+            "SIGDA spend mandate v1",
             f"ts:{ts}",
             f"grantor:{grantor.lower()}",
             f"agent:{agent.lower()}",
@@ -147,7 +147,7 @@ def build_spend_preimage(
     """Canonical preimage for a spend recorded against a mandate."""
     return "\n".join(
         [
-            "SIGNA spend v1",
+            "SIGDA spend v1",
             f"ts:{ts}",
             f"mandate:{mandate_id}",
             f"agent:{agent.lower()}",
@@ -169,7 +169,7 @@ def build_budget_request_preimage(
     """Canonical preimage for an agent asking its grantor for more budget."""
     return "\n".join(
         [
-            "SIGNA budget request v1",
+            "SIGDA budget request v1",
             f"ts:{ts}",
             f"agent:{agent.lower()}",
             f"grantor:{grantor.lower()}",
@@ -180,13 +180,13 @@ def build_budget_request_preimage(
     )
 
 
-# ──────────────────────────── SignaAgent ────────────────────────────
+# ──────────────────────────── SigdaAgent ────────────────────────────
 
 
-class SignaAgent:
+class SigdaAgent:
     """The wallet-signed messaging client.
 
-    One ``SignaAgent`` = one wallet = one addressable identity on SIGNA.
+    One ``SigdaAgent`` = one wallet = one addressable identity on SIGDA.
     """
 
     def __init__(
@@ -199,7 +199,7 @@ class SignaAgent:
         echo_own_messages: bool = False,
     ) -> None:
         if not private_key:
-            raise ValueError("SignaAgent: private_key is required")
+            raise ValueError("SigdaAgent: private_key is required")
         pk = private_key if private_key.startswith("0x") else f"0x{private_key}"
         self._account = Account.from_key(pk)
         self.address: str = self._account.address.lower()
@@ -216,7 +216,7 @@ class SignaAgent:
         self._heartbeat_thread: Optional[threading.Thread] = None
         self._session = requests.Session()
 
-        # v0.2.0 namespaces — mirror the JS SDK at signa-agent@0.2.0.
+        # v0.2.0 namespaces — mirror the JS SDK at sigda-agent@0.2.0.
         from .rooms import Anchor, Nodes, Receipts, Rooms, Search
         self.rooms = Rooms(self)
         self.search = Search(self)
@@ -374,7 +374,7 @@ class SignaAgent:
         description: Optional[str] = None,
         capabilities: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Declare this wallet as a bridge between SIGNA and an external platform."""
+        """Declare this wallet as a bridge between SIGDA and an external platform."""
         ts = int(time.time() * 1000)
         message = build_bridge_register_preimage(
             self.address, ts,
@@ -439,7 +439,7 @@ class SignaAgent:
         remember: bool = False,
         report_to: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Ask the SIGNA brain a goal in plain language.
+        """Ask the SIGDA brain a goal in plain language.
 
         It reasons on decentralized inference, decides which capabilities on the
         network to call, invokes them for real, and answers from the live
@@ -452,7 +452,7 @@ class SignaAgent:
         stops and wallet-signs a request for more; the returned ``spend`` field
         carries ``{paid_raw, remaining_raw, receipt_id}`` or
         ``{budget_exhausted, request_id}``. Omit it and the brain runs
-        unmetered. The brain holds no funds of its own; SIGNA enforces the cap.
+        unmetered. The brain holds no funds of its own; SIGDA enforces the cap.
         """
         payload: Dict[str, Any] = {"goal": goal}
         if remember:
@@ -559,7 +559,7 @@ class SignaAgent:
     def start(self) -> None:
         """Run the poll loop in the current thread. Blocks until ``stop()`` is called."""
         if self._running:
-            raise RuntimeError("SignaAgent: already running")
+            raise RuntimeError("SigdaAgent: already running")
         self._running = True
         self._stop_event.clear()
 
@@ -572,7 +572,7 @@ class SignaAgent:
 
         if self._bridge:
             self._heartbeat_thread = threading.Thread(
-                target=self._heartbeat_loop, name="signa-heartbeat", daemon=True,
+                target=self._heartbeat_loop, name="sigda-heartbeat", daemon=True,
             )
             self._heartbeat_thread.start()
 
@@ -645,7 +645,7 @@ class SignaAgent:
     def _emit_error(self, err: BaseException) -> None:
         if not self._err_handlers:
             import sys
-            print(f"[signa_agent] {err!r}", file=sys.stderr)
+            print(f"[sigda_agent] {err!r}", file=sys.stderr)
             return
         for h in self._err_handlers:
             try:

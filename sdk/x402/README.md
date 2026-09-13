@@ -1,23 +1,23 @@
-# signa-x402
+# sigda-x402
 
-**Verifiable receipts for x402 agentic commerce on Base.**
+**Verifiable receipts for x402 agentic commerce on Robinhood Chain.**
 
-x402 moves the money. It doesn't prove *what was agreed*. `signa-x402` binds the
+x402 moves the money. It doesn't prove *what was agreed*. `sigda-x402` binds the
 **request → terms → the x402 payment authorization → the delivery** into one
-envelope, signed by the SIGNA attestor and **re-verifiable by anyone on Base** —
-no trust in SIGNA. The same check runs locally with `viem`.
+envelope, signed by the SIGDA attestor and **re-verifiable by anyone on Robinhood Chain** —
+no trust in SIGDA. The same check runs locally with `viem`.
 
-> x402 moves the money. SIGNA proves the deal.
+> x402 moves the money. SIGDA proves the deal.
 
 - **Zero dependencies** — just `fetch`.
 - Works in Node, Bun, Deno, edge runtimes, the browser.
-- Non-custodial: SIGNA never settles or holds funds. The receipt is provenance.
+- Non-custodial: SIGDA never settles or holds funds. The receipt is provenance.
 
 ## Install
 
 ```bash
-# from signaagent.xyz — no third-party registry, SHA-256 in /sdk/manifest.json
-npm install https://www.signaagent.xyz/sdk/signa-x402-0.1.0.tgz
+# from sigda.xyz — no third-party registry, SHA-256 in /sdk/manifest.json
+npm install https://www.sigda.xyz/sdk/sigda-x402-0.1.0.tgz
 ```
 
 ## Add receipts to your x402 server in ~3 lines
@@ -25,7 +25,7 @@ npm install https://www.signaagent.xyz/sdk/signa-x402-0.1.0.tgz
 After you verify a buyer's x402 payment, issue a receipt and hand it back:
 
 ```ts
-import { receiptFor } from "signa-x402";
+import { receiptFor } from "sigda-x402";
 
 // inside your x402 handler, once the payment is verified + the goods are ready:
 const { receipt, url, headers } = await receiptFor({
@@ -36,7 +36,7 @@ const { receipt, url, headers } = await receiptFor({
 });
 
 return new Response(JSON.stringify(output), {
-  headers: { "content-type": "application/json", ...headers }, // x-signa-receipt: <url>
+  headers: { "content-type": "application/json", ...headers }, // x-sigda-receipt: <url>
 });
 ```
 
@@ -45,7 +45,7 @@ That's it. The buyer now has a permanent, verifiable receipt at `url`.
 ### Express
 
 ```ts
-import { receiptFor } from "signa-x402";
+import { receiptFor } from "sigda-x402";
 
 app.post("/buy", async (req, res) => {
   // ... verify req payment (x402) + produce `output` ...
@@ -64,7 +64,7 @@ return c.json({ output }, 200, headers);
 ## Re-verify a receipt (anyone, no trust)
 
 ```ts
-import { getReceipt, verifyReceipt } from "signa-x402";
+import { getReceipt, verifyReceipt } from "sigda-x402";
 
 const receipt = await getReceipt(id);
 const v = await verifyReceipt(receipt);
@@ -91,19 +91,19 @@ const signer = await recoverMessageAddress({
 | `getReceipt(id, opts?)` | fetch a receipt by id |
 | `verifyReceipt(receipt, opts?)` | re-verify against the universal verifier |
 | `receiptUrl(id, opts?)` | the public, in-feed-unfurling permalink |
-| `receiptHeaders(receipt, opts?)` | `{ "x-signa-receipt", "x-signa-receipt-id" }` |
+| `receiptHeaders(receipt, opts?)` | `{ "x-sigda-receipt", "x-sigda-receipt-id" }` |
 
-`opts`: `{ baseUrl?: string; fetch?: typeof fetch }` — point at your own SIGNA
+`opts`: `{ baseUrl?: string; fetch?: typeof fetch }` — point at your own SIGDA
 node, or inject a custom `fetch`.
 
 ## How it works
 
 The buyer's payment is an EIP-3009 `TransferWithAuthorization` (the x402 "exact"
-scheme). SIGNA verifies that signature recovers to the buyer, then signs a
+scheme). SIGDA verifies that signature recovers to the buyer, then signs a
 canonical envelope binding `sha256` of the request, terms, payment, and delivery
 plus buyer/seller/amount/asset/network/ts. Pulling the funds is the permissionless
-x402 settlement step, done out of band — SIGNA never custodies anything.
+x402 settlement step, done out of band — SIGDA never custodies anything.
 
-Learn more + run a live receipt: <https://www.signaagent.xyz/x402>
+Learn more + run a live receipt: <https://www.sigda.xyz/x402>
 
 MIT.

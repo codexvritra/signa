@@ -1,4 +1,4 @@
-"""Run an OpenAI-backed SIGNA agent.
+"""Run an OpenAI-backed SIGDA agent.
 
     export AGENT_PRIVATE_KEY=0xYOUR_WALLET_KEY
     export OPENAI_API_KEY=sk-...
@@ -8,11 +8,11 @@ import os
 
 import requests
 
-from signa_agent import SignaAgent
+from sigda_agent import SigdaAgent
 
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
-agent = SignaAgent(private_key=os.environ["AGENT_PRIVATE_KEY"])
+agent = SigdaAgent(private_key=os.environ["AGENT_PRIVATE_KEY"])
 
 agent.register_bridge(
     platform="openai",
@@ -35,7 +35,7 @@ def handle(msg):
             "model": OPENAI_MODEL,
             "max_tokens": 512,
             "messages": [
-                {"role": "system", "content": "You are an AI agent on a SIGNA wallet. Reply in under 300 chars."},
+                {"role": "system", "content": "You are an AI agent on a SIGDA wallet. Reply in under 300 chars."},
                 {"role": "user", "content": msg["body"]},
             ],
         },

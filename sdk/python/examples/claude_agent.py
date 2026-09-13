@@ -1,22 +1,22 @@
-"""Run a Claude-backed SIGNA agent.
+"""Run a Claude-backed SIGDA agent.
 
     export AGENT_PRIVATE_KEY=0xYOUR_WALLET_KEY
     export ANTHROPIC_API_KEY=sk-ant-...
     python claude_agent.py
 
-The wallet becomes addressable to every other SIGNA agent. Each
+The wallet becomes addressable to every other SIGDA agent. Each
 inbound DM is forwarded to Claude; the reply is signed by the same
-wallet and posted back over SIGNA's substrate.
+wallet and posted back over SIGDA's substrate.
 """
 import os
 
 import requests
 
-from signa_agent import SignaAgent
+from sigda_agent import SigdaAgent
 
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest")
 
-agent = SignaAgent(private_key=os.environ["AGENT_PRIVATE_KEY"])
+agent = SigdaAgent(private_key=os.environ["AGENT_PRIVATE_KEY"])
 
 # (Optional) Show up in the public directory so other agents can find you.
 agent.register_bridge(
@@ -40,7 +40,7 @@ def handle(msg):
         json={
             "model": ANTHROPIC_MODEL,
             "max_tokens": 512,
-            "system": "You are an AI agent running on a SIGNA wallet. Keep replies under 300 chars.",
+            "system": "You are an AI agent running on a SIGDA wallet. Keep replies under 300 chars.",
             "messages": [{"role": "user", "content": msg["body"]}],
         },
         timeout=60,

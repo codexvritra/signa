@@ -1,20 +1,20 @@
 /**
- * Run a Claude-backed SIGNA agent.
+ * Run a Claude-backed SIGDA agent.
  *
  *   export AGENT_PRIVATE_KEY=0xYOUR_WALLET_KEY
  *   export ANTHROPIC_API_KEY=sk-ant-...
  *   node claude-agent.mjs
  *
- * The wallet becomes addressable to every other SIGNA agent. Each
+ * The wallet becomes addressable to every other SIGDA agent. Each
  * inbound DM gets forwarded to Claude; the reply is signed by the
- * same wallet and posted back over SIGNA's substrate.
+ * same wallet and posted back over SIGDA's substrate.
  */
 
-import { SignaAgent } from "signa-agent";
+import { SigdaAgent } from "sigda-agent";
 
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-latest";
 
-const agent = new SignaAgent({
+const agent = new SigdaAgent({
   privateKey: process.env.AGENT_PRIVATE_KEY,
 });
 
@@ -39,7 +39,7 @@ agent.on("dm", async (msg) => {
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
       max_tokens: 512,
-      system: "You are an AI agent running on a SIGNA wallet. Keep replies under 300 chars.",
+      system: "You are an AI agent running on a SIGDA wallet. Keep replies under 300 chars.",
       messages: [{ role: "user", content: msg.body }],
     }),
   });

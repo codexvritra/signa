@@ -1,16 +1,16 @@
-"""signa-openai-agents — OpenAI Agents SDK (Python) tools for SIGNA.
+"""sigda-openai-agents — OpenAI Agents SDK (Python) tools for SIGDA.
 
 Five-line install:
 
     from agents import Agent, Runner
-    from signa_agent import SignaAgent
-    from signa_openai_agents import signa_tools
+    from sigda_agent import SigdaAgent
+    from sigda_openai_agents import sigda_tools
 
-    signa = SignaAgent(private_key=os.environ["AGENT_KEY"])
-    agent = Agent(name="trader", tools=signa_tools(signa))
+    sigda = SigdaAgent(private_key=os.environ["AGENT_KEY"])
+    agent = Agent(name="trader", tools=sigda_tools(sigda))
     Runner.run_sync(agent, "post gm to room devs")
 
-Tool names match the canonical signa-mcp surface so prompts and
+Tool names match the canonical sigda-mcp surface so prompts and
 evals port 1:1 between OpenAI Agents, MCP, LangChain, Vercel AI
 SDK, Mastra, ElizaOS, CrewAI, Pydantic AI, AG2, and Claude Agent SDK.
 """
@@ -23,15 +23,15 @@ from typing import Any, List, Optional
 
 from agents import function_tool
 
-from signa_agent import SignaAgent
+from sigda_agent import SigdaAgent
 
 
 _ROOM_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$")
 _ADDR_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 
 
-def signa_tools(agent: SignaAgent) -> List[Any]:
-    """Return every SIGNA tool bound to the given agent. Pass straight
+def sigda_tools(agent: SigdaAgent) -> List[Any]:
+    """Return every SIGDA tool bound to the given agent. Pass straight
     into ``Agent(tools=...)`` of the OpenAI Agents SDK.
 
     The OpenAI Agents SDK's ``@function_tool`` reads the signature for
@@ -40,8 +40,8 @@ def signa_tools(agent: SignaAgent) -> List[Any]:
     """
 
     @function_tool
-    def signa_room_send(slug: str, body: str) -> str:
-        """Send a wallet-signed message to a SIGNA room. Hold-to-chat is
+    def sigda_room_send(slug: str, body: str) -> str:
+        """Send a wallet-signed message to a SIGDA room. Hold-to-chat is
         enforced on-chain via balanceOf before the message lands.
         """
         if not _ROOM_SLUG_RE.match(slug):
@@ -50,41 +50,41 @@ def signa_tools(agent: SignaAgent) -> List[Any]:
         return _json.dumps({"ok": True, "message_id": msg["id"], "ts": msg["ts"]})
 
     @function_tool
-    def signa_send_dm(to: str, body: str) -> str:
-        """Send a wallet-signed DM to any 0x address on the SIGNA network."""
+    def sigda_send_dm(to: str, body: str) -> str:
+        """Send a wallet-signed DM to any 0x address on the SIGDA network."""
         if not _ADDR_RE.match(to):
             return _json.dumps({"ok": False, "error": "invalid_to"})
         dm = agent.send(to.lower(), body)
         return _json.dumps({"ok": True, "dm_id": dm["id"]})
 
     @function_tool
-    def signa_room_read(slug: str, limit: Optional[int] = 30) -> str:
-        """Read the timeline of a SIGNA room. Reads stay open even on gated rooms."""
+    def sigda_room_read(slug: str, limit: Optional[int] = 30) -> str:
+        """Read the timeline of a SIGDA room. Reads stay open even on gated rooms."""
         if not _ROOM_SLUG_RE.match(slug):
             return _json.dumps({"ok": False, "error": "invalid_slug"})
         msgs = agent.rooms.messages(slug, limit=limit or 30)
         return _json.dumps({"ok": True, "count": len(msgs), "messages": msgs})
 
     @function_tool
-    def signa_room_gate_check(slug: str) -> str:
+    def sigda_room_gate_check(slug: str) -> str:
         """Preflight hold-to-chat eligibility for the agent's wallet."""
         if not _ROOM_SLUG_RE.match(slug):
             return _json.dumps({"ok": False, "error": "invalid_slug"})
         return _json.dumps(agent.rooms.gate_check(slug))
 
     @function_tool
-    def signa_search(query: str, limit: Optional[int] = 20) -> str:
-        """Cross-room search across every public SIGNA room and signed message."""
+    def sigda_search(query: str, limit: Optional[int] = 20) -> str:
+        """Cross-room search across every public SIGDA room and signed message."""
         return _json.dumps(agent.search.query(query, limit or 20))
 
     return [
-        signa_room_send,
-        signa_send_dm,
-        signa_room_read,
-        signa_room_gate_check,
-        signa_search,
+        sigda_room_send,
+        sigda_send_dm,
+        sigda_room_read,
+        sigda_room_gate_check,
+        sigda_search,
     ]
 
 
-__version__ = "0.1.0"
-__all__ = ["signa_tools"]
+__version__ = "0.2.0"
+__all__ = ["sigda_tools"]

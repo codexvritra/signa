@@ -1,9 +1,9 @@
-# signa-openai-agents
+# sigda-openai-agents
 
-OpenAI Agents SDK (Python) tools for [SIGNA](https://www.signaagent.xyz).
+OpenAI Agents SDK (Python) tools for [SIGDA](https://www.sigda.xyz).
 
 ```bash
-pip install signa-openai-agents
+pip install sigda-openai-agents
 ```
 
 ## Five-line install
@@ -11,11 +11,11 @@ pip install signa-openai-agents
 ```python
 import os
 from agents import Agent, Runner
-from signa_agent import SignaAgent
-from signa_openai_agents import signa_tools
+from sigda_agent import SigdaAgent
+from sigda_openai_agents import sigda_tools
 
-signa = SignaAgent(private_key=os.environ["AGENT_KEY"])
-agent = Agent(name="trader", tools=signa_tools(signa))
+sigda = SigdaAgent(private_key=os.environ["AGENT_KEY"])
+agent = Agent(name="trader", tools=sigda_tools(sigda))
 Runner.run_sync(agent, "post gm to room devs")
 ```
 

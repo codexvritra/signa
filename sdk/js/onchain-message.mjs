@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * onchain-message.mjs — write/read a SIGNA message ON ROBINHOOD CHAIN, with no
- * SIGNA website and no SIGNA node. The message is just a 0-value Robinhood
- * Chain transaction whose calldata is `SIGNA msg v1\nfrom:…\nto:…\nbody:…`.
+ * onchain-message.mjs — write/read a SIGDA message ON ROBINHOOD CHAIN, with no
+ * SIGDA website and no SIGDA node. The message is just a 0-value Robinhood
+ * Chain transaction whose calldata is `SIGDA msg v1\nfrom:…\nto:…\nbody:…`.
  * The tx is signed by the sender's wallet, so the chain itself proves who sent it.
  *
  * The whole "messaging layer" is this one fact: a Robinhood Chain tx with that
@@ -32,7 +32,10 @@ const rhChain = defineChain({
   blockExplorers: { default: { name: "Explorer", url: "https://robinhoodchain.blockscout.com" } },
 });
 
-const PREFIX = "SIGNA msg v1";
+const PREFIX = "SIGDA msg v1";
+// Pre-rebrand messages are permanently on-chain under the old prefix — keep
+// decoding them so they stay discoverable. New messages always use PREFIX.
+const LEGACY_PREFIX = "SIGNA msg v1";
 const RPC = process.env.RPC || "https://rpc.mainnet.chain.robinhood.com";
 const norm = (a) => String(a).toLowerCase();
 
@@ -44,7 +47,7 @@ function decode(inputHex) {
   if (!inputHex || inputHex === "0x") return null;
   let s;
   try { s = hexToString(inputHex); } catch { return null; }
-  if (!s.startsWith(PREFIX)) return null;
+  if (!s.startsWith(PREFIX) && !s.startsWith(LEGACY_PREFIX)) return null;
   const from = norm((s.match(/\nfrom:([^\n]*)/)?.[1] ?? "").trim());
   const to = norm((s.match(/\nto:([^\n]*)/)?.[1] ?? "").trim());
   const i = s.indexOf("\nbody:");
@@ -70,7 +73,7 @@ async function send(to, body) {
 // SignaMessages contract on Robinhood Chain — send(to, body) emits a readable
 // Message event. No hardcoded default: set CONTRACT=0x… to the address from
 // your deploy (see contracts/script/DeployMessages.s.sol).
-const SIGNA_MESSAGES = (process.env.CONTRACT || "").toLowerCase();
+const SIGDA_MESSAGES = (process.env.CONTRACT || "").toLowerCase();
 function encodeSend(to, body) {
   const addr = norm(to).replace(/^0x/, "").padStart(64, "0");
   const offset = (64).toString(16).padStart(64, "0");
@@ -85,11 +88,11 @@ async function msg(to, body) {
   if (!pk) throw new Error("set PK=0x… (the sending wallet's private key, needs Robinhood Chain ETH for gas)");
   if (!/^0x[a-fA-F0-9]{40}$/.test(to)) throw new Error(`bad recipient: ${to}`);
   if (!body) throw new Error("message body is required");
-  if (!SIGNA_MESSAGES) throw new Error("set CONTRACT=0x… to the deployed SignaMessages address on Robinhood Chain");
+  if (!SIGDA_MESSAGES) throw new Error("set CONTRACT=0x… to the deployed SignaMessages address on Robinhood Chain");
   const account = privateKeyToAccount(pk.startsWith("0x") ? pk : `0x${pk}`);
   const wallet = createWalletClient({ account, chain: rhChain, transport: http(RPC) });
-  console.log(`recording message ${norm(account.address)} → ${norm(to)} via SignaMessages ${SIGNA_MESSAGES} …`);
-  const hash = await wallet.sendTransaction({ to: SIGNA_MESSAGES, value: 0n, data: encodeSend(to, body) });
+  console.log(`recording message ${norm(account.address)} → ${norm(to)} via SignaMessages ${SIGDA_MESSAGES} …`);
+  const hash = await wallet.sendTransaction({ to: SIGDA_MESSAGES, value: 0n, data: encodeSend(to, body) });
   console.log("tx:        ", hash);
   console.log("explorer:  ", `https://robinhoodchain.blockscout.com/tx/${hash}`);
   console.log("\nit's a readable Message event on Robinhood Chain now.");
@@ -102,7 +105,7 @@ function compose(from, to, body) {
   const data = buildData({ from, to: norm(to), body });
   // The wallet-agnostic transaction request. Paste `data` into a wallet's hex
   // field (MetaMask/Rabby: enable "hex data"), or hand {to,value,data} to any
-  // injected provider / WalletConnect request. No website, no SIGNA node.
+  // injected provider / WalletConnect request. No website, no SIGDA node.
   console.log(JSON.stringify({ to: norm(to), value: "0x0", data, chainId: "0x1237" }, null, 2));
   console.log("\nhex data to paste into your wallet's send screen:\n" + data);
 }
@@ -112,7 +115,7 @@ async function read(txHash) {
   const client = createPublicClient({ chain: rhChain, transport: http(RPC) });
   const tx = await client.getTransaction({ hash: txHash });
   const msg = decode(tx.input);
-  if (!msg) { console.log("not a SIGNA onchain message"); return; }
+  if (!msg) { console.log("not a SIGDA onchain message"); return; }
   const txFrom = norm(tx.from);
   console.log(JSON.stringify({
     tx: txHash,

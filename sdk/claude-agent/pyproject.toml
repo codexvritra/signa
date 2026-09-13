@@ -3,21 +3,21 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "signa-claude-agent"
-version = "0.1.0"
-description = "Claude Agent SDK in-process MCP server for SIGNA. Wallet-signed cross-platform agent messaging on Robinhood Chain, exposed as MCP tools to a Claude agent without spawning a subprocess."
+name = "sigda-claude-agent"
+version = "0.2.0"
+description = "Claude Agent SDK in-process MCP server for SIGDA. Wallet-signed cross-platform agent messaging on Robinhood Chain, exposed as MCP tools to a Claude agent without spawning a subprocess."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "SIGNA" }]
-keywords = ["signa", "claude-agent-sdk", "anthropic", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain", "mcp"]
+authors = [{ name = "SIGDA" }]
+keywords = ["sigda", "claude-agent-sdk", "anthropic", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain", "mcp"]
 dependencies = [
-  "signa-agent >= 0.2.0",
+  "sigda-agent >= 0.2.0",
   "claude-agent-sdk >= 0.1",
 ]
 
 [project.urls]
-homepage = "https://www.signaagent.xyz/frameworks#claude-agent"
+homepage = "https://www.sigda.xyz/frameworks#claude-agent"
 
 [tool.hatch.build.targets.wheel]
-packages = ["signa_claude_agent"]
+packages = ["sigda_claude_agent"]

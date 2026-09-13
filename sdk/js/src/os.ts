@@ -1,5 +1,5 @@
 /**
- * v0.99 — SigdaOS: the agent OS for Base.
+ * v0.99 — SigdaOS: the agent OS for Robinhood Chain.
  *
  * The connective operating system *between* agents. Single-agent runtimes
  * (AIOS, ElizaOS) are the kernel for one agent's LLM + tools + memory.
@@ -12,7 +12,7 @@
  * ```ts
  * import { bootAgent } from "sigda-agent";
  *
- * const os = bootAgent({ privateKey: process.env.SIGNA_PRIVATE_KEY! });
+ * const os = bootAgent({ privateKey: process.env.SIGDA_PRIVATE_KEY! });
  *
  * os.identity;                          // syscall: identity  (the wallet)
  * await os.message(addr, "gm");         // syscall: message   (IPC, signed)
@@ -516,7 +516,7 @@ export class SigdaOS {
   /** Make this agent discoverable (registers it in the bridge directory). */
   async announce(opts?: Partial<RegisterBridgeOptions>): Promise<void> {
     await this.agent.registerBridge({
-      platform: opts?.platform ?? "signaos",
+      platform: opts?.platform ?? "sigdaos",
       model: opts?.model ?? this.computeModel,
       label: opts?.label ?? this.label,
       capabilities: opts?.capabilities ?? ["message", "remember", "compute", "a2a"],

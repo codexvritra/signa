@@ -1,9 +1,9 @@
-// signa-x402 quickstart — proves the SDK against live prod.
+// sigda-x402 quickstart — proves the SDK against live prod.
 // Mints a receipt via the demo endpoint, then reads + re-verifies it through
 // the SDK. Run after build:  node examples/quickstart.mjs
 import { getReceipt, verifyReceipt, receiptUrl } from "../dist/index.js";
 
-const BASE = process.env.SIGNA_BASE ?? "https://www.signaagent.xyz";
+const BASE = process.env.SIGDA_BASE ?? "https://www.sigda.xyz";
 
 // 1. a seller would normally call issueReceipt() after verifying an x402
 //    payment. Here we use the live demo endpoint to mint a real one.
@@ -14,10 +14,10 @@ console.log("minted receipt:", receiptUrl(id, { baseUrl: BASE }));
 
 // 2. anyone can fetch it
 const receipt = await getReceipt(id, { baseUrl: BASE });
-console.log("amount:", Number(BigInt(receipt.amount)) / 1e6, "USDC  buyer→seller:",
+console.log("amount:", Number(BigInt(receipt.amount)) / 1e6, "USDG  buyer→seller:",
   receipt.buyer.slice(0, 10), "→", receipt.seller.slice(0, 10));
 
-// 3. and re-verify it — no trust in SIGNA
+// 3. and re-verify it — no trust in SIGDA
 const v = await verifyReceipt(receipt, { baseUrl: BASE });
 console.log("verify:", JSON.stringify({ valid: v.valid, matches: v.matches, role: v.signer_role }));
 if (!v.valid) throw new Error("receipt did not verify");

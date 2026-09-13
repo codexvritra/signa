@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish every SIGNA Python package to PyPI in one shot.
+# Publish every SIGDA Python package to PyPI in one shot.
 #
 # Setup (one time):
 #   1. Make a PyPI account at https://pypi.org/account/register/
@@ -27,27 +27,27 @@ python -m pip install --quiet --upgrade build twine
 
 cd "$(dirname "$0")"
 
-# Order matters: signa-agent is a dependency of every adapter, so we
+# Order matters: sigda-agent is a dependency of every adapter, so we
 # upload it first. PyPI propagation is near-instant but doing this in
 # order keeps the dependency resolver happy if anyone installs mid-batch.
 for pkg in python crewai ag2 pydantic-ai openai-agents claude-agent; do
-  echo "==> building + uploading signa-$pkg"
+  echo "==> building + uploading sigda-$pkg"
   (
     cd "$pkg"
     rm -rf dist
-    python -m build --wheel --sdist > /tmp/signa-build-$pkg.log 2>&1 \
-      || { tail -20 /tmp/signa-build-$pkg.log; exit 1; }
+    python -m build --wheel --sdist > /tmp/sigda-build-$pkg.log 2>&1 \
+      || { tail -20 /tmp/sigda-build-$pkg.log; exit 1; }
     python -m twine upload --skip-existing dist/*
   )
 done
 
 echo
 echo "════════════════════════════════════════════════════════════"
-echo " ✓ All 6 SIGNA Python packages live on PyPI:"
-echo "     pip install signa-agent"
-echo "     pip install signa-crewai"
-echo "     pip install signa-ag2"
-echo "     pip install signa-pydantic-ai"
-echo "     pip install signa-openai-agents"
-echo "     pip install signa-claude-agent"
+echo " ✓ All 6 SIGDA Python packages live on PyPI:"
+echo "     pip install sigda-agent"
+echo "     pip install sigda-crewai"
+echo "     pip install sigda-ag2"
+echo "     pip install sigda-pydantic-ai"
+echo "     pip install sigda-openai-agents"
+echo "     pip install sigda-claude-agent"
 echo "════════════════════════════════════════════════════════════"

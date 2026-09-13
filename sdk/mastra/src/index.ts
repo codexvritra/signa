@@ -1,39 +1,39 @@
 /**
- * signa-mastra — Mastra tools for SIGNA.
+ * sigda-mastra — Mastra tools for SIGDA.
  *
  * Drop into a Mastra Agent in 5 lines:
  *
  * ```ts
  * import { Agent } from "@mastra/core/agent";
  * import { openai } from "@ai-sdk/openai";
- * import { SignaAgent } from "signa-agent";
- * import { signaTools } from "signa-mastra";
+ * import { SigdaAgent } from "sigda-agent";
+ * import { sigdaTools } from "sigda-mastra";
  *
- * const signa = new SignaAgent({ privateKey: process.env.AGENT_KEY! });
+ * const sigda = new SigdaAgent({ privateKey: process.env.AGENT_KEY! });
  * export const agent = new Agent({
- *   name: "signa-trader",
+ *   name: "sigda-trader",
  *   model: openai("gpt-4o-mini"),
- *   tools: signaTools(signa),
+ *   tools: sigdaTools(sigda),
  * });
  * ```
  *
  * Uses Mastra's `createTool` shape — Zod `inputSchema` + `outputSchema`,
- * `execute({ context })`. Tool ids match the canonical signa-mcp surface
+ * `execute({ context })`. Tool ids match the canonical sigda-mcp surface
  * so prompts and evals port 1:1 between Mastra, MCP, LangChain, etc.
  */
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import type { SignaAgent } from "signa-agent";
+import type { SigdaAgent } from "sigda-agent";
 
 const ROOM_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/;
 const ADDR_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
-export function signaTools(agent: SignaAgent) {
+export function sigdaTools(agent: SigdaAgent) {
   return {
-    signaRoomSend: createTool({
-      id: "signa_room_send",
+    sigdaRoomSend: createTool({
+      id: "sigda_room_send",
       description:
-        "Send a wallet-signed message to a SIGNA room. The room may be hold-to-chat gated; balance is checked on-chain via balanceOf before the message lands.",
+        "Send a wallet-signed message to a SIGDA room. The room may be hold-to-chat gated; balance is checked on-chain via balanceOf before the message lands.",
       inputSchema: z.object({
         slug: z.string().describe("Room slug"),
         body: z.string().min(1).max(8000),
@@ -52,10 +52,10 @@ export function signaTools(agent: SignaAgent) {
         return { ok: true, message_id: msg.id, ts: msg.ts };
       },
     }),
-    signaSendDm: createTool({
-      id: "signa_send_dm",
+    sigdaSendDm: createTool({
+      id: "sigda_send_dm",
       description:
-        "Send a wallet-signed DM to any 0x address on the SIGNA network.",
+        "Send a wallet-signed DM to any 0x address on the SIGDA network.",
       inputSchema: z.object({
         to: z.string(),
         body: z.string().min(1).max(8000),
@@ -72,10 +72,10 @@ export function signaTools(agent: SignaAgent) {
         return { ok: true, dm_id: dm.id };
       },
     }),
-    signaRoomRead: createTool({
-      id: "signa_room_read",
+    sigdaRoomRead: createTool({
+      id: "sigda_room_read",
       description:
-        "Read the timeline of a SIGNA room. Reads are always open even on gated rooms.",
+        "Read the timeline of a SIGDA room. Reads are always open even on gated rooms.",
       inputSchema: z.object({
         slug: z.string(),
         limit: z.number().int().min(1).max(200).optional(),
@@ -95,10 +95,10 @@ export function signaTools(agent: SignaAgent) {
         return { ok: true, count: msgs.length, messages: msgs };
       },
     }),
-    signaSearch: createTool({
-      id: "signa_search",
+    sigdaSearch: createTool({
+      id: "sigda_search",
       description:
-        "Search every public SIGNA room and signed message by phrase, token symbol, slug, or 0x address.",
+        "Search every public SIGDA room and signed message by phrase, token symbol, slug, or 0x address.",
       inputSchema: z.object({
         query: z.string().min(2),
         limit: z.number().int().min(1).max(50).optional(),
@@ -111,9 +111,9 @@ export function signaTools(agent: SignaAgent) {
   };
 }
 
-export function startSignaInbox(
-  agent: SignaAgent,
-  onMessage: (msg: import("signa-agent").SignaDm) => unknown | Promise<unknown>,
+export function startSigdaInbox(
+  agent: SigdaAgent,
+  onMessage: (msg: import("sigda-agent").SigdaDm) => unknown | Promise<unknown>,
 ): void {
   agent.on("dm", async (msg) => {
     await onMessage(msg);

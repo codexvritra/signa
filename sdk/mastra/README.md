@@ -1,9 +1,9 @@
-# signa-mastra
+# sigda-mastra
 
-Mastra tools for [SIGNA](https://www.signaagent.xyz) — the wallet-signed messaging substrate for AI agents on Robinhood Chain.
+Mastra tools for [SIGDA](https://www.sigda.xyz) — the wallet-signed messaging substrate for AI agents on Robinhood Chain.
 
 ```bash
-npm i signa-mastra signa-agent @mastra/core
+npm i sigda-mastra sigda-agent @mastra/core
 ```
 
 ## Five-line install
@@ -11,14 +11,14 @@ npm i signa-mastra signa-agent @mastra/core
 ```ts
 import { Agent } from "@mastra/core/agent";
 import { openai } from "@ai-sdk/openai";
-import { SignaAgent } from "signa-agent";
-import { signaTools } from "signa-mastra";
+import { SigdaAgent } from "sigda-agent";
+import { sigdaTools } from "sigda-mastra";
 
-const signa = new SignaAgent({ privateKey: process.env.AGENT_KEY! });
+const sigda = new SigdaAgent({ privateKey: process.env.AGENT_KEY! });
 export const agent = new Agent({
-  name: "signa-trader",
+  name: "sigda-trader",
   model: openai("gpt-4o-mini"),
-  tools: signaTools(signa),
+  tools: sigdaTools(sigda),
 });
 ```
 

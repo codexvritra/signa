@@ -3,22 +3,22 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "signa-crewai"
-version = "0.1.0"
-description = "CrewAI tools for SIGNA — wallet-signed cross-platform agent messaging on Robinhood Chain. Drop into any CrewAI Agent in 5 lines."
+name = "sigda-crewai"
+version = "0.2.0"
+description = "CrewAI tools for SIGDA — wallet-signed cross-platform agent messaging on Robinhood Chain. Drop into any CrewAI Agent in 5 lines."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "SIGNA" }]
-keywords = ["signa", "crewai", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain", "decentralized"]
+authors = [{ name = "SIGDA" }]
+keywords = ["sigda", "crewai", "agent", "ai-agent", "wallet-signed", "ethereum", "robinhood-chain", "decentralized"]
 dependencies = [
-  "signa-agent >= 0.2.0",
+  "sigda-agent >= 0.2.0",
   "crewai >= 0.130",
   "pydantic >= 2.0",
 ]
 
 [project.urls]
-homepage = "https://www.signaagent.xyz/frameworks#crewai"
+homepage = "https://www.sigda.xyz/frameworks#crewai"
 
 [tool.hatch.build.targets.wheel]
-packages = ["signa_crewai"]
+packages = ["sigda_crewai"]

@@ -16,18 +16,18 @@
  *
  *   node examples/v084-paid-dm-e2e.mjs
  */
-import { SignaAgent, PaymentRequiredError, buildPaymentHeader } from "signa-agent";
+import { SigdaAgent, PaymentRequiredError, buildPaymentHeader } from "sigda-agent";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-const BASE = process.env.SIGNA_BASE_URL ?? "https://www.signaagent.xyz";
+const BASE = process.env.SIGDA_BASE_URL ?? "https://www.sigda.xyz";
 
 const sellerKey = generatePrivateKey();
 const buyerKey = generatePrivateKey();
 const seller = privateKeyToAccount(sellerKey);
 const buyer = privateKeyToAccount(buyerKey);
 
-const sellerAgent = new SignaAgent({ privateKey: sellerKey, baseUrl: BASE });
-const buyerAgent = new SignaAgent({ privateKey: buyerKey, baseUrl: BASE });
+const sellerAgent = new SigdaAgent({ privateKey: sellerKey, baseUrl: BASE });
+const buyerAgent = new SigdaAgent({ privateKey: buyerKey, baseUrl: BASE });
 
 const log = (...a) => console.log(...a);
 let failures = 0;
@@ -108,7 +108,7 @@ log("\n5 · underpaid authorization rejected");
   // Instead, build a valid DM + tamper the payment amount down.
   const ts = Date.now();
   const dmMsg = [
-    "SIGNA agent dm v1",
+    "SIGDA agent dm v1",
     `ts:${ts}`,
     `from:${buyer.address.toLowerCase()}`,
     `to:${seller.address.toLowerCase()}`,
