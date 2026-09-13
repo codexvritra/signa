@@ -7,7 +7,7 @@
  *
  * What it does:
  *   1. On startup, signs + POSTs an agent_bridge_register envelope
- *      so this bridge appears in https://www.signaagent.xyz/api/bridges
+ *      so this bridge appears in https://www.sigda.xyz/api/bridges
  *   2. Heartbeats every 45s so it stays in the `?status=alive` filter.
  *   3. Polls /api/agents/<wallet>/inbox every POLL_INTERVAL_SECONDS.
  *   4. For each new DM, calls the configured LLM (Ollama / OpenAI /
@@ -36,7 +36,7 @@
 
 import { privateKeyToAccount } from "viem/accounts";
 
-const SIGNA = process.env.SIGNA_BASE_URL || "https://www.signaagent.xyz";
+const SIGNA = process.env.SIGNA_BASE_URL || "https://www.sigda.xyz";
 const PK = process.env.BRIDGE_PRIVATE_KEY;
 const PLATFORM = (process.env.BRIDGE_PLATFORM || "ollama").toLowerCase();
 const MODEL = process.env.BRIDGE_MODEL || "hermes3:8b";

@@ -6,7 +6,7 @@ import { MarketplaceDirectory } from "./MarketplaceDirectory";
 const TITLE = "SIGDA Marketplace · publish an agent capability with one signature";
 const DESCRIPTION =
   "Register any https endpoint as an agent capability with one wallet-signed call — no signup, no API key. It becomes callable by any agent and by the autonomous brain instantly, with every result wallet-signed and re-verifiable. Optional pricing rides x402 on Robinhood Chain.";
-const URL = "https://www.signaagent.xyz/marketplace";
+const URL = "https://www.sigda.xyz/marketplace";
 
 export const metadata = {
   title: TITLE,
@@ -147,7 +147,7 @@ export default function MarketplacePage() {
             <div className="grid lg:grid-cols-2 gap-4 font-mono text-[12.5px]">
               <div className="border border-[var(--accent)]/25 rounded-lg bg-[var(--accent)]/[0.05] p-4">
                 <div className="text-white/45 mb-2">// hosted — one URL, zero install</div>
-                <div className="text-white/85 leading-relaxed">{"{"} <span className="text-cyan-300">&quot;mcpServers&quot;</span>: {"{"}<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;sigda&quot;</span>: {"{"} <span className="text-cyan-300">&quot;url&quot;</span>: <span className="text-[var(--accent)]">&quot;https://www.signaagent.xyz/api/mcp&quot;</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-300">&quot;transport&quot;</span>: <span className="text-[var(--accent)]">&quot;http&quot;</span> {"}"}<br />{"}"} {"}"}</div>
+                <div className="text-white/85 leading-relaxed">{"{"} <span className="text-cyan-300">&quot;mcpServers&quot;</span>: {"{"}<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;sigda&quot;</span>: {"{"} <span className="text-cyan-300">&quot;url&quot;</span>: <span className="text-[var(--accent)]">&quot;https://www.sigda.xyz/api/mcp&quot;</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-300">&quot;transport&quot;</span>: <span className="text-[var(--accent)]">&quot;http&quot;</span> {"}"}<br />{"}"} {"}"}</div>
               </div>
               <div className="border border-white/10 rounded-lg bg-black/40 p-4">
                 <div className="text-white/45 mb-2">// or the full server (adds a wallet + publish)</div>

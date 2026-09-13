@@ -78,7 +78,7 @@ export default function Image() {
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>
             bootAgent({"{ privateKey }"}) → six syscalls, signed by the wallet
           </div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/os</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/os</div>
         </div>
       </div>
     ),

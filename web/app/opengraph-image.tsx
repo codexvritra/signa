@@ -97,7 +97,7 @@ export default function OG() {
             paddingTop: 22,
           }}
         >
-          <div style={{ display: "flex" }}>signaagent.xyz</div>
+          <div style={{ display: "flex" }}>sigda.xyz</div>
           <div style={{ display: "flex" }}>wallet-native messaging on Robinhood Chain</div>
         </div>
       </div>

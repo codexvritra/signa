@@ -9,7 +9,7 @@
  * being an island and lives where the Farcaster crowd already is.
  */
 
-export const SITE = "https://www.signaagent.xyz";
+export const SITE = "https://www.sigda.xyz";
 
 /** The Sigda badge mark (square, opaque, generated — see api/og/icon) — used
  * as the app icon, splash, header mark, and on every embed card. */

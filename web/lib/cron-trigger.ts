@@ -33,7 +33,7 @@ export async function triggerCronIfStale(name: "bankr" | "gitlawb" | "agent-toke
   // to the canonical domain.
   const host =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://www.signaagent.xyz");
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://www.sigda.xyz");
 
   // Fire-and-forget. Don't await — page render must not block on a
   // 5-second BaseScan call.

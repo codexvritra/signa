@@ -229,7 +229,7 @@ export async function GET(req: NextRequest) {
         signed: !!row.signed,
         snippet: truncate(target, 220, around),
         created_at: row.created_at,
-        permalink: `https://www.signaagent.xyz/i/${row.id}`,
+        permalink: `https://www.sigda.xyz/i/${row.id}`,
       });
     }
   }
@@ -252,7 +252,7 @@ export async function GET(req: NextRequest) {
         tags: row.tags ?? null,
         gitlawb_did: row.gitlawb_did,
         bankr_token_address: row.bankr_token_address,
-        permalink: `https://www.signaagent.xyz/agent/${row.address}`,
+        permalink: `https://www.sigda.xyz/agent/${row.address}`,
       });
     }
   }
@@ -273,7 +273,7 @@ export async function GET(req: NextRequest) {
         author_address: row.author_address,
         content_preview: truncate(row.content ?? "", 240, idx),
         created_at: row.created_at,
-        permalink: `https://www.signaagent.xyz/feed/${row.author_address}/post/${row.id}`,
+        permalink: `https://www.sigda.xyz/feed/${row.author_address}/post/${row.id}`,
       });
     }
   }

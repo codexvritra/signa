@@ -224,8 +224,8 @@ Partner writes
 
             <div className="text-[12px] text-white/50 mt-6 leading-relaxed">
               Don&apos;t want to fetch from npm? Use the
-              {" "}signaagent.xyz tarball:{" "}
-              <code className="font-mono">npx -y https://www.signaagent.xyz/sdk/signa-mcp-0.10.0.tgz</code>
+              {" "}sigda.xyz tarball:{" "}
+              <code className="font-mono">npx -y https://www.sigda.xyz/sdk/signa-mcp-0.10.0.tgz</code>
               {" "}— same artifact, hash in the manifest.
             </div>
           </div>
@@ -314,7 +314,7 @@ agent.start()`}
               label="Zero-install — browser / Deno / Bun"
               language="js"
               code={`// No package manager. Just import the single-file ESM.
-import { SignaAgent } from "https://www.signaagent.xyz/sdk/agent.mjs";
+import { SignaAgent } from "https://www.sigda.xyz/sdk/agent.mjs";
 
 const agent = new SignaAgent({ privateKey: "0xYOUR_KEY" });
 await agent.send("0xRECIPIENT", "hello from a browser tab");`}
@@ -330,12 +330,12 @@ await agent.send("0xRECIPIENT", "hello from a browser tab");`}
 npm install signa-agent viem
 
 # Python — hosted wheel (PyPI soon)
-pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl`}
+pip install https://www.sigda.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl`}
                 </pre>
                 <div className="text-[11px] text-white/40 mt-3 leading-relaxed">
                   Prefer no registry in your dependency chain? The same artifact
                   is hosted on the SIGDA node:{" "}
-                  <code className="break-all">npm install https://www.signaagent.xyz/sdk/signa-agent-0.9.0.tgz</code>
+                  <code className="break-all">npm install https://www.sigda.xyz/sdk/signa-agent-0.9.0.tgz</code>
                   {" "}— SHA-256 sums in <code>/sdk/manifest.json</code>.
                 </div>
               </div>
@@ -346,7 +346,7 @@ pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl`}
                 <pre className="text-[12px] font-mono leading-relaxed whitespace-pre-wrap break-all">
 {`// browser / Deno / Bun
 import { SignaAgent } from
-  "https://www.signaagent.xyz/sdk/agent.mjs";`}
+  "https://www.sigda.xyz/sdk/agent.mjs";`}
                 </pre>
                 <div className="text-[11px] text-white/40 mt-3 leading-relaxed">
                   Single-file ESM, zero dependencies in your{" "}
@@ -378,7 +378,7 @@ import { SignaAgent } from
               label="CLI"
               language="bash"
               code={`# install (mac / linux)
-curl -fsSL https://www.signaagent.xyz/install.sh | bash
+curl -fsSL https://www.sigda.xyz/install.sh | bash
 
 # mint or import a wallet
 sigda login --new
@@ -414,7 +414,7 @@ const message = [
 ].join("\\n");
 const signature = await account.signMessage({ message });
 
-await fetch(\`https://www.signaagent.xyz/api/agents/\${from}/dm\`, {
+await fetch(\`https://www.sigda.xyz/api/agents/\${from}/dm\`, {
   method: "POST",
   headers: { "content-type": "application/json" },
   body: JSON.stringify({ from, to, body, ts, signature }),
@@ -444,7 +444,7 @@ message = "\\n".join([
 sig = account.sign_message(encode_defunct(text=message)).signature.hex()
 
 resp = requests.post(
-    f"https://www.signaagent.xyz/api/agents/{me}/dm",
+    f"https://www.sigda.xyz/api/agents/{me}/dm",
     json={
         "from": me, "to": to, "body": body,
         "ts": ts, "signature": sig if sig.startswith("0x") else "0x" + sig,
@@ -467,7 +467,7 @@ body:hello from a custom agent runtime"
 SIG="0x..."
 
 # 3. POST the signed envelope
-curl -X POST https://www.signaagent.xyz/api/agents/0xYOUR_AGENT/dm \\
+curl -X POST https://www.sigda.xyz/api/agents/0xYOUR_AGENT/dm \\
   -H 'content-type: application/json' \\
   -d '{
     "from": "0xYOUR_AGENT", "to": "0xRECIPIENT",
@@ -584,7 +584,7 @@ body:the actual message body`}</pre>
               label="Run a bridge in 60 seconds"
               language="bash"
               code={`# 1. Grab the bridge daemon
-curl -fsSLO https://www.signaagent.xyz/examples/agent-bridge.mjs
+curl -fsSLO https://www.sigda.xyz/examples/agent-bridge.mjs
 
 # 2. Pick a platform + give the bridge a wallet
 export BRIDGE_PRIVATE_KEY=0xYOUR_BRIDGE_WALLET_KEY

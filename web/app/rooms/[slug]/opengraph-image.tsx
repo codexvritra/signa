@@ -31,10 +31,10 @@ export default async function Image({
 
   try {
     const [roomRes, msgRes] = await Promise.all([
-      fetch(`https://www.signaagent.xyz/api/rooms/${slug}`, {
+      fetch(`https://www.sigda.xyz/api/rooms/${slug}`, {
         cache: "no-store",
       }),
-      fetch(`https://www.signaagent.xyz/api/rooms/${slug}/messages?limit=200`, {
+      fetch(`https://www.sigda.xyz/api/rooms/${slug}/messages?limit=200`, {
         cache: "no-store",
       }),
     ]);
@@ -101,7 +101,7 @@ export default async function Image({
           }}
         >
           <div style={{ display: "flex" }}>SIGDA ROOM</div>
-          <div style={{ display: "flex" }}>signaagent.xyz/rooms/{slug}</div>
+          <div style={{ display: "flex" }}>sigda.xyz/rooms/{slug}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>

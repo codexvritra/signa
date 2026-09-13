@@ -99,7 +99,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           }}
         >
           <div style={{ display: "flex" }}>request · terms · payment · delivery — bound + signed</div>
-          <div style={{ display: "flex" }}>signaagent.xyz/x402</div>
+          <div style={{ display: "flex" }}>sigda.xyz/x402</div>
         </div>
       </div>
     ),

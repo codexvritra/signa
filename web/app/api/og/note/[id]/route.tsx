@@ -104,7 +104,7 @@ export async function GET(
           }}
         >
           <div style={{ display: "flex", color: "#86efac" }}>— {who}</div>
-          <div style={{ display: "flex" }}>re-verify at signaagent.xyz</div>
+          <div style={{ display: "flex" }}>re-verify at sigda.xyz</div>
         </div>
       </div>
     ),

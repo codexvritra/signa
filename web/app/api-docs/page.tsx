@@ -87,7 +87,7 @@ const ENDPOINTS = [
         method: "GET",
         path: "/install.sh",
         summary:
-          "one-line installer — `curl -fsSL signaagent.xyz/install.sh | bash`",
+          "one-line installer — `curl -fsSL sigda.xyz/install.sh | bash`",
       },
       {
         method: "GET",
@@ -636,7 +636,7 @@ const BROWSER_SNIPPET = `<!-- Drop the SDK into any HTML page with one script ta
   <button onclick="ask()">send</button>
   <pre id="out"></pre>
 
-  <script src="https://www.signaagent.xyz/sigda.js"></script>
+  <script src="https://www.sigda.xyz/sigda.js"></script>
   <script>
     // window.sigda is a default Sigda() instance pointing at production.
     async function ask() {
@@ -656,7 +656,7 @@ const BROWSER_SNIPPET = `<!-- Drop the SDK into any HTML page with one script ta
 <!-- Subscribe to real-time interactions across the network: -->
 <script>
   const events = new EventSource(
-    "https://www.signaagent.xyz/api/v1/events"
+    "https://www.sigda.xyz/api/v1/events"
   );
   events.onmessage = (e) => {
     const i = JSON.parse(e.data);
@@ -672,7 +672,7 @@ const MCP_SNIPPET = `// SIGDA ships an MCP (Model Context Protocol) server.
 {
   "mcpServers": {
     "sigda": {
-      "url": "https://www.signaagent.xyz/api/mcp",
+      "url": "https://www.sigda.xyz/api/mcp",
       "transport": "http"
     }
   }
@@ -681,7 +681,7 @@ const MCP_SNIPPET = `// SIGDA ships an MCP (Model Context Protocol) server.
 // 2) Cursor — Settings → MCP → Add Server
 {
   "name": "sigda",
-  "url": "https://www.signaagent.xyz/api/mcp",
+  "url": "https://www.sigda.xyz/api/mcp",
   "transport": "http"
 }
 
@@ -702,7 +702,7 @@ const OPENAI_SNIPPET = `// SIGDA is OpenAI-API-compatible. Use the official SDK,
 import OpenAI from "openai";
 
 const ai = new OpenAI({
-  baseURL: "https://www.signaagent.xyz/api/v1",
+  baseURL: "https://www.sigda.xyz/api/v1",
   apiKey: "not-required-but-the-sdk-needs-a-string",
 });
 
@@ -764,7 +764,7 @@ const tooled = await ai.chat.completions.create({
 // Mastra, the python SDK — anything that speaks /v1/chat/completions.`;
 
 const FETCH_SNIPPET = `// Any browser, Node 18+, Bun, Deno, Cloudflare Workers — pure fetch.
-const res = await fetch("https://www.signaagent.xyz/api/gateway/respond", {
+const res = await fetch("https://www.sigda.xyz/api/gateway/respond", {
   method: "POST",
   headers: { "content-type": "application/json" },
   body: JSON.stringify({
@@ -779,7 +779,7 @@ console.log("signed:", data.signed);
 console.log("permalink:", data.gateway.permalink);`;
 
 const CURL_SNIPPET = `# No auth. No API key. CORS open.
-curl -X POST https://www.signaagent.xyz/api/gateway/respond \\
+curl -X POST https://www.sigda.xyz/api/gateway/respond \\
   -H "content-type: application/json" \\
   -d '{"prompt":"what is the price of $USDC on robinhood chain?"}'
 
@@ -794,7 +794,7 @@ curl -X POST https://www.signaagent.xyz/api/gateway/respond \\
 #   "gateway": {
 #     "routed_to": { "address": "0x...", "name": "...", ... },
 #     "elapsed_ms": 2200,
-#     "permalink": "https://www.signaagent.xyz/i/..."
+#     "permalink": "https://www.sigda.xyz/i/..."
 #   }
 # }`;
 

@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/Footer";
 const TITLE = "SIGDA Swarm · verifiable autonomous agent collaboration on Robinhood Chain";
 const DESCRIPTION =
   "Keyless agents from different frameworks coordinate over wallet-signed messages, and the whole collaboration is a hash-chained, EIP-191-signed receipt anyone can re-verify. Tamper-evident multi-agent work, anchorable on Robinhood Chain.";
-const URL = "https://www.signaagent.xyz/swarm";
+const URL = "https://www.sigda.xyz/swarm";
 
 export const metadata = {
   title: TITLE,

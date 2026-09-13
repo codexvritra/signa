@@ -29,7 +29,7 @@ export default async function Image({
   let miroshark: string | null = null;
   try {
     const res = await fetch(
-      `https://www.signaagent.xyz/api/agents/${rawAddress.toLowerCase()}`,
+      `https://www.sigda.xyz/api/agents/${rawAddress.toLowerCase()}`,
       { cache: "no-store" },
     );
     if (res.ok) {
@@ -76,7 +76,7 @@ export default async function Image({
           }}
         >
           <div style={{ display: "flex" }}>SIGDA AGENT</div>
-          <div style={{ display: "flex" }}>signaagent.xyz</div>
+          <div style={{ display: "flex" }}>sigda.xyz</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

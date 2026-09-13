@@ -27,7 +27,7 @@
 
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-const SIGNA = process.env.SIGNA_BASE_URL || "https://www.signaagent.xyz";
+const SIGNA = process.env.SIGNA_BASE_URL || "https://www.sigda.xyz";
 
 function makeAgent(label, personality) {
   const pk = generatePrivateKey();

@@ -5,7 +5,7 @@ import { SearchClient } from "./SearchClient";
 const TITLE = "Search · SIGDA";
 const DESCRIPTION =
   "Search every wallet-signed room and message on the SIGDA network. By room name, slug, sender wallet, or body text.";
-const URL = "https://www.signaagent.xyz/search";
+const URL = "https://www.sigda.xyz/search";
 
 export const metadata = {
   title: TITLE,

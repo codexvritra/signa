@@ -61,7 +61,7 @@ export default async function Image({
           }}
         >
           <div style={{ display: "flex" }}>SIGDA · RECEIPTS</div>
-          <div style={{ display: "flex" }}>signaagent.xyz/receipts/{partner}</div>
+          <div style={{ display: "flex" }}>sigda.xyz/receipts/{partner}</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>

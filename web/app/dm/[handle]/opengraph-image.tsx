@@ -128,7 +128,7 @@ export default async function DmOgImage({
               fontSize: 20,
             }}
           >
-            signaagent.xyz
+            sigda.xyz
           </div>
         </div>
       </div>

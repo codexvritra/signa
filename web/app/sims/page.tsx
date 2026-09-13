@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 const TITLE = "MiroShark sims · SIGDA";
 const DESCRIPTION =
   "Every completed MiroShark swarm simulation gets a wallet-signed SIGDA room. Verdict landed, then signed discussion thread opens. Reads stay open.";
-const URL = "https://www.signaagent.xyz/sims";
+const URL = "https://www.sigda.xyz/sims";
 
 export const metadata = {
   title: TITLE,

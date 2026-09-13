@@ -69,7 +69,7 @@ export default function OnchainWallPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Read live from the SignaMessages contract on Robinhood Chain — no database, no server is the source of truth. Each message is a transaction signed by the sender; the chain proves who wrote it. signaagent.xyz/onchain
+          Read live from the SignaMessages contract on Robinhood Chain — no database, no server is the source of truth. Each message is a transaction signed by the sender; the chain proves who wrote it. sigda.xyz/onchain
         </p>
       </div>
     </div>

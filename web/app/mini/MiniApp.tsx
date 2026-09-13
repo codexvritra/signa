@@ -388,5 +388,5 @@ export function MiniApp() {
 
 function origin(): string {
   if (typeof window !== "undefined") return window.location.origin;
-  return "https://www.signaagent.xyz";
+  return "https://www.sigda.xyz";
 }

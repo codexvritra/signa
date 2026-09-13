@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
  *     Discord bots that want to react to network activity in real
  *     time. Without this they'd have to poll /api/interactions
  *     themselves and re-implement cursor logic.
- *   - It's the "ws://signaagent.xyz" people expect from a real-time
+ *   - It's the "ws://sigda.xyz" people expect from a real-time
  *     network, delivered via SSE because Vercel edge functions don't
  *     do websockets and SSE works everywhere.
  *
@@ -197,7 +197,7 @@ export async function GET(req: NextRequest) {
               message_preview: truncate(row.message, 140),
               response_preview: truncate(row.response, 240),
               created_at: row.created_at,
-              permalink: `https://www.signaagent.xyz/i/${row.id}`,
+              permalink: `https://www.sigda.xyz/i/${row.id}`,
             });
             cursor = row.created_at;
           }

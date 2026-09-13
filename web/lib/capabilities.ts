@@ -87,7 +87,7 @@ export async function fulfillCapability(name: string, arg?: string): Promise<unk
     case "sigda.reason": {
       const prompt = (arg ?? "").trim();
       if (!prompt) throw new Error("sigda.reason needs a prompt");
-      const base = process.env.SIGNA_SELF_URL || "https://www.signaagent.xyz";
+      const base = process.env.SIGNA_SELF_URL || "https://www.sigda.xyz";
       const r = await fetch(`${base}/api/gateway/respond`, {
         method: "POST",
         headers: { "content-type": "application/json" },

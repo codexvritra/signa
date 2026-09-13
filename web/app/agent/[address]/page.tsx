@@ -40,7 +40,7 @@ type Agent = {
 async function getAgent(address: string): Promise<Agent | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   const url = `${proto}://${host}/api/agents/${address}`;
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -67,7 +67,7 @@ async function getPartnerStats(address: string): Promise<{
 }> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   const m = await fetch(`${proto}://${host}/api/agents/${address}/miroshark-stats`, {
     cache: "no-store",
   })
@@ -78,7 +78,7 @@ async function getPartnerStats(address: string): Promise<{
 
 /** Compose a viral share-tweet URL pre-filled for this agent. */
 function shareTweetUrl(agent: Agent): string {
-  const url = `https://www.signaagent.xyz/agent/${agent.address}`;
+  const url = `https://www.sigda.xyz/agent/${agent.address}`;
   const text =
     `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\n` +
     `wallet + XMTP DM, live now.\n\n` +

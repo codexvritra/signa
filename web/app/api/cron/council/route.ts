@@ -24,7 +24,7 @@ export const maxDuration = 120;
  * transcript is re-verifiable and undeletable.
  *
  * Auth: Bearer CRON_SECRET (or ?key=). Point a scheduler at:
- *   https://www.signaagent.xyz/api/cron/council?key=<CRON_SECRET>
+ *   https://www.sigda.xyz/api/cron/council?key=<CRON_SECRET>
  */
 const ROOM_NAME = "agent council";
 const ROOM_DESC =

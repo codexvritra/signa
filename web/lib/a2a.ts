@@ -19,7 +19,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes, type Hex } from "viem";
 
 export const A2A_PROTOCOL_VERSION = "0.3.0";
-export const BASE_URL = "https://www.signaagent.xyz";
+export const BASE_URL = "https://www.sigda.xyz";
 
 // ───────── A2A v0.3.0 types (the subset we implement) ─────────
 

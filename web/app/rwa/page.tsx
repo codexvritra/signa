@@ -198,7 +198,7 @@ export default function RwaPage() {
           named block, re-verifiable at /verify (kind <span className="font-mono">rwa_attestation</span>) or locally with
           viem.recoverMessageAddress. Price, market cap and holder counts are read from the Robinhood Chain explorer for context and are
           deliberately <span className="text-white/70">not</span> part of the signed claim — only what is checkable onchain is signed.
-          SIGDA is not affiliated with Robinhood; it mints nothing and custodies nothing. Not investment advice. signaagent.xyz/rwa
+          SIGDA is not affiliated with Robinhood; it mints nothing and custodies nothing. Not investment advice. sigda.xyz/rwa
         </p>
       </div>
     </div>

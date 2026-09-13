@@ -21,7 +21,7 @@ export async function generateMetadata({
   const title = data ? `${data.name} · SIGDA room` : `#${slug} · SIGDA room`;
   const description =
     data?.description ?? "Wallet-signed room on the SIGDA network.";
-  const url = `https://www.signaagent.xyz/rooms/${slug}`;
+  const url = `https://www.sigda.xyz/rooms/${slug}`;
 
   return {
     title,

@@ -256,7 +256,7 @@ export async function GET(
       ok: true,
       slug: room.slug,
       exists: true,
-      join_url: `https://www.signaagent.xyz/rooms/${room.slug}`,
+      join_url: `https://www.sigda.xyz/rooms/${room.slug}`,
       gate: room.gate_token_address
         ? {
             token_address: room.gate_token_address,

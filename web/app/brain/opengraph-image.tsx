@@ -33,7 +33,7 @@ export default function Image() {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>a brain with a useful os, not a rented mouth behind an api key</div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/brain</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/brain</div>
         </div>
       </div>
     ),

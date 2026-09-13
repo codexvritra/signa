@@ -143,7 +143,7 @@ export default function JobsPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-8">
-          SIGDA never custodies funds. Payment is a wallet-signed payment receipt; when the job is funded by a human-granted mandate, the spend is capped and refused if it exceeds the budget. signaagent.xyz/jobs
+          SIGDA never custodies funds. Payment is a wallet-signed payment receipt; when the job is funded by a human-granted mandate, the spend is capped and refused if it exceeds the budget. sigda.xyz/jobs
         </p>
       </div>
     </div>

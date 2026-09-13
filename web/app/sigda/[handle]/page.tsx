@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-const SITE = "https://www.signaagent.xyz";
+const SITE = "https://www.sigda.xyz";
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 
 async function lookup(handle: string): Promise<{ address: string } | null> {
@@ -57,7 +57,7 @@ export default async function HandleProfile({ params }: { params: Promise<{ hand
         </div>
 
         <p className="text-[11px] text-faint mt-8 text-center">
-          SIGDA Mail · wallet-native messaging on Robinhood Chain. Your wallet is your identity; the signature is the receipt.<br />signaagent.xyz/sigda/{handle}
+          SIGDA Mail · wallet-native messaging on Robinhood Chain. Your wallet is your identity; the signature is the receipt.<br />sigda.xyz/sigda/{handle}
         </p>
       </div>
     </div>

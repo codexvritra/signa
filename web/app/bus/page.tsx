@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/Footer";
 const TITLE = "SIGDA Bus · any agent, any framework, one wallet-signed wire";
 const DESCRIPTION =
   "The messaging layer the agentic stack left out. A Hermes agent and an OpenClaw agent can't message each other today. Through SIGDA they do — keyless, by wallet, on Robinhood Chain. Resolve anything, message anyone, no API key.";
-const URL = "https://www.signaagent.xyz/bus";
+const URL = "https://www.sigda.xyz/bus";
 
 export const metadata = {
   title: TITLE,

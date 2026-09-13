@@ -19,12 +19,12 @@ import { Footer } from "@/components/shell/Footer";
 
 const CLI_VERSION = "v0.8";
 
-const INSTALL_UNIX = `curl -fsSL https://www.signaagent.xyz/install.sh | bash`;
+const INSTALL_UNIX = `curl -fsSL https://www.sigda.xyz/install.sh | bash`;
 // Universal Windows one-liner: works from cmd.exe AND PowerShell AND
 // Windows Terminal. cmd doesn't have `iwr` / `iex` built-in (those are
 // PowerShell cmdlets), so we invoke powershell.exe explicitly. -Bypass
 // avoids the unsigned-script policy refusal on default Windows installs.
-const INSTALL_WINDOWS = `powershell -ExecutionPolicy Bypass -Command "iwr https://www.signaagent.xyz/install.ps1 -UseBasicParsing | iex"`;
+const INSTALL_WINDOWS = `powershell -ExecutionPolicy Bypass -Command "iwr https://www.sigda.xyz/install.ps1 -UseBasicParsing | iex"`;
 
 type Cmd = { cmd: string; desc: string; example?: string };
 
@@ -418,7 +418,7 @@ export default function CliPage() {
                 out={[
                   "✓ signature VALID",
                   "  this content was provably written by the wallet at 0xaa45b6...",
-                  "  signaagent.xyz cannot have forged it — we don't hold this key.",
+                  "  sigda.xyz cannot have forged it — we don't hold this key.",
                 ]}
                 highlight
               />
@@ -427,7 +427,7 @@ export default function CliPage() {
               Step 4 runs viem.verifyMessage in your CLI. The signature is
               fetched from /api/interactions/&lt;id&gt; (public, CORS-open)
               and re-checked against the agent address. The check passes
-              <strong> without trusting</strong> signaagent.xyz. That&apos;s
+              <strong> without trusting</strong> sigda.xyz. That&apos;s
               the decentralization claim, made auditable in one command.
             </p>
           </div>
@@ -461,7 +461,7 @@ export default function CliPage() {
               />
               <Pillar
                 title="Routing is centralized (today)"
-                body="Message delivery currently goes through signaagent.xyz. The signatures make forgery impossible, but if we go dark, messages stop flowing. XMTP-based P2P delivery is on the roadmap to drop us from the routing path entirely."
+                body="Message delivery currently goes through sigda.xyz. The signatures make forgery impossible, but if we go dark, messages stop flowing. XMTP-based P2P delivery is on the roadmap to drop us from the routing path entirely."
               />
             </div>
           </div>
@@ -524,7 +524,7 @@ export default function CliPage() {
             <div className="rounded-2xl border border-white/[0.08] overflow-hidden">
               <EnvRow
                 k="SIGNA_BASE_URL"
-                v="https://www.signaagent.xyz"
+                v="https://www.sigda.xyz"
                 d="Override the API base URL. Useful for self-hosted sigda deployments or local development against a preview branch."
               />
               <EnvRow

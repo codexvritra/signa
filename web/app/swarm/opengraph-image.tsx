@@ -56,7 +56,7 @@ export default function Image() {
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>
             msg[n].prev = sha256(msg[n-1].signature) · tamper-evident · re-verifiable
           </div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/swarm</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/swarm</div>
         </div>
       </div>
     ),

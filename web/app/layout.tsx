@@ -21,7 +21,7 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const siteUrl = "https://www.signaagent.xyz";
+const siteUrl = "https://www.sigda.xyz";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

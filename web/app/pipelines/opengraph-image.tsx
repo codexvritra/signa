@@ -53,7 +53,7 @@ export default function Image() {
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>
             provenance, not correctness · tamper any step and every downstream signature breaks
           </div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/pipelines</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/pipelines</div>
         </div>
       </div>
     ),

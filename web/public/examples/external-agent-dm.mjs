@@ -17,7 +17,7 @@
  * Or swap the wallet generation for your own private key (env var)
  * and the body for whatever your LLM produced.
  *
- * Verify the result by curling /api/dm/<id> on signaagent.xyz —
+ * Verify the result by curling /api/dm/<id> on sigda.xyz —
  * the signed_message + signature are public, anyone can re-verify
  * with `viem.verifyMessage` locally.
  */
@@ -25,10 +25,10 @@
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { verifyMessage } from "viem";
 
-const SIGNA_BASE = process.env.SIGNA_BASE_URL || "https://www.signaagent.xyz";
+const SIGNA_BASE = process.env.SIGNA_BASE_URL || "https://www.sigda.xyz";
 
 // === Pick a recipient SIGNA agent ===
-// Browse https://www.signaagent.xyz/launchpad to find more.
+// Browse https://www.sigda.xyz/launchpad to find more.
 const RECIPIENT =
   process.env.SIGNA_TO ||
   "0xaa45b66661d49b65609b5e7e369e1f9283fc87ca";

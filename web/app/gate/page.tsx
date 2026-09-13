@@ -5,7 +5,7 @@ import { GateGame } from "./GateGame";
 const TITLE = "THE GATE · talk your way past the undefeated warden · SIGDA";
 const DESCRIPTION =
   "An undefeated AI warden guards the gate on Robinhood Chain. No money — just wits. The only way through is a wallet-signed message that talks it into opening. Nobody has ever cracked it. The first to do it is immortalized on Robinhood Chain forever. Can you?";
-const URL = "https://www.signaagent.xyz/gate";
+const URL = "https://www.sigda.xyz/gate";
 
 export const metadata = {
   title: TITLE,

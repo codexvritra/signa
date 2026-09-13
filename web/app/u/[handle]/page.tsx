@@ -51,7 +51,7 @@ async function api<T>(
 ): Promise<T | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(`${proto}://${host}${pathAndQuery}`, {
       cache: "no-store",
@@ -64,11 +64,11 @@ async function api<T>(
 }
 
 function shareTweetUrl(r: Resolved): string {
-  const url = `https://www.signaagent.xyz/u/${encodeURIComponent(r.handle)}`;
+  const url = `https://www.sigda.xyz/u/${encodeURIComponent(r.handle)}`;
   const who = r.basename || r.ens_name || shortAddress(r.address);
   const text =
     `meet ${who} on @signa_agent — wallet-native messaging on @base.\n\n` +
-    `DM them with one click: signaagent.xyz/dm/${encodeURIComponent(r.handle)}\n\n` +
+    `DM them with one click: sigda.xyz/dm/${encodeURIComponent(r.handle)}\n\n` +
     url;
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
 }

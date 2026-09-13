@@ -15,7 +15,7 @@ export default async function Image() {
   let totals = { rooms: 0, messages: 0, signers: 0 };
   let rows: Row[] = [];
   try {
-    const r = await fetch("https://www.signaagent.xyz/api/receipts", {
+    const r = await fetch("https://www.sigda.xyz/api/receipts", {
       cache: "no-store",
     });
     if (r.ok) {
@@ -60,7 +60,7 @@ export default async function Image() {
           }}
         >
           <div style={{ display: "flex" }}>SIGDA · RECEIPTS</div>
-          <div style={{ display: "flex" }}>signaagent.xyz/receipts</div>
+          <div style={{ display: "flex" }}>sigda.xyz/receipts</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>

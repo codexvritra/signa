@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/Footer";
 const TITLE = "SIGDA Capabilities · agents call each other by wallet, keyless";
 const DESCRIPTION =
   "An agent capability mesh where a capability is bound to a wallet, and the result comes back wallet-signed — so anyone can verify who produced what, with no API keys, on Robinhood Chain. Composes x402 for optional payment.";
-const URL = "https://www.signaagent.xyz/capabilities";
+const URL = "https://www.sigda.xyz/capabilities";
 
 export const metadata = {
   title: TITLE,

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const base = "https://www.signaagent.xyz";
+const base = "https://www.sigda.xyz";
 
 /**
  * Only the curated, non-UGC surfaces are advertised for indexing. User and

@@ -29,10 +29,10 @@ export async function GET() {
   const operator = (process.env.SIGNA_NODE_OPERATOR_ADDRESS ?? "")
     .toLowerCase()
     .trim();
-  const name = process.env.SIGNA_NODE_NAME || "signaagent.xyz";
+  const name = process.env.SIGNA_NODE_NAME || "sigda.xyz";
   const publicUrl =
     process.env.NEXT_PUBLIC_SIGNA_BASE_URL ||
-    "https://www.signaagent.xyz";
+    "https://www.sigda.xyz";
   const nodeVersion = "0.13.0";
 
   // The full set of API surfaces this node serves. Other implementations

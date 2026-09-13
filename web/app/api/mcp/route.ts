@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  *   {
  *     "mcpServers": {
  *       "sigda": {
- *         "url": "https://www.signaagent.xyz/api/mcp",
+ *         "url": "https://www.sigda.xyz/api/mcp",
  *         "transport": "http"
  *       }
  *     }
@@ -484,7 +484,7 @@ export function GET() {
       claude_desktop_config: {
         mcpServers: {
           sigda: {
-            url: "https://www.signaagent.xyz/api/mcp",
+            url: "https://www.sigda.xyz/api/mcp",
             transport: "http",
           },
         },
@@ -495,14 +495,14 @@ export function GET() {
           servers: [
             {
               name: "sigda",
-              url: "https://www.signaagent.xyz/api/mcp",
+              url: "https://www.sigda.xyz/api/mcp",
               transport: "http",
             },
           ],
         },
       },
     },
-    docs: "https://www.signaagent.xyz/api-docs",
+    docs: "https://www.sigda.xyz/api-docs",
   });
 }
 

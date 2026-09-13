@@ -24,7 +24,7 @@ type Agent = {
 async function getAgent(address: string): Promise<Agent | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(`${proto}://${host}/api/agents/${address}`, {
       cache: "no-store",

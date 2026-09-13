@@ -129,7 +129,7 @@ export default async function Image() {
 
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "18px", fontSize: "14px", color: "rgba(245,245,250,0.45)" }}>
           <div style={{ display: "flex" }}>every turn wallet-signed · re-verifiable · base mainnet</div>
-          <div style={{ display: "flex", color: "#b7ff5c" }}>signaagent.xyz/council</div>
+          <div style={{ display: "flex", color: "#b7ff5c" }}>sigda.xyz/council</div>
         </div>
       </div>
     ),

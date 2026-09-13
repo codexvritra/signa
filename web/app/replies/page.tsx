@@ -39,7 +39,7 @@ async function load(sort: "top" | "new" = "top"): Promise<{
 }> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(
       `${proto}://${host}/api/interactions?sort=${sort}&limit=30`,

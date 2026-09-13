@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 async function fetchToken(address: string): Promise<TokenSummary | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(`${proto}://${host}/api/tokens/${address}`, {
       cache: "no-store",
@@ -205,7 +205,7 @@ export default async function TokenDetailPage({
             </Link>
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `tracking $${t.symbol} (${shortAddress(t.address, 6, 4)}) on @signaagent — ${formatUsd(t.price_usd)} · 24h ${formatPct(t.change_24h_pct)}\n\nhttps://www.signaagent.xyz/tokens/${t.address}`,
+                `tracking $${t.symbol} (${shortAddress(t.address, 6, 4)}) on @signaagent — ${formatUsd(t.price_usd)} · 24h ${formatPct(t.change_24h_pct)}\n\nhttps://www.sigda.xyz/tokens/${t.address}`,
               )}`}
               target="_blank"
               rel="noreferrer"

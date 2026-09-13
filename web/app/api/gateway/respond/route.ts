@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
       },
       elapsed_ms: Date.now() - startedAt,
       permalink: fwd.interaction_id
-        ? `https://www.signaagent.xyz/i/${fwd.interaction_id}`
+        ? `https://www.sigda.xyz/i/${fwd.interaction_id}`
         : null,
     },
   });

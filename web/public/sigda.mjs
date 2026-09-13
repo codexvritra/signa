@@ -26,8 +26,8 @@
 //   to the server, which verifies before storing.
 //
 // Install:
-//   curl -fsSL https://www.signaagent.xyz/install.sh | bash             # mac/linux
-//   powershell -ExecutionPolicy Bypass -Command "iwr https://www.signaagent.xyz/install.ps1 -UseBasicParsing | iex"   # windows (cmd or PowerShell)
+//   curl -fsSL https://www.sigda.xyz/install.sh | bash             # mac/linux
+//   powershell -ExecutionPolicy Bypass -Command "iwr https://www.sigda.xyz/install.ps1 -UseBasicParsing | iex"   # windows (cmd or PowerShell)
 
 import { argv, env, stdout, stderr, stdin, exit } from "node:process";
 import {
@@ -47,7 +47,7 @@ import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline";
 
 const VERSION = "0.30.0";
-const DEFAULT_BASE_URL = "https://www.signaagent.xyz";
+const DEFAULT_BASE_URL = "https://www.sigda.xyz";
 const SIGDA_HOME = join(homedir(), ".sigda");
 const CONFIG_PATH = join(SIGDA_HOME, "config.json");
 const KEYSTORE_PATH = join(SIGDA_HOME, "keystore.json");
@@ -76,28 +76,13 @@ const RH_EXPLORER = "https://robinhoodchain.blockscout.com";
 // on-chain at Blockscout.
 const USDG_ADDRESS = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
 
-// Ethereum mainnet RPC for ERC-8004 (aeon) reads. Default publicnode is
-// rate-limited but works fine for CLI-volume traffic. Override with
-// SIGDA_ETH_RPC env to point at Alchemy / Infura for heavier use.
-const ETH_RPC = env.SIGDA_ETH_RPC || "https://ethereum.publicnode.com";
-
-// ERC-8004 Identity Registry on Ethereum mainnet (aeon protocol).
-// Reference: eips.ethereum.org/EIPS/eip-8004 and 8004.org.
-const ERC8004_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
-
-// Gitlawb node — public REST API for repo/profile/task reads. No auth
-// required for reads. Override with SIGDA_GITLAWB_NODE for a different
-// gitlawb node (the network is multi-node by design).
-const GITLAWB_NODE = env.SIGDA_GITLAWB_NODE || "https://node.gitlawb.com";
-const GITLAWB_PLAYGROUND = "https://playground.gitlawb.app";
-
 // Seed list — the always-available fallback when the on-chain registry
 // returns nothing or the RPC is down. After v0.15 the CLI prefers the
 // on-chain registry for discovery.
 const SIGDA_SEED_NODES = [
   {
-    name: "signaagent.xyz",
-    url: "https://www.signaagent.xyz",
+    name: "sigda.xyz",
+    url: "https://www.sigda.xyz",
     note: "founder node",
   },
 ];
@@ -373,7 +358,7 @@ async function viem() {
     );
     err(
       "  or re-run: ",
-      paint(c.cyan, "curl -fsSL https://www.signaagent.xyz/install.sh | bash"),
+      paint(c.cyan, "curl -fsSL https://www.sigda.xyz/install.sh | bash"),
     );
     err(paint(c.dim, `  (underlying error: ${e?.message ?? e})`));
     bail(1);
@@ -671,18 +656,6 @@ ${paint(c.bold, "Tokens")}
                                  --dry  to print the tx without broadcasting
 
 ${paint(c.bold, "Partner ecosystem")}
-  aeon resolve <token_id>        ERC-8004 lookup on Ethereum mainnet
-  aeon balance <0x address>      ERC-8004 tokens held by an address
-  aeon agent <0x signa_agent>    ERC-8004 registration for a sigda agent
-  gitlawb resolve <did>          gitlawb profile (repos, tasks) · direct read
-  gitlawb repos [--owner=did]    list repos on the gitlawb node · direct read
-  gitlawb playground "<prompt>"  composes a playground.gitlawb.app URL
-  gitlawb link <did>             wallet-signed bind of a gitlawb DID
-  gitlawb unlink                 clear the DID binding
-  gitlawb status                 show your current linked DID
-  gitlawb stats <0x wallet>      live repos, commits, tasks for the bound DID
-  bankr status                   show whether your bankr key is connected
-  bankr trade "<prompt>"         wallet-signed natural-language trade
   miroshark <scenario>           swarm simulation via the gateway
   miroshark sim <0x signa_agent> show miroshark sim binding for an agent
   miroshark stats <0x signa_agent>
@@ -750,7 +723,7 @@ ${paint(c.bold, "Agent platform bridges (a2a bridges · v0.28)")}
        [--description="..."] [--caps=cap1,cap2]
                                  wallet-signed self-registration of a
                                   bridge you operate. then run
-                                  https://www.signaagent.xyz/examples/agent-bridge.mjs
+                                  https://www.sigda.xyz/examples/agent-bridge.mjs
 
   # the a2a substrate is open. any agent (Claude, GPT, Hermes, custom)
   # signs an envelope with their own wallet and posts to the same
@@ -1307,7 +1280,7 @@ async function cmdConfig(args) {
 
 // ---------- multi-node primitives (federable sigda) ----------
 //
-// sigda is designed to be federable. Today signaagent.xyz is the only
+// sigda is designed to be federable. Today sigda.xyz is the only
 // node, but the CLI is built for many. These commands let users:
 //   - discover known nodes (`sigda nodes`)
 //   - inspect a node's metadata (`sigda node info [url]`)
@@ -1749,7 +1722,7 @@ async function cmdNode(args) {
     await saveConfig(cfg);
     out(paint(c.green, "✓"), "cli now points at", paint(c.cyan, cfg.baseUrl));
     out(paint(c.dim, "  node:"), info.node?.name ?? "?", paint(c.dim, "v" + (info.node?.version ?? "?")));
-    out(paint(c.dim, "  revert with:"), paint(c.cyan, "sigda config set baseUrl https://www.signaagent.xyz"));
+    out(paint(c.dim, "  revert with:"), paint(c.cyan, "sigda config set baseUrl https://www.sigda.xyz"));
     return;
   }
 
@@ -2571,12 +2544,12 @@ async function signSignaAgentDm({
 // ---------- v0.29: signa-agent SDK install hints ----------
 
 const SDK_JS_INSTALL = "npm install signa-agent";
-const SDK_JS_TARBALL = "https://www.signaagent.xyz/sdk/signa-agent-0.1.0.tgz";
-const SDK_JS_ESM = "https://www.signaagent.xyz/sdk/agent.mjs";
-const SDK_PY_INSTALL = "pip install https://www.signaagent.xyz/sdk/signa_agent-0.1.0-py3-none-any.whl";
+const SDK_JS_TARBALL = "https://www.sigda.xyz/sdk/signa-agent-0.1.0.tgz";
+const SDK_JS_ESM = "https://www.sigda.xyz/sdk/agent.mjs";
+const SDK_PY_INSTALL = "pip install https://www.sigda.xyz/sdk/signa_agent-0.1.0-py3-none-any.whl";
 const SDK_MCP_INSTALL = "npx -y signa-mcp";
-const SDK_MCP_TARBALL = "https://www.signaagent.xyz/sdk/signa-mcp-0.1.0.tgz";
-const SDK_MANIFEST = "https://www.signaagent.xyz/sdk/manifest.json";
+const SDK_MCP_TARBALL = "https://www.sigda.xyz/sdk/signa-mcp-0.1.0.tgz";
+const SDK_MANIFEST = "https://www.sigda.xyz/sdk/manifest.json";
 
 async function cmdSdk(args) {
   const sub = (args[0] || "").toLowerCase();
@@ -2630,7 +2603,7 @@ async function cmdSdk(args) {
     out(paint(c.dim, "Install — published on npm:"));
     out(`  ${SDK_JS_INSTALL}`);
     out("");
-    out(paint(c.dim, "Or install directly from signaagent.xyz (no registry):"));
+    out(paint(c.dim, "Or install directly from sigda.xyz (no registry):"));
     out(`  npm install ${SDK_JS_TARBALL}`);
     out("");
     out(paint(c.dim, "Zero-install (browser / Deno / Bun):"));
@@ -2678,7 +2651,7 @@ async function cmdSdk(args) {
   out(paint(c.bold, "JavaScript / TypeScript"));
   out(`  ${SDK_JS_INSTALL}                       ${paint(c.dim, "# from npm registry")}`);
   out(`  npm install ${SDK_JS_TARBALL}`);
-  out(`                                              ${paint(c.dim, "# from signaagent.xyz")}`);
+  out(`                                              ${paint(c.dim, "# from sigda.xyz")}`);
   out("");
   out(paint(c.bold, "Python"));
   out(`  ${SDK_PY_INSTALL}`);
@@ -3035,7 +3008,7 @@ async function cmdA2A(args) {
       out("");
       out(paint(c.dim, "  next: run a bridge daemon to start serving DMs."));
       out(paint(c.dim, "  see: ") +
-          paint(c.cyan, "https://www.signaagent.xyz/examples/agent-bridge.mjs"));
+          paint(c.cyan, "https://www.sigda.xyz/examples/agent-bridge.mjs"));
       return;
     }
 
@@ -4347,13 +4320,13 @@ async function cmdHolders(args) {
   const symbol = (args[0] ?? "").replace(/^\$/, "").toUpperCase();
   if (!symbol) {
     err("usage: holders <SYMBOL>");
-    err("  e.g.  holders BNKR | holders GITLAWB | holders MIROSHARK | holders USDC");
+    err("  e.g.  holders MIROSHARK | holders USDG");
     bail(2);
   }
   const r = await httpJson(`/api/holders/${symbol}`).catch(() => null);
   if (!r?.ok) {
     err(paint(c.red, "✗"), `no holders index for $${symbol}`);
-    err(paint(c.dim, "  supported partner tokens: BNKR, GITLAWB, MIROSHARK, USDC"));
+    err(paint(c.dim, "  supported partner tokens: MIROSHARK, USDG"));
     bail(1);
   }
   const holders = r.holders ?? [];
@@ -4771,627 +4744,9 @@ function chatPromptFor(ctx) {
 
 // ---------- partner integrations ----------
 //
-// CLI surface for the four partner stacks SIGDA composes with:
-//   aeon       — ERC-8004 Identity Registry on Ethereum mainnet
-//                  read-only · pure on-chain · no sigda server in the path
-//   gitlawb    — DID-bound decentralized git
-//                  wallet-signed link/unlink against /api/users/link-gitlawb
-//   bankr      — agent-token trading via the user's Bankr Agent key
-//                  wallet-signed trade execution against /api/me/trade
-//                  (connect is intentionally web-only — see SECURITY note)
+// CLI surface for the one partner stack SIGDA composes with:
 //   miroshark  — swarm-intelligence simulation
 //                  gateway-routed via the swarm intent
-//
-// SECURITY: `sigda bankr connect <api_key>` is NOT exposed in the CLI.
-// API keys pasted on a command line land in shell history (~/.bash_history,
-// ~/.zsh_history, cmd doskey buffer). That's an unacceptable persistence
-// path for a credential the user expects to be encrypted. Users connect
-// the key on the website (where a password input handles it); the CLI
-// inherits the connection via wallet signature.
-
-// ----- aeon (ERC-8004) -----
-
-const ERC8004_ABI = [
-  {
-    type: "function",
-    name: "agentURI",
-    stateMutability: "view",
-    inputs: [{ name: "tokenId", type: "uint256" }],
-    outputs: [{ name: "", type: "string" }],
-  },
-  {
-    type: "function",
-    name: "ownerOf",
-    stateMutability: "view",
-    inputs: [{ name: "tokenId", type: "uint256" }],
-    outputs: [{ name: "", type: "address" }],
-  },
-  {
-    type: "function",
-    name: "balanceOf",
-    stateMutability: "view",
-    inputs: [{ name: "owner", type: "address" }],
-    outputs: [{ name: "", type: "uint256" }],
-  },
-];
-
-async function ethClient() {
-  const vi = await viem();
-  return vi.createPublicClient({
-    chain: vi.mainnet ?? (await import("viem/chains")).mainnet,
-    transport: vi.http(ETH_RPC),
-  });
-}
-
-async function fetchAgentRegistration(uri) {
-  if (!uri) return null;
-  try {
-    if (uri.startsWith("data:")) {
-      const comma = uri.indexOf(",");
-      if (comma < 0) return null;
-      const meta = uri.slice(5, comma);
-      const payload = uri.slice(comma + 1);
-      const decoded = meta.includes("base64")
-        ? Buffer.from(payload, "base64").toString("utf8")
-        : decodeURIComponent(payload);
-      return JSON.parse(decoded);
-    }
-    if (uri.startsWith("ipfs://")) {
-      const cid = uri.slice(7).replace(/^ipfs\//, "");
-      const res = await fetch(`https://ipfs.io/ipfs/${cid}`);
-      if (!res.ok) return null;
-      return await res.json();
-    }
-    const res = await fetch(uri);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
-async function cmdAeon(args) {
-  const sub = args[0];
-  if (sub === "resolve") {
-    const idArg = args[1];
-    if (!idArg) {
-      err("usage: aeon resolve <token_id>");
-      bail(2);
-    }
-    let tokenId;
-    try {
-      tokenId = BigInt(idArg);
-    } catch {
-      err("token_id must be an integer");
-      bail(2);
-    }
-    const client = await ethClient();
-    let uri;
-    let owner;
-    try {
-      [uri, owner] = await Promise.all([
-        client.readContract({
-          address: ERC8004_REGISTRY,
-          abi: ERC8004_ABI,
-          functionName: "agentURI",
-          args: [tokenId],
-        }),
-        client.readContract({
-          address: ERC8004_REGISTRY,
-          abi: ERC8004_ABI,
-          functionName: "ownerOf",
-          args: [tokenId],
-        }),
-      ]);
-    } catch (e) {
-      err(paint(c.red, "✗"), `token #${idArg} not found or RPC failed: ${e?.shortMessage ?? e?.message ?? e}`);
-      bail(1);
-    }
-    const registration = await fetchAgentRegistration(uri);
-    out("");
-    out(paint(c.bold, "ERC-8004 agent #" + idArg.toString()));
-    out(paint(c.dim, "─".repeat(48)));
-    out(paint(c.dim, "owner".padEnd(14)), paint(c.cyan, owner));
-    out(paint(c.dim, "registry".padEnd(14)), ERC8004_REGISTRY);
-    out(paint(c.dim, "uri".padEnd(14)), uri);
-    if (registration) {
-      if (registration.name) out(paint(c.dim, "name".padEnd(14)), paint(c.bold, String(registration.name)));
-      if (registration.description) out(paint(c.dim, "desc".padEnd(14)), String(registration.description));
-      if (Array.isArray(registration.services) && registration.services.length > 0) {
-        out(paint(c.dim, "services".padEnd(14)));
-        for (const s of registration.services.slice(0, 4)) {
-          out(paint(c.dim, "  • " + (s.name ?? "?")), paint(c.dim, s.endpoint ?? ""));
-        }
-      }
-      if (registration.x402Support === true) {
-        out(paint(c.dim, "x402".padEnd(14)), paint(c.green, "supported"));
-      }
-    } else {
-      out(paint(c.yellow, "  (couldn't resolve metadata from URI)"));
-    }
-    out("");
-    out(paint(c.dim, "  source: ethereum mainnet · no sigda server in the path"));
-    return;
-  }
-  if (sub === "balance") {
-    const addr = args[1];
-    if (!addr || !/^0x[a-fA-F0-9]{40}$/.test(addr)) {
-      err("usage: aeon balance <0x address>");
-      bail(2);
-    }
-    const client = await ethClient();
-    let bal;
-    try {
-      bal = await client.readContract({
-        address: ERC8004_REGISTRY,
-        abi: ERC8004_ABI,
-        functionName: "balanceOf",
-        args: [addr],
-      });
-    } catch (e) {
-      err(paint(c.red, "✗"), `read failed: ${e?.shortMessage ?? e?.message ?? e}`);
-      bail(1);
-    }
-    out("");
-    out(paint(c.bold, "ERC-8004 token balance"));
-    out(paint(c.dim, "─".repeat(48)));
-    out(paint(c.dim, "address".padEnd(14)), paint(c.cyan, addr));
-    out(paint(c.dim, "registered".padEnd(14)), paint(c.bold, String(bal)) + " " + paint(c.dim, "agent token(s)"));
-    out(paint(c.dim, "registry".padEnd(14)), ERC8004_REGISTRY);
-    out("");
-    return;
-  }
-  if (sub === "agent") {
-    // Convenience: look up the ERC-8004 registration BOUND TO a sigda
-    // agent. We pull the agent's record from /api/agents/<addr> to get
-    // the recorded erc8004_token_id, then resolve it on-chain.
-    const sAddr = (args[1] ?? "").toLowerCase();
-    if (!/^0x[a-f0-9]{40}$/.test(sAddr)) {
-      err("usage: aeon agent <0x signa_agent_address>");
-      bail(2);
-    }
-    const r = await httpJson(`/api/agents/${sAddr}`).catch(() => null);
-    const agent = r?.agent;
-    if (!agent) {
-      err(paint(c.red, "✗"), `sigda agent ${sAddr} not found`);
-      bail(1);
-    }
-    const tokenId = agent.erc8004_token_id;
-    out("");
-    out(paint(c.bold, "aeon registration for sigda agent"));
-    out(paint(c.dim, "─".repeat(64)));
-    out(paint(c.dim, "agent".padEnd(14)), paint(c.cyan, agent.address));
-    out(paint(c.dim, "name".padEnd(14)), agent.name ?? "?");
-    if (!tokenId) {
-      out(paint(c.dim, "erc8004".padEnd(14)), paint(c.yellow, "not registered"));
-      out(paint(c.dim, "  the agent's owner can register on https://www.8004.org"));
-      return;
-    }
-    out(paint(c.dim, "token_id".padEnd(14)), paint(c.cyan, String(tokenId)));
-    // Resolve on-chain to confirm
-    const client = await ethClient();
-    try {
-      const [uri, owner] = await Promise.all([
-        client.readContract({
-          address: ERC8004_REGISTRY,
-          abi: ERC8004_ABI,
-          functionName: "agentURI",
-          args: [BigInt(tokenId)],
-        }),
-        client.readContract({
-          address: ERC8004_REGISTRY,
-          abi: ERC8004_ABI,
-          functionName: "ownerOf",
-          args: [BigInt(tokenId)],
-        }),
-      ]);
-      out(paint(c.dim, "on-chain owner".padEnd(14)), paint(c.cyan, owner));
-      out(paint(c.dim, "agent uri".padEnd(14)), uri);
-      out(paint(c.green, "✓"), "verified on Ethereum mainnet");
-    } catch (e) {
-      err(paint(c.yellow, "!"), `on-chain resolve failed: ${e?.shortMessage ?? e?.message ?? e}`);
-    }
-    return;
-  }
-  err("usage:");
-  err("  aeon resolve <token_id>            fetch ERC-8004 agent metadata from chain");
-  err("  aeon balance <0x address>          count ERC-8004 tokens owned");
-  err("  aeon agent <0x signa_agent_addr>   show ERC-8004 binding for a sigda agent");
-  bail(2);
-}
-
-// ----- gitlawb -----
-
-async function signSignaLinkGitlawb({ address, gitlawb_did, ts }) {
-  // Mirrors buildMessageToSign("link_gitlawb") on the server.
-  const acc = await account();
-  const message = [
-    "SIGDA link gitlawb v1",
-    `ts:${ts}`,
-    `address:${address}`,
-    `gitlawb_did:${gitlawb_did}`,
-    "I attach this gitlawb DID to my SIGDA profile.",
-  ].join("\n");
-  const signature = await acc.viemAccount.signMessage({ message });
-  return { signature, message };
-}
-
-/**
- * Direct fetch against gitlawb.com (or any gitlawb node). No sigda
- * server in the path — this is the partner-integrated decentralization
- * piece for gitlawb. If signaagent.xyz disappears, these commands
- * keep working as long as the gitlawb node is up.
- */
-async function gitlawbFetch(path) {
-  try {
-    const res = await fetch(`${GITLAWB_NODE}${path}`, {
-      headers: {
-        accept: "application/json",
-        "user-agent": `sigda-cli/${VERSION}`,
-      },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
-async function cmdGitlawb(args) {
-  const sub = args[0];
-
-  // ----- direct-read commands (no sigda, no wallet) -----
-
-  if (sub === "resolve") {
-    const did = (args[1] ?? "").trim();
-    if (!did) {
-      err("usage: gitlawb resolve <did:key:z6Mk... | did:gitlawb:<slug>>");
-      bail(2);
-    }
-    out(paint(c.dim, `querying ${GITLAWB_NODE}…`));
-    const repos = await gitlawbFetch(
-      `/api/v1/repos?owner=${encodeURIComponent(did)}&limit=20`,
-    );
-    const tasks = await gitlawbFetch(
-      `/tasks?assignee=${encodeURIComponent(did)}&status=open&limit=50`,
-    );
-    out("");
-    out(paint(c.bold, "gitlawb profile"));
-    out(paint(c.dim, "─".repeat(72)));
-    out(paint(c.dim, "did".padEnd(14)), paint(c.cyan, did));
-    out(paint(c.dim, "node".padEnd(14)), GITLAWB_NODE);
-    const repoList = repos?.repos ?? [];
-    out(paint(c.dim, "repos".padEnd(14)), paint(c.cyan, String(repoList.length)));
-    const taskList = tasks?.tasks ?? [];
-    out(paint(c.dim, "open tasks".padEnd(14)), paint(c.cyan, String(taskList.length)));
-    if (repoList.length > 0) {
-      out("");
-      out(paint(c.bold, "recent repos"));
-      for (const r of repoList.slice(0, 8)) {
-        const name = r.name ?? "?";
-        out("  " + paint(c.cyan, name) + " " + paint(c.dim, (r.description ?? "").slice(0, 60)));
-      }
-    }
-    if (taskList.length > 0) {
-      out("");
-      out(paint(c.bold, "open tasks"));
-      for (const t of taskList.slice(0, 5)) {
-        const bounty = t.bounty
-          ? `${t.bounty.amount ?? "?"} ${t.bounty.token ?? ""}`
-          : "";
-        out(
-          "  " +
-            paint(c.yellow, (t.title ?? "?").slice(0, 50)) +
-            " " +
-            paint(c.dim, bounty),
-        );
-      }
-    }
-    out("");
-    out(paint(c.dim, "  source: " + GITLAWB_NODE + " · no sigda server in the path"));
-    return;
-  }
-
-  if (sub === "repos") {
-    let owner = null;
-    let limit = 20;
-    for (const a of args.slice(1)) {
-      if (a.startsWith("--owner=")) owner = a.slice(8);
-      else if (a.startsWith("--limit=")) limit = Math.max(1, Number(a.slice(8)) || 20);
-    }
-    const path = owner
-      ? `/api/v1/repos?owner=${encodeURIComponent(owner)}&limit=${limit}`
-      : `/api/v1/repos?limit=${limit}`;
-    const r = await gitlawbFetch(path);
-    const repos = r?.repos ?? [];
-    out("");
-    out(
-      paint(c.bold, owner ? `repos for ${owner}` : "recent repos on gitlawb"),
-      paint(c.dim, `(${GITLAWB_NODE})`),
-    );
-    out(paint(c.dim, "─".repeat(72)));
-    if (repos.length === 0) {
-      out(paint(c.dim, "  no repos found."));
-      return;
-    }
-    for (const r of repos.slice(0, limit)) {
-      const name = `${r.owner ?? "?"}/${r.name ?? "?"}`;
-      const desc = (r.description ?? "").slice(0, 60);
-      out(" " + paint(c.cyan, name) + "  " + paint(c.dim, desc));
-    }
-  }
-
-  if (sub === "playground") {
-    const prompt = args.slice(1).join(" ").trim();
-    if (!prompt) {
-      err('usage: gitlawb playground "<prompt to seed playground>"');
-      bail(2);
-    }
-    const url = `${GITLAWB_PLAYGROUND}/?prompt=${encodeURIComponent(prompt)}`;
-    out("");
-    out(paint(c.bold, "gitlawb playground"), paint(c.dim, "→ paste into your browser"));
-    out(paint(c.dim, "─".repeat(72)));
-    out(paint(c.cyan, url));
-    out("");
-    out(paint(c.dim, "  opens a fresh Playground session pre-loaded with your prompt."));
-    return;
-  }
-
-  // ----- wallet-signed commands (link/unlink/status) — existing -----
-
-  const acc = await account();
-  const addr = acc.address.toLowerCase();
-
-  if (sub === "link") {
-    const did = (args[1] ?? "").trim();
-    if (!did || !/^did:(key|gitlawb):[a-zA-Z0-9_-]+$/.test(did)) {
-      err("usage: gitlawb link <did:key:z6Mk... | did:gitlawb:<slug>>");
-      bail(2);
-    }
-    const ts = Date.now();
-    const { signature } = await signSignaLinkGitlawb({
-      address: addr,
-      gitlawb_did: did,
-      ts,
-    });
-    const r = await httpJson("/api/users/link-gitlawb", {
-      method: "POST",
-      body: JSON.stringify({ address: addr, gitlawb_did: did, ts, signature }),
-    });
-    if (!r.ok) {
-      err(paint(c.red, "✗"), r.error ?? "link failed");
-      bail(1);
-    }
-    out(paint(c.green, "✓"), "linked");
-    out(paint(c.dim, "did".padEnd(14)), paint(c.cyan, did));
-    out(paint(c.dim, "address".padEnd(14)), addr);
-    return;
-  }
-
-  if (sub === "unlink") {
-    const ts = Date.now();
-    const { signature } = await signSignaLinkGitlawb({
-      address: addr,
-      gitlawb_did: "",
-      ts,
-    });
-    const r = await httpJson("/api/users/link-gitlawb", {
-      method: "POST",
-      body: JSON.stringify({ address: addr, gitlawb_did: "", ts, signature }),
-    });
-    if (!r.ok) {
-      err(paint(c.red, "✗"), r.error ?? "unlink failed");
-      bail(1);
-    }
-    out(paint(c.green, "✓"), "gitlawb DID unlinked");
-    return;
-  }
-
-  if (sub === "status") {
-    const r = await httpJson(
-      `/api/users/resolve?handle=${addr}`,
-    ).catch(() => null);
-    out("");
-    out(paint(c.bold, "gitlawb status"));
-    out(paint(c.dim, "─".repeat(48)));
-    out(paint(c.dim, "address".padEnd(14)), paint(c.cyan, addr));
-    if (r?.gitlawb_did) {
-      out(paint(c.dim, "did".padEnd(14)), paint(c.green, r.gitlawb_did));
-    } else {
-      out(paint(c.dim, "did".padEnd(14)), paint(c.dim, "(none linked)"));
-      out(
-        paint(c.dim, "  link with:"),
-        paint(c.cyan, "sigda gitlawb link did:key:..."),
-      );
-    }
-    out("");
-    return;
-  }
-
-  if (sub === "stats") {
-    const sAddr = (args[1] ?? "").toLowerCase();
-    if (!/^0x[a-f0-9]{40}$/.test(sAddr)) {
-      err("usage: gitlawb stats <0x signa_wallet_address>");
-      bail(2);
-    }
-    let r;
-    try {
-      r = await httpJson(`/api/agents/${sAddr}/gitlawb-stats`);
-    } catch (e) {
-      const msg = e?.message ?? String(e);
-      // 404 → no DID bound, 502 → node unreachable. Distinguish both.
-      if (msg.includes("HTTP 404")) {
-        err(paint(c.yellow, "!"), "no gitlawb DID bound to that wallet.");
-        err(
-          paint(c.dim, "  link one first:"),
-          paint(c.cyan, "sigda gitlawb link did:key:..."),
-        );
-        bail(1);
-      }
-      if (msg.includes("HTTP 502")) {
-        err(paint(c.red, "✗"), "node.gitlawb.com is unreachable right now.");
-        bail(1);
-      }
-      err(paint(c.red, "✗"), msg);
-      bail(1);
-    }
-    if (!r?.ok) {
-      err(paint(c.red, "✗"), r?.error ?? "gitlawb-stats read failed");
-      bail(1);
-    }
-    out("");
-    out(paint(c.bold, "gitlawb activity"), paint(c.dim, "· " + sAddr));
-    out(paint(c.dim, "─".repeat(64)));
-    out(paint(c.dim, "did".padEnd(16)), paint(c.green, r.gitlawb_did));
-    out(
-      paint(c.dim, "node".padEnd(16)),
-      paint(c.dim, r.node_url ?? "node.gitlawb.com"),
-    );
-    out(paint(c.dim, "repos".padEnd(16)), paint(c.cyan, String(r.repo_count)));
-    out(
-      paint(c.dim, "open tasks".padEnd(16)),
-      paint(c.cyan, String(r.open_tasks)),
-    );
-    out(
-      paint(c.dim, "recent commits".padEnd(16)),
-      paint(c.cyan, String(r.recent_commits)) +
-        paint(c.dim, " (top 3 repos)"),
-    );
-    if (Array.isArray(r.top_repos) && r.top_repos.length > 0) {
-      out("");
-      out(paint(c.bold, "top repos"));
-      for (const repo of r.top_repos) {
-        const name = `${repo.owner ?? "?"}/${repo.name ?? "?"}`;
-        out("  " + paint(c.cyan, name));
-        if (repo.description) {
-          out(
-            "    " + paint(c.dim, String(repo.description).slice(0, 80)),
-          );
-        }
-        if (repo.updated_at) {
-          out("    " + paint(c.dim, "updated " + repo.updated_at));
-        }
-      }
-    }
-    out("");
-    return;
-  }
-
-  err("usage:");
-  err("  gitlawb link <did:key:... | did:gitlawb:<slug>>   wallet-signed bind");
-  err("  gitlawb unlink                                     wallet-signed clear");
-  err("  gitlawb status                                     show your linked DID");
-  err("  gitlawb stats <0x signa_wallet>                    live repos/commits/tasks");
-  bail(2);
-}
-
-// ----- bankr -----
-
-async function signSignaBankrTrade({ address, prompt, ts }) {
-  // Mirrors the SIGDA trade v1 envelope on /api/me/trade.
-  const acc = await account();
-  const message = [
-    "SIGDA trade v1",
-    `ts:${ts}`,
-    `address:${address}`,
-    `prompt:${prompt}`,
-  ].join("\n");
-  const signature = await acc.viemAccount.signMessage({ message });
-  return { signature, message };
-}
-
-async function cmdBankr(args) {
-  const sub = args[0];
-  const acc = await account();
-  const addr = acc.address.toLowerCase();
-
-  if (sub === "status") {
-    // Lightweight unsigned read — server only exposes a boolean, no key
-    // material. Avoids the prompt-validation trap of the trade endpoint.
-    const r = await httpJson(`/api/me/bankr-status?address=${addr}`).catch(
-      () => null,
-    );
-    out("");
-    out(paint(c.bold, "bankr status"));
-    out(paint(c.dim, "─".repeat(48)));
-    out(paint(c.dim, "address".padEnd(14)), paint(c.cyan, addr));
-    if (r?.connected) {
-      out(paint(c.dim, "connected".padEnd(14)), paint(c.green, "yes"));
-      out(
-        paint(c.dim, "  execute a trade with:"),
-        paint(c.cyan, 'sigda bankr trade "buy 1 $BNKR"'),
-      );
-    } else {
-      out(paint(c.dim, "connected".padEnd(14)), paint(c.yellow, "no"));
-      out(
-        paint(c.dim, "  connect on the website — the cli won't accept API keys"),
-      );
-      out(paint(c.dim, "  on the command line (shell history is unsafe):"));
-      out(paint(c.dim, "    "), paint(c.cyan, (await baseUrl()) + "/me"));
-    }
-    out("");
-    return;
-  }
-
-  if (sub === "trade") {
-    const prompt = args.slice(1).join(" ").trim();
-    if (!prompt) {
-      err("usage: bankr trade \"<natural-language trade>\"");
-      err("  examples:");
-      err('    bankr trade "buy 100 $BNKR"');
-      err('    bankr trade "swap 0.01 ETH for $USDC"');
-      bail(2);
-    }
-    if (prompt.length > 500) {
-      err("prompt max 500 chars");
-      bail(2);
-    }
-    out(paint(c.dim, "submitting trade through bankr… this can take 10–30s"));
-    const ts = Date.now();
-    const { signature } = await signSignaBankrTrade({
-      address: addr,
-      prompt,
-      ts,
-    });
-    let r;
-    try {
-      r = await httpJson("/api/me/trade", {
-        method: "POST",
-        body: JSON.stringify({ address: addr, prompt, ts, signature }),
-      });
-    } catch (e) {
-      err(paint(c.red, "✗"), `trade failed: ${e?.message ?? e}`);
-      bail(1);
-    }
-    out("");
-    if (r.status === "completed" || r.status === "success" || r.ok) {
-      out(paint(c.green, "✓ trade completed"));
-    } else if (r.status === "failed") {
-      out(paint(c.red, "✗ trade failed:"), r.error ?? r.message ?? "(no detail)");
-    } else {
-      out(paint(c.yellow, "!"), `status: ${r.status ?? "unknown"}`);
-    }
-    if (r.result) {
-      const x = r.result;
-      if (x.transactionHash) {
-        out(paint(c.dim, "tx".padEnd(14)), paint(c.cyan, x.transactionHash));
-        out(paint(c.dim, "view".padEnd(14)), `https://robinhoodchain.blockscout.com/tx/${x.transactionHash}`);
-      }
-      if (x.tokenSymbol) out(paint(c.dim, "token".padEnd(14)), x.tokenSymbol);
-      if (x.amountIn) out(paint(c.dim, "in".padEnd(14)), x.amountIn);
-      if (x.amountOut) out(paint(c.dim, "out".padEnd(14)), x.amountOut);
-    }
-    return;
-  }
-
-  err("usage:");
-  err("  bankr status                  show whether your bankr key is connected");
-  err("  bankr trade \"<prompt>\"        wallet-signed natural-language trade");
-  err("");
-  err("  to connect a bankr key, visit /me on the website — API keys can't be");
-  err("  pasted into a CLI safely (shell history persists them).");
-  bail(2);
-}
 
 // ---------- verify: cryptographic re-verification of a signed reply ----------
 //
@@ -5477,7 +4832,7 @@ async function _verifyPost(p, id) {
 async function _runVerify(expectedAddress, signed_message, signature) {
   // Cryptographic re-verification — same primitive the server uses on
   // ingest, executed CLIENT-SIDE so we depend on viem + math, not on
-  // signaagent.xyz being honest.
+  // sigda.xyz being honest.
   const vi = await viem();
   let ok;
   try {
@@ -5496,7 +4851,7 @@ async function _runVerify(expectedAddress, signed_message, signature) {
     out(paint(c.green, "✓ signature VALID"));
     out(paint(c.dim, "  this content was provably written by the wallet at"));
     out(paint(c.dim, "  " + expectedAddress));
-    out(paint(c.dim, "  signaagent.xyz cannot have forged it — we don't hold this key."));
+    out(paint(c.dim, "  sigda.xyz cannot have forged it — we don't hold this key."));
   } else {
     out(paint(c.red, "✗ signature MISMATCH"));
     out(paint(c.dim, "  the on-record signature does not validate against the address."));
@@ -5877,7 +5232,7 @@ async function cmdMiroshark(args) {
 // ---------- xmtp: real P2P E2E messaging ----------
 //
 // XMTP is a decentralized messaging network. Messages go peer-to-peer
-// through XMTP's relay mesh — signaagent.xyz is NOT in the routing
+// through XMTP's relay mesh — sigda.xyz is NOT in the routing
 // path. Encryption is libsignal-style double-ratchet, identity is
 // wallet-bound (registration is signed by the user's wallet, proving
 // they control the address).
@@ -5922,13 +5277,13 @@ async function xmtp({ soft = false } = {}) {
     err(
       paint(
         c.cyan,
-        "    curl -fsSL https://www.signaagent.xyz/install.sh | bash   # mac/linux",
+        "    curl -fsSL https://www.sigda.xyz/install.sh | bash   # mac/linux",
       ),
     );
     err(
       paint(
         c.cyan,
-        '    powershell -ExecutionPolicy Bypass -Command "iwr https://www.signaagent.xyz/install.ps1 -UseBasicParsing | iex"   # windows',
+        '    powershell -ExecutionPolicy Bypass -Command "iwr https://www.sigda.xyz/install.ps1 -UseBasicParsing | iex"   # windows',
       ),
     );
     err(paint(c.dim, `  (underlying error: ${e?.message ?? e})`));
@@ -6231,7 +5586,7 @@ async function cmdXmtpDm(args) {
   out(paint(c.dim, "to".padEnd(16)), paint(c.cyan, toAddr));
   out(paint(c.dim, "conversation".padEnd(16)), paint(c.dim, dm.id));
   out(paint(c.dim, "  delivered through the XMTP relay network."));
-  out(paint(c.dim, "  signaagent.xyz was not in the path."));
+  out(paint(c.dim, "  sigda.xyz was not in the path."));
 }
 
 async function cmdXmtpInbox(args) {
@@ -6442,7 +5797,7 @@ const REPL_COMMANDS = [
   "inbox", "watch", "receipts",
   "send",
   // partner integrations
-  "aeon", "gitlawb", "bankr", "miroshark",
+  "miroshark",
   // P2P E2E messaging via XMTP
   "xmtp",
   // daily-use + verify showpiece
@@ -6587,23 +5942,8 @@ function replCompleter(line) {
     return [hits.length ? hits : opts, last];
   }
   // partner subcommands
-  if (head === "aeon" && tokens.length === 2) {
-    const opts = ["resolve", "balance", "agent"];
-    const hits = opts.filter((s) => s.startsWith(last));
-    return [hits.length ? hits : opts, last];
-  }
-  if (head === "gitlawb" && tokens.length === 2) {
-    const opts = ["resolve", "repos", "playground", "link", "unlink", "status", "stats"];
-    const hits = opts.filter((s) => s.startsWith(last));
-    return [hits.length ? hits : opts, last];
-  }
   if (head === "miroshark" && tokens.length === 2) {
     const opts = ["sim", "stats"];
-    const hits = opts.filter((s) => s.startsWith(last));
-    return [hits.length ? hits : opts, last];
-  }
-  if (head === "bankr" && tokens.length === 2) {
-    const opts = ["status", "trade"];
     const hits = opts.filter((s) => s.startsWith(last));
     return [hits.length ? hits : opts, last];
   }
@@ -6791,7 +6131,7 @@ async function cmdUpdate(args) {
   } catch (e) {
     err(paint(c.red, "✗"), `write failed: ${e?.message ?? e}`);
     err(paint(c.dim, "  if this is a permissions issue, re-run the installer:"));
-    err(paint(c.cyan, "    curl -fsSL https://www.signaagent.xyz/install.sh | bash"));
+    err(paint(c.cyan, "    curl -fsSL https://www.sigda.xyz/install.sh | bash"));
     bail(1);
   }
 
@@ -6964,15 +6304,6 @@ async function dispatchCommand(args, { fromRepl = false, replRl = null } = {}) {
       break;
     case "chat":
       await cmdChat(rest, { fromRepl, replRl });
-      break;
-    case "aeon":
-      await cmdAeon(rest);
-      break;
-    case "gitlawb":
-      await cmdGitlawb(rest);
-      break;
-    case "bankr":
-      await cmdBankr(rest);
       break;
     case "miroshark":
       await cmdMiroshark(rest);

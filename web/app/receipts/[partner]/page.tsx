@@ -26,7 +26,7 @@ export async function generateMetadata({
   const detail = await getPartnerDetail(partner);
   const TITLE = `${detail.label} · SIGDA receipts`;
   const DESCRIPTION = `${detail.totals.rooms} wallet-signed rooms, ${detail.totals.messages} signed messages, ${detail.totals.unique_posters} unique signers produced for ${detail.label} via SIGDA.`;
-  const URL = `https://www.signaagent.xyz/receipts/${partner}`;
+  const URL = `https://www.sigda.xyz/receipts/${partner}`;
   return {
     title: TITLE,
     description: DESCRIPTION,

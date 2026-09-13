@@ -5,7 +5,7 @@ import { listFederatedNodes, probeNode, SIGNA_NODE_REGISTRY } from "@/lib/onchai
 const TITLE = "Federated nodes · SIGDA";
 const DESCRIPTION =
   "Every SIGDA node registered on the on-chain SignaNodeRegistry contract on Robinhood Chain. Open spec, permissionless join. The federation source of truth.";
-const URL = "https://www.signaagent.xyz/nodes";
+const URL = "https://www.sigda.xyz/nodes";
 
 export const metadata = {
   title: TITLE,

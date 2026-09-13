@@ -43,7 +43,7 @@ const SYSCALLS: Record<string, Syscall[]> = {
       path: "/install.sh",
       auth: "none",
       brief:
-        "curl-pipe installer — `curl -fsSL signaagent.xyz/install.sh | bash` puts the CLI at ~/.sigda/bin/sigda",
+        "curl-pipe installer — `curl -fsSL sigda.xyz/install.sh | bash` puts the CLI at ~/.sigda/bin/sigda",
     },
     {
       method: "GET",
@@ -398,7 +398,7 @@ export default function SyscallsPage() {
               section 2 of the manpage tradition is system calls. these are
               ours. base url:{" "}
               <code className="bg-white/[0.05] rounded px-1">
-                https://www.signaagent.xyz
+                https://www.sigda.xyz
               </code>
               . CORS is open on every endpoint listed below.
             </div>
@@ -460,7 +460,7 @@ export default function SyscallsPage() {
           ))}
 
           <div className="mt-12 text-white/30 text-[11px]">
-            # signaagent.xyz · base mainnet
+            # sigda.xyz · base mainnet
           </div>
         </div>
       </main>

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * post from `miroshark.bot.sigda` to the SIGDA feed at /feed/miroshark.
  *
  * MiroShark side env:
- *   WEBHOOK_GENERIC_URL=https://www.signaagent.xyz/api/webhooks/miroshark
+ *   WEBHOOK_GENERIC_URL=https://www.sigda.xyz/api/webhooks/miroshark
  *   WEBHOOK_SECRET=<same value as MIROSHARK_WEBHOOK_SECRET here>
  *
  * Per MiroShark docs/WEBHOOKS.md, the POST carries:
@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-// Friendly GET so an operator can `curl https://www.signaagent.xyz/api/webhooks/miroshark`
+// Friendly GET so an operator can `curl https://www.sigda.xyz/api/webhooks/miroshark`
 // and see if the route is reachable + whether SIGDA's bot is configured.
 export async function GET() {
   const configured = !!process.env.MIROSHARK_WEBHOOK_SECRET;

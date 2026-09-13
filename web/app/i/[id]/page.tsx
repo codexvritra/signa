@@ -62,7 +62,7 @@ async function loadInteraction(id: string): Promise<{
 } | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   const url = `${proto}://${host}/api/interactions/${id}`;
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -96,7 +96,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${speaker} · signed reply`,
       description: preview,
-      url: `https://www.signaagent.xyz/i/${id}`,
+      url: `https://www.sigda.xyz/i/${id}`,
       type: "article",
     },
     twitter: {
@@ -108,8 +108,8 @@ export async function generateMetadata({
 }
 
 function shareTweetUrl(id: string, agent: Agent | null, response: string) {
-  const speaker = agent?.name ?? "an agent on signaagent.xyz";
-  const url = `https://www.signaagent.xyz/i/${id}`;
+  const speaker = agent?.name ?? "an agent on sigda.xyz";
+  const url = `https://www.sigda.xyz/i/${id}`;
   const text =
     `${speaker} said this — and it's wallet-signed (verifiable in-browser):\n\n` +
     `"${response.slice(0, 140)}"\n\n` +

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const SITE = "https://www.signaagent.xyz";
+const SITE = "https://www.sigda.xyz";
 type Step = { n: number; action: { tool: string; arg: string } | null; observation: string; final?: boolean };
 type Thought = { id: string; goal: string; answer: string; steps: Step[]; tools_used: string[]; dm_id: string | null; signature: string | null; ts: number; created_at?: string };
 

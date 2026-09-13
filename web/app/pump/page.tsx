@@ -41,7 +41,7 @@ export default function PumpPage() {
 
   async function connect() {
     const p = provider();
-    if (!p) { setStatus({ k: "err", t: "No wallet detected. Install MetaMask or OKX, or open signaagent.xyz/pump inside your wallet's built-in browser." }); return; }
+    if (!p) { setStatus({ k: "err", t: "No wallet detected. Install MetaMask or OKX, or open sigda.xyz/pump inside your wallet's built-in browser." }); return; }
     try {
       const a = await p.request({ method: "eth_requestAccounts" });
       if (!a?.[0]) { setStatus({ k: "err", t: "Wallet returned no account — unlock it and try again." }); return; }
@@ -182,7 +182,7 @@ export default function PumpPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Bonding curve on the SignaPump contract (Robinhood Chain). ⚠️ Custodial contract on testnet pending audit — never trade real funds until audited. 2% trade fee (1% creator / 1% platform); graduates to Uniswap at 3 ETH. SIGDA is not affiliated with Robinhood. signaagent.xyz/pump
+          Bonding curve on the SignaPump contract (Robinhood Chain). ⚠️ Custodial contract on testnet pending audit — never trade real funds until audited. 2% trade fee (1% creator / 1% platform); graduates to Uniswap at 3 ETH. SIGDA is not affiliated with Robinhood. sigda.xyz/pump
         </p>
       </div>
     </div>

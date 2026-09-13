@@ -97,7 +97,7 @@ export default async function InboxPage({
         {/* owner affordance: share this link to collect signed messages */}
         <div className="mt-3 glass rounded-xl px-3.5 py-3 flex items-center gap-2">
           <code className="flex-1 text-[12px] text-[#86efac] font-mono truncate">
-            signaagent.xyz/to/{handle}
+            sigda.xyz/to/{handle}
           </code>
           <ShareInbox handle={handle} />
         </div>
@@ -132,7 +132,7 @@ export default async function InboxPage({
         </div>
 
         <div className="mt-8 text-center text-[11px] text-faint">
-          signaagent.xyz · the wallet-signed message layer on Robinhood Chain
+          sigda.xyz · the wallet-signed message layer on Robinhood Chain
         </div>
       </div>
     </div>

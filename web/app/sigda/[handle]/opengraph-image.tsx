@@ -5,10 +5,10 @@ export const alt = "SIGDA Mail address";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const SITE = "https://www.signaagent.xyz";
+const SITE = "https://www.sigda.xyz";
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 
-/** The card that unfurls when a signaagent.xyz/sigda/<handle> link is shared. */
+/** The card that unfurls when a sigda.xyz/sigda/<handle> link is shared. */
 export default async function Image({ params }: { params: Promise<{ handle: string }> }) {
   const { handle: raw } = await params;
   const handle = decodeURIComponent(raw).toLowerCase();
@@ -32,7 +32,7 @@ export default async function Image({ params }: { params: Promise<{ handle: stri
         <div style={{ display: "flex", fontSize: 34, color: "#e8edf7", marginTop: 40, maxWidth: 1000 }}>
           {address ? "Send me a wallet-signed message on Robinhood Chain. No account, no API key." : "Claim this name for your wallet inbox on Robinhood Chain."}
         </div>
-        <div style={{ display: "flex", fontSize: 24, color: "#6b7690", marginTop: 46 }}>signaagent.xyz/sigda/{handle} · don't trust, verify</div>
+        <div style={{ display: "flex", fontSize: 24, color: "#6b7690", marginTop: 46 }}>sigda.xyz/sigda/{handle} · don't trust, verify</div>
       </div>
     ),
     { ...size },

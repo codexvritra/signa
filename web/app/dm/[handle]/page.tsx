@@ -20,7 +20,7 @@ type ResolvedUser = {
 async function resolveHandle(handle: string): Promise<ResolvedUser | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(
       `${proto}://${host}/api/users/resolve?handle=${encodeURIComponent(handle)}`,
@@ -91,7 +91,7 @@ export default async function DmHandlePage({
                 becomes their inbox.
               </p>
               <div className="mt-7 border border-dashed border-white/15 px-4 py-3 font-mono text-[12px] text-white/70 max-w-md">
-                signaagent.xyz/dm/{handle}
+                sigda.xyz/dm/{handle}
               </div>
             </div>
           </section>

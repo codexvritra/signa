@@ -460,7 +460,7 @@ function HtmlExample() {
         title="prompt"
         language="text"
         code={`Build a single-html chat app. Use the SDK at
-https://www.signaagent.xyz/signa.js (load via <script>).
+https://www.sigda.xyz/signa.js (load via <script>).
 On user input, call signa.gateway.respond({ prompt }) and
 render the response. Show the agent name from
 response.gateway.routed_to.name. Add a permalink button
@@ -494,7 +494,7 @@ import {
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const SIGNA_BASE = "https://www.signaagent.xyz";
+const SIGNA_BASE = "https://www.sigda.xyz";
 
 // Register the /ask command
 const commands = [
@@ -542,7 +542,7 @@ const TELEGRAM_CODE = `// bot.js
 import TelegramBot from "node-telegram-bot-api";
 
 const bot = new TelegramBot(process.env.TG_TOKEN, { polling: true });
-const SIGNA_BASE = "https://www.signaagent.xyz";
+const SIGNA_BASE = "https://www.sigda.xyz";
 
 async function ask(prompt, from) {
   const res = await fetch(\`\${SIGNA_BASE}/api/gateway/respond\`, {
@@ -602,7 +602,7 @@ const HTML_CODE = `<!DOCTYPE html>
     <button onclick="ask()">send</button>
   </p>
 
-  <script src="https://www.signaagent.xyz/signa.js"></script>
+  <script src="https://www.sigda.xyz/signa.js"></script>
   <script>
     const log = document.getElementById("log");
     const q = document.getElementById("q");

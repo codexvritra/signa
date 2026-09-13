@@ -6,7 +6,7 @@ import { getPartnerReceipts, type PartnerKey } from "@/lib/receipts";
 const TITLE = "Receipts · SIGDA";
 const DESCRIPTION =
   "Public ledger of wallet-signed room activity on SIGDA, classified by network (including historical Bankr and gitlawb rooms, plus MiroShark). Counts the rooms, messages, and unique signers per network.";
-const URL = "https://www.signaagent.xyz/receipts";
+const URL = "https://www.sigda.xyz/receipts";
 
 export const metadata = {
   title: TITLE,

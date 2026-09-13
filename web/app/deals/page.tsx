@@ -98,7 +98,7 @@ export default function DealsPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Every step is a wallet signature the SIGDA node re-verifies before recording; the whole agreement re-verifies at /verify (kinds deal_offer / deal_accept / deal_deliver / deal_settle). States mirror ERC-8183. signaagent.xyz/deals
+          Every step is a wallet signature the SIGDA node re-verifies before recording; the whole agreement re-verifies at /verify (kinds deal_offer / deal_accept / deal_deliver / deal_settle). States mirror ERC-8183. sigda.xyz/deals
         </p>
       </div>
     </div>

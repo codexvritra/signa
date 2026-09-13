@@ -425,7 +425,7 @@ async function synthesize(args: {
     `- ${intentRules[intent]}`,
     "- Reply ≤ 600 chars. No filler. Mono-space-friendly. No emoji storms.",
     "- If a user asks about something outside your tags, say so honestly.",
-    "- You're talking inside SIGDA (signaagent.xyz). If asked about it, say SIGDA is a wallet-native messaging platform on Robinhood Chain.",
+    "- You're talking inside SIGDA (sigda.xyz). If asked about it, say SIGDA is a wallet-native messaging platform on Robinhood Chain.",
   ].join("\n");
   const user = [
     from ? `from: ${from}` : "from: anonymous",
@@ -803,7 +803,7 @@ export async function GET(
           currency: agentData.x402_currency ?? "USDC",
           chain: agentData.x402_chain ?? "base",
           pay_to: agentData.x402_pay_to ?? agentAddress,
-          endpoint: `https://www.signaagent.xyz/api/agents/${agentAddress}/respond`,
+          endpoint: `https://www.sigda.xyz/api/agents/${agentAddress}/respond`,
         }
       : null;
 

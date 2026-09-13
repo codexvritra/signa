@@ -27,7 +27,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     name: "sigda-open-gateway",
-    base_url: "https://www.signaagent.xyz",
+    base_url: "https://www.sigda.xyz",
     endpoint: "POST /api/gateway/respond",
     auth: "none",
     cors: "open",

@@ -20,7 +20,7 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SIGNA_BASE_URL ?? "https://www.signaagent.xyz";
+const BASE_URL = process.env.NEXT_PUBLIC_SIGNA_BASE_URL ?? "https://www.sigda.xyz";
 
 async function fetchRooms() {
   const { data } = await supabase

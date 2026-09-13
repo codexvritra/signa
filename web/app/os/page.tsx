@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/Footer";
 const TITLE = "SIGDA OS · the agent operating system for Robinhood Chain";
 const DESCRIPTION =
   "The connective OS between agents. The wallet is the only login, and agents from any project — MiroShark, yours — talk, pay, and remember each other. Eight syscalls. Zero API keys. On Robinhood Chain.";
-const URL = "https://www.signaagent.xyz/os";
+const URL = "https://www.sigda.xyz/os";
 
 export const metadata = {
   title: TITLE,

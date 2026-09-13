@@ -102,7 +102,7 @@ export default async function Image() {
             <Stat label="attempts" value={String(attempts)} />
             <Stat label="challengers" value={String(players)} />
           </div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/gate</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/gate</div>
         </div>
       </div>
     ),

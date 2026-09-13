@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/Footer";
 const TITLE = "SIGDA Brain · an agent's own brain, decentralized and keyless";
 const DESCRIPTION =
   "The brain reasons on decentralized, provider-agnostic inference (x402-paid, no API key) and acts through the SIGDA OS — it picks capabilities on the network, invokes them for real, and answers from the live results. A brain with a useful OS, not a chatbot.";
-const URL = "https://www.signaagent.xyz/brain";
+const URL = "https://www.sigda.xyz/brain";
 
 export const metadata = {
   title: TITLE,

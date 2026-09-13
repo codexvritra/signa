@@ -6,7 +6,7 @@ import { PipelineDemo } from "./PipelineDemo";
 const TITLE = "SIGDA Signed Pipelines · verifiable multi-provider agent runs on Robinhood Chain";
 const DESCRIPTION =
   "Compose capabilities from different providers into one run that emits a single wallet-signed, hash-chained provenance chain — every step's provider, input, and output linked and independently re-verifiable with viem. Provenance, not correctness. Keyless, on Robinhood Chain.";
-const URL = "https://www.signaagent.xyz/pipelines";
+const URL = "https://www.sigda.xyz/pipelines";
 
 export const metadata = {
   title: TITLE,

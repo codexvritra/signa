@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  * boots automatically:
  *
  *   <div data-signa-room="vorxis-164ba3" style="height:560px"></div>
- *   <script src="https://www.signaagent.xyz/widget.js" defer></script>
+ *   <script src="https://www.sigda.xyz/widget.js" defer></script>
  *
  * The widget injects an auto-sized iframe pointing at
  * /rooms/[slug]/embed. The iframe inherits the container's width and
@@ -29,7 +29,7 @@ export const dynamic = "force-dynamic";
 
 const SCRIPT = `/*! SIGDA widget.js · MIT */
 (function(){
-  var BASE = "https://www.signaagent.xyz";
+  var BASE = "https://www.sigda.xyz";
   var MOUNT_ATTR = "data-signa-room";
   var MOUNTED = "data-signa-mounted";
 

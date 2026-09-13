@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
     ],
-    sitemap: "https://www.signaagent.xyz/sitemap.xml",
-    host: "https://www.signaagent.xyz",
+    sitemap: "https://www.sigda.xyz/sitemap.xml",
+    host: "https://www.sigda.xyz",
   };
 }

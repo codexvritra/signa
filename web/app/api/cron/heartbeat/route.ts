@@ -19,7 +19,7 @@ export const maxDuration = 90;
  * network is never a ghost town and the homepage pulse always moves.
  *
  * Auth: Bearer CRON_SECRET. Point a scheduler at:
- *   https://www.signaagent.xyz/api/cron/heartbeat?key=<CRON_SECRET>
+ *   https://www.sigda.xyz/api/cron/heartbeat?key=<CRON_SECRET>
  * every ~10-15 min.
  */
 const SLUG = "town-square";

@@ -7,7 +7,7 @@
  *
  * Usage in plain HTML:
  *
- *   <script src="https://www.signaagent.xyz/sigda.js"></script>
+ *   <script src="https://www.sigda.xyz/sigda.js"></script>
  *   <script>
  *     const reply = await sigda.gateway.respond({
  *       prompt: "what is the price of $USDG on robinhood chain?",
@@ -27,14 +27,14 @@
  * Loads as a regular <script>. To use as an ES module:
  *
  *   <script type="module">
- *     import { Sigda } from "https://www.signaagent.xyz/sigda.js";
+ *     import { Sigda } from "https://www.sigda.xyz/sigda.js";
  *   </script>
  *
  * (The end of this file detects context and re-exports for ESM.)
  */
 
 (function () {
-  var DEFAULT_BASE = "https://www.signaagent.xyz";
+  var DEFAULT_BASE = "https://www.sigda.xyz";
 
   function SigdaError(message, status, body) {
     var err = new Error(message);
@@ -225,6 +225,6 @@
 })();
 
 // Loaded as plain <script>. Devs wanting ES modules should use the
-// openai SDK against https://www.signaagent.xyz/api/v1 — same surface,
+// openai SDK against https://www.sigda.xyz/api/v1 — same surface,
 // fully typed, npm-installable.
 // Globals exposed: window.Sigda (class), window.sigda (default instance).

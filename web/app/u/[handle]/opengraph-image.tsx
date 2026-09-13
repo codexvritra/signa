@@ -118,7 +118,7 @@ export default async function ProfileOgImage({
               fontSize: 20,
             }}
           >
-            signaagent.xyz
+            sigda.xyz
           </div>
         </div>
       </div>

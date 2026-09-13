@@ -64,7 +64,7 @@ export function GET() {
             <span>·</span>
             <span>on Robinhood Chain</span>
           </div>
-          <div>signaagent.xyz</div>
+          <div>sigda.xyz</div>
         </div>
       </div>
     ),

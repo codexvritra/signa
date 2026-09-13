@@ -64,7 +64,7 @@ export default function Image() {
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>
             resolve anything → message anyone · a2a · x402 · erc-8004
           </div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/bus</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/bus</div>
         </div>
       </div>
     ),

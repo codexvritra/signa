@@ -10,7 +10,7 @@ export function ShareInbox({ handle }: { handle: string }) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(
-        typeof window !== "undefined" ? window.location.href : `https://www.signaagent.xyz/to/${handle}`,
+        typeof window !== "undefined" ? window.location.href : `https://www.sigda.xyz/to/${handle}`,
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

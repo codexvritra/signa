@@ -154,6 +154,6 @@ export async function POST(req: NextRequest) {
   return jsonResp({
     ok: true,
     bridge: upserted,
-    directory_url: `https://www.signaagent.xyz/api/bridges?platform=${encodeURIComponent(platform)}`,
+    directory_url: `https://www.sigda.xyz/api/bridges?platform=${encodeURIComponent(platform)}`,
   });
 }

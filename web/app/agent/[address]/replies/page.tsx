@@ -55,7 +55,7 @@ async function load(address: string): Promise<{
 } | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
 
   try {
     const [aRes, iRes] = await Promise.all([

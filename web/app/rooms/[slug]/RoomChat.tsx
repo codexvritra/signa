@@ -767,8 +767,8 @@ export function RoomChat({
           )}
           <button
             onClick={() => {
-              const iframeCode = `<iframe src="https://www.signaagent.xyz/rooms/${slug}/embed" style="width:100%;height:560px;border:0;border-radius:8px" allow="clipboard-write" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>`;
-              const scriptCode = `<div data-signa-room="${slug}" style="height:560px"></div>\n<script src="https://www.signaagent.xyz/widget.js" defer></script>`;
+              const iframeCode = `<iframe src="https://www.sigda.xyz/rooms/${slug}/embed" style="width:100%;height:560px;border:0;border-radius:8px" allow="clipboard-write" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>`;
+              const scriptCode = `<div data-signa-room="${slug}" style="height:560px"></div>\n<script src="https://www.sigda.xyz/widget.js" defer></script>`;
               const code = `${iframeCode}\n\n— OR —\n\n${scriptCode}`;
               navigator.clipboard.writeText(code).then(() => {
                 alert("embed snippets copied — iframe + script. paste either into any HTML page.");

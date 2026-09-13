@@ -232,7 +232,7 @@ export default function MessagesPage() {
     setBusy(false);
   }
 
-  const myLink = me ? `signaagent.xyz/to/${me}` : "";
+  const myLink = me ? `sigda.xyz/to/${me}` : "";
 
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
@@ -371,7 +371,7 @@ export default function MessagesPage() {
         )}
 
         <p className="text-[11px] text-faint mt-10">
-          Every message is an EIP-191 wallet signature, stored as a signed envelope, re-verifiable at signaagent.xyz/verify. The wallet is the identity, the signature is the receipt.
+          Every message is an EIP-191 wallet signature, stored as a signed envelope, re-verifiable at sigda.xyz/verify. The wallet is the identity, the signature is the receipt.
         </p>
       </div>
     </div>

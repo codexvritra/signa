@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 const BRAIN = "0x95fce75729690477e48820805c74602338e19303";
-const SITE = "https://www.signaagent.xyz";
+const SITE = "https://www.sigda.xyz";
 
 export default function VerifiedPage() {
   const [addr, setAddr] = useState(BRAIN);

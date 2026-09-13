@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  * Farcaster custody key — it can't be generated server-side. Generate it once
  * with the Farcaster manifest tool (Warpcast → Settings → Developer → Domains,
  * or https://farcaster.xyz/~/developers/mini-apps/manifest) for the domain
- * www.signaagent.xyz, then set these env vars in Vercel:
+ * www.sigda.xyz, then set these env vars in Vercel:
  *   FARCASTER_HEADER, FARCASTER_PAYLOAD, FARCASTER_SIGNATURE
  * The embed cards render in-feed regardless; accountAssociation unlocks
  * publishing/attribution. Until set, we omit it (manifest stays valid JSON).
@@ -45,7 +45,7 @@ export function GET() {
       ogTitle: "SIGDA — sign a message on Robinhood Chain",
       ogDescription: "Wallet-signed, re-verifiable messages. One tap, no account.",
       ogImageUrl: HOME_EMBED_IMAGE,
-      canonicalDomain: "www.signaagent.xyz",
+      canonicalDomain: "www.sigda.xyz",
       requiredChains: ["eip155:8453"],
       requiredCapabilities: [
         "wallet.getEthereumProvider",

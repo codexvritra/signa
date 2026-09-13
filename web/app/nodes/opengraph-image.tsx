@@ -57,7 +57,7 @@ export default async function Image() {
           }}
         >
           <div style={{ display: "flex" }}>SIGDA · FEDERATED NODES</div>
-          <div style={{ display: "flex" }}>signaagent.xyz/nodes</div>
+          <div style={{ display: "flex" }}>sigda.xyz/nodes</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>

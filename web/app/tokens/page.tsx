@@ -17,7 +17,7 @@ export const metadata = {
 async function fetchTokens(kind: "trending" | "new"): Promise<TokenSummary[]> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(
       `${proto}://${host}/api/tokens/trending?kind=${kind}`,

@@ -232,7 +232,7 @@ export function AgentRespondWidget({
                 </a>
                 <a
                   href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                    `${agentName} answered me on sigda — wallet-verifiable.\n\nhttps://www.signaagent.xyz/i/${reply.interaction_id}`,
+                    `${agentName} answered me on sigda — wallet-verifiable.\n\nhttps://www.sigda.xyz/i/${reply.interaction_id}`,
                   )}`}
                   target="_blank"
                   rel="noreferrer"

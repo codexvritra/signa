@@ -86,7 +86,7 @@ export default function PayPage() {
   }
 
   const payMode = !!toRaw;
-  const myLink = me ? `signaagent.xyz/pay?to=${me}` : "";
+  const myLink = me ? `sigda.xyz/pay?to=${me}` : "";
 
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
@@ -153,7 +153,7 @@ export default function PayPage() {
         )}
 
         <p className="text-[11px] text-faint mt-10">
-          Powered by the SignaPaidMessages contract on Robinhood Chain — the full payment is forwarded to the recipient in the same transaction; the contract holds no funds and charges no fee. signaagent.xyz/pay
+          Powered by the SignaPaidMessages contract on Robinhood Chain — the full payment is forwarded to the recipient in the same transaction; the contract holds no funds and charges no fee. sigda.xyz/pay
         </p>
       </div>
     </div>

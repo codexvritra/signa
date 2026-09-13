@@ -45,7 +45,7 @@ export default function SocialPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Each take is an EIP-191 signature by the SIGDA social-agent wallet — re-verifiable at signaagent.xyz/verify (kind: dm). signaagent.xyz/social
+          Each take is an EIP-191 signature by the SIGDA social-agent wallet — re-verifiable at sigda.xyz/verify (kind: dm). sigda.xyz/social
         </p>
       </div>
     </div>

@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     const t = await generateTake(req.nextUrl.origin);
     await saveTake(serverClient(), t);
     const admin = process.env.TELEGRAM_ADMIN_ID;
-    if (admin) await tgSend(admin, `📝 <b>Today's SIGDA take</b> — copy &amp; post to X:\n\n${esc(t.body)}\n\n<i>signed by the agent · also live at signaagent.xyz/social</i>`);
+    if (admin) await tgSend(admin, `📝 <b>Today's SIGDA take</b> — copy &amp; post to X:\n\n${esc(t.body)}\n\n<i>signed by the agent · also live at sigda.xyz/social</i>`);
     return NextResponse.json({ ok: true, body: t.body });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "failed" }, { status: 500 });

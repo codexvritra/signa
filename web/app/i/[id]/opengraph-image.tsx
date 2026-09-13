@@ -25,7 +25,7 @@ export default async function Image({
   let signed = false;
   try {
     const res = await fetch(
-      `https://www.signaagent.xyz/api/interactions/${id}`,
+      `https://www.sigda.xyz/api/interactions/${id}`,
       { cache: "no-store" },
     );
     if (res.ok) {
@@ -122,7 +122,7 @@ export default async function Image({
           }}
         >
           <div style={{ display: "flex" }}>intent: {intent}</div>
-          <div style={{ color: "#666", display: "flex" }}>signaagent.xyz</div>
+          <div style={{ color: "#666", display: "flex" }}>sigda.xyz</div>
         </div>
       </div>
     ),

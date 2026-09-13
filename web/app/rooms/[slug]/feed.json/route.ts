@@ -30,7 +30,7 @@ export async function GET(
 ) {
   const { slug: raw } = await params;
   const slug = (raw ?? "").toLowerCase();
-  const base = "https://www.signaagent.xyz";
+  const base = "https://www.sigda.xyz";
 
   const { data: room } = await supabase
     .from("signa_rooms")

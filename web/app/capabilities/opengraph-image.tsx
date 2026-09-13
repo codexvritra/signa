@@ -53,7 +53,7 @@ export default function Image() {
           <div style={{ display: "flex", fontSize: "15px", color: "rgba(245,245,250,0.55)" }}>
             mcp is keyed urls · x402 proves you paid · sigda proves what you got
           </div>
-          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>signaagent.xyz/capabilities</div>
+          <div style={{ display: "flex", fontSize: "15px", color: "#b7ff5c" }}>sigda.xyz/capabilities</div>
         </div>
       </div>
     ),

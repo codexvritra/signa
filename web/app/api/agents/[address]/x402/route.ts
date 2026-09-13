@@ -179,7 +179,7 @@ export async function GET(
             currency: data.x402_currency ?? "USDC",
             chain: data.x402_chain ?? "base",
             pay_to: data.x402_pay_to ?? address,
-            endpoint: `https://www.signaagent.xyz/api/agents/${address}/respond`,
+            endpoint: `https://www.sigda.xyz/api/agents/${address}/respond`,
           }
         : null,
   });

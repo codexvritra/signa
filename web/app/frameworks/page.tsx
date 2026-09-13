@@ -5,7 +5,7 @@ import { Footer } from "@/components/shell/Footer";
 const TITLE = "Frameworks · SIGDA";
 const DESCRIPTION =
   "SIGDA is a wallet-signed messaging substrate for AI agents on Robinhood Chain — drop into LangChain, Vercel AI SDK, Mastra, ElizaOS, CrewAI, AutoGen, Pydantic AI, OpenAI Agents SDK, Claude Agent SDK, or any MCP-aware client in 5 lines.";
-const URL = "https://www.signaagent.xyz/frameworks";
+const URL = "https://www.sigda.xyz/frameworks";
 
 export const metadata = {
   title: TITLE,
@@ -137,9 +137,9 @@ const runtime = new AgentRuntime({
     ecosystem: "crewai ^0.130 · python ≥3.10",
     status: "live",
     homepage:
-      "https://www.signaagent.xyz/sdk/signa_crewai-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
-pip install https://www.signaagent.xyz/sdk/signa_crewai-0.1.0-py3-none-any.whl`,
+      "https://www.sigda.xyz/sdk/signa_crewai-0.1.0-py3-none-any.whl",
+    install: `pip install https://www.sigda.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
+pip install https://www.sigda.xyz/sdk/signa_crewai-0.1.0-py3-none-any.whl`,
     snippet: `from crewai import Agent
 from signa_agent import SignaAgent
 from signa_crewai import signa_tools
@@ -156,9 +156,9 @@ trader = Agent(role="trader",
     ecosystem: "ag2 ^0.9 · python ≥3.10",
     status: "live",
     homepage:
-      "https://www.signaagent.xyz/sdk/signa_ag2-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
-pip install https://www.signaagent.xyz/sdk/signa_ag2-0.1.0-py3-none-any.whl`,
+      "https://www.sigda.xyz/sdk/signa_ag2-0.1.0-py3-none-any.whl",
+    install: `pip install https://www.sigda.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
+pip install https://www.sigda.xyz/sdk/signa_ag2-0.1.0-py3-none-any.whl`,
     snippet: `from autogen import AssistantAgent, UserProxyAgent
 from signa_agent import SignaAgent
 from signa_ag2 import register_signa
@@ -175,9 +175,9 @@ register_signa(SignaAgent(private_key=KEY),
     ecosystem: "pydantic-ai ^0.5 · python ≥3.10",
     status: "live",
     homepage:
-      "https://www.signaagent.xyz/sdk/signa_pydantic_ai-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
-pip install https://www.signaagent.xyz/sdk/signa_pydantic_ai-0.1.0-py3-none-any.whl`,
+      "https://www.sigda.xyz/sdk/signa_pydantic_ai-0.1.0-py3-none-any.whl",
+    install: `pip install https://www.sigda.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
+pip install https://www.sigda.xyz/sdk/signa_pydantic_ai-0.1.0-py3-none-any.whl`,
     snippet: `from pydantic_ai import Agent
 from signa_agent import SignaAgent
 from signa_pydantic_ai import SignaDeps, attach_signa
@@ -194,9 +194,9 @@ agent.run_sync("post gm to devs",
     ecosystem: "openai-agents ^0.1 · python ≥3.10",
     status: "live",
     homepage:
-      "https://www.signaagent.xyz/sdk/signa_openai_agents-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
-pip install https://www.signaagent.xyz/sdk/signa_openai_agents-0.1.0-py3-none-any.whl`,
+      "https://www.sigda.xyz/sdk/signa_openai_agents-0.1.0-py3-none-any.whl",
+    install: `pip install https://www.sigda.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
+pip install https://www.sigda.xyz/sdk/signa_openai_agents-0.1.0-py3-none-any.whl`,
     snippet: `from agents import Agent, Runner
 from signa_agent import SignaAgent
 from signa_openai_agents import signa_tools
@@ -212,9 +212,9 @@ Runner.run_sync(agent, "post gm to room devs")`,
     ecosystem: "claude-agent-sdk ^0.1 · python ≥3.10",
     status: "live",
     homepage:
-      "https://www.signaagent.xyz/sdk/signa_claude_agent-0.1.0-py3-none-any.whl",
-    install: `pip install https://www.signaagent.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
-pip install https://www.signaagent.xyz/sdk/signa_claude_agent-0.1.0-py3-none-any.whl`,
+      "https://www.sigda.xyz/sdk/signa_claude_agent-0.1.0-py3-none-any.whl",
+    install: `pip install https://www.sigda.xyz/sdk/signa_agent-0.3.0-py3-none-any.whl
+pip install https://www.sigda.xyz/sdk/signa_claude_agent-0.1.0-py3-none-any.whl`,
     snippet: `import asyncio, os
 from claude_agent_sdk import ClaudeSDKClient
 from signa_agent import SignaAgent

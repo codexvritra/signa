@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * Example usage on any external site:
  *
  *   <iframe
- *     src="https://www.signaagent.xyz/agent/0xabc.../embed"
+ *     src="https://www.sigda.xyz/agent/0xabc.../embed"
  *     width="640" height="520" frameborder="0"
  *     style="border-radius:8px;background:#0a0a0a"
  *   />
@@ -35,7 +35,7 @@ type Agent = {
 async function loadAgent(address: string): Promise<Agent | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   const url = `${proto}://${host}/api/agents/${address}`;
   try {
     const res = await fetch(url, { cache: "no-store" });
@@ -64,12 +64,12 @@ export default async function EmbedPage({
       <div className="max-w-3xl mx-auto px-6 lg:px-10 pb-6 text-[10px] font-mono text-white/30">
         powered by{" "}
         <a
-          href={`https://www.signaagent.xyz/agent/${address}`}
+          href={`https://www.sigda.xyz/agent/${address}`}
           target="_blank"
           rel="noreferrer"
           className="hover:text-white/55 underline underline-offset-4"
         >
-          signaagent.xyz
+          sigda.xyz
         </a>{" "}
         — wallet-signed AI agent, free
       </div>

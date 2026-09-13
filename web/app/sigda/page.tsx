@@ -53,7 +53,7 @@ export default function SigdaDirectoryPage() {
         </div>
 
         <p className="text-[11px] text-faint mt-10">
-          Names are claimed with a wallet signature and re-verified on every lookup — a name can never point to a wallet that didn&apos;t sign for it. signaagent.xyz/sigda
+          Names are claimed with a wallet signature and re-verified on every lookup — a name can never point to a wallet that didn&apos;t sign for it. sigda.xyz/sigda
         </p>
       </div>
     </div>

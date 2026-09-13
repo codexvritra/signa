@@ -226,7 +226,7 @@ export default function GenerateBotKeysPage() {
               <li>
                 For MiroShark operators: in their MiroShark env, set{" "}
                 <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5 text-[12px]">
-                  WEBHOOK_GENERIC_URL=https://www.signaagent.xyz/api/webhooks/miroshark
+                  WEBHOOK_GENERIC_URL=https://www.sigda.xyz/api/webhooks/miroshark
                 </code>{" "}
                 and{" "}
                 <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5 text-[12px]">

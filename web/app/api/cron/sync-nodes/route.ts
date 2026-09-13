@@ -43,7 +43,7 @@ export const dynamic = "force-dynamic";
  */
 
 const SIGNA_NODE_REGISTRY = (process.env.SIGNA_NODE_REGISTRY || "") as Address;
-const OWN_URL = process.env.NEXT_PUBLIC_SIGNA_BASE_URL || "https://www.signaagent.xyz";
+const OWN_URL = process.env.NEXT_PUBLIC_SIGNA_BASE_URL || "https://www.sigda.xyz";
 const MAX_POSTS_PER_PEER = 100;
 const REPLICATION_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 

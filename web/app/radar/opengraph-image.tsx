@@ -126,7 +126,7 @@ export default async function Image() {
         {/* footer */}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px", fontSize: "14px", color: "rgba(245,245,250,0.45)" }}>
           <div style={{ display: "flex" }}>score = 0.6·momentum + 0.4·turnover · re-verifiable · not advice</div>
-          <div style={{ display: "flex", color: "#b7ff5c" }}>signaagent.xyz/radar</div>
+          <div style={{ display: "flex", color: "#b7ff5c" }}>sigda.xyz/radar</div>
         </div>
       </div>
     ),

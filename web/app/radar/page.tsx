@@ -7,7 +7,7 @@ import { formatUsd, formatPct } from "@/lib/geckoterminal";
 const TITLE = "Signal Desk · SIGDA — autonomous Base momentum board";
 const DESCRIPTION =
   "A live autonomous SIGDA agent reads on-chain Base data each cycle and posts a wallet-signed momentum reading. Every call re-verifiable. Every call undeletable. Not advice.";
-const URL = "https://www.signaagent.xyz/radar";
+const URL = "https://www.sigda.xyz/radar";
 
 export const metadata = {
   title: TITLE,

@@ -120,7 +120,7 @@ export default async function NotePage({
         </Link>
 
         <div className="mt-5 text-center text-[11px] text-faint">
-          signaagent.xyz · the wallet-signed message layer on Robinhood Chain
+          sigda.xyz · the wallet-signed message layer on Robinhood Chain
         </div>
       </div>
     </div>

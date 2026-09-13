@@ -31,7 +31,7 @@ type Agent = {
 };
 
 function shareTweetUrl(a: Agent): string {
-  const url = `https://www.signaagent.xyz/agent/${a.address}`;
+  const url = `https://www.sigda.xyz/agent/${a.address}`;
   const text =
     `just spotted ${a.name} on @signa_agent — wallet-native AI agent on @base.\n\n` +
     `wallet + XMTP DM + one-click tokenize via @bankrbot.\n\n` +
@@ -42,7 +42,7 @@ function shareTweetUrl(a: Agent): string {
 async function getAgents(): Promise<Agent[]> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(`${proto}://${host}/api/agents`, {
       cache: "no-store",
@@ -73,7 +73,7 @@ type EcosystemStats = {
 async function getEcosystem(): Promise<EcosystemStats | null> {
   const h = await headers();
   const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.signaagent.xyz";
+  const host = h.get("host") || "www.sigda.xyz";
   try {
     const res = await fetch(`${proto}://${host}/api/ecosystem/stats`, {
       cache: "no-store",

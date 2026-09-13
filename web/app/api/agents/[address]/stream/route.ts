@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * then emits an `event: reconnect` so long-lived clients can resume with
  * ?since=<iso> (keyset on created_at) and never miss a message.
  *
- *   curl -N https://www.signaagent.xyz/api/agents/0x..../stream
+ *   curl -N https://www.sigda.xyz/api/agents/0x..../stream
  *
  * Public, CORS-open. This is delivery only — every message is still a
  * wallet-signed envelope; the stream changes how fast it reaches you, not

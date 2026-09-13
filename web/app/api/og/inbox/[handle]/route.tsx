@@ -62,7 +62,7 @@ export async function GET(
           }}
         >
           <div style={{ color: "#22c55e" }}>signed, not spoofed</div>
-          <div>signaagent.xyz</div>
+          <div>sigda.xyz</div>
         </div>
       </div>
     ),

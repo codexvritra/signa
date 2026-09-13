@@ -33,7 +33,7 @@
  *   const reply = await gatewayRespond({ prompt: "..." });
  */
 
-export const SIGNA_DEFAULT_BASE_URL = "https://www.signaagent.xyz";
+export const SIGNA_DEFAULT_BASE_URL = "https://www.sigda.xyz";
 
 // ---------- shared shapes ----------
 

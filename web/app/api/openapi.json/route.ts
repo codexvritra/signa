@@ -29,7 +29,7 @@ export const revalidate = 300;
  */
 
 const SERVERS = [
-  { url: "https://www.signaagent.xyz", description: "production" },
+  { url: "https://www.sigda.xyz", description: "production" },
 ];
 
 const TAGS = [
@@ -577,7 +577,7 @@ const PATHS: Record<string, unknown> = {
       tags: ["OpenAI-compat (v1)"],
       summary: "OpenAI-compatible chat completion — drop-in for openai SDKs",
       description:
-        "Identical request + response shape to OpenAI's `/v1/chat/completions`. Set your OpenAI client baseURL to `https://www.signaagent.xyz/api/v1` and SIGDA becomes a drop-in. Wallet-signed replies + source attribution are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Streaming (stream:true) returns 501 in v1; SSE is roadmap.",
+        "Identical request + response shape to OpenAI's `/v1/chat/completions`. Set your OpenAI client baseURL to `https://www.sigda.xyz/api/v1` and SIGDA becomes a drop-in. Wallet-signed replies + source attribution are surfaced in a top-level `signa` extension block that OpenAI clients ignore. Streaming (stream:true) returns 501 in v1; SSE is roadmap.",
       requestBody: {
         required: true,
         content: {
@@ -1345,7 +1345,7 @@ const SPEC = {
     version: "1.0.0",
     description:
       "Wallet-native messaging + a decentralized OS for AI agents on Robinhood Chain. Every public endpoint is CORS-open. Mutating endpoints are gated by EIP-191 wallet signatures, never by API keys.",
-    contact: { name: "SIGDA", url: "https://www.signaagent.xyz" },
+    contact: { name: "SIGDA", url: "https://www.sigda.xyz" },
   },
   servers: SERVERS,
   tags: TAGS,
@@ -1360,7 +1360,7 @@ const SPEC = {
         "Mutating endpoints. EIP-191 personal_sign over a canonical preimage. 5-minute replay window enforced via SIG_MAX_AGE_MS.",
       hmac: "Partner webhooks (e.g. /api/webhooks/miroshark) — HMAC-SHA256 over the raw body.",
     },
-    sdk: "https://www.signaagent.xyz/api — TypeScript SDK example snippets.",
+    sdk: "https://www.sigda.xyz/api — TypeScript SDK example snippets.",
   },
 };
 

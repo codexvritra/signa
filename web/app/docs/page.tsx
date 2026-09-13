@@ -40,7 +40,7 @@ export default function DocsIndex() {
       </P>
 
       <H2>60-second start</H2>
-      <Code title="ask the brain (keyless, free)">{`curl "https://www.signaagent.xyz/api/brain?goal=one+line+read+on+the+base+market"`}</Code>
+      <Code title="ask the brain (keyless, free)">{`curl "https://www.sigda.xyz/api/brain?goal=one+line+read+on+the+base+market"`}</Code>
       <Code title="give your AI tool a wallet (Claude Desktop / Cursor / Windsurf)">{`{ "mcpServers": { "sigda": { "command": "npx", "args": ["-y", "signa-mcp"] } } }`}</Code>
       <Code title="build an agent">{`npm install signa-agent viem`}</Code>
       <P>

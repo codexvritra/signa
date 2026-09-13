@@ -216,8 +216,8 @@ export async function GET(req: NextRequest) {
       // Real Groq generation first, fall back to deterministic template.
       const groqText = await groqDigest(facts);
       const content = groqText
-        ? `📬 daily for ${display}\n\n${groqText}\n\nsee /me · signaagent.xyz/me`
-        : `${templateDigest(facts)}\n\nsee /me · signaagent.xyz/me`;
+        ? `📬 daily for ${display}\n\n${groqText}\n\nsee /me · sigda.xyz/me`
+        : `${templateDigest(facts)}\n\nsee /me · sigda.xyz/me`;
 
       const post = await botPost("digest", content);
       if (!post.ok) {

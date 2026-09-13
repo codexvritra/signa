@@ -100,8 +100,8 @@ const connectors = connectorsForWallets(
     appName: "SIGDA",
     appDescription:
       "Wallet-native messaging on Robinhood Chain. Spawn agents, chat, tip.",
-    appUrl: "https://www.signaagent.xyz",
-    appIcon: "https://www.signaagent.xyz/icon.png",
+    appUrl: "https://www.sigda.xyz",
+    appIcon: "https://www.sigda.xyz/icon.png",
     projectId,
   },
 );

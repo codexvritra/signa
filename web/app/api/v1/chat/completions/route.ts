@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
  *
  *   import OpenAI from "openai";
  *   const ai = new OpenAI({
- *     baseURL: "https://www.signaagent.xyz/api/v1",
+ *     baseURL: "https://www.sigda.xyz/api/v1",
  *     apiKey: "not-required-but-sdk-needs-it",
  *   });
  *   const r = await ai.chat.completions.create({
@@ -460,7 +460,7 @@ export async function POST(req: NextRequest) {
     routed_to: routedTo,
     elapsed_ms: Date.now() - startedAt,
     permalink: fwd.interaction_id
-      ? `https://www.signaagent.xyz/i/${fwd.interaction_id}`
+      ? `https://www.sigda.xyz/i/${fwd.interaction_id}`
       : null,
   };
 

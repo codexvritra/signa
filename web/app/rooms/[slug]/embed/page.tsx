@@ -11,7 +11,7 @@ import { RoomEmbedClient } from "./RoomEmbedClient";
  *
  * Designed to be embedded on any partner site with one tag:
  *
- *   <iframe src="https://www.signaagent.xyz/rooms/<slug>/embed"
+ *   <iframe src="https://www.sigda.xyz/rooms/<slug>/embed"
  *           style="width:100%;height:560px;border:0"
  *           allow="clipboard-write"
  *           sandbox="allow-scripts allow-same-origin allow-popups
