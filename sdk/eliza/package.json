@@ -11,7 +11,11 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
@@ -32,13 +36,15 @@
   "homepage": "https://www.sigda.xyz/frameworks#eliza",
   "peerDependencies": {
     "@elizaos/core": "^1.0.0",
-    "sigda-agent": "^0.2.0"
+    "sigda-agent": "^0.15.0"
   },
   "devDependencies": {
-    "@elizaos/core": "^1.0.0",
-    "sigda-agent": "^0.2.0",
-    "typescript": "^5.4.0",
-    "@types/node": "^20.0.0"
+    "@elizaos/core": "^1.7.2",
+    "@types/node": "^20.19.43",
+    "sigda-agent": "^0.15.0",
+    "typescript": "^5.9.3"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

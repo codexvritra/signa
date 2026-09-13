@@ -11,7 +11,11 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
@@ -31,16 +35,18 @@
   "homepage": "https://www.sigda.xyz/frameworks#vercel-ai-sdk",
   "peerDependencies": {
     "ai": "^5.0.0",
-    "sigda-agent": "^0.2.0"
+    "sigda-agent": "^0.15.0"
   },
   "dependencies": {
-    "zod": "^3.23.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "ai": "^5.0.0",
-    "sigda-agent": "^0.2.0",
-    "typescript": "^5.4.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.19.43",
+    "ai": "^5.0.257",
+    "sigda-agent": "^0.15.0",
+    "typescript": "^5.9.3"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

@@ -38,12 +38,12 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "sigda-agent": "^0.1.0",
-    "viem": "^2.0.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "sigda-agent": "^0.15.0",
+    "viem": "^2.56.5"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3"
   }
 }
