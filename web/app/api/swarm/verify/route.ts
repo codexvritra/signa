@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       if (!sigOk) {
         sigOk = await verifyMessage({
           address: m.from as `0x${string}`,
-          message: "SIGDA " + message.slice("SIGDA ".length),
+          message: "SIGNA " + message.slice("SIGDA ".length),
           signature: m.signature as `0x${string}`,
         });
       }

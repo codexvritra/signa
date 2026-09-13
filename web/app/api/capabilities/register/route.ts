@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     if (!sigOk && registerMessage.startsWith("SIGDA ")) {
       sigOk = await verifyMessage({
         address: provider as `0x${string}`,
-        message: "SIGDA " + registerMessage.slice("SIGDA ".length),
+        message: "SIGNA " + registerMessage.slice("SIGDA ".length),
         signature: signature as `0x${string}`,
       });
     }

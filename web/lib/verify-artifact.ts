@@ -296,7 +296,7 @@ export async function verifyArtifact(a: VerifyInput): Promise<VerifyResult> {
   // marker should stop verifying — retry against the pre-rebrand preimage
   // before giving up, so historical signatures stay re-verifiable forever.
   if (kind !== "raw" && !matched(recovered) && preimage.startsWith("SIGDA ")) {
-    const legacyPreimage = "SIGDA " + preimage.slice("SIGDA ".length);
+    const legacyPreimage = "SIGNA " + preimage.slice("SIGDA ".length);
     const legacyRecovered = await tryRecover(legacyPreimage);
     if (matched(legacyRecovered) || (!expected && legacyRecovered && !recovered)) {
       preimage = legacyPreimage;

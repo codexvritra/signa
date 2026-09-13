@@ -79,7 +79,7 @@ async function recovers(message: string, signature: string, expected: string): P
     // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed
     // preimage so an already-signed or stale-client deal step still verifies.
     if (message.startsWith("SIGDA ")) {
-      const legacy = "SIGDA " + message.slice("SIGDA ".length);
+      const legacy = "SIGNA " + message.slice("SIGDA ".length);
       const legacyRec = await recoverMessageAddress({ message: legacy, signature: signature as `0x${string}` });
       return norm(legacyRec) === norm(expected);
     }

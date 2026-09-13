@@ -16,7 +16,7 @@ const RESERVED = new Set([
   "agent", "signaagent", "sigdaagent", "official", "team", "base", "bankr", "aeon",
 ]);
 
-/** Strip any SIGDA suffix (you@sigda, you@signa, you@signaagent.xyz, you.sigda) → bare handle. */
+/** Strip any SIGDA suffix (you@sigda, you@signa, you@sigda.xyz, you.sigda) → bare handle. */
 export function normalizeHandle(raw: string): string | null {
   let bare = (raw ?? "").trim().toLowerCase();
   bare = bare.replace(/@sig(?:n|d)a(?:agent)?(?:\.[a-z]+)*$/i, "").replace(/\.sig(?:n|d)a$/i, "");
@@ -98,7 +98,7 @@ export async function claimHandle(
   // Pre-rebrand compatibility: retry against the legacy "SIGDA"-prefixed
   // preimage so a stale cached client doesn't fail to claim.
   if (recovered !== address && message.startsWith("SIGDA ")) {
-    const legacy = "SIGDA " + message.slice("SIGDA ".length);
+    const legacy = "SIGNA " + message.slice("SIGDA ".length);
     try { recovered = (await recoverMessageAddress({ message: legacy, signature: a.signature as Hex })).toLowerCase(); } catch { /* invalid */ }
   }
   if (recovered !== address) return { ok: false, error: "signature does not match the connected wallet" };

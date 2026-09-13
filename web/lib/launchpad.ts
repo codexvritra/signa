@@ -274,7 +274,7 @@ export async function settleJob(db: SupabaseClient, origin: string, agent: Launc
     // Pre-rebrand compatibility: a worker on an old cached build may have
     // signed the legacy "SIGDA"-prefixed preimage — don't refuse payment for it.
     if (recovered !== job.worker.toLowerCase() && pre.startsWith("SIGDA ")) {
-      const legacyPre = "SIGDA " + pre.slice("SIGDA ".length);
+      const legacyPre = "SIGNA " + pre.slice("SIGDA ".length);
       recovered = (await recoverMessageAddress({ message: legacyPre, signature: job.result_sig as Hex })).toLowerCase();
     }
     worker_verified = recovered === job.worker.toLowerCase();

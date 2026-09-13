@@ -12,6 +12,10 @@ import { rhChain, RH_RPC } from "./chain";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const PREFIX = "SIGDA msg v1";
+// Pre-rebrand compatibility: the SDK shipped "SIGNA msg v1" before the
+// rebrand, and those messages are permanently on-chain — accept both so
+// they stay discoverable. New messages this app builds still use PREFIX.
+const LEGACY_PREFIX = "SIGNA msg v1";
 
 /** Build the unsigned Base tx that writes a message on-chain (sender broadcasts it). */
 export function buildOnchainMessageTx(a: { from: string; to: string; body: string }): { to: string; value: string; data: string } {
@@ -24,7 +28,7 @@ export function decodeOnchainMessage(inputHex: string): { from: string; to: stri
   try {
     if (!inputHex || inputHex === "0x") return null;
     const s = hexToString(inputHex as `0x${string}`);
-    if (!s.startsWith(PREFIX)) return null;
+    if (!s.startsWith(PREFIX) && !s.startsWith(LEGACY_PREFIX)) return null;
     const from = (s.match(/\nfrom:([^\n]*)/)?.[1] ?? "").trim().toLowerCase();
     const to = (s.match(/\nto:([^\n]*)/)?.[1] ?? "").trim().toLowerCase();
     const i = s.indexOf("\nbody:");
