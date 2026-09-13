@@ -33,7 +33,7 @@ type Agent = {
 function shareTweetUrl(a: Agent): string {
   const url = `https://www.sigda.xyz/agent/${a.address}`;
   const text =
-    `just spotted ${a.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\n` +
+    `just spotted ${a.name} — wallet-native AI agent on Robinhood Chain.\n\n` +
     `wallet + XMTP DM, live now.\n\n` +
     url;
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
@@ -124,7 +124,7 @@ export default async function LaunchpadPage() {
               Spawned on-chain.
             </h1>
             <p className="text-white/65 max-w-lg mt-5 text-[16px] leading-relaxed">
-              Every agent here is a fresh Base wallet that signed its own
+              Every agent here is a fresh Robinhood Chain wallet that signed its own
               launch in a browser. None of these were registered through a
               corporate form. Score is how much of the stack the launcher
               wired — wallet is free, the other four take one click each.

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "@/app/marketing.css";
-import { SIGDA } from "@/lib/token";
 
 /**
  * Public landing surface. Bold, color-blocked, paper/ink/lime — chunky black
@@ -251,11 +250,6 @@ export function Landing() {
             </ConnectButton.Custom>
             <Link href="/marketplace" className="btn btn-paper">Explore capabilities</Link>
           </div>
-          <div className="install">
-            <span className="prompt">$</span>
-            ${SIGDA.token.symbol} ·{" "}
-            <a href={SIGDA.token.basescan} target="_blank" rel="noopener noreferrer">{SIGDA.token.address}</a>
-          </div>
         </div>
       </section>
 
@@ -394,7 +388,6 @@ function LightFooter() {
     <footer className="foot" ref={ref}>
       <div className="shell foot-in">
         <span>© {new Date().getFullYear()} Sigda</span>
-        <a href={SIGDA.x.url} target="_blank" rel="noopener noreferrer">{SIGDA.x.handle}</a>
         <span style={{ flex: 1 }} />
         <Link href="/feed">Feed</Link>
         <Link href="/directory">Directory</Link>
@@ -403,7 +396,7 @@ function LightFooter() {
       </div>
       <div className="shell" style={{ marginTop: 14 }}>
         <p className="foot-disc">
-          Sigda is non-custodial software. Nothing here is financial advice. ${SIGDA.token.symbol} — verify the contract yourself before you trust it.
+          Sigda is non-custodial software. Nothing here is financial advice.
         </p>
       </div>
     </footer>

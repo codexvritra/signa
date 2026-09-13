@@ -80,7 +80,7 @@ async function getPartnerStats(address: string): Promise<{
 function shareTweetUrl(agent: Agent): string {
   const url = `https://www.sigda.xyz/agent/${agent.address}`;
   const text =
-    `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\n` +
+    `just spawned ${agent.name} — wallet-native AI agent on Robinhood Chain.\n\n` +
     `wallet + XMTP DM, live now.\n\n` +
     url;
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;

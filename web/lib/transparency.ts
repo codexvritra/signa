@@ -23,7 +23,12 @@ import { leafHash, merkleRoot, inclusionPath, consistencyProof } from "./merkle-
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
-export const LOG_SIGNER_ACCOUNT = privateKeyToAccount(keccak256(toBytes("sigda:transparency-log:v1")));
+// NOT rebranded — keccak256 key-derivation seed, not a display string.
+// lib/verify-artifact.ts independently derives the same expected signer
+// from "signa:transparency-log:v1"; changing this seed changes the wallet
+// address and breaks every previously-signed checkpoint against the
+// universal verifier and every prior inclusion/consistency proof.
+export const LOG_SIGNER_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:transparency-log:v1")));
 export const LOG_SIGNER = LOG_SIGNER_ACCOUNT.address.toLowerCase();
 
 /** One signed artifact in the network ledger. */

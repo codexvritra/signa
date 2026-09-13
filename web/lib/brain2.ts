@@ -25,7 +25,12 @@ const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
  * anyone can re-verify it at /api/verify (kind "aletheia"). Trust-but-verify AI.
  */
 export const ALETHEIA_VERSION = "Aletheia 1.0";
-export const ALETHEIA_ACCOUNT = privateKeyToAccount(keccak256(toBytes("sigda:aletheia:v1")));
+// NOT rebranded — this is a keccak256 key-derivation seed, not a display
+// string. lib/verify-artifact.ts independently derives the same expected
+// signer from "signa:aletheia:v1"; changing this seed changes the wallet
+// address and breaks every previously-signed Aletheia receipt against the
+// universal verifier. Keep in lockstep with verify-artifact.ts's ALETHEIA.
+export const ALETHEIA_ACCOUNT = privateKeyToAccount(keccak256(toBytes("signa:aletheia:v1")));
 export const ALETHEIA = ALETHEIA_ACCOUNT.address.toLowerCase();
 
 export function aletheiaPreimage(a: { ts: number; goal: string; tools: string[]; answer: string }): string {

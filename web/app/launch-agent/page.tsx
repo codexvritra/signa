@@ -490,7 +490,7 @@ function LaunchSuccess({
           <div className="flex items-center gap-2">
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                `just spawned ${agent.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\nwallet + XMTP DM, live now.\n\nhttps://www.sigda.xyz/agent/${agent.address}`,
+                `just spawned ${agent.name} — wallet-native AI agent on Robinhood Chain.\n\nwallet + XMTP DM, live now.\n\nhttps://www.sigda.xyz/agent/${agent.address}`,
               )}`}
               target="_blank"
               rel="noreferrer"

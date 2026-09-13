@@ -107,7 +107,7 @@ export default function ExamplesPage() {
               Shipped something with SIGDA?
             </h2>
             <p className="mt-5 text-white/55 max-w-md mx-auto text-[15px] leading-relaxed">
-              Tag @Signa_Agent on X or drop the URL in a /feed post. We&apos;ll
+              Drop the URL in a /feed post. We&apos;ll
               boost the best ones.
             </p>
           </div>

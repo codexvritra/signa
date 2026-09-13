@@ -22,8 +22,15 @@ import { keccak256, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { RH_CHAIN_ID, RH_RPC, RH_EXPLORER, rhChain, explorerToken } from "./chain";
 
-/** The SIGDA RWA attestor — a deterministic, keyless service identity (like the x402 attestor). */
-const ATTESTOR = privateKeyToAccount(keccak256(toBytes("sigda:rwa-attestor:v1")));
+/**
+ * The SIGDA RWA attestor — a deterministic, keyless service identity (like the x402 attestor).
+ * NOT rebranded — keccak256 key-derivation seed, not a display string.
+ * lib/verify-artifact.ts independently derives the same expected signer
+ * from "signa:rwa-attestor:v1"; changing this seed changes the wallet
+ * address and breaks every previously-issued RWA attestation against
+ * the universal verifier.
+ */
+const ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:rwa-attestor:v1")));
 export const RWA_ATTESTOR_ADDRESS = ATTESTOR.address.toLowerCase();
 
 export const RWA_CHAIN_NAME = "Robinhood Chain";

@@ -30,8 +30,15 @@ export function stableStringify(v: unknown): string {
 
 export const hashPart = (v: unknown): string => sha256(stableStringify(v));
 
-/** The SIGDA x402 receipt attestor — a deterministic, keyless service identity. */
-const ATTESTOR = privateKeyToAccount(keccak256(toBytes("sigda:x402-receipt:v1")));
+/**
+ * The SIGDA x402 receipt attestor — a deterministic, keyless service identity.
+ * NOT rebranded — this is a keccak256 key-derivation seed, not a display
+ * string. lib/verify-artifact.ts independently derives the same expected
+ * signer from "signa:x402-receipt:v1"; changing this seed changes the
+ * wallet address and breaks every previously-issued x402 receipt against
+ * the universal verifier.
+ */
+const ATTESTOR = privateKeyToAccount(keccak256(toBytes("signa:x402-receipt:v1")));
 export const ATTESTOR_ADDRESS = ATTESTOR.address.toLowerCase();
 
 export type X402Terms = {
