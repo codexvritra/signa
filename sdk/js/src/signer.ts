@@ -1,15 +1,15 @@
 /**
  * v4.9 — custody-delegated signing.
  *
- * SIGNA's model is "the wallet is the credential": agents sign EIP-191
+ * SIGDA's model is "the wallet is the credential": agents sign EIP-191
  * messages, EIP-3009 payment authorizations, and log/checkpoint preimages.
  * The one soft spot is *where the private key lives*. This module lets the key
  * live in an external HSM/TEE custody service (1Claw, Turnkey, Privy, AWS KMS,
  * …) instead of in the agent process — the agent submits a preimage, the
- * custody service signs it, SIGNA posts the signature. The raw key never
+ * custody service signs it, SIGDA posts the signature. The raw key never
  * touches the agent.
  *
- * `SignaSigner` is the structural seam SIGNA needs (a viem `PrivateKeyAccount`
+ * `SigdaSigner` is the structural seam SIGDA needs (a viem `PrivateKeyAccount`
  * already satisfies it, so nothing else changes). `remoteSigner` builds one
  * from any async sign function. `oneClawSigner` is a ready 1Claw Intents-API
  * implementation built on top.
@@ -18,10 +18,10 @@ import { toAccount } from "viem/accounts";
 import { hashMessage, hashTypedData, type Hex } from "viem";
 
 /**
- * The minimal signer SIGNA uses everywhere. A viem `PrivateKeyAccount`
+ * The minimal signer SIGDA uses everywhere. A viem `PrivateKeyAccount`
  * satisfies it (local key); a custody-backed account satisfies it too.
  */
-export interface SignaSigner {
+export interface SigdaSigner {
   address: Hex;
   signMessage(args: { message: string | { raw: Hex } }): Promise<Hex>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,7 +29,7 @@ export interface SignaSigner {
 }
 
 /**
- * Build a SIGNA-compatible account from a remote/custodied signer. You supply
+ * Build a SIGDA-compatible account from a remote/custodied signer. You supply
  * `address` (the wallet the custody service controls) and `sign(payload)`,
  * which receives either a 32-byte EIP-191 message hash or a 32-byte EIP-712
  * digest and returns the 65-byte signature. The agent never holds the key.
@@ -39,13 +39,13 @@ export interface SignaSigner {
  *   address: "0x…",
  *   sign: async ({ hash }) => myHsm.signDigest(hash), // returns 0x…65-byte sig
  * });
- * const agent = new SignaAgent({ account });
+ * const agent = new SigdaAgent({ account });
  * ```
  */
 export function remoteSigner(opts: {
   address: Hex;
   sign: (payload: { hash: Hex; kind: "message" | "typedData" }) => Promise<Hex>;
-}): SignaSigner {
+}): SigdaSigner {
   const account = toAccount({
     address: opts.address,
     async signMessage({ message }) {
@@ -56,16 +56,16 @@ export function remoteSigner(opts: {
       return opts.sign({ hash: hashTypedData(typedData), kind: "typedData" });
     },
     async signTransaction() {
-      throw new Error("remoteSigner: signTransaction is not used by SIGNA (messages + EIP-3009 only)");
+      throw new Error("remoteSigner: signTransaction is not used by SIGDA (messages + EIP-3009 only)");
     },
   });
-  return account as unknown as SignaSigner;
+  return account as unknown as SigdaSigner;
 }
 
 /**
- * 1Claw custody signer. The private key stays in 1Claw's HSM/TEE; SIGNA submits
- * the preimage hash as an Intent and 1Claw returns the signature. Point a SIGNA
- * agent at it with `new SignaAgent({ account: oneClawSigner({...}) })`.
+ * 1Claw custody signer. The private key stays in 1Claw's HSM/TEE; SIGDA submits
+ * the preimage hash as an Intent and 1Claw returns the signature. Point a SIGDA
+ * agent at it with `new SigdaAgent({ account: oneClawSigner({...}) })`.
  *
  * The Intents API wire shape is configurable (`endpoint` + `request`/`parse`)
  * so it tracks 1Claw's API exactly without code changes; the defaults target
@@ -89,7 +89,7 @@ export function oneClawSigner(opts: {
   /** Override the endpoint path (default /v1/intents/sign). */
   endpoint?: string;
   fetchImpl?: typeof fetch;
-}): SignaSigner {
+}): SigdaSigner {
   const baseUrl = (opts.baseUrl ?? "https://api.1claw.xyz").replace(/\/$/, "");
   const path = opts.endpoint ?? "/v1/intents/sign";
   const doFetch = opts.fetchImpl ?? fetch;

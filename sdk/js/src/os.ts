@@ -1,16 +1,16 @@
 /**
- * v0.99 — SignaOS: the agent OS for Base.
+ * v0.99 — SigdaOS: the agent OS for Base.
  *
  * The connective operating system *between* agents. Single-agent runtimes
  * (AIOS, ElizaOS) are the kernel for one agent's LLM + tools + memory.
- * SignaOS is the layer above that: the IPC, identity, payments, memory,
+ * SigdaOS is the layer above that: the IPC, identity, payments, memory,
  * discovery and compute services that let agents from ANY project talk,
  * pay, and remember each other — with the wallet as the only credential.
  *
  * Boot an agent on nothing but a private key and get the six syscalls:
  *
  * ```ts
- * import { bootAgent } from "signa-agent";
+ * import { bootAgent } from "sigda-agent";
  *
  * const os = bootAgent({ privateKey: process.env.SIGNA_PRIVATE_KEY! });
  *
@@ -29,8 +29,8 @@
  * identity, and the way the agent buys its own brain.
  */
 import type { Hex } from "viem";
-import { SignaAgent } from "./index.js";
-import type { SignaDm, SendOptions, RegisterBridgeOptions } from "./types.js";
+import { SigdaAgent } from "./index.js";
+import type { SigdaDm, SendOptions, RegisterBridgeOptions } from "./types.js";
 import { PERMIT2_ADDRESS, PERMIT2_WITNESS_TYPES, networkToChainId } from "./paid-dm.js";
 
 const SURPLUS_INFERENCE = "https://www.surplusintelligence.ai/x402/api/inference/v1";
@@ -47,7 +47,7 @@ export interface BootOptions {
   /**
    * v4.6 — auto-sign a "received" delivery ack for every inbound message the
    * receive loop delivers, so senders get proof of delivery for free. Default
-   * false. You can always call {@link SignaOS.ack} manually (e.g. "read").
+   * false. You can always call {@link SigdaOS.ack} manually (e.g. "read").
    */
   autoAck?: boolean;
 }
@@ -58,14 +58,14 @@ export interface MemoryEntry {
   ts: number;
 }
 
-/** Boot an agent on a private key alone and get the SignaOS syscalls. */
-export function bootAgent(opts: BootOptions): SignaOS {
-  return new SignaOS(opts);
+/** Boot an agent on a private key alone and get the SigdaOS syscalls. */
+export function bootAgent(opts: BootOptions): SigdaOS {
+  return new SigdaOS(opts);
 }
 
-export class SignaOS {
+export class SigdaOS {
   /** The underlying wallet-signed messaging agent. */
-  readonly agent: SignaAgent;
+  readonly agent: SigdaAgent;
   private readonly memSlug: string;
   private readonly inferenceBase: string;
   private readonly computeModel: string;
@@ -73,12 +73,12 @@ export class SignaOS {
   private readonly baseUrl: string;
 
   constructor(opts: BootOptions) {
-    this.agent = new SignaAgent({ privateKey: opts.privateKey, baseUrl: opts.baseUrl, autoAck: opts.autoAck });
+    this.agent = new SigdaAgent({ privateKey: opts.privateKey, baseUrl: opts.baseUrl, autoAck: opts.autoAck });
     this.memSlug = `mem-${this.agent.address.slice(2, 12)}`;
     this.inferenceBase = (opts.inferenceBase ?? SURPLUS_INFERENCE).replace(/\/$/, "");
     this.computeModel = opts.computeModel ?? "claude-opus-4.5";
-    this.label = opts.label ?? "SignaOS agent";
-    this.baseUrl = (opts.baseUrl ?? "https://www.signaagent.xyz").replace(/\/$/, "");
+    this.label = opts.label ?? "SigdaOS agent";
+    this.baseUrl = (opts.baseUrl ?? "https://www.sigda.xyz").replace(/\/$/, "");
   }
 
   // ─────────────── syscall: identity ───────────────
@@ -89,19 +89,19 @@ export class SignaOS {
 
   // ─────────────── syscall: message (IPC) ───────────────
   /** Send a wallet-signed message to any agent on any project. */
-  async message(to: string, body: string, opts?: SendOptions): Promise<SignaDm> {
+  async message(to: string, body: string, opts?: SendOptions): Promise<SigdaDm> {
     return this.agent.send(to, body, opts);
   }
   /** Reply to a received message. */
-  async reply(msg: SignaDm, body: string, opts?: SendOptions): Promise<SignaDm> {
+  async reply(msg: SigdaDm, body: string, opts?: SendOptions): Promise<SigdaDm> {
     return this.agent.reply(msg, body, opts);
   }
   /** Read the agent's inbox. */
-  async inbox(limit = 50): Promise<SignaDm[]> {
+  async inbox(limit = 50): Promise<SigdaDm[]> {
     return this.agent.inbox({ limit });
   }
   /** Subscribe to inbound messages (the OS delivers them to your handler). */
-  onMessage(handler: (msg: SignaDm) => void | Promise<void>): this {
+  onMessage(handler: (msg: SigdaDm) => void | Promise<void>): this {
     this.agent.on("dm", handler);
     return this;
   }
@@ -113,7 +113,7 @@ export class SignaOS {
    * "Delivered" becomes a wallet signature anyone can re-verify (/api/verify,
    * kind `delivery_ack`), not a server flag. Pass a message object or its id.
    */
-  async ack(message: string | SignaDm, status: "received" | "read" = "received"): Promise<unknown> {
+  async ack(message: string | SigdaDm, status: "received" | "read" = "received"): Promise<unknown> {
     return this.agent.ack(message, status);
   }
   /**
@@ -135,11 +135,11 @@ export class SignaOS {
    * so only they can read it (the node stores ciphertext only), still
    * wallet-signed so the sender is attributable.
    */
-  async messageEncrypted(to: string, plaintext: string, opts?: SendOptions): Promise<SignaDm> {
+  async messageEncrypted(to: string, plaintext: string, opts?: SendOptions): Promise<SigdaDm> {
     return this.agent.sendEncrypted(to, plaintext, opts);
   }
   /** Decrypt a received message (returns plaintext, or the body unchanged if it wasn't encrypted). */
-  async decrypt(msg: SignaDm): Promise<string | null> {
+  async decrypt(msg: SigdaDm): Promise<string | null> {
     return this.agent.decrypt(msg);
   }
 
@@ -152,7 +152,7 @@ export class SignaOS {
    *   // later: sub.stop();
    */
   stream(
-    handler: (msg: SignaDm) => void | Promise<void>,
+    handler: (msg: SigdaDm) => void | Promise<void>,
     opts: { signal?: AbortSignal } = {},
   ): { stop: () => void } {
     const url = `${this.baseUrl}/api/agents/${this.agent.address.toLowerCase()}/stream`;
@@ -199,7 +199,7 @@ export class SignaOS {
                     const dm = JSON.parse(m[1]);
                     if (dm && dm.body) {
                       since = dm.created_at ?? since;
-                      await handler(dm as SignaDm);
+                      await handler(dm as SigdaDm);
                     }
                   } catch {
                     /* skip malformed frame */
@@ -275,7 +275,7 @@ export class SignaOS {
       await this.agent.rooms.create({
         name: `memory · ${this.agent.address.slice(0, 8)}`,
         slug: this.memSlug,
-        description: "Wallet-signed agent memory (SignaOS).",
+        description: "Wallet-signed agent memory (SigdaOS).",
         is_public: true,
       });
     } catch {
@@ -304,9 +304,9 @@ export class SignaOS {
   }
   /**
    * Invoke another agent's capability by name and get back a wallet-signed,
-   * verifiable result — keyless. e.g. `os.invoke("bankr.resolve", "@mac_eth")`
-   * or `os.invoke("root.market")`. The returned result carries the gateway's
-   * EIP-191 signature so any client can re-verify it.
+   * verifiable result — keyless. e.g. `os.invoke("token.price", "ethereum")`
+   * or `os.invoke("defi.tvl", "aave")`. The returned result carries the
+   * gateway's EIP-191 signature so any client can re-verify it.
    */
   async invoke(capability: string, arg = ""): Promise<{ output: unknown; signature: string; gateway: string; [k: string]: unknown }> {
     const r = await fetch(`${this.baseUrl}/api/capabilities/invoke`, {
@@ -351,7 +351,7 @@ export class SignaOS {
     const method = (spec.method ?? "GET").toUpperCase();
     const price = spec.priceUsdc ?? 0;
     const preimage = [
-      "SIGNA capability register v1",
+      "SIGDA capability register v1",
       `ts:${ts}`,
       `name:${spec.name}`,
       `provider:${provider}`,
@@ -386,7 +386,7 @@ export class SignaOS {
    * Base, keyless. Probes the capability; if it returns an HTTP 402 challenge,
    * signs an EIP-3009 USDC `transferWithAuthorization` authorizing the asked
    * amount to the provider, attaches it as the `X-PAYMENT` header, and retries.
-   * The provider settles the authorization out of band — SIGNA never custodies
+   * The provider settles the authorization out of band — SIGDA never custodies
    * funds. Free capabilities just return immediately.
    *
    * `maxUsdc` is a safety ceiling: if the capability asks for more, this throws
@@ -472,7 +472,7 @@ export class SignaOS {
 
   // ─────────────── the brain: reason on decentralized inference + act through the OS ───────────────
   /**
-   * The SIGNA brain. Give it a goal in plain language; it reasons on
+   * The SIGDA brain. Give it a goal in plain language; it reasons on
    * decentralized inference, decides which capabilities on the network to
    * call, invokes them for real, and answers from the live results. Returns
    * the answer plus the plan, the real tool outputs, and a wallet-signed

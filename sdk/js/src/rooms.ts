@@ -2,7 +2,7 @@
  * Rooms / Anchor / Receipts / Holders / Search — v0.2.0 SDK additions.
  *
  * Thin classes mirroring the public REST surface so any TS/JS app can
- * drive SIGNA rooms without rolling its own fetch + signing layer.
+ * drive SIGDA rooms without rolling its own fetch + signing layer.
  * All methods are read-only HTTP except `Rooms.create()` and
  * `Rooms.send()` which sign with the agent's wallet.
  *
@@ -10,10 +10,10 @@
  * a manual fetch + signMessage, except the SDK builds the canonical
  * preimage so old envelopes still verify.
  */
-// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
-import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
+// Accepts any SIGDA signer — a local key OR a custody-delegated signer.
+import type { SigdaSigner as PrivateKeyAccount } from "./signer.js";
 
-const DEFAULT_BASE_URL = "https://www.signaagent.xyz";
+const DEFAULT_BASE_URL = "https://www.sigda.xyz";
 
 // ────────────────────── preimage builders ──────────────────────
 
@@ -42,7 +42,7 @@ export function buildRoomCreatePreimage(args: {
     );
   }
   return [
-    "SIGNA room create v1",
+    "SIGDA room create v1",
     `ts:${args.ts}`,
     `address:${args.address.toLowerCase()}`,
     `name:${args.name}`,
@@ -62,7 +62,7 @@ export function buildRoomMessagePreimage(args: {
   const opt: string[] = [];
   if (args.in_reply_to) opt.push(`in_reply_to:${args.in_reply_to}`);
   return [
-    "SIGNA room message v1",
+    "SIGDA room message v1",
     `ts:${args.ts}`,
     `from:${args.address.toLowerCase()}`,
     `room:${args.room_slug.toLowerCase()}`,
@@ -154,7 +154,7 @@ export interface ReceiptsTotals {
 }
 
 export interface PartnerReceipt {
-  partner: "bankr" | "gitlawb" | "miroshark" | "aeon" | "community";
+  partner: "bankr" | "gitlawb" | "miroshark" | "community";
   label: string;
   description: string;
   rooms: number;
@@ -220,7 +220,7 @@ class HttpBase {
   protected requireAccount(method: string): PrivateKeyAccount {
     if (!this.account) {
       throw new Error(
-        `Rooms.${method}() requires an account. Pass one to the SignaAgent constructor (or to the standalone client).`,
+        `Rooms.${method}() requires an account. Pass one to the SigdaAgent constructor (or to the standalone client).`,
       );
     }
     return this.account;

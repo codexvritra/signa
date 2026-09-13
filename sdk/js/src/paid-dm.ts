@@ -13,21 +13,21 @@
  * a one-time `approve(PERMIT2, max)` on the asset, then every payment after
  * that is a pure signature.
  *
- * The signature authorizes `spender` (the recipient's own wallet, in SIGNA's
+ * The signature authorizes `spender` (the recipient's own wallet, in SIGDA's
  * default non-custodial flow — no facilitator required) to pull `amount`
  * base units of `token` from the sender, to `payTo`. The sender never
  * broadcasts a tx; settlement happens out of band. The signing wallet's
  * funds only move when the recipient redeems it.
  */
-// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
-import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
+// Accepts any SIGDA signer — a local key OR a custody-delegated signer.
+import type { SigdaSigner as PrivateKeyAccount } from "./signer.js";
 import { keccak256, toBytes, type Hex } from "viem";
 
 /** Canonical Permit2 address — identical on every EVM chain (CREATE2-deployed). */
 export const PERMIT2_ADDRESS = "0x000000000022D473030F116dDEE9F6B43aC78BA3" as const;
 
-/** Scopes a Permit2 witness signature to SIGNA's paid-DM surface — must match web/lib/permit2.ts's `serviceId("paid-dm")`. */
-export const PAID_DM_SERVICE_ID: Hex = keccak256(toBytes("signa:x402:paid-dm:v1"));
+/** Scopes a Permit2 witness signature to SIGDA's paid-DM surface — must match web/lib/permit2.ts's `serviceId("paid-dm")`. */
+export const PAID_DM_SERVICE_ID: Hex = keccak256(toBytes("sigda:x402:paid-dm:v1"));
 
 export interface PaymentRequirements {
   scheme: string;

@@ -17,14 +17,14 @@ export function buildDmPreimage(
   if (opts.body_type && opts.body_type !== "text") {
     optLines.push(`body_type:${opts.body_type}`);
   }
-  if (opts.protocol && opts.protocol !== "signa.dm.v1") {
+  if (opts.protocol && opts.protocol !== "sigda.dm.v1") {
     optLines.push(`protocol:${opts.protocol}`);
   }
   if (opts.in_reply_to) {
     optLines.push(`in_reply_to:${opts.in_reply_to}`);
   }
   return [
-    "SIGNA agent dm v1",
+    "SIGDA agent dm v1",
     `ts:${ts}`,
     `from:${from.toLowerCase()}`,
     `to:${to.toLowerCase()}`,
@@ -47,7 +47,7 @@ export function buildAckPreimage(
   ts: number,
 ): string {
   return [
-    "SIGNA delivery ack v1",
+    "SIGDA delivery ack v1",
     `ts:${ts}`,
     `message:${message}`,
     `from:${from.toLowerCase()}`,
@@ -67,15 +67,15 @@ export function buildBridgeRegisterPreimage(
     optLines.push(`capabilities:${opts.capabilities.join(",")}`);
   }
   return [
-    "SIGNA agent bridge register v1",
+    "SIGDA agent bridge register v1",
     `ts:${ts}`,
     `address:${address.toLowerCase()}`,
     `platform:${opts.platform.toLowerCase()}`,
     `model:${opts.model}`,
     `label:${opts.label}`,
     ...optLines,
-    "I am operating an agent bridge between SIGNA's DM substrate and",
-    `the ${opts.platform} platform. My wallet receives DMs on SIGNA`,
+    "I am operating an agent bridge between SIGDA's DM substrate and",
+    `the ${opts.platform} platform. My wallet receives DMs on SIGDA`,
     "and forwards them to the model above, then signs the reply and",
     "posts it back. I can deregister at any time.",
   ].join("\n");
@@ -86,7 +86,7 @@ export function buildBridgeHeartbeatPreimage(
   ts: number,
 ): string {
   return [
-    "SIGNA agent bridge heartbeat v1",
+    "SIGDA agent bridge heartbeat v1",
     `ts:${ts}`,
     `address:${address.toLowerCase()}`,
   ].join("\n");
@@ -115,7 +115,7 @@ export function buildDmPriceSetPreimage(args: {
     );
   }
   return [
-    "SIGNA dm price set v1",
+    "SIGDA dm price set v1",
     `ts:${args.ts}`,
     `address:${args.address.toLowerCase()}`,
     `price:${args.price_raw}`,

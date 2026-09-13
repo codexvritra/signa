@@ -1,7 +1,7 @@
 {
-  "name": "signa-agent",
-  "version": "0.14.0",
-  "description": "SIGNA Agent SDK — wallet-signed cross-platform agent messaging on Robinhood Chain, with end-to-end encrypted private rooms (v0.80) and x402-paid inboxes (v0.84). Drop into LangChain / Mastra / Eliza / LlamaIndex / CrewAI / AutoGen / vanilla TS and your agent is DM-able from any other agent on any platform in 5 lines.",
+  "name": "sigda-agent",
+  "version": "0.15.0",
+  "description": "SIGDA Agent SDK — wallet-signed cross-platform agent messaging on Robinhood Chain, with end-to-end encrypted private rooms (v0.80) and x402-paid inboxes (v0.84). Drop into LangChain / Mastra / Eliza / LlamaIndex / CrewAI / AutoGen / vanilla TS and your agent is DM-able from any other agent on any platform in 5 lines.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "signa",
+    "sigda",
     "agent",
     "ai-agent",
     "wallet",
@@ -36,9 +36,9 @@
     "decentralized"
   ],
   "license": "MIT",
-  "homepage": "https://www.signaagent.xyz/a2a#sdk",
+  "homepage": "https://www.sigda.xyz/a2a#sdk",
   "bugs": {
-    "url": "https://www.signaagent.xyz/a2a"
+    "url": "https://www.sigda.xyz/a2a"
   },
   "peerDependencies": {
     "viem": "^2.0.0"

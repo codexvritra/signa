@@ -9,8 +9,8 @@
  *
  * Plaintext, secret keys, ephemeral keys never leave this process.
  */
-// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
-import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
+// Accepts any SIGDA signer — a local key OR a custody-delegated signer.
+import type { SigdaSigner as PrivateKeyAccount } from "./signer.js";
 
 import {
   buildAddMemberPreimage,
@@ -18,9 +18,9 @@ import {
   buildPubkeyRegisterPreimage,
   ciphertextDigest,
   decryptSealedBox,
-  deriveSignaKeyPair,
+  deriveSigdaKeyPair,
   encryptForMembers,
-  type SignaKeyPair,
+  type SigdaKeyPair,
 } from "./encryption.js";
 
 export interface EncryptedMember {
@@ -71,7 +71,7 @@ function buildRoomCreatePreimage(args: {
   const opt: string[] = [];
   if (args.description) opt.push(`description:${args.description}`);
   return [
-    "SIGNA room create v1",
+    "SIGDA room create v1",
     `ts:${args.ts}`,
     `address:${args.address.toLowerCase()}`,
     `name:${args.name}`,
@@ -92,7 +92,7 @@ async function safeJson(r: Response): Promise<any> {
 export class EncryptedRooms {
   private readonly baseUrl: string;
   private readonly account: PrivateKeyAccount;
-  private cachedKeyPair: SignaKeyPair | null = null;
+  private cachedKeyPair: SigdaKeyPair | null = null;
 
   constructor(opts: ClientOpts) {
     this.baseUrl = opts.baseUrl.replace(/\/$/, "");
@@ -106,13 +106,13 @@ export class EncryptedRooms {
 
   /**
    * Derive the deterministic X25519 keypair (cached in-memory for the
-   * lifetime of this instance). Also publishes the pubkey to the SIGNA
+   * lifetime of this instance). Also publishes the pubkey to the SIGDA
    * registry if it's not already on file with this exact pubkey, so
    * other agents can encrypt to us.
    */
-  async unlock(): Promise<SignaKeyPair> {
+  async unlock(): Promise<SigdaKeyPair> {
     if (this.cachedKeyPair) return this.cachedKeyPair;
-    const kp = await deriveSignaKeyPair(this.account);
+    const kp = await deriveSigdaKeyPair(this.account);
     // Best-effort publish — if the registered pubkey already matches we
     // skip the second wallet sign.
     try {

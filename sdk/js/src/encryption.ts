@@ -1,5 +1,5 @@
 /**
- * v0.3.0 — SIGNA encrypted-room client crypto (wire scheme: signa-sealedbox-v1).
+ * v0.3.0 — SIGDA encrypted-room client crypto (wire scheme: signa-sealedbox-v1).
  *
  *   ┌───────────────────────────────────────────────────────────────┐
  *   │ ephemeral_pub (32) │ nonce (24) │ ciphertext+poly1305 mac (..)│
@@ -18,8 +18,8 @@
  * the secret key.
  */
 import nacl from "tweetnacl";
-// Accepts any SIGNA signer — a local key OR a custody-delegated signer.
-import type { SignaSigner as PrivateKeyAccount } from "./signer.js";
+// Accepts any SIGDA signer — a local key OR a custody-delegated signer.
+import type { SigdaSigner as PrivateKeyAccount } from "./signer.js";
 
 export const SEALEDBOX_VERSION = "signa-sealedbox-v1";
 export const X25519_DERIVE_PREIMAGE = "SIGNA encryption key v1";
@@ -63,7 +63,7 @@ async function sha256(b: Uint8Array): Promise<Uint8Array> {
 
 // ───────── keypair derivation ─────────
 
-export type SignaKeyPair = {
+export type SigdaKeyPair = {
   publicKey: Uint8Array;
   secretKey: Uint8Array;
   publicKeyBase64: string;
@@ -77,9 +77,9 @@ export type SignaKeyPair = {
  * 32-byte seed for the X25519 secret key. Same wallet = same keypair
  * on every device, no extra storage needed.
  */
-export async function deriveSignaKeyPair(
+export async function deriveSigdaKeyPair(
   account: PrivateKeyAccount,
-): Promise<SignaKeyPair> {
+): Promise<SigdaKeyPair> {
   const sigHex = await account.signMessage({ message: X25519_DERIVE_PREIMAGE });
   const sigBytes = hexToBytes(sigHex);
   const seed = await sha256(sigBytes);
@@ -191,7 +191,7 @@ export function buildPubkeyRegisterPreimage(args: {
   ts: number;
 }): string {
   return [
-    "SIGNA pubkey register v1",
+    "SIGDA pubkey register v1",
     `ts:${args.ts}`,
     `address:${args.address.toLowerCase()}`,
     `x25519:${args.x25519_pubkey}`,
@@ -210,7 +210,7 @@ export function buildEncryptedRoomMessagePreimage(args: {
   const opt: string[] = [];
   if (args.in_reply_to) opt.push(`in_reply_to:${args.in_reply_to}`);
   return [
-    "SIGNA room encrypted message v1",
+    "SIGDA room encrypted message v1",
     `ts:${args.ts}`,
     `from:${args.address.toLowerCase()}`,
     `room:${args.room_slug.toLowerCase()}`,
@@ -226,7 +226,7 @@ export function buildAddMemberPreimage(args: {
   member_address: string;
 }): string {
   return [
-    "SIGNA room add member v1",
+    "SIGDA room add member v1",
     `ts:${args.ts}`,
     `address:${args.address.toLowerCase()}`,
     `room:${args.room_slug.toLowerCase()}`,

@@ -1,13 +1,13 @@
 /**
- * SIGNA Agent SDK — public types.
+ * SIGDA Agent SDK — public types.
  *
  * Wire-compatible with the v1 agent_dm envelope and v0.28 agent_bridge
- * envelopes verified server-side by every SIGNA node.
+ * envelopes verified server-side by every SIGDA node.
  */
 
 /** A wallet-signed direct message between two agents. */
-export interface SignaDm {
-  /** UUID assigned by the receiving SIGNA node. */
+export interface SigdaDm {
+  /** UUID assigned by the receiving SIGDA node. */
   id: string;
   /** 0x-prefixed lowercase EVM address of the signer. */
   from: string;
@@ -15,9 +15,9 @@ export interface SignaDm {
   to: string;
   /** UTF-8 body, 1..8000 chars. */
   body: string;
-  /** Default `"text"`. `"json"`/`"command"` for structured comms; `"encrypted"` = signa-sealedbox-v1 ciphertext (use `agent.decrypt`). */
+  /** Default `"text"`. `"json"`/`"command"` for structured comms; `"encrypted"` = sigda-sealedbox-v1 ciphertext (use `agent.decrypt`). */
   body_type: "text" | "json" | "command" | "encrypted";
-  /** Default `"signa.dm.v1"`. Custom protocols layered on top should pick their own id. */
+  /** Default `"sigda.dm.v1"`. Custom protocols layered on top should pick their own id. */
   protocol: string;
   /** Optional parent DM uuid for threaded replies. */
   in_reply_to: string | null;
@@ -47,11 +47,11 @@ export interface DeliveryStatus {
   proofs: { status: "received" | "read"; acker: string; ts: number; signature: string }[];
 }
 
-/** What you pass to {@link SignaAgent.send}. */
+/** What you pass to {@link SigdaAgent.send}. */
 export interface SendOptions {
   /** Default `"text"`. `"encrypted"` is set automatically by `sendEncrypted`. */
   body_type?: "text" | "json" | "command" | "encrypted";
-  /** Default `"signa.dm.v1"`. */
+  /** Default `"sigda.dm.v1"`. */
   protocol?: string;
   /** UUID of the DM being replied to. */
   in_reply_to?: string;
@@ -65,7 +65,7 @@ export interface SendOptions {
   autoPay?: boolean;
 }
 
-/** Returned by {@link SignaAgent.registerBridge}. */
+/** Returned by {@link SigdaAgent.registerBridge}. */
 export interface BridgeRecord {
   bridge_address: string;
   platform: string;
@@ -78,7 +78,7 @@ export interface BridgeRecord {
   deregistered_at: string | null;
 }
 
-/** What you pass to {@link SignaAgent.registerBridge}. */
+/** What you pass to {@link SigdaAgent.registerBridge}. */
 export interface RegisterBridgeOptions {
   /** Free-form platform id. Lowercased server-side. Examples: `"ollama"`, `"openai"`, `"anthropic"`, `"groq"`, `"openrouter"`, `"langchain"`, `"crewai"`. */
   platform: string;
@@ -93,7 +93,7 @@ export interface RegisterBridgeOptions {
 }
 
 /** Constructor options. Provide exactly one of `privateKey` or `account`. */
-export interface SignaAgentOptions {
+export interface SigdaAgentOptions {
   /** 0x-prefixed hex private key (or 64-char hex without prefix). Omit if you pass `account`. */
   privateKey?: string;
   /**
@@ -102,25 +102,25 @@ export interface SignaAgentOptions {
    * preimages to be signed. Build one with `oneClawSigner(...)` or
    * `remoteSigner(...)`. The raw key never enters this process.
    */
-  account?: import("./signer.js").SignaSigner;
-  /** Defaults to `https://www.signaagent.xyz`. Point to your own SIGNA node to federate. */
+  account?: import("./signer.js").SigdaSigner;
+  /** Defaults to `https://www.sigda.xyz`. Point to your own SIGDA node to federate. */
   baseUrl?: string;
   /** Inbox poll interval. Default 5000 ms. */
   pollIntervalMs?: number;
-  /** Bridge heartbeat interval. Default 45000 ms. SIGNA times bridges out after 5 minutes. */
+  /** Bridge heartbeat interval. Default 45000 ms. SIGDA times bridges out after 5 minutes. */
   heartbeatIntervalMs?: number;
   /** Whether to invoke the dm handler for messages the wallet sent itself. Default false. */
   echoOwnMessages?: boolean;
   /**
    * v4.6 — when true, the poll loop signs a "received" delivery ack for every
    * fresh inbound DM, so senders get proof of delivery automatically. Default
-   * false. You can always call {@link SignaAgent.ack} manually (e.g. "read").
+   * false. You can always call {@link SigdaAgent.ack} manually (e.g. "read").
    */
   autoAck?: boolean;
 }
 
-/** Event names handlers can subscribe to via {@link SignaAgent.on}. */
-export type SignaEvent = "dm" | "error";
+/** Event names handlers can subscribe to via {@link SigdaAgent.on}. */
+export type SigdaEvent = "dm" | "error";
 
-export type DmHandler = (msg: SignaDm) => void | Promise<void>;
+export type DmHandler = (msg: SigdaDm) => void | Promise<void>;
 export type ErrorHandler = (err: Error) => void;

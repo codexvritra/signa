@@ -1,14 +1,14 @@
 /**
- * signa-agent — wallet-signed cross-platform agent messaging on Base.
+ * sigda-agent — wallet-signed cross-platform agent messaging on Robinhood Chain.
  *
  * Drop into any agent framework (LangChain / LlamaIndex / CrewAI /
  * AutoGen / vanilla TypeScript) and your agent becomes DM-able from
  * any other agent on any platform in 5 lines:
  *
  * ```ts
- * import { SignaAgent } from "signa-agent";
+ * import { SigdaAgent } from "sigda-agent";
  *
- * const agent = new SignaAgent({ privateKey: process.env.AGENT_PRIVATE_KEY! });
+ * const agent = new SigdaAgent({ privateKey: process.env.AGENT_PRIVATE_KEY! });
  *
  * agent.on("dm", async (msg) => {
  *   const reply = await yourLLM.invoke(msg.body);
@@ -23,7 +23,7 @@
  * can DM you, regardless of what AI runtime they're built on.
  *
  * Optional: declare yourself as a bridge so you show up in the public
- * directory at https://www.signaagent.xyz/api/bridges :
+ * directory at https://www.sigda.xyz/api/bridges :
  *
  * ```ts
  * await agent.registerBridge({
@@ -36,7 +36,7 @@
  */
 
 import { privateKeyToAccount } from "viem/accounts";
-import type { SignaSigner } from "./signer.js";
+import type { SigdaSigner } from "./signer.js";
 
 import {
   buildAckPreimage,
@@ -63,13 +63,13 @@ import type {
   ErrorHandler,
   RegisterBridgeOptions,
   SendOptions,
-  SignaAgentOptions,
-  SignaDm,
-  SignaEvent,
+  SigdaAgentOptions,
+  SigdaDm,
+  SigdaEvent,
 } from "./types.js";
 
 export * from "./types.js";
-export { remoteSigner, oneClawSigner, type SignaSigner } from "./signer.js";
+export { remoteSigner, oneClawSigner, type SigdaSigner } from "./signer.js";
 export {
   buildDmPreimage,
   buildAckPreimage,
@@ -108,7 +108,7 @@ export type {
 export {
   SEALEDBOX_VERSION,
   X25519_DERIVE_PREIMAGE,
-  deriveSignaKeyPair,
+  deriveSigdaKeyPair,
   encryptSealedBox,
   decryptSealedBox,
   encryptForMembers,
@@ -117,18 +117,18 @@ export {
   buildEncryptedRoomMessagePreimage,
   buildAddMemberPreimage,
 } from "./encryption.js";
-export type { SignaKeyPair } from "./encryption.js";
+export type { SigdaKeyPair } from "./encryption.js";
 export { buildDmPriceSetPreimage } from "./envelope.js";
 export { buildPaymentHeader } from "./paid-dm.js";
 export type { Challenge402, PaymentRequirements } from "./paid-dm.js";
-// v0.99 — SignaOS: the agent OS for Base (the 6 syscalls, keyless)
-export { SignaOS, bootAgent } from "./os.js";
+// v0.99 — SigdaOS: the agent OS for Base (the 6 syscalls, keyless)
+export { SigdaOS, bootAgent } from "./os.js";
 export type { BootOptions, MemoryEntry } from "./os.js";
-// onchain messaging — write/read a DM straight into a Base tx (no node, no website)
+// onchain messaging — write/read a DM straight into a Robinhood Chain tx (no node, no website)
 export {
   ONCHAIN_MSG_PREFIX,
-  BASE_CHAIN_ID_HEX,
-  SIGNA_MESSAGES_ADDRESS,
+  RH_CHAIN_ID_HEX,
+  SIGDA_MESSAGES_ADDRESS,
   buildOnchainMessageData,
   composeOnchain,
   decodeOnchainMessage,
@@ -142,7 +142,7 @@ export {
 export type { OnchainMessage, ContractMessage } from "./onchain.js";
 
 /**
- * Thrown by {@link SignaAgent.send} when the recipient's inbox is priced
+ * Thrown by {@link SigdaAgent.send} when the recipient's inbox is priced
  * and auto-pay is disabled. `challenge` carries the raw x402 402 body.
  */
 export class PaymentRequiredError extends Error {
@@ -154,20 +154,20 @@ export class PaymentRequiredError extends Error {
   }
 }
 
-const DEFAULT_BASE_URL = "https://www.signaagent.xyz";
+const DEFAULT_BASE_URL = "https://www.sigda.xyz";
 const DEFAULT_POLL_INTERVAL_MS = 5_000;
 const DEFAULT_HEARTBEAT_INTERVAL_MS = 45_000;
 
 /**
  * The wallet-signed messaging client.
  *
- * One `SignaAgent` = one wallet = one addressable identity on SIGNA.
+ * One `SigdaAgent` = one wallet = one addressable identity on SIGDA.
  * Spin up as many as you want — each is independent.
  */
-export class SignaAgent {
+export class SigdaAgent {
   /** Lowercased 0x address of the wallet. This is what other agents DM. */
   readonly address: string;
-  /** SIGNA node base URL. Default `https://www.signaagent.xyz` — change to federate against your own node. */
+  /** SIGDA node base URL. Default `https://www.sigda.xyz` — change to federate against your own node. */
   readonly baseUrl: string;
 
   /** Rooms: wallet-signed group chat with optional hold-to-chat gating. */
@@ -178,12 +178,12 @@ export class SignaAgent {
   readonly receipts: Receipts;
   /** Search: cross-room search over rooms + signed messages. */
   readonly search: Search;
-  /** Nodes: federated SIGNA nodes from the on-chain registry. */
+  /** Nodes: federated SIGDA nodes from the on-chain registry. */
   readonly nodes: Nodes;
   /** v0.80 — end-to-end encrypted private rooms (signa-sealedbox-v1 per member). */
   readonly encrypted: EncryptedRooms;
 
-  private readonly account: SignaSigner;
+  private readonly account: SigdaSigner;
   /** The raw local key, if one was supplied — needed only to BROADCAST an onchain message (a tx). Null for custody/remote signers. */
   private readonly localPrivateKey: `0x${string}` | null;
   private readonly pollIntervalMs: number;
@@ -197,7 +197,7 @@ export class SignaAgent {
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private running = false;
 
-  constructor(opts: SignaAgentOptions) {
+  constructor(opts: SigdaAgentOptions) {
     // v4.9 — sign with a local key OR delegate to a custody signer (1Claw /
     // any HSM/TEE) via `account`. The agent never needs the raw key.
     if (opts.account) {
@@ -210,7 +210,7 @@ export class SignaAgent {
       this.account = privateKeyToAccount(pk);
       this.localPrivateKey = pk;
     } else {
-      throw new Error("SignaAgent: provide `privateKey` or `account` (a SignaSigner, e.g. oneClawSigner)");
+      throw new Error("SigdaAgent: provide `privateKey` or `account` (a SigdaSigner, e.g. oneClawSigner)");
     }
     this.address = this.account.address.toLowerCase();
     this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
@@ -235,10 +235,10 @@ export class SignaAgent {
   /** Subscribe to events. Returns `this` for chaining. */
   on(event: "dm", handler: DmHandler): this;
   on(event: "error", handler: ErrorHandler): this;
-  on(event: SignaEvent, handler: DmHandler | ErrorHandler): this {
+  on(event: SigdaEvent, handler: DmHandler | ErrorHandler): this {
     if (event === "dm") this.dmHandlers.push(handler as DmHandler);
     else if (event === "error") this.errorHandlers.push(handler as ErrorHandler);
-    else throw new Error(`SignaAgent: unknown event "${event}"`);
+    else throw new Error(`SigdaAgent: unknown event "${event}"`);
     return this;
   }
 
@@ -254,12 +254,12 @@ export class SignaAgent {
    * the message simply delivers free. The returned DM includes a
    * `tip_hint` when the recipient has a price set and you didn't tip.
    */
-  async send(to: string, body: string, opts: SendOptions = {}): Promise<SignaDm> {
+  async send(to: string, body: string, opts: SendOptions = {}): Promise<SigdaDm> {
     if (!to || !/^0x[a-fA-F0-9]{40}$/.test(to)) {
-      throw new Error(`SignaAgent.send: invalid recipient "${to}"`);
+      throw new Error(`SigdaAgent.send: invalid recipient "${to}"`);
     }
     if (!body || body.length === 0 || body.length > 8000) {
-      throw new Error(`SignaAgent.send: body must be 1..8000 chars`);
+      throw new Error(`SigdaAgent.send: body must be 1..8000 chars`);
     }
     const ts = Date.now();
     const toLower = to.toLowerCase();
@@ -317,7 +317,7 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
       throw new Error(
-        `SignaAgent.send failed: ${data?.error ?? `HTTP ${r.status}`}`,
+        `SigdaAgent.send failed: ${data?.error ?? `HTTP ${r.status}`}`,
       );
     }
     return normalizeDm(data.dm);
@@ -439,7 +439,7 @@ export class SignaAgent {
     const ts = Date.now();
     const note = opts.note ?? "";
     const message = [
-      "SIGNA spend v1",
+      "SIGDA spend v1",
       `ts:${ts}`,
       `mandate:${mandateId}`,
       `agent:${this.address}`,
@@ -455,7 +455,7 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!data?.ok) {
       const extra = data?.remaining_raw ? ` (remaining ${data.remaining_raw})` : "";
-      throw new Error(`SignaAgent.spend: ${data?.error ?? `HTTP ${r.status}`}${extra}`);
+      throw new Error(`SigdaAgent.spend: ${data?.error ?? `HTTP ${r.status}`}${extra}`);
     }
     return { spent_raw: data.spent_raw, remaining_raw: data.remaining_raw };
   }
@@ -474,7 +474,7 @@ export class SignaAgent {
     const goal = opts.goal ?? "";
     const reason = opts.reason ?? "";
     const message = [
-      "SIGNA budget request v1",
+      "SIGDA budget request v1",
       `ts:${ts}`,
       `agent:${this.address}`,
       `grantor:${g}`,
@@ -489,7 +489,7 @@ export class SignaAgent {
       body: JSON.stringify({ agent: this.address, grantor: g, amount: amountRaw, goal, reason, ts, signature }),
     });
     const data = await safeJson(r);
-    if (!data?.ok) throw new Error(`SignaAgent.requestBudget: ${data?.error ?? `HTTP ${r.status}`}`);
+    if (!data?.ok) throw new Error(`SigdaAgent.requestBudget: ${data?.error ?? `HTTP ${r.status}`}`);
     return data.request.id;
   }
 
@@ -515,7 +515,7 @@ export class SignaAgent {
   }
 
   /** Convenience: send a DM threaded as a reply to a received message. */
-  async reply(msg: SignaDm, body: string, opts: SendOptions = {}): Promise<SignaDm> {
+  async reply(msg: SigdaDm, body: string, opts: SendOptions = {}): Promise<SigdaDm> {
     return this.send(msg.from, body, { ...opts, in_reply_to: msg.id });
   }
 
@@ -523,8 +523,8 @@ export class SignaAgent {
 
   /**
    * Write a message ONCHAIN — a 0-value Base transaction to `to` whose
-   * calldata is the SIGNA message. Permanent, censorship-resistant, and
-   * readable straight from the chain by anyone, with NO SIGNA node and NO
+   * calldata is the SIGDA message. Permanent, censorship-resistant, and
+   * readable straight from the chain by anyone, with NO SIGDA node and NO
    * website in the loop. The transaction is signed by this wallet, so the
    * chain itself proves the sender.
    *
@@ -545,7 +545,7 @@ export class SignaAgent {
   ): Promise<{ hash: string; from: string; to: string; explorer: string }> {
     if (!this.localPrivateKey) {
       throw new Error(
-        "SignaAgent.sendOnchain needs a local `privateKey` (a custody/remote signer can't broadcast a transaction)",
+        "SigdaAgent.sendOnchain needs a local `privateKey` (a custody/remote signer can't broadcast a transaction)",
       );
     }
     const res = await sendOnchainMessage(this.localPrivateKey, { to, body, rpcUrl: opts.rpcUrl });
@@ -562,8 +562,8 @@ export class SignaAgent {
   }
 
   /**
-   * Read a SIGNA message back from a Base transaction hash — straight from the
-   * chain via RPC, no SIGNA node needed. Returns null if the tx isn't a SIGNA
+   * Read a SIGDA message back from a Robinhood Chain transaction hash — straight from the
+   * chain via RPC, no SIGDA node needed. Returns null if the tx isn't a SIGDA
    * onchain message. `sender_matches` is the chain's proof the claimed sender
    * really broadcast it.
    */
@@ -588,7 +588,7 @@ export class SignaAgent {
   ): Promise<{ hash: string; from: string; to: string; contract: string; explorer: string }> {
     if (!this.localPrivateKey) {
       throw new Error(
-        "SignaAgent.sendMessageOnchain needs a local `privateKey` (a custody/remote signer can't broadcast a transaction)",
+        "SigdaAgent.sendMessageOnchain needs a local `privateKey` (a custody/remote signer can't broadcast a transaction)",
       );
     }
     return sendContractMessage(this.localPrivateKey, { to, body, contract: opts.contract, rpcUrl: opts.rpcUrl });
@@ -631,11 +631,11 @@ export class SignaAgent {
   /**
    * Send an END-TO-END ENCRYPTED DM. The body is sealed (signa-sealedbox-v1)
    * to the recipient's registered X25519 key, so only the recipient can read
-   * it — the SIGNA node stores ciphertext only. The DM is still wallet-signed,
+   * it — the SIGDA node stores ciphertext only. The DM is still wallet-signed,
    * so the sender stays attributable and the envelope re-verifies. Throws if
    * the recipient hasn't published a key yet.
    */
-  async sendEncrypted(to: string, plaintext: string, opts: SendOptions = {}): Promise<SignaDm> {
+  async sendEncrypted(to: string, plaintext: string, opts: SendOptions = {}): Promise<SigdaDm> {
     const toLower = to.toLowerCase();
     await this.encrypted.unlock(); // ensure my own key is published (for replies)
     const r = await fetch(`${this.baseUrl}/api/users/${toLower}/pubkey`);
@@ -643,7 +643,7 @@ export class SignaAgent {
     const recipientPub = data?.pubkey?.x25519_pubkey;
     if (!r.ok || !data?.ok || !recipientPub) {
       throw new Error(
-        `SignaAgent.sendEncrypted: ${toLower} has no published X25519 key (they must call publishKey first)`,
+        `SigdaAgent.sendEncrypted: ${toLower} has no published X25519 key (they must call publishKey first)`,
       );
     }
     const ciphertext = encryptSealedBox(plaintext, recipientPub);
@@ -656,14 +656,14 @@ export class SignaAgent {
    * null if it isn't for us / is malformed). Non-encrypted DMs return their
    * body unchanged, so you can call this on anything.
    */
-  async decrypt(dm: SignaDm): Promise<string | null> {
+  async decrypt(dm: SigdaDm): Promise<string | null> {
     if ((dm as { body_type?: string }).body_type !== "encrypted") return dm.body;
     const kp = await this.encrypted.unlock();
     return decryptSealedBox(dm.body, kp.secretKey);
   }
 
   /** Pull the most-recent inbox page. */
-  async inbox(opts: { limit?: number; since?: string; from?: string } = {}): Promise<SignaDm[]> {
+  async inbox(opts: { limit?: number; since?: string; from?: string } = {}): Promise<SigdaDm[]> {
     const url = new URL(`${this.baseUrl}/api/agents/${this.address}/inbox`);
     url.searchParams.set("limit", String(opts.limit ?? 50));
     if (opts.since) url.searchParams.set("since", opts.since);
@@ -672,14 +672,14 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
       throw new Error(
-        `SignaAgent.inbox failed: ${data?.error ?? `HTTP ${r.status}`}`,
+        `SigdaAgent.inbox failed: ${data?.error ?? `HTTP ${r.status}`}`,
       );
     }
     return ((data.dms ?? []) as any[]).map(normalizeDm);
   }
 
   /** Pull the most-recent outbox page (DMs sent by this wallet). */
-  async outbox(opts: { limit?: number; to?: string } = {}): Promise<SignaDm[]> {
+  async outbox(opts: { limit?: number; to?: string } = {}): Promise<SigdaDm[]> {
     const url = new URL(`${this.baseUrl}/api/agents/${this.address}/dm`);
     url.searchParams.set("limit", String(opts.limit ?? 50));
     if (opts.to) url.searchParams.set("to", opts.to.toLowerCase());
@@ -687,14 +687,14 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
       throw new Error(
-        `SignaAgent.outbox failed: ${data?.error ?? `HTTP ${r.status}`}`,
+        `SigdaAgent.outbox failed: ${data?.error ?? `HTTP ${r.status}`}`,
       );
     }
     return ((data.dms ?? []) as any[]).map(normalizeDm);
   }
 
   /** Pull the full thread between this wallet and another address, oldest first. */
-  async thread(other: string, opts: { limit?: number } = {}): Promise<SignaDm[]> {
+  async thread(other: string, opts: { limit?: number } = {}): Promise<SigdaDm[]> {
     const url = new URL(`${this.baseUrl}/api/dm/thread`);
     url.searchParams.set("a", this.address);
     url.searchParams.set("b", other.toLowerCase());
@@ -703,7 +703,7 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
       throw new Error(
-        `SignaAgent.thread failed: ${data?.error ?? `HTTP ${r.status}`}`,
+        `SigdaAgent.thread failed: ${data?.error ?? `HTTP ${r.status}`}`,
       );
     }
     return ((data.dms ?? []) as any[]).map(normalizeDm);
@@ -720,7 +720,7 @@ export class SignaAgent {
    * Returns the stored ack record.
    */
   async ack(
-    message: string | SignaDm,
+    message: string | SigdaDm,
     status: "received" | "read" = "received",
   ): Promise<any> {
     const dm = typeof message === "string" ? null : message;
@@ -739,7 +739,7 @@ export class SignaAgent {
       }
     }
     if (!counterparty) {
-      throw new Error("SignaAgent.ack: could not resolve the original sender for this message");
+      throw new Error("SigdaAgent.ack: could not resolve the original sender for this message");
     }
     const ts = Date.now();
     const preimage = buildAckPreimage(messageId, this.address, counterparty, status, ts);
@@ -751,7 +751,7 @@ export class SignaAgent {
     });
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
-      throw new Error(`SignaAgent.ack failed: ${data?.error ?? `HTTP ${r.status}`}`);
+      throw new Error(`SigdaAgent.ack failed: ${data?.error ?? `HTTP ${r.status}`}`);
     }
     return data.ack;
   }
@@ -772,7 +772,7 @@ export class SignaAgent {
     const r = await fetch(url);
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
-      throw new Error(`SignaAgent.acks failed: ${data?.error ?? `HTTP ${r.status}`}`);
+      throw new Error(`SigdaAgent.acks failed: ${data?.error ?? `HTTP ${r.status}`}`);
     }
     return (data.acks ?? []) as any[];
   }
@@ -780,7 +780,7 @@ export class SignaAgent {
   // ─────────────────────────── bridge directory ───────────────────────────
 
   /**
-   * Declare this wallet as a bridge between SIGNA and an external
+   * Declare this wallet as a bridge between SIGDA and an external
    * AI platform (Ollama / OpenAI / Anthropic / LangChain / your custom
    * runtime — anything). Makes you discoverable at
    * `/api/bridges?platform=<platform>` so other agents can find you.
@@ -808,7 +808,7 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
       throw new Error(
-        `SignaAgent.registerBridge failed: ${data?.error ?? `HTTP ${r.status}`}`,
+        `SigdaAgent.registerBridge failed: ${data?.error ?? `HTTP ${r.status}`}`,
       );
     }
     this.bridge = opts;
@@ -825,7 +825,7 @@ export class SignaAgent {
     const data = await safeJson(r);
     if (!r.ok || !data?.ok) {
       throw new Error(
-        `SignaAgent.listBridges failed: ${data?.error ?? `HTTP ${r.status}`}`,
+        `SigdaAgent.listBridges failed: ${data?.error ?? `HTTP ${r.status}`}`,
       );
     }
     return (data.bridges ?? []) as BridgeRecord[];
@@ -840,7 +840,7 @@ export class SignaAgent {
    * this, heartbeats fire on the configured interval automatically.
    */
   async start(): Promise<void> {
-    if (this.running) throw new Error("SignaAgent: already running");
+    if (this.running) throw new Error("SigdaAgent: already running");
     this.running = true;
 
     // Seed the seen-set with whatever was already in the inbox so we
@@ -946,7 +946,7 @@ export class SignaAgent {
     if (this.errorHandlers.length === 0) {
       // No handler — at least surface it on stderr so we don't swallow.
       // eslint-disable-next-line no-console
-      console.error("[signa-agent]", e);
+      console.error("[sigda-agent]", e);
       return;
     }
     for (const h of this.errorHandlers) {
@@ -982,7 +982,7 @@ async function safeJson(r: Response): Promise<any> {
  * Both names are kept on the returned object to ease migration for
  * callers that already used the raw HTTP shape.
  */
-function normalizeDm(raw: any): SignaDm {
+function normalizeDm(raw: any): SigdaDm {
   if (!raw) return raw;
   return {
     ...raw,

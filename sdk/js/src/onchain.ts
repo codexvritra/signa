@@ -1,14 +1,14 @@
 /**
  * Onchain messaging — write a message INTO a Robinhood Chain transaction, with
- * no SIGNA node and no website in the loop. The message lives in the
+ * no SIGDA node and no website in the loop. The message lives in the
  * transaction's calldata, on-chain, permanently; the transaction is signed by
  * the sender's wallet, so the chain itself proves who sent it. A 0-value tx to
  * the recipient with the message in `data`.
  *
- * This is the permissionless half of the SIGNA message layer: the protocol is
- * just "a Robinhood Chain tx whose calldata starts with `SIGNA msg v1`".
+ * This is the permissionless half of the SIGDA message layer: the protocol is
+ * just "a Robinhood Chain tx whose calldata starts with `SIGDA msg v1`".
  * Anyone — any wallet, any language, any agent — can write and read these
- * without asking SIGNA. Sending costs gas (cents); reading needs nothing but
+ * without asking SIGDA. Sending costs gas (cents); reading needs nothing but
  * an RPC.
  */
 import {
@@ -34,13 +34,13 @@ export const rhChain = defineChain({
   blockExplorers: { default: { name: "Explorer", url: "https://robinhoodchain.blockscout.com" } },
 });
 
-/** The canonical onchain-message prefix. A tx is a SIGNA message iff its calldata, decoded as UTF-8, starts with this. */
-export const ONCHAIN_MSG_PREFIX = "SIGNA msg v1";
+/** The canonical onchain-message prefix. A tx is a SIGDA message iff its calldata, decoded as UTF-8, starts with this. */
+export const ONCHAIN_MSG_PREFIX = "SIGDA msg v1";
 
 const DEFAULT_RPC = "https://rpc.mainnet.chain.robinhood.com";
 const norm = (a: string): string => a.toLowerCase();
 
-/** Build the calldata (hex) that encodes a SIGNA onchain message. */
+/** Build the calldata (hex) that encodes a SIGDA onchain message. */
 export function buildOnchainMessageData(a: { from: string; to: string; body: string }): Hex {
   const canonical = `${ONCHAIN_MSG_PREFIX}\nfrom:${norm(a.from)}\nto:${norm(a.to)}\nbody:${a.body}`;
   return toHex(canonical);
@@ -52,10 +52,10 @@ export const RH_CHAIN_ID_HEX = "0x1237"; // 4663
 /**
  * Build the wallet-agnostic transaction REQUEST for an onchain message — the
  * exact `{ to, value, data, chainId }` any wallet (MetaMask, Rabby, OKX, Trust,
- * Coinbase, …) needs to send it. The user signs it in their OWN wallet; SIGNA
+ * Coinbase, …) needs to send it. The user signs it in their OWN wallet; SIGDA
  * never touches the key. Feed `data` into a wallet's hex-data field, an
  * injected-provider `eth_sendTransaction`, or a WalletConnect request — all
- * produce the identical on-chain message. No website, no SIGNA node required.
+ * produce the identical on-chain message. No website, no SIGDA node required.
  */
 export function composeOnchain(a: { from: string; to: string; body: string }): {
   to: string;
@@ -66,7 +66,7 @@ export function composeOnchain(a: { from: string; to: string; body: string }): {
   return { to: norm(a.to), value: "0x0", data: buildOnchainMessageData(a), chainId: RH_CHAIN_ID_HEX };
 }
 
-/** Decode a transaction's calldata back into a SIGNA message, or null if it isn't one. */
+/** Decode a transaction's calldata back into a SIGDA message, or null if it isn't one. */
 export function decodeOnchainMessage(inputHex: string): { from: string; to: string; body: string } | null {
   try {
     if (!inputHex || inputHex === "0x") return null;
@@ -95,8 +95,8 @@ export interface OnchainMessage {
 }
 
 /**
- * Read a SIGNA message straight back from a Robinhood Chain transaction hash —
- * no SIGNA node involved, just an RPC. Returns null if the tx isn't a SIGNA message.
+ * Read a SIGDA message straight back from a Robinhood Chain transaction hash —
+ * no SIGDA node involved, just an RPC. Returns null if the tx isn't a SIGDA message.
  */
 export async function readOnchainMessage(
   txHash: string,
@@ -126,9 +126,9 @@ export async function readOnchainMessage(
 }
 
 /**
- * Broadcast a SIGNA onchain message from a local private key — writes it to
+ * Broadcast a SIGDA onchain message from a local private key — writes it to
  * Robinhood Chain and returns the tx hash. The key must hold a little ETH
- * for gas. This is the only SIGNA primitive that needs a *local* key (a
+ * for gas. This is the only SIGDA primitive that needs a *local* key (a
  * custody/remote signer can sign messages but can't broadcast a transaction).
  */
 export async function sendOnchainMessage(
@@ -164,8 +164,8 @@ export async function sendOnchainMessage(
  * Robinhood Chain deploy address is assigned at deploy time (see
  * contracts/script/DeployMessages.s.sol).
  */
-export const SIGNA_MESSAGES_ADDRESS = "";
-const SIGNA_MESSAGES_DEPLOY_BLOCK = 0n;
+export const SIGDA_MESSAGES_ADDRESS = "";
+const SIGDA_MESSAGES_DEPLOY_BLOCK = 0n;
 const SEND_ABI = [parseAbiItem("function send(address to, string body) returns (uint256)")] as const;
 const MESSAGE_EVENT = parseAbiItem(
   "event Message(uint256 indexed id, address indexed from, address indexed to, string body, uint64 timestamp)",
@@ -198,7 +198,7 @@ export function composeMessage(a: { to: string; body: string; contract?: string 
   chainId: string;
 } {
   return {
-    to: norm(a.contract ?? SIGNA_MESSAGES_ADDRESS),
+    to: norm(a.contract ?? SIGDA_MESSAGES_ADDRESS),
     value: "0x0",
     data: buildMessageCall(a.to, a.body),
     chainId: RH_CHAIN_ID_HEX,
@@ -216,7 +216,7 @@ export async function sendContractMessage(
   if (!args.body || args.body.length === 0) throw new Error("sendContractMessage: body is required");
   const pk = (privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`) as Hex;
   const account = privateKeyToAccount(pk);
-  const contract = norm(args.contract ?? SIGNA_MESSAGES_ADDRESS);
+  const contract = norm(args.contract ?? SIGDA_MESSAGES_ADDRESS);
   const wallet = createWalletClient({ account, chain: rhChain, transport: http(args.rpcUrl ?? DEFAULT_RPC) });
   const hash = await wallet.sendTransaction({ to: contract as Hex, value: 0n, data: buildMessageCall(args.to, args.body) });
   return { hash, from: norm(account.address), to: norm(args.to), contract, explorer: `https://robinhoodchain.blockscout.com/tx/${hash}` };
@@ -229,7 +229,7 @@ export async function sendContractMessage(
 export async function readContractMessages(
   args: { to?: string; from?: string; contract?: string; rpcUrl?: string; limit?: number } = {},
 ): Promise<ContractMessage[]> {
-  const contract = norm(args.contract ?? SIGNA_MESSAGES_ADDRESS);
+  const contract = norm(args.contract ?? SIGDA_MESSAGES_ADDRESS);
   const client = createPublicClient({ chain: rhChain, transport: http(args.rpcUrl ?? DEFAULT_RPC) });
   const filter: Record<string, unknown> = {};
   if (args.to) filter.to = norm(args.to) as Address;
@@ -238,7 +238,7 @@ export async function readContractMessages(
     address: contract as Address,
     event: MESSAGE_EVENT,
     args: filter,
-    fromBlock: SIGNA_MESSAGES_DEPLOY_BLOCK,
+    fromBlock: SIGDA_MESSAGES_DEPLOY_BLOCK,
     toBlock: "latest",
   });
   const out: ContractMessage[] = (logs as any[]).map((l) => ({
