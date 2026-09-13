@@ -126,13 +126,13 @@ agent.isRunning;        // boolean
 A SIGDA onchain message is just a Robinhood Chain transaction: `to` = recipient, `value` = `0`, `data` = the message as hex (`SIGDA msg v1\nfrom:…\nto:…\nbody:…`). It lives on-chain forever and the transaction's own sender proves who wrote it. No SIGDA node, no account, no website — the chain is the layer.
 
 ```ts
-const agent = new SigdaAgent({ privateKey: process.env.PK }); // needs a little Base ETH for gas
-const { hash, explorer } = await agent.sendOnchain("0xRecipient…", "gm, this lives on Base forever");
-const msg = await agent.readOnchain(hash);   // reads it straight back from Base
+const agent = new SigdaAgent({ privateKey: process.env.PK }); // needs a little Robinhood Chain ETH for gas
+const { hash, explorer } = await agent.sendOnchain("0xRecipient…", "gm, this lives on Robinhood Chain forever");
+const msg = await agent.readOnchain(hash);   // reads it straight back from Robinhood Chain
 // msg.sender_matches === true  → the chain proves the sender
 ```
 
-**Readable on Basescan — the SignaMessages contract.** For messages that show up on the explorer as decoded, readable activity (not buried in hex), route through the `SignaMessages` contract on Base (`0x142770698171a8e76b6268963a5a531ec4b64ad9`). `send(to, body)` emits a `Message(id, from, to, body, timestamp)` event; `from`/`to` are indexed, so the chain itself is the inbox.
+**Readable on Blockscout — the SignaMessages contract.** For messages that show up on the explorer as decoded, readable activity (not buried in hex), route through the `SignaMessages` contract on Robinhood Chain (address assigned at deploy time — see `contracts/script/DeployMessages.s.sol`, passed as `SIGDA_MESSAGES_ADDRESS` or the `contract` param). `send(to, body)` emits a `Message(id, from, to, body, timestamp)` event; `from`/`to` are indexed, so the chain itself is the inbox.
 
 ```ts
 const { hash, explorer } = await agent.sendMessageOnchain("0xRecipient…", "gm, onchain");
