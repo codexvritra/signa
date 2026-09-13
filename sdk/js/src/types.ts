@@ -17,7 +17,7 @@ export interface SigdaDm {
   body: string;
   /** Default `"text"`. `"json"`/`"command"` for structured comms; `"encrypted"` = sigda-sealedbox-v1 ciphertext (use `agent.decrypt`). */
   body_type: "text" | "json" | "command" | "encrypted";
-  /** Default `"sigda.dm.v1"`. Custom protocols layered on top should pick their own id. */
+  /** Default `"signa.dm.v1"`. Custom protocols layered on top should pick their own id. */
   protocol: string;
   /** Optional parent DM uuid for threaded replies. */
   in_reply_to: string | null;
@@ -51,7 +51,7 @@ export interface DeliveryStatus {
 export interface SendOptions {
   /** Default `"text"`. `"encrypted"` is set automatically by `sendEncrypted`. */
   body_type?: "text" | "json" | "command" | "encrypted";
-  /** Default `"sigda.dm.v1"`. */
+  /** Default `"signa.dm.v1"`. */
   protocol?: string;
   /** UUID of the DM being replied to. */
   in_reply_to?: string;

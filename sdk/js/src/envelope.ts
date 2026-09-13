@@ -17,7 +17,7 @@ export function buildDmPreimage(
   if (opts.body_type && opts.body_type !== "text") {
     optLines.push(`body_type:${opts.body_type}`);
   }
-  if (opts.protocol && opts.protocol !== "sigda.dm.v1") {
+  if (opts.protocol && opts.protocol !== "signa.dm.v1") {
     optLines.push(`protocol:${opts.protocol}`);
   }
   if (opts.in_reply_to) {

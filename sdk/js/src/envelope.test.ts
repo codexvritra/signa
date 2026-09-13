@@ -22,9 +22,9 @@ test("buildDmPreimage: basic, lowercases from/to, omits default opts", () => {
     buildDmPreimage("0xAbC", "0xDeF", "hello", TS, {}),
     `SIGDA agent dm v1\nts:${TS}\nfrom:0xabc\nto:0xdef\nbody:hello`,
   );
-  // default body_type "text" and default protocol "sigda.dm.v1" produce NO opt lines
+  // default body_type "text" and default protocol "signa.dm.v1" produce NO opt lines
   assert.equal(
-    buildDmPreimage("0xA", "0xB", "x", TS, { body_type: "text", protocol: "sigda.dm.v1" }),
+    buildDmPreimage("0xA", "0xB", "x", TS, { body_type: "text", protocol: "signa.dm.v1" }),
     `SIGDA agent dm v1\nts:${TS}\nfrom:0xa\nto:0xb\nbody:x`,
   );
 });
