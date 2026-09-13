@@ -67,7 +67,7 @@ function shareTweetUrl(r: Resolved): string {
   const url = `https://www.sigda.xyz/u/${encodeURIComponent(r.handle)}`;
   const who = r.basename || r.ens_name || shortAddress(r.address);
   const text =
-    `meet ${who} on @signa_agent — wallet-native messaging on @base.\n\n` +
+    `meet ${who} on @signa_agent — wallet-native messaging on Robinhood Chain.\n\n` +
     `DM them with one click: sigda.xyz/dm/${encodeURIComponent(r.handle)}\n\n` +
     url;
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;

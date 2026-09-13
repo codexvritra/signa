@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Onchain message · SIGNA</title>
-<meta name="description" content="Write a message onto Base, straight from your own wallet. Works with OKX, Trust, MetaMask, Coinbase Wallet — no account, no server." />
+<title>Onchain message · SIGDA</title>
+<meta name="description" content="Write a message onto Robinhood Chain, straight from your own wallet. Works with OKX, Trust, MetaMask, Coinbase Wallet — no account, no server." />
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -43,15 +43,15 @@
 </head>
 <body>
   <div class="card">
-    <div class="badge">SIGNA · onchain message</div>
-    <h1>Write a message onto Base.</h1>
-    <p class="sub">From your own wallet — OKX, Trust, MetaMask, Coinbase. No account, no SIGNA server. Open this page inside your wallet's browser, or use a desktop extension. Your message is recorded on Base as a readable event — it shows on Basescan forever, and the chain proves you sent it.</p>
+    <div class="badge">SIGDA · onchain message</div>
+    <h1>Write a message onto Robinhood Chain.</h1>
+    <p class="sub">From your own wallet — OKX, Trust, MetaMask, Coinbase. No account, no SIGDA server. Open this page inside your wallet's browser, or use a desktop extension. Your message is recorded on Robinhood Chain as a readable event — it shows on Blockscout forever, and the chain proves you sent it.</p>
 
     <label for="to">To (wallet address)</label>
     <input id="to" placeholder="0x… recipient" autocomplete="off" spellcheck="false" />
 
     <label for="body">Message</label>
-    <textarea id="body" placeholder="gm — this is written on Base, forever"></textarea>
+    <textarea id="body" placeholder="gm — this is written on Robinhood Chain, forever"></textarea>
 
     <button id="connect">Connect wallet</button>
     <div class="who" id="who"></div>
@@ -60,16 +60,17 @@
     <div class="status" id="status"></div>
 
     <div class="foot">
-      This is a single static file. Host it anywhere (GitHub Pages, IPFS, your own domain) or open it in your wallet's built-in browser — it talks straight to the chain and never sees your key. Messages are recorded by the SignaMessages contract on Base (<code>0x1427…4ad9</code>) as a <code>Message(from, to, body)</code> event; override with <code>?contract=</code>. Sending costs a few cents of Base ETH for gas.
+      This is a single static file. Host it anywhere (GitHub Pages, IPFS, your own domain) or open it in your wallet's built-in browser — it talks straight to the chain and never sees your key. Messages are recorded by the SignaMessages contract on Robinhood Chain via <code>send(to, body)</code>, a <code>Message(from, to, body)</code> event. Pass the deployed contract address as <code>?contract=0x…</code> — there is no baked-in default since the address is assigned at deploy time (see <code>contracts/script/DeployMessages.s.sol</code>). Sending costs a few cents of Robinhood Chain ETH for gas.
     </div>
   </div>
 
 <script>
 (function () {
-  var BASE_HEX = "0x2105"; // 8453
+  var RH_HEX = "0x1237"; // 4663
   var qs = new URLSearchParams(location.search);
-  // SignaMessages on Base — each send() emits a readable Message event on the explorer.
-  var CONTRACT = (qs.get("contract") || "0x142770698171a8e76b6268963a5a531ec4b64ad9").toLowerCase();
+  // SignaMessages on Robinhood Chain — each send() emits a readable Message event on the explorer.
+  // No hardcoded default: pass ?contract=0x… for the address from your deploy.
+  var CONTRACT = (qs.get("contract") || "").toLowerCase();
   var SEND_SELECTOR = "99142b5f"; // send(address,string)
   var account = null;
 
@@ -79,6 +80,9 @@
 
   if (qs.get("to")) toEl.value = qs.get("to");
   if (qs.get("body")) bodyEl.value = qs.get("body");
+  if (!/^0x[0-9a-f]{40}$/.test(CONTRACT)) {
+    show("err", "No contract configured — open this page with <code>?contract=0x…</code> set to the deployed SignaMessages address on Robinhood Chain.");
+  }
 
   function show(kind, html) { statusEl.className = "status show " + kind; statusEl.innerHTML = html; }
   function norm(a) { return String(a || "").toLowerCase(); }
@@ -109,23 +113,23 @@
       var accts = await p.request({ method: "eth_requestAccounts" });
       account = norm(accts[0]);
       whoEl.textContent = "connected: " + account;
-      sendBtn.disabled = false;
+      sendBtn.disabled = !/^0x[0-9a-f]{40}$/.test(CONTRACT);
       connectBtn.textContent = "Wallet connected";
       statusEl.className = "status";
     } catch (e) { show("err", "Connect rejected: " + (e && e.message ? e.message : e)); }
   }
 
-  async function ensureBase(p) {
+  async function ensureRobinhoodChain(p) {
     var chain = await p.request({ method: "eth_chainId" });
-    if (norm(chain) === BASE_HEX) return;
+    if (norm(chain) === RH_HEX) return;
     try {
-      await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: BASE_HEX }] });
+      await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: RH_HEX }] });
     } catch (e) {
-      // chain not added yet — add Base, then it's selected
+      // chain not added yet — add Robinhood Chain, then it's selected
       await p.request({ method: "wallet_addEthereumChain", params: [{
-        chainId: BASE_HEX, chainName: "Base",
+        chainId: RH_HEX, chainName: "Robinhood Chain",
         nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-        rpcUrls: ["https://mainnet.base.org"], blockExplorerUrls: ["https://basescan.org"]
+        rpcUrls: ["https://rpc.mainnet.chain.robinhood.com"], blockExplorerUrls: ["https://robinhoodchain.blockscout.com"]
       }]});
     }
   }
@@ -134,17 +138,18 @@
     var p = provider();
     var to = norm(toEl.value.trim());
     var body = bodyEl.value;
+    if (!/^0x[0-9a-f]{40}$/.test(CONTRACT)) { show("err", "No contract configured — open this page with ?contract=0x… set to the deployed SignaMessages address."); return; }
     if (!/^0x[0-9a-f]{40}$/.test(to)) { show("err", "Enter a valid recipient address (0x…40 hex)."); return; }
     if (!body || !body.trim()) { show("err", "Type a message first."); return; }
     if (new TextEncoder().encode(body).length > 8000) { show("err", "Message is too long (max 8000 bytes)."); return; }
     sendBtn.disabled = true; show("ok", "Check your wallet to confirm…");
     try {
-      await ensureBase(p);
-      // call SignaMessages.send(to, body) → records a readable Message event on Basescan
+      await ensureRobinhoodChain(p);
+      // call SignaMessages.send(to, body) → records a readable Message event on Blockscout
       var data = encodeSend(to, body);
       var hash = await p.request({ method: "eth_sendTransaction", params: [{ from: account, to: CONTRACT, value: "0x0", data: data }] });
-      var url = "https://basescan.org/tx/" + hash;
-      show("ok", "Recorded on Base ✓ — it's a readable Message event on the explorer.<br><a href='" + url + "' target='_blank' rel='noreferrer'>" + hash.slice(0,14) + "… · view on Basescan ↗</a>");
+      var url = "https://robinhoodchain.blockscout.com/tx/" + hash;
+      show("ok", "Recorded on Robinhood Chain ✓ — it's a readable Message event on the explorer.<br><a href='" + url + "' target='_blank' rel='noreferrer'>" + hash.slice(0,14) + "… · view on Blockscout ↗</a>");
     } catch (e) {
       show("err", "Failed: " + (e && e.message ? e.message : e));
     } finally { sendBtn.disabled = false; }

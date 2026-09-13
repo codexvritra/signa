@@ -6,9 +6,13 @@ import { encodeFunctionData, parseAbiItem } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { deriveSignaKeyPair, encryptSealedBox, decryptSealedBox, SEALEDBOX_VERSION, type SignaKeyPair } from "@/lib/encryption";
 import { buildMessageToSign } from "@/lib/feed-types";
+import { SIGNA_MESSAGES_ADDRESS } from "@/lib/signa-messages";
+import { RH_EXPLORER } from "@/lib/chain";
 
 // SignaMessages on Robinhood Chain — send(to, body) records a readable Message event on the explorer.
-const SIGNA_MESSAGES = "0x142770698171a8e76b6268963a5a531ec4b64ad9";
+// Address comes from the same env var the backend reads (lib/signa-messages.ts) so the
+// client never sends a transaction to a stale/wrong-chain address.
+const SIGNA_MESSAGES = SIGNA_MESSAGES_ADDRESS;
 const SEND_ABI = [parseAbiItem("function send(address to, string body) returns (uint256)")];
 const ENC_PREFIX = `${SEALEDBOX_VERSION}:`; // onchain bodies with this prefix are sealed-box ciphertext
 
@@ -78,7 +82,7 @@ export default function MessagesPage() {
         fetch(`/api/onchain-message?thread=${me},${peerAddr}`, { cache: "no-store" }).then((x) => x.json()).catch(() => ({ messages: [] })),
       ]);
       const signed = ((r.dms ?? []) as DM[]).map((d) => ({ ...d, ts: d.ts || (d.created_at ? new Date(d.created_at).getTime() : 0) }));
-      // onchain messages from the SignaMessages contract's event logs (both directions, straight from Base)
+      // onchain messages from the SignaMessages contract's event logs (both directions, straight from Robinhood Chain)
       const onchain = ((oc.messages ?? []) as Array<{ id: string; from: string; to: string; body: string; timestamp: number; tx: string }>)
         .map((m) => ({ id: `oc-${m.tx}`, from_address: m.from, to_address: m.to, body: m.body, ts: (m.timestamp || 0) * 1000, tx: m.tx }));
       setThread([...signed, ...onchain].sort((a, b) => (a.ts || 0) - (b.ts || 0)));
@@ -171,6 +175,10 @@ export default function MessagesPage() {
     if (!peer || !me) return;
     const text = draft.trim();
     if (!text) return;
+    if (!SIGNA_MESSAGES) {
+      setStatus({ kind: "err", text: "On-chain messaging isn't configured yet on this deploy — the SignaMessages contract address isn't set." });
+      return;
+    }
     setBusy(true);
     try {
       let body = text;
@@ -180,8 +188,8 @@ export default function MessagesPage() {
         if (!pk.ok || !pk.pubkey?.x25519_pubkey) { setStatus({ kind: "err", text: `${peer.label} hasn't enabled encryption yet — they need to open Messages and click "Enable encryption".` }); setBusy(false); return; }
         body = ENC_PREFIX + encryptSealedBox(text, pk.pubkey.x25519_pubkey);
       }
-      setStatus({ kind: "info", text: encOn ? "Confirm the Base tx (encrypted)…" : "Confirm the Base tx to record this on-chain…" });
-      // call SignaMessages.send(to, body) → a readable Message event on Basescan (the chain self-indexes via logs)
+      setStatus({ kind: "info", text: encOn ? "Confirm the Robinhood Chain tx (encrypted)…" : "Confirm the Robinhood Chain tx to record this on-chain…" });
+      // call SignaMessages.send(to, body) → a readable Message event on Blockscout (the chain self-indexes via logs)
       const data = encodeFunctionData({ abi: SEND_ABI, functionName: "send", args: [peer.address as `0x${string}`, body] });
       const hash = await sendTransactionAsync({ to: SIGNA_MESSAGES as `0x${string}`, data, value: 0n });
       setDraft(""); setStatus({ kind: "ok", text: encOn ? "Encrypted message recorded on Robinhood Chain ⛓ — only they can read it." : "Recorded on Robinhood Chain ⛓ — a readable Message event on the explorer." });
@@ -273,7 +281,7 @@ export default function MessagesPage() {
                     <div className={`rounded-2xl px-3.5 py-2.5 text-[14px] leading-snug whitespace-pre-wrap break-words ${mine ? "bg-gradient-to-br from-[#7c3aed] to-[#3b6fe0] text-white" : "glass border border-white/10 text-[#e8edf7]"}`}>{d.text}</div>
                     <div className={`text-[10px] mt-1 flex gap-1.5 ${mine ? "justify-end" : ""}`}>
                       {d.enc && <span className="text-[#4ade80]">🔒 encrypted</span>}
-                      {m.tx ? <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Robinhood Chain · Basescan ↗</a> : <span className="text-faint">✓ signed</span>}
+                      {m.tx ? <a href={`${RH_EXPLORER}/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ on Robinhood Chain · Blockscout ↗</a> : <span className="text-faint">✓ signed</span>}
                     </div>
                   </div>
                 );

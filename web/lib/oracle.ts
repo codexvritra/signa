@@ -1,7 +1,7 @@
 /**
  * THE SIGNED ORACLE — the AI that can't delete its calls.
  *
- * Once a day the SIGDA brain makes one binary call on the Base Fear & Greed
+ * Once a day the SIGDA brain makes one binary call on the crypto Fear & Greed
  * index, wallet-signs it, and stores it as a signed DM to a dedicated oracle
  * archive address. 24h later it resolves the call against the live signed feed
  * and signs the verdict too. Both records are EIP-191 signatures by the brain
@@ -16,7 +16,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, toBytes } from "viem";
 import { fulfillCapability } from "@/lib/capabilities";
 
-export const ORACLE_METRIC = "Fear & Greed (Base / crypto sentiment)";
+export const ORACLE_METRIC = "Fear & Greed (crypto sentiment)";
 export const WINDOW_SEC = 24 * 60 * 60;
 
 const brain = privateKeyToAccount(keccak256(toBytes("signa:brain:v1")));
@@ -62,7 +62,7 @@ function kv(body: string): Record<string, string> {
 
 async function feargreed(): Promise<number | null> {
   try {
-    const out = (await fulfillCapability("root.feargreed", "")) as { score?: number };
+    const out = (await fulfillCapability("crypto.feargreed", "")) as { score?: number };
     const s = Number(out?.score);
     return Number.isFinite(s) ? s : null;
   } catch { return null; }

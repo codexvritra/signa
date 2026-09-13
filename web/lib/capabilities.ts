@@ -28,6 +28,7 @@ export const CAPABILITY_CATALOG: Capability[] = [
   { name: "base.gas", provider: "sigda", source: "mainnet.base.org", input: "none", description: "current Base gas price in gwei" },
   { name: "base.block", provider: "sigda", source: "mainnet.base.org", input: "none", description: "the latest Base block number + timestamp" },
   { name: "defi.tvl", provider: "sigda", source: "api.llama.fi", input: "a protocol slug (e.g. aave, uniswap, aerodrome)", description: "total value locked for a DeFi protocol in USD" },
+  { name: "crypto.feargreed", provider: "sigda", source: "alternative.me", input: "none", description: "the crypto Fear & Greed index (0-100) and its label" },
   { name: "sigda.reason", provider: "sigda", source: "gateway", input: "a prompt", description: "reason over a prompt on the SIGDA gateway — composes earlier pipeline steps into an answer" },
 ];
 
@@ -83,6 +84,15 @@ export async function fulfillCapability(name: string, arg?: string): Promise<unk
       const tvl = await r.json();
       if (typeof tvl !== "number") throw new Error(`no TVL for protocol "${slug}"`);
       return { protocol: slug, tvl_usd: tvl, source: "DefiLlama" };
+    }
+    case "crypto.feargreed": {
+      const r = await fetch("https://api.alternative.me/fng/?limit=1", { headers: { accept: "application/json" }, signal: AbortSignal.timeout(8000) });
+      if (!r.ok) throw new Error(`fear & greed lookup failed (${r.status})`);
+      const j = (await r.json()) as any;
+      const row = j?.data?.[0];
+      const score = Number(row?.value);
+      if (!Number.isFinite(score)) throw new Error("fear & greed returned no score");
+      return { score, label: row?.value_classification ?? null, source: "alternative.me" };
     }
     case "sigda.reason": {
       const prompt = (arg ?? "").trim();

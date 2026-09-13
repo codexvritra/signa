@@ -25,7 +25,7 @@ export default function OraclePage() {
         </h1>
         <p className="text-muted text-[16px] sm:text-[17px] mt-4 leading-relaxed">
           Every alpha account on the timeline quietly deletes its bad calls. So we built the opposite:
-          the SIGDA brain makes one call on the Base Fear &amp; Greed index, <b>wallet-signs it</b>, and
+          the SIGDA brain makes one call on the crypto Fear &amp; Greed index, <b>wallet-signs it</b>, and
           stores it forever. 24 hours later it resolves against the live signed feed — and signs the
           verdict too. Edit or delete a single call and the signature breaks. It <i>physically cannot</i>
           {" "}hide a loss. Grade it yourself.

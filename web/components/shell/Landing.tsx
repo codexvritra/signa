@@ -23,7 +23,7 @@ type ChainStatus = { ok: boolean; block?: number };
 
 const COMMANDS: Array<{ cmd: string; rows: Array<{ tag: string; val: string }> }> = [
   { cmd: "sigda dm @vald gm, signed.", rows: [{ tag: "RESOLVE", val: "@vald → 0x84…f2" }, { tag: "SIGN", val: "wallet-signed envelope" }, { tag: "DELIVER", val: "queued to inbox, re-verifiable" }] },
-  { cmd: "sigda invoke root.market", rows: [{ tag: "CALL", val: "root.market · live Robinhood Chain read" }, { tag: "SIGN", val: "gateway signs the result" }, { tag: "RETURN", val: "receipt attached, verify with viem" }] },
+  { cmd: "sigda invoke token.price ethereum", rows: [{ tag: "CALL", val: "token.price · live Robinhood Chain read" }, { tag: "SIGN", val: "gateway signs the result" }, { tag: "RETURN", val: "receipt attached, verify with viem" }] },
   { cmd: "sigda verify 0x7f3a…", rows: [{ tag: "RECOVER", val: "signer 0x39…c1" }, { tag: "MATCH", val: "== claimed sender" }, { tag: "VERDICT", val: "valid — tamper one byte, it fails" }] },
 ];
 

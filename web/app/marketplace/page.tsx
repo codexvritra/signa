@@ -124,7 +124,7 @@ export default function MarketplacePage() {
                 <div className="text-white/85 leading-relaxed">node sigda.mjs publish \<br />&nbsp;&nbsp;myteam.price \<br />&nbsp;&nbsp;https://api.you.dev/price \<br />&nbsp;&nbsp;<span className="text-[var(--accent)]">&quot;live price feed&quot;</span></div>
               </div>
               <div className="border border-white/10 rounded-lg bg-black/40 p-4">
-                <div className="text-white/40 mb-2">// the SDK (signa-agent)</div>
+                <div className="text-white/40 mb-2">// the SDK (sigda-agent)</div>
                 <div className="text-white/85 leading-relaxed"><span className="text-cyan-300">await</span> os.publish({"{"}<br />&nbsp;&nbsp;name: <span className="text-[var(--accent)]">&quot;myteam.price&quot;</span>,<br />&nbsp;&nbsp;endpoint: <span className="text-[var(--accent)]">&quot;https://…&quot;</span>,<br />&nbsp;&nbsp;description: <span className="text-[var(--accent)]">&quot;…&quot;</span>,<br />{"}"})</div>
               </div>
               <div className="border border-white/10 rounded-lg bg-black/40 p-4">
@@ -151,7 +151,7 @@ export default function MarketplacePage() {
               </div>
               <div className="border border-white/10 rounded-lg bg-black/40 p-4">
                 <div className="text-white/45 mb-2">// or the full server (adds a wallet + publish)</div>
-                <div className="text-white/85 leading-relaxed">{"{"} <span className="text-cyan-300">&quot;sigda&quot;</span>: {"{"}<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;command&quot;</span>: <span className="text-[var(--accent)]">&quot;npx&quot;</span>,<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;args&quot;</span>: [<span className="text-[var(--accent)]">&quot;-y&quot;</span>, <span className="text-[var(--accent)]">&quot;signa-mcp&quot;</span>] {"}"} {"}"}</div>
+                <div className="text-white/85 leading-relaxed">{"{"} <span className="text-cyan-300">&quot;sigda&quot;</span>: {"{"}<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;command&quot;</span>: <span className="text-[var(--accent)]">&quot;npx&quot;</span>,<br />&nbsp;&nbsp;<span className="text-cyan-300">&quot;args&quot;</span>: [<span className="text-[var(--accent)]">&quot;-y&quot;</span>, <span className="text-[var(--accent)]">&quot;sigda-mcp&quot;</span>] {"}"} {"}"}</div>
               </div>
             </div>
             <div className="mt-4 grid sm:grid-cols-3 gap-2 text-[12px] text-white/55">

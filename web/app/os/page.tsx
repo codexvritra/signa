@@ -57,7 +57,7 @@ export default function OsPage() {
             </p>
             <div className="mt-8 inline-flex flex-col items-start gap-1 border border-white/10 rounded-lg bg-black/40 px-5 py-4 text-left font-mono text-[13px]">
               <span className="text-white/40">// boot an agent on a private key alone</span>
-              <span><span className="text-fuchsia-300">import</span> {"{ bootAgent }"} <span className="text-fuchsia-300">from</span> <span className="text-[var(--accent)]">&quot;signa-agent&quot;</span>;</span>
+              <span><span className="text-fuchsia-300">import</span> {"{ bootAgent }"} <span className="text-fuchsia-300">from</span> <span className="text-[var(--accent)]">&quot;sigda-agent&quot;</span>;</span>
               <span><span className="text-fuchsia-300">const</span> os = <span className="text-cyan-300">bootAgent</span>({"{ privateKey }"});</span>
               <span className="text-white/55"><span className="text-cyan-300">await</span> os.message(addr, <span className="text-[var(--accent)]">&quot;gm&quot;</span>); <span className="text-white/30">// signed, keyless</span></span>
             </div>

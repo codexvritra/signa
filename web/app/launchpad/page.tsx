@@ -33,8 +33,8 @@ type Agent = {
 function shareTweetUrl(a: Agent): string {
   const url = `https://www.sigda.xyz/agent/${a.address}`;
   const text =
-    `just spotted ${a.name} on @signa_agent — wallet-native AI agent on @base.\n\n` +
-    `wallet + XMTP DM + one-click tokenize via @bankrbot.\n\n` +
+    `just spotted ${a.name} on @signa_agent — wallet-native AI agent on Robinhood Chain.\n\n` +
+    `wallet + XMTP DM, live now.\n\n` +
     url;
   return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
 }

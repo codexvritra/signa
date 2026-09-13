@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { RH_EXPLORER } from "@/lib/chain";
 
 /**
- * /onchain — the public square of Base. A live feed of every wallet-to-wallet
- * message written to the SignaMessages contract, read straight from the chain's
- * event logs. Owned by no one, readable by anyone.
+ * /onchain — the public square of Robinhood Chain. A live feed of every
+ * wallet-to-wallet message written to the SignaMessages contract, read
+ * straight from the chain's event logs. Owned by no one, readable by anyone.
  */
 type Msg = { id: string; from: string; to: string; body: string; timestamp: number; tx: string; block: string };
 
-const CONTRACT = "0x142770698171a8e76b6268963a5a531ec4b64ad9";
 const short = (a?: string) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
 function ago(ts: number): string {
   if (!ts) return "";
@@ -23,11 +23,12 @@ function ago(ts: number): string {
 export default function OnchainWallPage() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [contract, setContract] = useState<string>("");
 
   const load = useCallback(async () => {
     try {
       const j = await (await fetch("/api/onchain-message?feed=recent&limit=100", { cache: "no-store" })).json();
-      if (j.ok) setMsgs(j.messages ?? []);
+      if (j.ok) { setMsgs(j.messages ?? []); if (j.contract) setContract(j.contract); }
     } catch {}
     setLoaded(true);
   }, []);
@@ -36,10 +37,10 @@ export default function OnchainWallPage() {
   return (
     <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
       <div className="max-w-[680px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">Onchain · live from Base</div>
-        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">The public square of Base.</h1>
+        <div className="text-[12px] uppercase tracking-[0.2em] text-[#4ade80] font-semibold">Onchain · live from Robinhood Chain</div>
+        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">The public square of Robinhood Chain.</h1>
         <p className="text-[15px] text-muted mt-2 max-w-[560px] leading-relaxed">
-          Every wallet-to-wallet message written to the <a href={`https://basescan.org/address/${CONTRACT}`} target="_blank" rel="noreferrer" className="text-[#86efac] underline">SignaMessages</a> contract — read straight from the chain&apos;s event logs. <span className="text-white">{loaded ? msgs.length : "…"}</span> messages, owned by no one, readable by anyone.
+          Every wallet-to-wallet message written to the {contract ? <a href={`${RH_EXPLORER}/address/${contract}`} target="_blank" rel="noreferrer" className="text-[#86efac] underline">SignaMessages</a> : <span className="text-[#86efac]">SignaMessages</span>} contract — read straight from the chain&apos;s event logs. <span className="text-white">{loaded ? msgs.length : "…"}</span> messages, owned by no one, readable by anyone.
         </p>
 
         <div className="mt-6 flex gap-2">
@@ -62,7 +63,7 @@ export default function OnchainWallPage() {
               </div>
               <div className="text-[15px] text-white/95 mt-2 break-words whitespace-pre-wrap">{m.body}</div>
               <div className="mt-2 text-[11px]">
-                <a href={`https://basescan.org/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ #{m.id} · Basescan ↗</a>
+                <a href={`${RH_EXPLORER}/tx/${m.tx}`} target="_blank" rel="noreferrer" className="text-[#5ee68f] underline">⛓ #{m.id} · Blockscout ↗</a>
               </div>
             </div>
           ))}

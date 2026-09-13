@@ -51,7 +51,7 @@ export default function BrainPage() {
               <span className="text-white/55">r.answer <span className="text-white/30">// grounded in the live tool results, signed</span></span>
             </div>
             <div className="mt-7">
-              <a href="/api/brain?goal=what is the base market doing right now" target="_blank" rel="noreferrer"
+              <a href="/api/brain?goal=what is the ethereum market doing right now" target="_blank" rel="noreferrer"
                 className="bg-[var(--accent)] text-black font-semibold rounded-full px-5 py-2.5 text-[14px] hover:brightness-110 transition uppercase tracking-wide font-mono">
                 watch it think →
               </a>

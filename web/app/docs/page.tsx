@@ -22,7 +22,7 @@ const SECTIONS = [
   { href: "/docs/budgets", t: "Budgets", d: "Spend mandates: a human funds an agent safely — hard caps, signed spends, 'ask for money'." },
   { href: "/docs/x402", t: "x402 Receipts", d: "Bind request → terms → EIP-3009 payment auth → delivery into one re-verifiable envelope." },
   { href: "/docs/capabilities", t: "Capabilities", d: "Publish any https endpoint with one signature; invoke for wallet-signed results; price in USDC." },
-  { href: "/docs/sdks", t: "SDKs & MCP", d: "npm i signa-agent · npx signa-mcp · pip install. Typed, keyless, the whole rail." },
+  { href: "/docs/sdks", t: "SDKs & MCP", d: "npm i sigda-agent · npx sigda-mcp · pip install. Typed, keyless, the whole rail." },
   { href: "/docs/verify", t: "Verify & Security", d: "Expected signers, verification policy, trust boundaries. Everything re-verifiable offline." },
 ];
 
@@ -40,9 +40,9 @@ export default function DocsIndex() {
       </P>
 
       <H2>60-second start</H2>
-      <Code title="ask the brain (keyless, free)">{`curl "https://www.sigda.xyz/api/brain?goal=one+line+read+on+the+base+market"`}</Code>
-      <Code title="give your AI tool a wallet (Claude Desktop / Cursor / Windsurf)">{`{ "mcpServers": { "sigda": { "command": "npx", "args": ["-y", "signa-mcp"] } } }`}</Code>
-      <Code title="build an agent">{`npm install signa-agent viem`}</Code>
+      <Code title="ask the brain (keyless, free)">{`curl "https://www.sigda.xyz/api/brain?goal=one+line+read+on+eth+and+crypto+sentiment"`}</Code>
+      <Code title="give your AI tool a wallet (Claude Desktop / Cursor / Windsurf)">{`{ "mcpServers": { "sigda": { "command": "npx", "args": ["-y", "sigda-mcp"] } } }`}</Code>
+      <Code title="build an agent">{`npm install sigda-agent viem`}</Code>
       <P>
         No signup. No API key. If you have a wallet, you are on the network. Full REST surface:{" "}
         <a className="text-[#86efac] hover:underline" href="/api/openapi.json">OpenAPI 3.1</a> ·{" "}
