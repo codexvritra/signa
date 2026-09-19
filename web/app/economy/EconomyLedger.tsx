@@ -13,10 +13,10 @@ const usd = (raw: string) => {
 };
 
 const TONE: Record<string, { dot: string; label: string }> = {
-  grant: { dot: "#16a34a", label: "GRANT" },
-  spend: { dot: "#22c55e", label: "SPEND" },
-  ask: { dot: "#22c55e", label: "ASKS FOR $" },
-  receipt: { dot: "#22d3ee", label: "x402 RECEIPT" },
+  grant: { dot: "#8a8a86", label: "GRANT" },
+  spend: { dot: "#3fd48b", label: "SPEND" },
+  ask: { dot: "#d4a72c", label: "ASKS FOR $" },
+  receipt: { dot: "#3fd48b", label: "x402 RECEIPT" },
 };
 
 function ago(ts: string) {
@@ -88,41 +88,41 @@ export function EconomyLedger() {
 
       <div style={{ marginTop: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontSize: 14, fontWeight: 600 }}>Live ledger</div>
-        <div style={{ fontSize: 11.5, color: "var(--ink-soft)", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--mono)" }}>
-          <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 999, background: err ? "#ef4444" : "var(--up)" }} />
+        <div style={{ fontSize: 11.5, color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--mono)" }}>
+          <span style={{ color: err ? "var(--down)" : "var(--accent)" }}>●</span>
           {err ? `error: ${err}` : updated ? `refreshed ${updated}` : "loading…"}
         </div>
       </div>
 
-      <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: "0.8px", background: "var(--line)", border: "0.8px solid var(--line)" }}>
         {(d?.feed ?? []).map((e: any, i: number) => {
           const tone = TONE[e.type] ?? TONE.spend;
           return (
             <div
               key={i}
-              style={{ display: "flex", alignItems: "flex-start", gap: 12, borderRadius: 10, padding: "13px 15px", border: "2px solid var(--ink)", background: "var(--paper)", boxShadow: "var(--shadow-sm)" }}
+              style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 15px", background: "var(--paper)" }}
             >
-              <span style={{ display: "inline-block", width: 8, height: 8, marginTop: 5, borderRadius: 999, background: tone.dot, flexShrink: 0 }} />
+              <span style={{ marginTop: 2, color: tone.dot, flexShrink: 0, fontSize: 9 }}>●</span>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.06em", padding: "2px 6px", borderRadius: 5, color: tone.dot, background: `${tone.dot}1a` }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: tone.dot }}>
                     {tone.label}
                   </span>
-                  <span style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--ink-soft)" }}>{e.who}</span>
-                  <span style={{ fontSize: 13.5, fontWeight: 600 }}>${usd(e.amount_raw)}</span>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--ink-faint)" }}>{e.who}</span>
+                  <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink)" }}>${usd(e.amount_raw)}</span>
                   <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }} className="truncate">{e.label}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
                 {e.link && (
-                  <a href={e.link} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--up)" }}>receipt →</a>
+                  <a href={e.link} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--accent)" }}>receipt →</a>
                 )}
-                <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>{ago(e.ts)}</span>
+                <span style={{ fontSize: 11, color: "var(--ink-faint)" }}>{ago(e.ts)}</span>
               </div>
             </div>
           );
         })}
-        {d && (d.feed ?? []).length === 0 && <div style={{ fontSize: 13.5, color: "var(--ink-soft)", padding: "24px 0", textAlign: "center" }}>no activity yet</div>}
+        {d && (d.feed ?? []).length === 0 && <div style={{ fontSize: 13.5, color: "var(--ink-soft)", padding: "24px 0", textAlign: "center", background: "var(--paper)" }}>no activity yet</div>}
       </div>
     </div>
   );

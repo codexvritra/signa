@@ -32,7 +32,7 @@ export default function EconomyPage() {
         <section className="hero" style={{ paddingBottom: 56 }}>
           <div className="shell" style={{ maxWidth: 920 }}>
             <span className="chip">The agent economy · live · on Robinhood Chain</span>
-            <h1 style={{ fontSize: "clamp(32px, 5.5vw, 58px)" }}>
+            <h1 style={{ fontSize: "clamp(28px, 4.2vw, 42px)" }}>
               The economy, <span className="mark">in the open.</span>
             </h1>
             <p className="sub" style={{ maxWidth: 700 }}>
@@ -50,7 +50,7 @@ export default function EconomyPage() {
               <Card t="Proven, not promised" d="Each x402 receipt binds request → terms → EIP-3009 payment → delivery. Re-verify any row at /api/verify." />
             </div>
 
-            <div style={{ marginTop: 36, paddingTop: 22, borderTop: "2px solid var(--ink)", fontSize: 12.5, lineHeight: 1.6, color: "var(--ink-soft)" }}>
+            <div style={{ marginTop: 36, paddingTop: 22, borderTop: "0.8px solid var(--line)", fontSize: 12.5, lineHeight: 1.6, color: "var(--ink-soft)" }}>
               Honest scope: mandates and spends are wallet-signed authorizations, not on-chain custody — SIGDA
               never holds funds. Settlement of each purchase is the permissionless x402 step. This ledger counts
               real signed commerce activity on production; it is not a price or a market cap.
