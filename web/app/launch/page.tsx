@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER, RH_CHAIN_ID } from "@/lib/chain";
 import { liveLaunchFeeWei, previewEconomics, buildPonsLaunchCalldata, randomSalt, NATIVE_PAIR, DEFAULT_LAUNCH_CONFIG_ID, DEFAULT_CREATOR_TAX_BPS, PONS_FACTORY } from "@/lib/pons";
+import { AppHeader } from "@/components/shell/AppHeader";
+import { Footer } from "@/components/shell/Footer";
 
 /**
  * /launch — launch a token straight on Pons's own factory (Robinhood Chain),
@@ -98,49 +100,53 @@ export default function LaunchPage() {
   const feeEth = (Number(feeWei) / 1e18).toFixed(4);
 
   return (
-    <div className="min-h-[100dvh] bg-[var(--background)] text-[var(--foreground)]">
-      <div className="max-w-[720px] mx-auto px-5 py-12 sm:py-16">
-        <div className="text-[12px] uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">Launch · Pons · Robinhood Chain</div>
-        <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a token. It comes alive.</h1>
-        <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">
-          This launches directly on Pons&apos;s own contract — no redirect, your wallet signs it. The moment it launches, it gets a
-          live onchain agent that researches its own token and signs its own thoughts. 2% of every trade routes to Sigda
-          (Pons&apos;s built-in creator tax), funding the agent network.
-        </p>
+    <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]">
+      <AppHeader />
+      <main className="flex-1">
+        <div className="max-w-[720px] mx-auto px-6 lg:px-10 py-12">
+          <div className="text-[12px] uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">Launch · Pons · Robinhood Chain</div>
+          <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a token. It comes alive.</h1>
+          <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">
+            This launches directly on Pons&apos;s own contract — no redirect, your wallet signs it. The moment it launches, it gets a
+            live onchain agent that researches its own token and signs its own thoughts. 2% of every trade routes to Sigda
+            (Pons&apos;s built-in creator tax), funding the agent network.
+          </p>
 
-        <div className="mt-6 glass rounded-2xl p-5 border border-white/[0.07] flex flex-col gap-2">
-          <div className="flex gap-2">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name" className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60" />
-            <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="TICKER" maxLength={10} className="w-28 bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60" />
-          </div>
-          <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60" />
-          <div className="grid grid-cols-3 gap-2">
-            <input value={tw} onChange={(e) => setTw(e.target.value)} placeholder="X / Twitter link" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60" />
-            <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="Telegram link" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60" />
-            <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="Website" className="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60" />
+          <div className="mt-6 glass rounded-2xl p-5 border border-white/[0.07] flex flex-col gap-2.5">
+            <div className="flex gap-2.5">
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name" className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+              <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="TICKER" maxLength={10} className="w-28 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+            </div>
+            <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+            <div className="grid grid-cols-3 gap-2.5">
+              <input value={tw} onChange={(e) => setTw(e.target.value)} placeholder="X / Twitter link" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+              <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="Telegram link" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+              <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="Website" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+            </div>
+
+            {account ? (
+              <button onClick={launch} disabled={busy} className="w-full mt-1.5 px-4 py-3 rounded-xl text-[15px] font-semibold bg-[var(--accent)] text-black disabled:opacity-60 hover:brightness-95 transition-[filter]">
+                {busy ? "launching…" : `Launch token · ${feeEth} ETH fee`}
+              </button>
+            ) : (
+              <button onClick={connect} className="w-full mt-1.5 px-4 py-3 rounded-xl text-[15px] font-semibold bg-[var(--accent)] text-black hover:brightness-95 transition-[filter]">Connect wallet</button>
+            )}
+            {account && <div className="text-[11px] text-faint font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</div>}
           </div>
 
-          {account ? (
-            <button onClick={launch} disabled={busy} className="w-full mt-2 px-4 py-3 rounded-xl text-[15px] font-semibold bg-[var(--accent)] text-black disabled:opacity-60 hover:brightness-95">
-              {busy ? "launching…" : `Launch token · ${feeEth} ETH fee`}
-            </button>
-          ) : (
-            <button onClick={connect} className="w-full mt-2 px-4 py-3 rounded-xl text-[15px] font-semibold bg-[var(--accent)] text-black hover:brightness-95">Connect wallet</button>
+          {status && (
+            <div className={`mt-4 text-[13px] rounded-lg px-3.5 py-2.5 break-words border ${status.k === "ok" ? "bg-[#22c98a]/10 text-[#bdf5d2] border-[#5ee68f]/30" : status.k === "err" ? "bg-red-500/10 text-red-300 border-red-500/30" : "bg-white/[0.04] text-faint border-white/[0.08]"}`}>
+              {status.t}
+            </div>
           )}
-          {account && <div className="text-[11px] text-faint font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</div>}
+
+          <p className="text-[11px] text-faint mt-10">
+            Launches go straight to Pons&apos;s verified factory contract on Robinhood Chain — Sigda never holds your funds or keys.
+            Trade fee is 3% total (1% Pons base + 2% creator tax routed to Sigda). Not affiliated with Robinhood or Pons.
+          </p>
         </div>
-
-        {status && (
-          <div className={`mt-4 text-[13px] rounded-lg px-3 py-2.5 break-words ${status.k === "ok" ? "bg-[#22c98a]/10 text-[#bdf5d2] border border-[#5ee68f]/30" : status.k === "err" ? "bg-red-500/10 text-red-300 border border-red-500/30" : "bg-white/[0.05] text-faint"}`}>
-            {status.t}
-          </div>
-        )}
-
-        <p className="text-[11px] text-faint mt-10">
-          Launches go straight to Pons&apos;s verified factory contract on Robinhood Chain — Sigda never holds your funds or keys.
-          Trade fee is 3% total (1% Pons base + 2% creator tax routed to Sigda). Not affiliated with Robinhood or Pons.
-        </p>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }
