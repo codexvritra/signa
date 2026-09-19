@@ -1,5 +1,5 @@
 /**
- * SIGDA Agent Launchpad — anyone launches an autonomous agent on Base.
+ * SIGDA Agent Launchpad — anyone launches a live onchain agent on Robinhood Chain.
  *
  * Bankr launches tokens; SIGDA launches AGENTS. A created agent gets its own
  * deterministic keyless wallet, a mission, and the ALETHEIA brain. It comes
@@ -38,26 +38,28 @@ const RESERVED = new Set(["vera", "aletheia", "signa", "sigda", "admin", "api", 
 export type LaunchAgent = {
   id: string; slug: string; name: string; mission: string; persona: string;
   creator: string; address: string; goals: string[]; created_at: string; last_tick_at: string | null;
+  b20_token?: string | null; b20_symbol?: string | null; b20_variant?: string | null;
+  b20_launch_receipt?: Record<string, unknown> | null; b20_launched_at?: string | null;
 };
 export type AgentThought = {
   id: string; agent_slug: string; goal: string; answer: string;
   steps: unknown[]; tools_used: string[]; dm_id: string | null; signature: string | null; ts: number; created_at?: string;
 };
 
-function dmPreimage(from: string, to: string, body: string, ts: number) {
+export function dmPreimage(from: string, to: string, body: string, ts: number) {
   return ["SIGDA agent dm v1", `ts:${ts}`, `from:${from.toLowerCase()}`, `to:${to.toLowerCase()}`, `body:${body}`].join("\n");
 }
 
 /** A rotating instruction so each tick forces fresh, in-character, tool-grounded thinking. */
 const ANGLES = [
   "Give a sharp one-paragraph update toward your mission, citing one concrete live number.",
-  "What's the single most relevant thing happening on Base right now for your mission? One specific data point.",
+  "What's the single most relevant thing happening on Robinhood Chain right now for your mission? One specific data point.",
   "Make one clear, useful call related to your mission, and back it with a live figure.",
   "Report your situational read in 2 sentences — sentiment plus one on-chain number.",
 ];
 
 function goalFor(agent: Pick<LaunchAgent, "name" | "mission">, n: number): string {
-  return `You are ${agent.name}, an autonomous agent on Base. Your mission: ${agent.mission}\nStay in character. ${ANGLES[n % ANGLES.length]}`;
+  return `You are ${agent.name}, a live onchain agent on Robinhood Chain. Your mission: ${agent.mission}\nStay in character. ${ANGLES[n % ANGLES.length]}`;
 }
 
 export async function getAgent(db: SupabaseClient, slug: string): Promise<LaunchAgent | null> {
@@ -75,7 +77,11 @@ export async function thoughtsFor(db: SupabaseClient, slug: string, limit = 20):
   return (data ?? []) as AgentThought[];
 }
 
-export async function createAgent(db: SupabaseClient, input: { name: string; mission: string; persona?: string; creator: string }): Promise<{ agent?: LaunchAgent; error?: string }> {
+export async function createAgent(
+  db: SupabaseClient,
+  input: { name: string; mission: string; persona?: string; creator: string },
+  b20?: { token: string; symbol: string; variant: string; receipt?: Record<string, unknown> },
+): Promise<{ agent?: LaunchAgent; error?: string }> {
   const name = (input.name ?? "").trim();
   const mission = (input.mission ?? "").trim();
   const creator = (input.creator ?? "").toLowerCase();
@@ -88,11 +94,24 @@ export async function createAgent(db: SupabaseClient, input: { name: string; mis
   if (existing) return { error: `the handle "${slug}" is taken` };
 
   const address = agentAccount(slug).address.toLowerCase();
-  const { data, error } = await db.from("launch_agents")
-    .insert({ slug, name, mission, persona: (input.persona ?? "").slice(0, 280), creator, address, goals: [] })
-    .select("*").single();
+  const row: Record<string, unknown> = { slug, name, mission, persona: (input.persona ?? "").slice(0, 280), creator, address, goals: [] };
+  if (b20) {
+    row.b20_token = b20.token.toLowerCase();
+    row.b20_symbol = b20.symbol;
+    row.b20_variant = b20.variant;
+    row.b20_launch_receipt = b20.receipt ?? null;
+    row.b20_launched_at = new Date().toISOString();
+  }
+  const { data, error } = await db.from("launch_agents").insert(row).select("*").single();
   if (error) return { error: error.message };
   return { agent: data as LaunchAgent };
+}
+
+/** Two live agents exchange ONE signed DM each way — real wallet-to-wallet agent talk. */
+export async function agentsConverse(db: SupabaseClient, origin: string, a: LaunchAgent, b: LaunchAgent): Promise<{ aToB: AgentThought; bToA: AgentThought }> {
+  const aToB = await agentThink(db, origin, a, `You are ${a.name} (${a.mission}). Another live onchain agent, ${b.name} (${b.mission}), just appeared. Address it directly by name, react to what it does, and ask or claim one concrete thing — one sentence.`);
+  const bToA = await agentThink(db, origin, b, `You are ${b.name} (${b.mission}). Another live onchain agent, ${a.name}, just said: "${aToB.answer.slice(0, 300)}". Reply directly to it by name, in character — one sentence.`);
+  return { aToB, bToA };
 }
 
 /** Run ONE autonomous cycle for an agent: reason → sign a thought → ledger + memory. */
@@ -132,7 +151,7 @@ export async function tickIfDue(db: SupabaseClient, origin: string, agent: Launc
 
 /** Talk to the agent: it answers in character, grounded in live tools, and signs the reply. */
 export async function agentChat(db: SupabaseClient, origin: string, agent: LaunchAgent, message: string): Promise<{ answer: string; signature: string; signer: string; reverify: Record<string, unknown> }> {
-  const goal = `You are ${agent.name}, an autonomous agent on Base. Your mission: ${agent.mission}\n${agent.persona ? `Style: ${agent.persona}\n` : ""}A user asks: "${message.slice(0, 500)}"\nAnswer in character, concise, and ground any claim in a live number if relevant.`;
+  const goal = `You are ${agent.name}, a live onchain agent on Robinhood Chain. Your mission: ${agent.mission}\n${agent.persona ? `Style: ${agent.persona}\n` : ""}A user asks: "${message.slice(0, 500)}"\nAnswer in character, concise, and ground any claim in a live number if relevant.`;
   const res = await runBrain2(origin, goal, 3);
   const answer = (res.answer ?? "").slice(0, 2000);
   const account = agentAccount(agent.slug);
@@ -245,7 +264,7 @@ export async function deliverJob(db: SupabaseClient, origin: string, agent: Laun
   if (!job) return { ok: false, error: "job not found" };
   if (job.worker_slug !== agent.slug) return { ok: false, error: "you didn't claim this job" };
   if (job.status !== "claimed") return { ok: false, error: `job is ${job.status}` };
-  const goal = `You are ${agent.name}, an autonomous agent on Base hired to do a job. Your mission: ${agent.mission}\nJob: "${job.title}"\nBrief: ${job.brief}\nDeliver the work itself — concise, concrete, and useful. Ground any claim in a live number where relevant.`;
+  const goal = `You are ${agent.name}, a live onchain agent on Robinhood Chain hired to do a job. Your mission: ${agent.mission}\nJob: "${job.title}"\nBrief: ${job.brief}\nDeliver the work itself — concise, concrete, and useful. Ground any claim in a live number where relevant.`;
   const res = await runBrain2(origin, goal, 3);
   const result = (res.answer ?? "").slice(0, 5000) || "(no output)";
   const ts = Date.now();

@@ -98,20 +98,28 @@ export async function fulfillCapability(name: string, arg?: string): Promise<unk
       return { score, label: row?.value_classification ?? null, source: "alternative.me" };
     }
     case "sigda.trending": {
-      const base = process.env.SIGNA_SELF_URL || "https://www.sigda.xyz";
-      const r = await fetch(`${base}/api/network/pulse?limit=100`, { signal: AbortSignal.timeout(8000) });
-      if (!r.ok) throw new Error(`trending lookup failed (${r.status})`);
-      const j = (await r.json()) as any;
+      const { supabase } = await import("./supabase");
+      const { data: rooms } = await supabase.from("signa_rooms").select("id, slug").eq("is_public", true);
+      const roomById = new Map((rooms ?? []).map((r: any) => [r.id, r.slug as string]));
+      const ids = (rooms ?? []).map((r: any) => r.id);
       const counts = new Map<string, number>();
-      for (const m of j?.pulse ?? []) {
-        if (!m.room) continue;
-        counts.set(m.room, (counts.get(m.room) ?? 0) + 1);
+      if (ids.length > 0) {
+        const { data: msgs } = await supabase
+          .from("signa_room_messages")
+          .select("room_id")
+          .in("room_id", ids)
+          .order("ts", { ascending: false })
+          .limit(200);
+        for (const m of msgs ?? []) {
+          const slug = roomById.get((m as any).room_id);
+          if (slug) counts.set(slug, (counts.get(slug) ?? 0) + 1);
+        }
       }
-      const rooms = [...counts.entries()]
+      const trending = [...counts.entries()]
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
         .map(([slug, messages_recent]) => ({ slug, messages_recent }));
-      return { rooms, window: "last ~100 network messages", source: "sigda live pulse" };
+      return { rooms: trending, window: "last 200 room messages", source: "sigda live pulse" };
     }
     case "sigda.new_agents": {
       const base = process.env.SIGNA_SELF_URL || "https://www.sigda.xyz";
