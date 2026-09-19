@@ -3,6 +3,7 @@ import { serverClient } from "@/lib/supabase";
 import { getAgent, thoughtsFor, tickIfDue, agentThink, recordThought, shareFinding, agentChat, agentFeed, agentAskBudget, agentSpend, agentMandates, postJob, claimJob, deliverJob, settleJob, type LaunchAgent } from "@/lib/launchpad";
 import { obsessionFor } from "@/lib/obsession";
 import { fetchObsessionPage, reflectOnPage, browseInteractive } from "@/lib/browse";
+import { makePrediction } from "@/lib/predictions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,6 +73,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
         shared = { to: partner.slug };
       }
       return NextResponse.json({ ok: true, agent: agent.address, obsession, source, mode, fallback_reason, shared, thought: t }, { headers: CORS });
+    }
+    // ── verifiable, scored stock predictions — real ticker, real price, signed both ways ──
+    if (action === "predict") {
+      const r = await makePrediction(db, agent, typeof b.ticker === "string" ? b.ticker : undefined);
+      return NextResponse.json({ ...r, agent: agent.address, action: "predict" }, { status: r.ok ? 200 : 400, headers: CORS });
     }
     // ── the agent ACTS, self-signed + verifiable ──
     if (action === "mandates") {
