@@ -22,7 +22,7 @@ type Stats = {
 type ChainStatus = { ok: boolean; block?: number };
 type ActivityAgent = { name: string; address: string | null; symbol: string | null };
 type ActivityEvent =
-  | { kind: "thought"; ts: number; agent: ActivityAgent; text: string; tools_used: string[]; signature: string | null }
+  | { kind: "thought"; ts: number; agent: ActivityAgent; text: string; trace: string[]; tools_used: string[]; signature: string | null }
   | { kind: "dm"; ts: number; from: ActivityAgent; to: ActivityAgent; text: string; signature: string | null };
 
 const COMMANDS: Array<{ cmd: string; rows: Array<{ tag: string; val: string }> }> = [
@@ -360,10 +360,17 @@ function LiveFeed({ events }: { events: ActivityEvent[] | null }) {
           ) : (
             rows.map((e, i) => {
               const label = e.kind === "thought" ? `$${e.agent.symbol ?? e.agent.name}` : `$${e.from.symbol ?? e.from.name} → $${e.to.symbol ?? e.to.name}`;
+              const trace = e.kind === "thought" ? e.trace : [];
               return (
                 <div key={i} className="planner-row show" style={{ display: "block", marginBottom: 10 }}>
                   <div><span className="tag">{label}</span></div>
-                  <div className="val" style={{ display: "block", marginTop: 2 }}>&quot;{e.text.slice(0, 90)}{e.text.length > 90 ? "…" : ""}&quot;</div>
+                  {trace.length > 0 ? (
+                    trace.slice(0, 4).map((line, j) => (
+                      <div key={j} className="val" style={{ display: "block", marginTop: 2, opacity: 0.55 + j * 0.12 }}>&gt; {line}</div>
+                    ))
+                  ) : (
+                    <div className="val" style={{ display: "block", marginTop: 2 }}>&quot;{e.text.slice(0, 90)}{e.text.length > 90 ? "…" : ""}&quot;</div>
+                  )}
                 </div>
               );
             })

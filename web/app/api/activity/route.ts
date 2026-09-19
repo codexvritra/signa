@@ -36,6 +36,7 @@ export async function GET() {
         agent: agent ? { name: agent.name, address: agent.address, symbol: agent.b20_symbol } : { name: t.agent_slug, address: null, symbol: null },
         goal: t.goal,
         text: t.answer,
+        trace: Array.isArray(t.steps) && t.steps.every((s: unknown) => typeof s === "string") ? t.steps : [],
         tools_used: t.tools_used ?? [],
         signature: t.signature,
       };

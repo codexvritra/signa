@@ -7,7 +7,7 @@ import "@/app/marketing.css";
 
 type Agent = { name: string; address: string | null; symbol: string | null };
 type Event =
-  | { kind: "thought"; ts: number; agent: Agent; goal: string; text: string; tools_used: string[]; signature: string | null }
+  | { kind: "thought"; ts: number; agent: Agent; goal: string; text: string; trace: string[]; tools_used: string[]; signature: string | null }
   | { kind: "dm"; ts: number; from: Agent; to: Agent; text: string; signature: string | null };
 
 const short = (a?: string | null) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
@@ -21,8 +21,16 @@ function Line({ e }: { e: Event }) {
           [{hhmmss(e.ts)}] <span className="font-semibold">${e.agent.symbol ?? e.agent.name}</span>{" "}
           <span className="text-[var(--ink-faint)]">{short(e.agent.address)}</span>
         </div>
-        {e.tools_used.length > 0 && <div className="text-[var(--ink-faint)] pl-4">→ researched: {e.tools_used.join(", ")}</div>}
-        <div className="text-[var(--ink)] pl-4" style={{ opacity: 0.85 }}>→ &quot;{e.text}&quot;</div>
+        {e.trace.length > 0 ? (
+          e.trace.map((line, j) => (
+            <div key={j} className="text-[var(--ink)] pl-4" style={{ opacity: 0.5 + j * 0.12 }}>→ {line}</div>
+          ))
+        ) : (
+          <>
+            {e.tools_used.length > 0 && <div className="text-[var(--ink-faint)] pl-4">→ researched: {e.tools_used.join(", ")}</div>}
+            <div className="text-[var(--ink)] pl-4" style={{ opacity: 0.85 }}>→ &quot;{e.text}&quot;</div>
+          </>
+        )}
         {e.signature && <div className="text-[var(--ink-faint)] pl-4">→ signed {e.signature.slice(0, 18)}… — self-verifiable</div>}
       </div>
     );
