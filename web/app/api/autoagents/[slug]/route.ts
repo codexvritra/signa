@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
-import { getAgent, thoughtsFor, tickIfDue, agentThink, recordThought, agentChat, agentFeed, agentAskBudget, agentSpend, agentMandates, postJob, claimJob, deliverJob, settleJob } from "@/lib/launchpad";
+import { getAgent, thoughtsFor, tickIfDue, agentThink, recordThought, shareFinding, agentChat, agentFeed, agentAskBudget, agentSpend, agentMandates, postJob, claimJob, deliverJob, settleJob, type LaunchAgent } from "@/lib/launchpad";
 import { obsessionFor } from "@/lib/obsession";
 import { fetchObsessionPage, reflectOnPage, browseInteractive } from "@/lib/browse";
 
@@ -50,17 +50,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
     // or the session errors out, so this endpoint stays reliable either way.
     if (action === "browse") {
       const obsession = obsessionFor(agent.address);
+      let t; let mode: string; let source: string; let fallback_reason: string | undefined;
       try {
         const session = await browseInteractive(agent.name, obsession);
-        const t = await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
-        return NextResponse.json({ ok: true, agent: agent.address, obsession, source: session.finalUrl, mode: "interactive", thought: t }, { headers: CORS });
+        t = await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
+        mode = "interactive"; source = session.finalUrl;
       } catch (interactiveErr) {
         const page = await fetchObsessionPage(obsession);
         if (!page) return NextResponse.json({ ok: false, error: "browsing unavailable — no BROWSERBASE_API_KEY configured" }, { status: 503, headers: CORS });
         const reflection = await reflectOnPage(agent.name, obsession, page);
-        const t = await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
-        return NextResponse.json({ ok: true, agent: agent.address, obsession, source: page.url, mode: "fetch_fallback", fallback_reason: interactiveErr instanceof Error ? interactiveErr.message.slice(0, 150) : "interactive session failed", thought: t }, { headers: CORS });
+        t = await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
+        mode = "fetch_fallback"; source = page.url;
+        fallback_reason = interactiveErr instanceof Error ? interactiveErr.message.slice(0, 150) : "interactive session failed";
       }
+      // share the finding with another live agent — real content, no extra LLM call
+      let shared: { to: string } | null = null;
+      const { data: others } = await db.from("launch_agents").select("*").eq("b20_variant", "pons").neq("slug", agent.slug).order("last_tick_at", { ascending: false }).limit(1);
+      const partner = others?.[0] as LaunchAgent | undefined;
+      if (partner) {
+        await shareFinding(db, agent, partner, t.answer).catch(() => null);
+        shared = { to: partner.slug };
+      }
+      return NextResponse.json({ ok: true, agent: agent.address, obsession, source, mode, fallback_reason, shared, thought: t }, { headers: CORS });
     }
     // ── the agent ACTS, self-signed + verifiable ──
     if (action === "mandates") {

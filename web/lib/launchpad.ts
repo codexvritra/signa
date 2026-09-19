@@ -114,6 +114,28 @@ export async function agentsConverse(db: SupabaseClient, origin: string, a: Laun
   return { aToB, bToA };
 }
 
+/**
+ * One agent shares a real finding directly with another — a signed DM
+ * carrying actual research content, not a scripted greeting. Zero extra
+ * LLM cost: the finding is already-generated text (e.g. from a browse
+ * pass), this just signs and delivers it agent-to-agent.
+ */
+export async function shareFinding(db: SupabaseClient, from: LaunchAgent, to: LaunchAgent, finding: string): Promise<{ dm_id: string | null; signature: string; body: string }> {
+  const account = agentAccount(from.slug);
+  const ts = Date.now();
+  const body = `[research from ${from.name}] ${finding}`.slice(0, 2000);
+  const signedMessage = dmPreimage(from.address, to.address, body, ts);
+  const signature = await account.signMessage({ message: signedMessage });
+  let dm_id: string | null = null;
+  try {
+    const { data } = await db.from("agent_dms")
+      .insert({ from_address: from.address, to_address: to.address, body, body_type: "text", protocol: "signa.dm.v1", ts, signature, signed_message: signedMessage })
+      .select("id").single();
+    dm_id = data?.id ?? null;
+  } catch { /* best-effort */ }
+  return { dm_id, signature, body };
+}
+
 /** Sign + store an already-produced answer as a thought — the shared tail of every thinking path. */
 export async function recordThought(db: SupabaseClient, agent: LaunchAgent, goal: string, answer: string, steps: unknown[] = [], tools_used: string[] = []): Promise<AgentThought> {
   answer = answer.slice(0, 3000);
