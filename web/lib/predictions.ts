@@ -34,7 +34,7 @@ async function researchDirection(stock: StockToken, priceUsd: number, track: str
       // same fix, applied first.
       const { browserbase } = await import("@browserbasehq/stagehand");
       const r = await browserbase.fetch({ apiKey, url: `https://finance.yahoo.com/quote/${stock.ticker}/`, format: "markdown" });
-      newsSnippet = (typeof r.content === "string" ? r.content : JSON.stringify(r.content)).slice(0, 3000);
+      newsSnippet = (typeof r.content === "string" ? r.content : JSON.stringify(r.content)).slice(0, 1500);
     } catch { /* fall through with no news context */ }
   }
   if (!groqKey) return { direction: "up", reasoning: ["(no GROQ_API_KEY — undirected default)"] };
@@ -51,7 +51,7 @@ async function researchDirection(stock: StockToken, priceUsd: number, track: str
           { role: "user", content: `Ticker: ${stock.ticker} (${stock.company}). Current price: $${priceUsd}.\n\nReal page content:\n${newsSnippet || "(no page fetched — reason from price alone)"}` },
         ],
         temperature: 0.6,
-        max_tokens: 300,
+        max_tokens: 180,
         response_format: { type: "json_object" },
       }),
       signal: AbortSignal.timeout(20000),

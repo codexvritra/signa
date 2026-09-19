@@ -70,7 +70,7 @@ export async function fetchObsessionPage(obsession: string): Promise<{ url: stri
     const { browserbase } = await import("@browserbasehq/stagehand");
     const result = await browserbase.fetch({ apiKey, url, format: "markdown" });
     const content = typeof result.content === "string" ? result.content : JSON.stringify(result.content);
-    return { url, content: content.slice(0, 4000) };
+    return { url, content: content.slice(0, 1800) };
   } catch {
     return null;
   }
@@ -109,7 +109,7 @@ export async function reflectOnPage(agentName: string, obsession: string, page: 
           { role: "user", content: `You just read this real page (${page.url}):\n\n${page.content}` },
         ],
         temperature: 0.7,
-        max_tokens: 400,
+        max_tokens: 220,
         response_format: { type: "json_object" },
       }),
       signal: AbortSignal.timeout(20000),
@@ -229,7 +229,7 @@ export async function browseInteractive(agentName: string, obsession: string, ho
     trace.push(`Chose a real link: "${chosen.text}".`);
 
     await page.goto(chosen.href, { timeout: 15000, waitUntil: "domcontentloaded" });
-    const bodyText = (await page.innerText("body").catch(() => "")).slice(0, 4000);
+    const bodyText = (await page.innerText("body").catch(() => "")).slice(0, 1800);
     const screenshot = await page.screenshot({ type: "jpeg", quality: 55 }).then((b) => `data:image/jpeg;base64,${b.toString("base64")}`).catch(() => null);
 
     const reflection = await reflectOnPage(agentName, obsession, { url: chosen.href, content: bodyText }, memories);

@@ -16,16 +16,24 @@ import { refreshTokenPrices } from "../lib/rwa";
  * autoActTick — this replaced the old "always browse, every 3rd tick also
  * predict" hardcoded round-robin.
  */
-// Groq's real cap here is 8000 tokens/minute (not the 1000/day request count,
-// which is generous) — at 8s between cycles, 2+ Groq calls per cycle blew
-// through that budget within a couple minutes and every tick started
-// failing with 429. 25s keeps cycles to ~2/min, comfortably under budget.
-const PAUSE_MS = 25_000;
+// The 8000-tokens/MINUTE cap (fixed earlier) turned out not to be the real
+// ceiling — this Groq key also has a 200,000-tokens/DAY cap, shared with
+// every other Groq call on the site (chat, social takes, etc.), and 25s
+// cycles blew through the *entire day's* budget in about an hour. A cycle
+// now costs roughly 500-1500 tokens after trimming prompt sizes, so 15min
+// keeps the worker's own share to roughly 100-140k tokens/day, leaving
+// headroom for the rest of the site sharing the same key.
+const PAUSE_MS = 15 * 60_000;
+// If a tick fails on a Groq rate limit, the normal PAUSE_MS is too short to
+// matter — back off much longer so we're not just re-failing every cycle
+// while the (rolling, not fixed-clock) daily window recovers.
+const RATE_LIMIT_BACKOFF_MS = 10 * 60_000;
 
 async function loop() {
   const db = serverClient();
   console.log(`[browse-worker] starting, ${new Date().toISOString()}`);
   for (;;) {
+    let waitMs = PAUSE_MS;
     try {
       const result = await autoActTick(db);
       console.log(`[browse-worker] tick`, result ?? "no launched agents yet");
@@ -33,9 +41,14 @@ async function loop() {
       const resolved = await resolveDuePredictions(db).catch(() => []);
       if (resolved.length) console.log(`[browse-worker] resolved ${resolved.length} prediction(s)`);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error("[browse-worker] tick failed", err);
+      if (msg.includes("429") || msg.toLowerCase().includes("rate_limit")) {
+        console.log(`[browse-worker] rate-limited, backing off ${RATE_LIMIT_BACKOFF_MS / 60_000}min`);
+        waitMs = RATE_LIMIT_BACKOFF_MS;
+      }
     }
-    await new Promise((r) => setTimeout(r, PAUSE_MS));
+    await new Promise((r) => setTimeout(r, waitMs));
   }
 }
 
