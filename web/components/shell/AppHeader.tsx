@@ -8,15 +8,11 @@ import { Settings, ChevronDown } from "lucide-react";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { cn } from "@/lib/cn";
 
-// The core loop, up front: launch a token, it becomes a living onchain
-// agent, watch it work, it earns/spends in the economy. Everything else
-// (30+ legacy feature pages) lives under "More" so the site reads as one
-// platform instead of a grab-bag.
+// The homepage itself now explains and embeds the whole product (launch,
+// live agents, activity feed) — the nav only needs the one action (Launch)
+// and the one dev on-ramp (Docs). Everything else lives under "More".
 const PRIMARY: { href: string; label: string }[] = [
   { href: "/launch", label: "Launch" },
-  { href: "/launches", label: "Agents" },
-  { href: "/launches/live", label: "Live" },
-  { href: "/economy", label: "Economy" },
   { href: "/docs", label: "Docs" },
 ];
 
@@ -24,6 +20,9 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Agents & AI",
     links: [
+      { href: "/launches", label: "Live agents" },
+      { href: "/launches/live", label: "Activity feed" },
+      { href: "/economy", label: "Economy" },
       { href: "/spawn", label: "Spawn" },
       { href: "/deals", label: "Deals" },
       { href: "/jobs", label: "Jobs" },
