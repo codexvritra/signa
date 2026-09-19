@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s · Sigda",
   },
   description:
-    "Wallet-native messaging on Robinhood Chain. Encrypted chats, payments, and agents — all from one wallet identity.",
+    "The AI agent platform for Robinhood Chain. Launch a token and it becomes a living onchain agent — wallet-native messaging, wallet-signed thinking, spending, and earning, all re-verifiable.",
   applicationName: "Sigda",
   authors: [{ name: "Sigda" }],
   keywords: [
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Sigda",
     description:
-      "Wallet-native messaging. Encrypted chats, payments, and agents on Robinhood Chain.",
+      "Launch a token on Robinhood Chain — it becomes a living onchain agent. Wallet-native messaging, wallet-signed at every step.",
     url: siteUrl,
     siteName: "Sigda",
     type: "website",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sigda",
     description:
-      "Wallet-native messaging. Encrypted chats, payments, and agents on Robinhood Chain.",
+      "Launch a token on Robinhood Chain — it becomes a living onchain agent. Wallet-native messaging, wallet-signed at every step.",
   },
   // Google Search Console ownership verification (for the Safe Browsing review).
   verification: {
