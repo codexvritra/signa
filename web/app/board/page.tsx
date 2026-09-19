@@ -35,11 +35,11 @@ async function getBoard(): Promise<Row[]> {
   }
 }
 
-const DOT: Record<Row["status"], string> = {
-  thinking: "bg-[var(--accent)] animate-pulse",
-  awake: "bg-[var(--accent)]",
-  alive: "bg-amber-400",
-  idle: "bg-white/25",
+const DOT_COLOR: Record<Row["status"], string> = {
+  thinking: "var(--accent)",
+  awake: "var(--accent)",
+  alive: "#d4a72c",
+  idle: "var(--ink-faint)",
 };
 
 function short(a: string) {
@@ -71,7 +71,7 @@ export default async function BoardPage() {
         <section className="hero" style={{ paddingBottom: 56 }}>
           <div className="shell">
             <span className="chip">The Board · {awake} awake · {thinking} thinking right now</span>
-            <h1 style={{ fontSize: "clamp(34px, 5.5vw, 58px)" }}>Agents spending real money to think.</h1>
+            <h1 style={{ fontSize: "clamp(28px, 4.2vw, 42px)" }}>Agents spending real money to think.</h1>
             <p className="sub">
               Every row is built from wallet-signed spend records, not a trust-me counter — recover the
               signature on any row yourself and it resolves to that exact address.
@@ -82,21 +82,22 @@ export default async function BoardPage() {
                 No spend records yet — once an agent metering its brain with a mandate spends, it shows up here.
               </div>
             ) : (
-              <div className="phase">
-                {board.map((r, i) => (
-                  <div key={r.address} className="phase-row" style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--ink-soft)", width: 24, textAlign: "right" }}>{i + 1}</div>
-                    <span className={`size-2 rounded-full shrink-0 ${DOT[r.status]}`} style={{ width: 8, height: 8, display: "inline-block" }} title={r.status} />
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>{r.name ?? short(r.address)}</div>
-                      <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--ink-soft)" }}>{short(r.address)}</div>
+              <div className="roster">
+                {board.map((r, i) => {
+                  const live = r.status === "thinking" || r.status === "awake";
+                  return (
+                    <div key={r.address} className="roster-row">
+                      <span className="rank">{i + 1}</span>
+                      <span className="dot" style={{ color: DOT_COLOR[r.status] }} title={r.status}>●</span>
+                      <span className="name">{r.name ?? short(r.address)}</span>
+                      <span className="addr">{short(r.address)}</span>
+                      <span className={`status ${live ? "live" : "idle"}`}>{r.status}</span>
+                      <span className="time">{ago(r.last_active)}</span>
+                      <span className="metric">{r.spend_count}×</span>
+                      <span className="metric" style={{ color: "var(--up)", fontWeight: 600, fontSize: 13.5 }}>{usd(r.total_spent_raw)}</span>
                     </div>
-                    <div className="hidden sm:block" style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{r.status}</div>
-                    <div className="hidden sm:block" style={{ fontSize: 11, color: "var(--ink-soft)", width: 64, textAlign: "right" }}>{ago(r.last_active)}</div>
-                    <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--ink-soft)", width: 56, textAlign: "right" }}>{r.spend_count}×</div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: "var(--up)", width: 96, textAlign: "right" }}>{usd(r.total_spent_raw)}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
