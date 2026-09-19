@@ -49,8 +49,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       const obsession = obsessionFor(agent.address);
       const page = await fetchObsessionPage(obsession);
       if (!page) return NextResponse.json({ ok: false, error: "browsing unavailable — no BROWSERBASE_API_KEY configured" }, { status: 503, headers: CORS });
-      const answer = await reflectOnPage(agent.name, obsession, page);
-      const t = await recordThought(db, agent, `read ${page.url}`, answer, [], ["browserbase.fetch"]);
+      const reflection = await reflectOnPage(agent.name, obsession, page);
+      const t = await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
       return NextResponse.json({ ok: true, agent: agent.address, obsession, source: page.url, thought: t }, { headers: CORS });
     }
     // ── the agent ACTS, self-signed + verifiable ──
