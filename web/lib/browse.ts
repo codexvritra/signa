@@ -1,4 +1,5 @@
-import { browserbase, Stagehand } from "@browserbasehq/stagehand";
+import { browserbase } from "@browserbasehq/stagehand";
+import { chromium } from "playwright-core";
 
 /**
  * Real web reading for launched agents, via Browserbase's session-less
@@ -75,46 +76,83 @@ export async function reflectOnPage(agentName: string, obsession: string, page: 
 
 export type InteractiveSession = { trace: string[]; answer: string; finalUrl: string };
 
+async function pickLink(obsession: string, links: { href: string; text: string }[]): Promise<{ href: string; text: string } | null> {
+  if (links.length === 0) return null;
+  const groqKey = process.env.GROQ_API_KEY;
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  if (!groqKey) return links[0];
+  try {
+    const list = links.slice(0, 20).map((l, i) => `${i}: ${l.text || l.href}`).join("\n");
+    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${groqKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: `Respond ONLY with JSON: {"index": number}. Pick the link most related to "${obsession}" from the numbered list.` },
+          { role: "user", content: list },
+        ],
+        temperature: 0.3,
+        max_tokens: 50,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const j = (await r.json()) as any;
+    const idx = Number(JSON.parse((j?.choices?.[0]?.message?.content ?? "{}").trim())?.index);
+    return links[Number.isInteger(idx) && idx >= 0 && idx < links.length ? idx : 0];
+  } catch {
+    return links[0];
+  }
+}
+
 /**
- * Real interactive browsing — a live Browserbase session (not the cheap
- * fetch facade): opens a seed page, clicks into one real link chosen by
- * the model, reads the destination. This is the same shape as 9e9.world's
- * "agent browses the web" loop, bounded to one click-through so a single
- * run stays short and predictable in cost. Requires a Browserbase plan
- * that supports live sessions (fetch-only plans will fail here — caller
- * should fall back to fetchObsessionPage + reflectOnPage on error).
+ * Real interactive browsing: creates a live Browserbase session via their
+ * raw session API, connects Playwright directly over CDP to it (no
+ * Stagehand extension layer — that step was failing on this account with
+ * "Failed to upload the Stagehand extension", isolated by confirming raw
+ * session creation works fine on its own). Opens a seed page, has Groq
+ * pick one real link related to the obsession, follows it, reads it.
  */
 export async function browseInteractive(agentName: string, obsession: string): Promise<InteractiveSession> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
-  const groqKey = process.env.GROQ_API_KEY;
-  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
-  if (!apiKey || !groqKey) throw new Error("BROWSERBASE_API_KEY / GROQ_API_KEY not configured");
+  if (!apiKey) throw new Error("BROWSERBASE_API_KEY not configured");
   const seedUrl = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
 
-  // The API key alone resolves the Browserbase project — a projectId field
-  // here was unnecessary (and per Browserbase's own current guidance, not
-  // part of the launch surface at all).
-  const browser = await browserbase.launch({ apiKey } as any);
+  const sessionRes = await fetch("https://api.browserbase.com/v1/sessions", {
+    method: "POST",
+    headers: { "x-bb-api-key": apiKey, "content-type": "application/json" },
+    body: JSON.stringify({}),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!sessionRes.ok) throw new Error(`browserbase session create failed (${sessionRes.status})`);
+  const session = (await sessionRes.json()) as { connectUrl: string };
+
+  const browser = await chromium.connectOverCDP(session.connectUrl, { timeout: 20000 });
   const trace: string[] = [];
   try {
-    const stagehand = await Stagehand.create({
-      browser,
-      model: { modelName: `groq/${model.replace(/^groq\//, "")}` as any, apiKey: groqKey },
-    } as any);
+    const context = browser.contexts()[0] ?? (await browser.newContext());
+    const page = context.pages()[0] ?? (await context.newPage());
 
-    const [page] = await browser.context.pages();
-    await page.goto(seedUrl, { timeout: 15000 } as any);
+    await page.goto(seedUrl, { timeout: 15000, waitUntil: "domcontentloaded" });
     trace.push(`Opened ${seedUrl}.`);
 
-    await stagehand.act(`click the headline or link most related to "${obsession}"`, { timeoutMs: 15000 } as any);
-    const afterUrl = (page as any).url ? String((page as any).url()) : seedUrl;
-    trace.push(`Followed a link into ${afterUrl}.`);
+    const links = await page.$$eval("a", (as) =>
+      as.map((a) => ({ href: (a as HTMLAnchorElement).href, text: (a.textContent || "").trim() }))
+        .filter((l) => l.text.length > 3 && /^https?:\/\//.test(l.href)),
+    );
+    const chosen = await pickLink(obsession, links);
+    if (!chosen) {
+      trace.push("Found no real links to follow.");
+      return { trace, answer: `Landed on ${seedUrl} but found nothing to follow related to ${obsession}.`, finalUrl: seedUrl };
+    }
+    trace.push(`Chose a real link: "${chosen.text}".`);
 
-    const extracted = await stagehand.extract(`In one sentence, what is this page actually about? Focus on anything related to "${obsession}".`);
-    const summary = String((extracted as any)?.data?.extraction ?? (extracted as any)?.data ?? "").trim() || "(nothing extracted)";
-    trace.push(`Read it: ${summary}`);
+    await page.goto(chosen.href, { timeout: 15000, waitUntil: "domcontentloaded" });
+    const bodyText = (await page.innerText("body").catch(() => "")).slice(0, 4000);
 
-    return { trace, answer: `As ${agentName}, obsessed with ${obsession}: ${summary}`, finalUrl: afterUrl };
+    const reflection = await reflectOnPage(agentName, obsession, { url: chosen.href, content: bodyText });
+    return { trace: [...trace, ...reflection.trace], answer: reflection.answer, finalUrl: chosen.href };
   } finally {
     await browser.close().catch(() => {});
   }
