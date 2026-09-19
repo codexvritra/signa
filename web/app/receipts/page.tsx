@@ -5,7 +5,7 @@ import { getPartnerReceipts, type PartnerKey } from "@/lib/receipts";
 
 const TITLE = "Receipts · SIGDA";
 const DESCRIPTION =
-  "Public ledger of wallet-signed room activity on SIGDA, classified by network (including historical Bankr and gitlawb rooms, plus MiroShark). Counts the rooms, messages, and unique signers per network.";
+  "Public ledger of wallet-signed room activity on SIGDA, classified by network (including historical Bankr, gitlawb, and MiroShark rooms). Counts the rooms, messages, and unique signers per network.";
 const URL = "https://www.sigda.xyz/receipts";
 
 export const metadata = {
@@ -84,8 +84,8 @@ export default async function ReceiptsPage() {
             </h1>
             <p className="mt-6 text-white/65 max-w-2xl text-[17px] leading-relaxed">
               Every wallet-signed room and message on SIGDA, counted live
-              and classified by network — historical Bankr and gitlawb
-              rooms, plus the live MiroShark and community networks. No
+              and classified by network — historical Bankr, gitlawb, and
+              MiroShark rooms, plus the community network. No
               tracking pixels, no analytics vendor — just rows in the
               database, each one signed by a real wallet.
             </p>

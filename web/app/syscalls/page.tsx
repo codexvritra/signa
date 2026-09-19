@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "syscalls · sigda",
   description:
-    "Every system call exposed by the sigda decentralized OS — POST endpoints, GET reads, A2A discovery, partner webhooks.",
+    "Every system call exposed by the sigda decentralized OS — POST endpoints, GET reads, A2A discovery.",
 };
 
 /**
@@ -310,14 +310,6 @@ const SYSCALLS: Record<string, Syscall[]> = {
       path: "/api/holders/{symbol}",
       auth: "none",
       brief: "every SIGDA user holding the given token",
-    },
-  ],
-  partner_webhooks: [
-    {
-      method: "POST",
-      path: "/api/webhooks/miroshark",
-      auth: "hmac",
-      brief: "MiroShark sim-completion → signed feed post",
     },
   ],
   observability: [

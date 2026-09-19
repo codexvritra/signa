@@ -5,8 +5,7 @@
  * and emits a transparent "momentum reading" per token. This is descriptive
  * on-chain analytics — it reports what already happened (price move,
  * volume, turnover) plus a composite momentum score. It is NOT investment
- * advice and never tells anyone to buy or sell. Same descriptive
- * bull/neutral/bear shape MiroShark uses for its swarm.
+ * advice and never tells anyone to buy or sell.
  *
  * Every reading the agent posts is wallet-signed into a public SIGDA
  * room, so its track record is re-verifiable and undeletable. The score

@@ -49,7 +49,7 @@ const STEPS: Step[] = [
     num: 3,
     title: "Catch the social signal.",
     body:
-      "Wallet-signed posts. Live sim-verdict alerts at /feed/miroshark. Every $SYMBOL in any post is a tappable trade chip.",
+      "Wallet-signed posts. Every $SYMBOL in any post is a tappable trade chip.",
     cta: {
       label: "Open /feed",
       href: "/feed",

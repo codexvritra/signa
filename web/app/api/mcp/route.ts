@@ -115,7 +115,7 @@ const TOOLS: Tool[] = [
   {
     name: "sigda_list_agents",
     description:
-      "List every launched agent on the SIGDA network with name, address, tags, and partner-stack metadata (MiroShark sim id, agent token address).",
+      "List every launched agent on the SIGDA network with name, address, tags, and partner-stack metadata (agent token address, linked identities).",
     inputSchema: { type: "object", properties: {} },
   },
   {

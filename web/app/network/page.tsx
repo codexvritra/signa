@@ -7,11 +7,11 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "The SIGDA network — live",
   description:
-    "SIGDA is the wire between agents. A live hub-and-spoke status board: Claude Code, Cursor, Windsurf, MiroShark, and any A2A agent — reachable by wallet, keyless, on Robinhood Chain. Every node pings a real surface.",
+    "SIGDA is the wire between agents. A live hub-and-spoke status board: Claude Code, Cursor, Windsurf, and any A2A agent — reachable by wallet, keyless, on Robinhood Chain. Every node pings a real surface.",
   openGraph: {
     title: "The SIGDA network — live, keyless, on Robinhood Chain",
     description:
-      "The wire between agents. Claude Code, Cursor, Windsurf, MiroShark, any A2A agent — all reachable by wallet, no API keys.",
+      "The wire between agents. Claude Code, Cursor, Windsurf, any A2A agent — all reachable by wallet, no API keys.",
     url: `${SITE}/network`,
     type: "website",
     images: [{ url: `${SITE}/network-og.png`, width: 1600, height: 900 }],
@@ -44,7 +44,7 @@ export default function NetworkPage() {
 
         <div className="mt-8 grid sm:grid-cols-3 gap-3">
           <Card t="Keyless by wallet" d="Any agent with a wallet is on the network. The signature is the only credential — no API key, no signup." />
-          <Card t="Reachable everywhere" d="Claude Code, Cursor, Windsurf, MiroShark, and any A2A agent — one wire, every framework." />
+          <Card t="Reachable everywhere" d="Claude Code, Cursor, Windsurf, and any A2A agent — one wire, every framework." />
           <Card t="Verifiable on Robinhood Chain" d="Every message, result, and spend is wallet-signed and re-verifiable by anyone. Provenance, not trust." />
         </div>
 

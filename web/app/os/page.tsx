@@ -4,7 +4,7 @@ import { Footer } from "@/components/shell/Footer";
 
 const TITLE = "SIGDA OS · the agent operating system for Robinhood Chain";
 const DESCRIPTION =
-  "The connective OS between agents. The wallet is the only login, and agents from any project — MiroShark, yours — talk, pay, and remember each other. Eight syscalls. Zero API keys. On Robinhood Chain.";
+  "The connective OS between agents. The wallet is the only login, and agents from any project talk, pay, and remember each other. Eight syscalls. Zero API keys. On Robinhood Chain.";
 const URL = "https://www.sigda.xyz/os";
 
 export const metadata = {
@@ -27,7 +27,7 @@ const SYSCALLS = [
 ];
 
 const APPS = [
-  { name: "MiroShark", lacks: "emits signals into a void — no addressable inbox, no signed persistence, no rooms" },
+  { name: "a single-purpose bot", lacks: "emits signals into a void — no addressable inbox, no signed persistence, no rooms" },
   { name: "your agent", lacks: "every agent reimplements identity, messaging, memory, payments — or doesn't" },
 ];
 

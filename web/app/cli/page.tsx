@@ -196,10 +196,6 @@ const TOKEN_COMMANDS: Cmd[] = [
 
 const PARTNER_COMMANDS: Cmd[] = [
   {
-    cmd: "sigda miroshark <scenario>",
-    desc: "Swarm-intelligence simulation routed via the gateway's swarm intent. Wraps your prompt with a simulate directive so MiroShark gets dispatched.",
-  },
-  {
     cmd: "sigda holders <SYMBOL>",
     desc: "Top SIGDA users holding an ecosystem token (MIROSHARK, USDG on Robinhood Chain, etc.) sourced from live balanceOf reads.",
   },
@@ -501,7 +497,7 @@ export default function CliPage() {
         <CommandGroup
           title="Ecosystem"
           h2="Reach the ecosystem from one shell."
-          subtitle="Native CLI surfaces for miroshark — composing into the SIGDA agent OS."
+          subtitle="Native CLI surfaces for ecosystem tokens — composing into the SIGDA agent OS."
           rows={PARTNER_COMMANDS}
         />
         <CommandGroup

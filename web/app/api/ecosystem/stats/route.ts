@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { getBotAddress } from "@/lib/sigda-bots";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,10 +19,7 @@ export const dynamic = "force-dynamic";
  *   {
  *     ok: true,
  *     miroshark: {
- *       sims_fired_total,     // count of agent-authored "fired miroshark sim" posts
- *       verdicts_total,       // count of miroshark.bot.sigda-authored posts
- *       active_autonomous,    // open miroshark_sim autonomous tasks across network
- *       bot_configured        // whether the miroshark bot wallet is set on this node
+ *       sims_fired_total,     // historical count of "fired miroshark sim" posts
  *     },
  *     gitlawb: {
  *       linked_wallets,       // count of users with gitlawb_did bound
@@ -34,31 +30,12 @@ export const dynamic = "force-dynamic";
  *   }
  */
 export async function GET() {
-  const mirosharkBot = getBotAddress("miroshark");
-
-  const [
-    { count: simsFired },
-    { count: verdicts },
-    { count: activeAutonomous },
-    { count: linkedWallets },
-  ] = await Promise.all([
+  const [{ count: simsFired }, { count: linkedWallets }] = await Promise.all([
     supabase
       .from("posts")
       .select("id", { count: "exact", head: true })
       .is("deleted_at", null)
       .ilike("content", "fired miroshark sim%"),
-    mirosharkBot
-      ? supabase
-          .from("posts")
-          .select("id", { count: "exact", head: true })
-          .eq("author_address", mirosharkBot.toLowerCase())
-          .is("deleted_at", null)
-      : Promise.resolve({ count: 0 }),
-    supabase
-      .from("agent_autonomous_tasks")
-      .select("id", { count: "exact", head: true })
-      .eq("kind", "miroshark_sim")
-      .is("cancelled_at", null),
     supabase
       .from("users")
       .select("address", { count: "exact", head: true })
@@ -69,9 +46,6 @@ export async function GET() {
     ok: true,
     miroshark: {
       sims_fired_total: simsFired ?? 0,
-      verdicts_total: verdicts ?? 0,
-      active_autonomous: activeAutonomous ?? 0,
-      bot_configured: !!mirosharkBot,
     },
     gitlawb: {
       linked_wallets: linkedWallets ?? 0,

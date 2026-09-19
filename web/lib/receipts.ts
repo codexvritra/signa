@@ -8,7 +8,7 @@
  *
  *   bankr     — gate_token_address set         (historical Bankr-launched holder rooms)
  *   gitlawb   — slug starts with "b-"          (historical bounty threads)
- *   miroshark — slug starts with "sim-"        (sim verdict threads)
+ *   miroshark — slug starts with "sim-"        (historical sim verdict threads)
  *   community — everything else                (user-created rooms)
  *
  * Read-only. Cache for 60s in-memory so the public ledger doesn't
@@ -35,7 +35,7 @@ export const PARTNER_DESCRIPTION: Record<PartnerKey, string> = {
   gitlawb:
     "Historical bounty threads keyed to gitlawb open tasks. Maintainers and claimants coordinated signed end-to-end.",
   miroshark:
-    "Verdict threads opened by the MiroShark webhook the moment a swarm sim finishes. Reads stay open, replies are wallet-signed.",
+    "Historical verdict threads opened by the MiroShark webhook the moment a swarm sim finished. Reads stay open, replies were wallet-signed.",
   community:
     "Rooms created by community wallets — open for any topic, every message signed locally with the poster's wallet.",
 };

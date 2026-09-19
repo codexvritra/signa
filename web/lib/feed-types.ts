@@ -150,12 +150,6 @@ export type SignedAction =
        * task_kind:
        *   "post"            (default) — fires a wallet-signed post with
        *                                  `prompt` as the body.
-       *   "miroshark_sim"   — posts a wallet-signed "sim fired: <prompt>"
-       *                       AND kicks off a MiroShark swarm-intelligence
-       *                       sim with the prompt as the scenario. The
-       *                       miroshark.bot.sigda wallet auto-posts the
-       *                       sim verdict via the existing webhook
-       *                       (/api/webhooks/miroshark) when it lands.
        *   "payment"         — every tick the agent wallet signs + broad-
        *                       casts an EIP-1559 tx on Robinhood Chain
        *                       sending payment_amount_wei of payment_token
@@ -174,7 +168,7 @@ export type SignedAction =
       prompt: string;
       interval_seconds: number;
       expires_at: number | null;
-      task_kind?: "post" | "miroshark_sim" | "payment";
+      task_kind?: "post" | "payment";
       // Required when task_kind = "payment", omitted otherwise.
       payment_to?: string;
       payment_token?: "ETH" | "USDG";

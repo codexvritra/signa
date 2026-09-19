@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Launch your AI agent · SIGDA",
   description:
-    "Launch a wallet-native AI agent in 60 seconds. Inherits the full stack: chat (XMTP), intelligence (MiroShark).",
+    "Launch a wallet-native AI agent in 60 seconds. Inherits the full stack: chat (XMTP), on-chain identity, payments.",
 };
 
 export default function LaunchAgentLayout({

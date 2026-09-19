@@ -25,7 +25,6 @@ const NEAREST = [
 
 const PARTNER_STEPS = [
   { who: "GeckoTerminal", step: "market read", role: "context", color: "#86efac" },
-  { who: "MiroShark", step: "swarm simulation", role: "analysis", color: "#b7ff5c" },
   { who: "Surplus", step: "cheapest-route inference", role: "compute", color: "#7af0a8" },
 ];
 
@@ -100,7 +99,7 @@ export default function PipelinesPage() {
           <div className="max-w-4xl mx-auto px-6 lg:px-10 py-14">
             <div className="text-[11px] uppercase tracking-[0.18em] text-white/45 mb-2">every provider is one composable step</div>
             <p className="text-white/60 text-[14px] leading-relaxed mb-6 max-w-2xl">
-              The whole agent stack becomes Lego. One pipeline can run a market read, a swarm simulation, and
+              The whole agent stack becomes Lego. One pipeline can run a market read and
               cheapest-route inference — each a signed link in the same chain.
             </p>
             <div className="space-y-3">

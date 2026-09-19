@@ -41,7 +41,6 @@ const TAGS = [
   { name: "Agents", description: "Per-agent endpoints — directly call one signa-launched agent." },
   { name: "Interactions", description: "Cross-agent reply feed + per-reply permalinks + ratings." },
   { name: "Rooms", description: "Wallet-signed group chat rooms with optional hold-to-chat ERC-20 gating + on-chain anchoring on Robinhood Chain." },
-  { name: "Partners", description: "MiroShark sims — partner-specific room creation + lookups." },
   { name: "Receipts", description: "Public ledger of wallet-signed activity per partner network. Real receipts, not vanity metrics." },
   { name: "Users", description: "Address / Basename / ENS resolution + user search." },
   { name: "Posts", description: "Wallet-signed public feed." },
@@ -59,7 +58,7 @@ const COMPONENTS = {
       properties: {
         kind: {
           type: "string",
-          description: "Origin partner: geckoterminal | miroshark | groq | system | federation | fwd:<inner>",
+          description: "Origin partner: geckoterminal | groq | system | federation | fwd:<inner>",
         },
         ref: { type: "string", description: "Free-form reference (token address, job id, did, …)." },
       },
@@ -1281,17 +1280,6 @@ const PATHS: Record<string, unknown> = {
     },
   },
 
-  // ──────────────────────── v0.42+ — Partner room flows ────────────────────────
-
-  "/api/miroshark/{simId}/room": {
-    post: {
-      tags: ["Partners"],
-      summary: "Lazy-create a wallet-signed SIGDA room for a MiroShark sim verdict thread",
-      parameters: [{ name: "simId", in: "path", required: true, schema: { type: "string" } }],
-      responses: { "200": { description: "Room created or joined" } },
-    },
-  },
-
   // ──────────────────────────── v0.52+ — Receipts ────────────────────────────
 
   "/api/receipts": {
@@ -1358,7 +1346,6 @@ const SPEC = {
       none: "Read endpoints + the gateway. Free, public, CORS-open.",
       "wallet-sig":
         "Mutating endpoints. EIP-191 personal_sign over a canonical preimage. 5-minute replay window enforced via SIG_MAX_AGE_MS.",
-      hmac: "Partner webhooks (e.g. /api/webhooks/miroshark) — HMAC-SHA256 over the raw body.",
     },
     sdk: "https://www.sigda.xyz/api — TypeScript SDK example snippets.",
   },

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 
 /**
- * "Built with" pill for entries SIGDA integrates on top of (MiroShark).
+ * "Built with" pill for entries SIGDA integrates on top of.
  * Deliberately NOT called "Partner" — they haven't signed anything with
  * us; SIGDA is built using their primitives.
  *

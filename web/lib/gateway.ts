@@ -28,7 +28,6 @@ const INTENT_TAGS: Record<GatewayIntent, string[]> = {
   swarm: [
     "swarm",
     "simulation",
-    "miroshark",
     "monte-carlo",
     "research",
   ],

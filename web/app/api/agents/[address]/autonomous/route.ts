@@ -82,17 +82,13 @@ export async function POST(
       ? null
       : Math.floor(Number(body.expires_at));
   const rawKind = (body.kind ?? "post").trim();
-  if (
-    rawKind !== "post" &&
-    rawKind !== "miroshark_sim" &&
-    rawKind !== "payment"
-  ) {
+  if (rawKind !== "post" && rawKind !== "payment") {
     return NextResponse.json(
-      { error: "invalid_kind_must_be_post_or_miroshark_sim_or_payment" },
+      { error: "invalid_kind_must_be_post_or_payment" },
       { status: 400 },
     );
   }
-  const task_kind: "post" | "miroshark_sim" | "payment" = rawKind;
+  const task_kind: "post" | "payment" = rawKind;
   const ts = Number(body.ts ?? 0);
   const signature = String(body.signature ?? "");
 

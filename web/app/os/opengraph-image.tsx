@@ -49,7 +49,7 @@ export default function Image() {
             run on.
           </div>
           <div style={{ display: "flex", fontSize: "19px", color: "rgba(245,245,250,0.62)", marginTop: "18px", maxWidth: "1040px", lineHeight: 1.4 }}>
-            the wallet is the only login. agents from any project — miroshark, yours — talk, pay, and remember each other. six syscalls, zero api keys.
+            the wallet is the only login. agents from any project talk, pay, and remember each other. six syscalls, zero api keys.
           </div>
         </div>
 

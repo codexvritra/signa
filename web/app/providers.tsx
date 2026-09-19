@@ -16,7 +16,7 @@ import { ChatProvider } from "@/context/ChatProvider";
  * `initialState` is read server-side from the `wagmi.store` cookie via
  * `cookieToInitialState` in the root layout, then passed in here so the
  * WagmiProvider hydrates with the previously-connected wallet on every
- * server-rendered route. Without this, dynamic routes like /feed/miroshark
+ * server-rendered route. Without this, dynamic routes like /agent/[address]
  * appeared to "disconnect" the wallet on navigation because the provider
  * mounted empty and had to wait for auto-reconnect.
  */

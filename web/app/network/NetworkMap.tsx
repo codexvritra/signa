@@ -15,7 +15,6 @@ const NODES = [
   { key: "claude", label: "Claude Code", sub: "via MCP", x: 500, y: 100, group: "mcp" },
   { key: "cursor", label: "Cursor", sub: "via MCP", x: 720, y: 200, group: "mcp" },
   { key: "a2a", label: "Any A2A agent", sub: "A2A v0.3", x: 650, y: 460, group: "a2a" },
-  { key: "miroshark", label: "MiroShark", sub: "sims", x: 350, y: 460, group: "miroshark" },
   { key: "windsurf", label: "Windsurf", sub: "via MCP", x: 280, y: 200, group: "mcp" },
 ] as const;
 
@@ -35,7 +34,7 @@ async function reachable(url: string, timeoutMs = 6000): Promise<Response | null
 
 export function NetworkMap() {
   const [st, setSt] = useState<Record<string, Status>>({
-    core: "checking", mcp: "checking", a2a: "checking", miroshark: "checking",
+    core: "checking", mcp: "checking", a2a: "checking",
   });
   const [subText, setSubText] = useState<Record<string, string>>({});
   const [caps, setCaps] = useState<number | null>(null);
@@ -58,16 +57,6 @@ export function NetworkMap() {
     reachable("/api/mcp").then((r) => setSt((s) => ({ ...s, mcp: r && r.status < 500 ? "online" : "down" })));
     // A2A transport
     reachable("/api/a2a").then((r) => setSt((s) => ({ ...s, a2a: r && r.status < 500 ? "online" : "down" })));
-    // MiroShark — the signed-activity ledger for the sims integration
-    reachable("/api/receipts", 9000).then(async (r) => {
-      let ok = false;
-      try {
-        const j = await r?.json();
-        const p = (j?.partners ?? []).find((x: { partner: string }) => x.partner === "miroshark");
-        if (j?.ok && p) { ok = true; setSubText((t) => ({ ...t, miroshark: `${p.messages ?? 0} signed · sims` })); }
-      } catch { /* */ }
-      setSt((s) => ({ ...s, miroshark: ok ? "online" : "down" }));
-    });
     // live counters
     reachable("/api/stats").then(async (r) => {
       try {

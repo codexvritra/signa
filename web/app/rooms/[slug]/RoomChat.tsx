@@ -176,19 +176,6 @@ interface SlashCommand {
 
 const SLASH: SlashCommand[] = [
   {
-    name: "miroshark",
-    syntax: "/miroshark <0x address>",
-    desc: "MiroShark sim activity for any SIGDA wallet (sims fired + verdicts).",
-    async run(args) {
-      const addr = args.trim().toLowerCase();
-      if (!/^0x[a-f0-9]{40}$/.test(addr)) return "/miroshark — usage: /miroshark <0x address>";
-      const r = await fetch(`/api/agents/${addr}/miroshark-stats`);
-      const d = await r.json().catch(() => ({}));
-      if (!d?.ok) return `/miroshark ${addr}\n  ↳ ${d?.error ?? "lookup failed"}`;
-      return `/miroshark ${addr}\n  ↳ sims fired: ${d.sims_fired ?? 0} · verdicts: ${d.verdicts_received ?? 0}`;
-    },
-  },
-  {
     name: "help",
     syntax: "/help",
     desc: "Show the list of slash commands in this room.",

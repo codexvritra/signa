@@ -59,9 +59,6 @@ type EcosystemStats = {
   ok: boolean;
   miroshark: {
     sims_fired_total: number;
-    verdicts_total: number;
-    active_autonomous: number;
-    bot_configured: boolean;
   };
   gitlawb: {
     linked_wallets: number;
@@ -270,9 +267,9 @@ function LaunchCard({ agent }: { agent: Agent }) {
  * which aggregates wallet-signed feed entries — every SIGDA node can
  * reproduce the same numbers from its own federated copy.
  *
- * Visible specifically so the gitlawb + MiroShark devs (and any other
- * partner watching) can see their protocols are first-class primitives
- * with live counters, not just static "integration" mentions.
+ * Visible so the network's historical protocol activity (gitlawb,
+ * MiroShark) reads as first-class primitives, not just static
+ * "integration" mentions.
  */
 function EcosystemStripe({ stats }: { stats: EcosystemStats }) {
   return (
@@ -281,20 +278,12 @@ function EcosystemStripe({ stats }: { stats: EcosystemStats }) {
         <div className="font-mono text-[10.5px] text-[var(--accent)]/85 mb-3">
           $ sigda ecosystem stats --network
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <EcoCell
             label="MiroShark sims fired"
             value={stats.miroshark.sims_fired_total}
-            sublabel="wallet-signed across the network"
+            sublabel="historical, wallet-signed across the network"
             tint="cyan"
-            href="https://github.com/aaronjmars/MiroShark"
-          />
-          <EcoCell
-            label="Swarm verdicts"
-            value={stats.miroshark.verdicts_total}
-            sublabel="from miroshark.bot.sigda"
-            tint="emerald"
-            href="/feed"
           />
           <EcoCell
             label="gitlawb wallets bound"
@@ -302,12 +291,6 @@ function EcosystemStripe({ stats }: { stats: EcosystemStats }) {
             sublabel="DIDs federated via signed envelopes"
             tint="emerald"
             href="https://gitlawb.com"
-          />
-          <EcoCell
-            label="Active autonomous sims"
-            value={stats.miroshark.active_autonomous}
-            sublabel="recurring miroshark_sim tasks"
-            tint="amber"
           />
         </div>
         <div className="mt-3 text-[10.5px] font-mono text-white/30 leading-relaxed">

@@ -1,15 +1,14 @@
 /**
  * SIGDA bot accounts — wallet-signed feed publishers for ecosystem bridges.
  *
- * Each bridge (MiroShark webhook receiver, the daily-digest cron) has its
- * own bot wallet that signs every post it publishes. The signature on each
- * post is verifiable proof that the bridge — not a random spammer — wrote
- * it. Posts show up in the standard SIGDA feed with the bot's basename
- * (e.g. `miroshark.bot.sigda`).
+ * Each bridge (the daily-digest cron) has its own bot wallet that signs
+ * every post it publishes. The signature on each post is verifiable proof
+ * that the bridge — not a random spammer — wrote it. Posts show up in the
+ * standard SIGDA feed with the bot's basename (e.g. `digest.bot.sigda`).
  *
  * Setup: visit /admin/generate-bot-keys once, copy the printed private
- * keys into Vercel env (`MIROSHARK_BOT_KEY`, `DIGEST_BOT_KEY`). The
- * bridges auto-register their bot wallet in the users table on first post.
+ * key into Vercel env (`DIGEST_BOT_KEY`). The bridge auto-registers its
+ * bot wallet in the users table on first post.
  */
 
 import { privateKeyToAccount } from "viem/accounts";
@@ -17,15 +16,13 @@ import type { Hex } from "viem";
 import { serverClient } from "./supabase";
 import { buildMessageToSign, MAX_POST_LENGTH } from "./feed-types";
 
-export type BotKind = "miroshark" | "digest";
+export type BotKind = "digest";
 
 const BOT_BASENAMES: Record<BotKind, string> = {
-  miroshark: "miroshark.bot.sigda",
   digest: "digest.bot.sigda",
 };
 
 const BOT_ENV_KEYS: Record<BotKind, string> = {
-  miroshark: "MIROSHARK_BOT_KEY",
   digest: "DIGEST_BOT_KEY",
 };
 

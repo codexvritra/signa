@@ -349,7 +349,7 @@ export default function LaunchAgentPage() {
 const STACK: Array<{ slot: string; via: string }> = [
   { slot: "wallet", via: "Robinhood Chain · minted in your browser" },
   { slot: "dm", via: "XMTP V3 · live the moment you sign" },
-  { slot: "sim", via: "demand pre-test via MiroShark · roadmap" },
+  { slot: "sim", via: "demand pre-test via swarm sim · roadmap" },
 ];
 
 function StackTable() {
@@ -478,8 +478,6 @@ function LaunchSuccess({
           />
         </div>
 
-        <CompleteYourStack agentAddress={agent.address} agentName={agent.name} />
-
         <div className="flex items-center justify-between gap-3 pt-2">
           <Link
             href="/launchpad"
@@ -510,59 +508,6 @@ function LaunchSuccess({
         </div>
       </div>
     </section>
-  );
-}
-
-function CompleteYourStack({
-  agentAddress,
-  agentName,
-}: {
-  agentAddress: string;
-  agentName: string;
-}) {
-  const actions = [
-    {
-      label: "Pre-launch swarm sim",
-      hint: "Run a MiroShark swarm sim to gauge demand for this agent.",
-      href: `/?sim=${encodeURIComponent(`will the AI agent "${agentName}" attract a community on SIGDA?`)}`,
-      who: "MiroShark",
-      dot: "bg-cyan-400",
-    },
-  ];
-
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider text-white/45 mb-2 font-medium">
-        Complete the stack
-      </div>
-      <div className="grid sm:grid-cols-2 gap-2">
-        {actions.map((a) => (
-          <a
-            key={a.label}
-            href={a.href}
-            target={a.href.startsWith("http") ? "_blank" : undefined}
-            rel="noreferrer"
-            className="card rounded-md p-3 hover:bg-white/[0.03] transition-colors group flex flex-col gap-1"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className={`inline-block size-1.5 rounded-full ${a.dot}`} />
-                <span className="text-[13px] font-medium text-white">
-                  {a.label}
-                </span>
-              </div>
-              <ArrowUpRight className="size-3 text-white/30 group-hover:text-white" />
-            </div>
-            <span className="text-[11px] text-white/50 leading-snug">
-              {a.hint}
-            </span>
-            <span className="text-[10px] uppercase tracking-wider text-white/30 mt-0.5">
-              {a.who}
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
   );
 }
 

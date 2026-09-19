@@ -11,15 +11,10 @@ import { useChat } from "@/context/ChatProvider";
 /**
  * /feed — public wallet-signed post stream.
  *
- * Rendered as a manpage-style index with a flat ecosystem-feed shortcut
- * (miroshark) followed by composer + timeline. No emoji-decorated cards,
- * no display-font hero, no chip buttons — same aesthetic as /, /me,
- * /launchpad/top.
+ * Rendered as a manpage-style index with composer + timeline. No
+ * emoji-decorated cards, no display-font hero, no chip buttons — same
+ * aesthetic as /, /me, /launchpad/top.
  */
-
-const ECOSYSTEM_FEEDS: Array<[string, string, string]> = [
-  ["/feed/miroshark", "miroshark", "swarm-sim verdicts, live"],
-];
 
 export default function FeedPage() {
   const { isConnected } = useAccount();
@@ -66,30 +61,6 @@ export default function FeedPage() {
               </code>
               .
             </div>
-          </section>
-
-          {/* Ecosystem feeds */}
-          <section className="mb-8">
-            <h2 className="text-white tracking-[0.18em] text-[11px] mb-2">
-              ECOSYSTEM
-            </h2>
-            <table className="w-full border-collapse">
-              <tbody>
-                {ECOSYSTEM_FEEDS.map(([href, name, blurb]) => (
-                  <tr key={href} className="align-top">
-                    <td className="pr-4 py-0.5 whitespace-nowrap w-[140px]">
-                      <Link
-                        href={href}
-                        className="text-[var(--accent)]/85 hover:text-[var(--accent)] hover:underline underline-offset-4"
-                      >
-                        /feed/{name}
-                      </Link>
-                    </td>
-                    <td className="text-white/55 py-0.5">{blurb}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </section>
 
           {/* Composer + Timeline */}

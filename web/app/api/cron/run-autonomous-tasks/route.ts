@@ -16,10 +16,6 @@ import { decryptAgentKey } from "@/lib/key-vault";
 import { authorizeBearer } from "@/lib/secret-auth";
 import { buildMessageToSign } from "@/lib/feed-types";
 import { rhChain, RH_RPC } from "@/lib/chain";
-import {
-  mirosharkConfigured,
-  mirosharkCreateSim,
-} from "@/lib/skills/miroshark";
 
 // USDG (Global Dollar, Paxos) — Robinhood Chain's native stablecoin.
 const USDG_ROBINHOOD: Address = "0x5fc5360d0400a0fd4f2af552add042d716f1d168";
@@ -64,7 +60,7 @@ type TaskRow = {
   id: string;
   agent_address: string;
   prompt: string;
-  kind: "post" | "miroshark_sim" | "payment";
+  kind: "post" | "payment";
   interval_seconds: number;
   expires_at: string | null;
   next_run_at: string;
@@ -160,66 +156,6 @@ async function runPostTask(
   const signer = await loadAgentSigner(db, task.agent_address);
   if (!signer.ok) return { ok: false, error: signer.error };
   return signAndInsertPost(db, signer.account, task.agent_address, task.prompt);
-}
-
-/**
- * miroshark_sim kind:
- *   1. Load + decrypt the agent's runtime key (same as post kind).
- *   2. Post a wallet-signed "fired miroshark sim: <prompt>" entry from
- *      the agent. Acts as the audit trail — the agent's feed shows when
- *      it requested a sim, regardless of whether the sim itself returns.
- *   3. Kick off the actual MiroShark sim via mirosharkCreateSim. The
- *      verdict is posted asynchronously by miroshark.bot.sigda via the
- *      existing /api/webhooks/miroshark handler when the sim completes.
- *
- * If MIROSHARK_BASE_URL isn't configured on this deployment, we still
- * post the audit entry but return a soft "miroshark_not_configured"
- * error so operators see it in last_error. We do NOT consider this a
- * post-failure (the agent's post landed) — so the task isn't penalized
- * toward auto-cancel.
- */
-async function runMirosharkSimTask(
-  db: ReturnType<typeof serverClient>,
-  task: TaskRow,
-): Promise<{ ok: true; post_id: string } | { ok: false; error: string }> {
-  const signer = await loadAgentSigner(db, task.agent_address);
-  if (!signer.ok) return { ok: false, error: signer.error };
-
-  // 1) Audit post — fired regardless of miroshark config so the agent's
-  // feed shows the cadence even on an unconfigured deployment.
-  const auditBody = `fired miroshark sim — scenario: ${task.prompt}`.slice(
-    0,
-    480,
-  );
-  const post = await signAndInsertPost(
-    db,
-    signer.account,
-    task.agent_address,
-    auditBody,
-  );
-  if (!post.ok) return { ok: false, error: post.error };
-
-  // 2) Fire the sim if MiroShark is configured. The webhook receiver
-  // handles the result asynchronously — we don't await consensus.
-  if (!mirosharkConfigured()) {
-    // Soft success: post landed, sim skipped because env isn't set.
-    // Surface via last_error but don't treat as a task failure.
-    return { ok: true, post_id: post.post_id };
-  }
-  try {
-    await mirosharkCreateSim({
-      prompt: task.prompt,
-      agentAddress: task.agent_address,
-    });
-  } catch (e) {
-    // Sim creation failed but the audit post landed. Return ok so the
-    // task isn't penalized, but operators see the issue in logs.
-    console.error(
-      "[autonomous-cron] miroshark sim create failed:",
-      e instanceof Error ? e.message : String(e),
-    );
-  }
-  return { ok: true, post_id: post.post_id };
 }
 
 /**
@@ -387,13 +323,11 @@ async function runOneTask(
   | { ok: true; post_id: string; tx_hash?: string }
   | { ok: false; error: string }
 > {
-  if (task.kind === "miroshark_sim") {
-    return runMirosharkSimTask(db, task);
-  }
   if (task.kind === "payment") {
     return runPaymentTask(db, task);
   }
-  // Default + legacy v0.18 tasks: kind is null or "post".
+  // Default + legacy tasks: kind is null, "post", or a retired kind
+  // (e.g. old "miroshark_sim" rows) — all fall back to a plain post.
   return runPostTask(db, task);
 }
 

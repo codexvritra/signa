@@ -6,10 +6,6 @@ import type { Hex } from "viem";
 import { serverClient } from "@/lib/supabase";
 import { decryptAgentKey } from "@/lib/key-vault";
 import { tokenInfo, formatUsd, formatPct } from "@/lib/geckoterminal";
-import {
-  mirosharkCreateSim,
-  mirosharkConfigured,
-} from "@/lib/skills/miroshark";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -51,8 +47,7 @@ export const dynamic = "force-dynamic";
  *
  *   2. Tool router executes the intent:
  *        facts  → GeckoTerminal direct on Base (free, structured)
- *        swarm  → MiroShark simulation create (env-gated; falls back to a
- *                 graceful "MiroShark not wired on this deploy" line)
+ *        swarm  → not wired on this deployment (describes qualitatively)
  *        code   → not wired on this deployment (describes qualitatively)
  *        chat   → plain Groq reply with the agent's system prompt
  *        action → not wired on this deployment (describes qualitatively,
@@ -78,8 +73,6 @@ export const dynamic = "force-dynamic";
  */
 
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-// MiroShark URLs/keys live inside lib/skills/miroshark — pulled
-// through the typed wrapper (mirosharkCreateSim).
 const MAX_MESSAGE_LEN = 1500;
 
 type Intent = "facts" | "swarm" | "code" | "chat" | "action";
@@ -89,7 +82,7 @@ type Source = {
    * Free-form so federation can wrap nested partner sources like
    * `fwd:geckoterminal` without us having to enumerate every cross
    * product up-front. The common values are still:
-   *   geckoterminal · miroshark · groq · system · federation · fwd:<inner>
+   *   geckoterminal · groq · system · federation · fwd:<inner>
    */
   kind: string;
   ref: string;
@@ -316,36 +309,13 @@ async function runFacts(
   };
 }
 
-async function runSwarm(
-  message: string,
-  agent: AgentRow,
-): Promise<{ context: string; sources: Source[] }> {
-  if (!mirosharkConfigured()) {
-    return {
-      context:
-        "SWARM CONTEXT:\nMiroShark not wired on this deployment. Respond by " +
-        "describing what a swarm sim of this scenario would explore, but " +
-        "make it clear you can't actually run one right now.",
-      sources: [{ kind: "system", ref: "miroshark_not_configured" }],
-    };
-  }
-  const sim = await mirosharkCreateSim({
-    prompt: message,
-    agentAddress: agent.address,
-  });
-  if (!sim) {
-    return {
-      context:
-        "SWARM CONTEXT:\nMiroShark unreachable. Describe the swarm scenario qualitatively.",
-      sources: [{ kind: "miroshark", ref: "unreachable" }],
-    };
-  }
+async function runSwarm(): Promise<{ context: string; sources: Source[] }> {
   return {
     context:
-      `SWARM CONTEXT (MiroShark sim_id ${sim.sim_id ?? "?"} dispatched):\n` +
-      (sim.preview ?? "simulation queued") +
-      (sim.url ? `\nview: ${sim.url}` : ""),
-    sources: [{ kind: "miroshark", ref: sim.sim_id ?? "queued" }],
+      "SWARM CONTEXT:\nSwarm simulation isn't wired on this deployment. Respond by " +
+      "describing what a swarm sim of this scenario would explore, but " +
+      "make it clear you can't actually run one right now.",
+    sources: [{ kind: "system", ref: "swarm_not_configured" }],
   };
 }
 
@@ -488,7 +458,7 @@ async function pickSpecialist(
 ): Promise<{ address: string; name: string } | null> {
   const tagHints: Record<Intent, string[]> = {
     facts: ["facts", "markets", "defi", "trading"],
-    swarm: ["swarm", "simulation", "miroshark", "monte-carlo"],
+    swarm: ["swarm", "simulation", "monte-carlo"],
     code: ["code", "build", "dev"],
     action: ["trade", "trading", "defi", "execution"],
     chat: ["chat", "companion"],
@@ -588,7 +558,7 @@ export async function POST(
       toolCtx = r.context;
       sources = r.sources;
     } else if (intent === "swarm") {
-      const r = await runSwarm(message, agentData);
+      const r = await runSwarm();
       toolCtx = r.context;
       sources = r.sources;
     } else if (intent === "code") {
@@ -837,7 +807,7 @@ export async function GET(
       x402
         ? `Paid endpoint: ${x402.price} ${x402.currency} per call on ${x402.chain}. Payment to ${x402.pay_to}. v1 is honor-system — server-side enforcement coming.`
         : "No auth required — free, public, signed-when-possible.",
-      "Routing tree: facts→GeckoTerminal | swarm→MiroShark | code→not configured | action→not configured | chat→Groq.",
+      "Routing tree: facts→GeckoTerminal | swarm→not configured | code→not configured | action→not configured | chat→Groq.",
       "When GROQ_API_KEY is absent the endpoint still works — classification falls back to a lexical rule-set and synthesis falls back to a deterministic template (you'll see [note: ... LLM is offline ...] in the reply).",
     ],
   });

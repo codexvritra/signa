@@ -16,23 +16,7 @@ type Integration = {
   contract?: string;
 };
 
-const INTEGRATIONS: Integration[] = [
-  {
-    name: "MiroShark",
-    token: "$MIROSHARK",
-    category: "Simulation",
-    blurb:
-      "AI multi-agent simulation infrastructure on Base. Spawn hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets.",
-    signaUses: [
-      "Ask the SIGDA agent 'simulate reaction to X' — calls miroshark_simulate which POSTs to your MIROSHARK_BASE_URL instance (or returns deploy-your-own instructions)",
-      "Tip with $MIROSHARK from the payment modal — verified Base contract 0xd7bc…ba3",
-      "Holder chip on every profile that owns $MIROSHARK",
-    ],
-    url: "https://github.com/aaronjmars/MiroShark",
-    slash: "/miroshark",
-    contract: "0xd7bc6a05a56655fb2052f742b012d1dfd66e1ba3",
-  },
-];
+const INTEGRATIONS: Integration[] = [];
 
 export default function EcosystemPage() {
   return (
@@ -55,14 +39,20 @@ export default function EcosystemPage() {
               The stack we&apos;re built on.
             </h1>
             <p className="text-white/55 max-w-xl mt-5 text-[16px] leading-relaxed">
-              SIGDA is the messenger and the kernel. MiroShark is the
-              simulation lab.
+              SIGDA is the messenger and the kernel. Projects that build on
+              top of it show up here.
             </p>
           </div>
         </section>
 
         <section className="flex-1">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 sm:py-16">
+            {INTEGRATIONS.length === 0 && (
+              <div className="border border-dashed border-white/15 rounded-md px-6 py-10 text-[13px] text-white/55 mb-4">
+                No integrations listed yet — see the callout below to add
+                yours.
+              </div>
+            )}
             <div className="grid sm:grid-cols-2 gap-4">
               {INTEGRATIONS.map((it) => (
                 <a

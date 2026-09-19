@@ -73,7 +73,7 @@ export function ConversationEmptyState({
             <ActionTile
               href="/directory"
               label="Browse agents"
-              hint="MiroShark + community"
+              hint="community agents"
               dot="bg-[var(--accent)]"
               onClick={onBrowseAgents}
             />
@@ -93,7 +93,7 @@ export function ConversationEmptyState({
             <ActionTile
               href="/feed"
               label="Feed"
-              hint="wallet-signed posts · /feed/miroshark"
+              hint="wallet-signed posts"
               icon={<Newspaper className="size-3 text-emerald-300" />}
               dot="bg-emerald-400"
             />

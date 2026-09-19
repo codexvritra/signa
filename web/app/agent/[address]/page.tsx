@@ -13,7 +13,6 @@ import { shortAddress } from "@/lib/format";
 import { headers } from "next/headers";
 import { getHolderStatus } from "@/lib/holder-status";
 import { AgentRespondWidget } from "@/components/agent/AgentRespondWidget";
-import { RunSimButton } from "@/components/agent/RunSimButton";
 import { DmAgentPanel } from "@/components/agent/DmAgentPanel";
 
 export const dynamic = "force-dynamic";
@@ -52,30 +51,6 @@ async function getAgent(address: string): Promise<Agent | null> {
   }
 }
 
-type MirosharkStats = {
-  ok: boolean;
-  sims_fired: number;
-  sims_completed: number;
-  pending_sims: number;
-  active_tasks: number;
-  latest_verdict: { post_id: string; content: string; created_at: string } | null;
-  latest_fired_at: string | null;
-};
-
-async function getPartnerStats(address: string): Promise<{
-  miroshark: MirosharkStats | null;
-}> {
-  const h = await headers();
-  const proto = h.get("x-forwarded-proto") || "https";
-  const host = h.get("host") || "www.sigda.xyz";
-  const m = await fetch(`${proto}://${host}/api/agents/${address}/miroshark-stats`, {
-    cache: "no-store",
-  })
-    .then((r) => (r.ok ? (r.json() as Promise<MirosharkStats>) : null))
-    .catch(() => null);
-  return { miroshark: m };
-}
-
 /** Compose a viral share-tweet URL pre-filled for this agent. */
 function shareTweetUrl(agent: Agent): string {
   const url = `https://www.sigda.xyz/agent/${agent.address}`;
@@ -109,11 +84,6 @@ export default async function AgentProfilePage({
   } catch {
     // best-effort; chip just doesn't render on RPC failure
   }
-
-  // Live partner activity — read in parallel with the agent. no-store, so
-  // the agent profile reflects the network state at request time. counts
-  // come from wallet-signed feed posts.
-  const partner = await getPartnerStats(agent.address);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -238,36 +208,15 @@ export default async function AgentProfilePage({
                     cta="trade ↗"
                   />
                 )}
-                <StackLine
-                  slot="sim"
-                  status={
-                    (partner.miroshark?.sims_fired ?? 0) > 0 ||
-                    agent.miroshark_sim_id
-                      ? "live"
-                      : "pending"
-                  }
-                  value={
-                    (partner.miroshark?.sims_fired ?? 0) > 0
-                      ? `${partner.miroshark!.sims_fired} sim${partner.miroshark!.sims_fired === 1 ? "" : "s"} fired · ${partner.miroshark!.sims_completed} verdict${partner.miroshark!.sims_completed === 1 ? "" : "s"} · ${partner.miroshark!.active_tasks} active autonomous · @miroshark_`
-                      : agent.miroshark_sim_id
-                        ? `MiroShark sim #${agent.miroshark_sim_id}`
-                        : "demand pre-test via @miroshark_ (optional)"
-                  }
-                  href={
-                    (partner.miroshark?.sims_fired ?? 0) > 0
-                      ? `/feed/${agent.address}`
-                      : agent.miroshark_sim_id
-                        ? `https://github.com/aaronjmars/MiroShark`
-                        : "https://github.com/aaronjmars/MiroShark"
-                  }
-                  cta={
-                    (partner.miroshark?.sims_fired ?? 0) > 0
-                      ? "feed ↗"
-                      : agent.miroshark_sim_id
-                        ? "view ↗"
-                        : "run ↗"
-                  }
-                />
+                {agent.miroshark_sim_id && (
+                  <StackLine
+                    slot="sim"
+                    status="live"
+                    value={`MiroShark sim #${agent.miroshark_sim_id}`}
+                    href="https://github.com/aaronjmars/MiroShark"
+                    cta="view ↗"
+                  />
+                )}
               </div>
             </div>
 
@@ -336,22 +285,10 @@ export default async function AgentProfilePage({
           </div>
         </section>
 
-        {/* Public partner-action surfaces. Always render — the value is
-            the public on-ramp itself (not a state readout). Any visitor
-            can fire a real MiroShark sim against this agent without a
-            wallet. Verdicts auto-post back via the existing webhook +
-            bot.sigda paths. */}
+        {/* Public agent-action surface. Always render — the value is
+            the public on-ramp itself (not a state readout). */}
         <section className="border-b border-white/[0.06]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-8 space-y-4">
-            <div>
-              <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-                $ sigda miroshark fire --agent {agent.address.slice(0, 10)}…
-              </div>
-              <RunSimButton
-                agentAddress={agent.address}
-                agentName={agent.name}
-              />
-            </div>
             <div>
               <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
                 $ sigda a2a send {agent.address.slice(0, 10)}… &quot;...&quot;
@@ -363,15 +300,6 @@ export default async function AgentProfilePage({
             </div>
           </div>
         </section>
-
-        {/* Ecosystem activity — LIVE partner data for this agent.
-            Only renders if there's something to show. The whole panel
-            disappears for an agent that hasn't touched MiroShark yet
-            so it doesn't add noise to brand-new agents. */}
-        <EcosystemActivityPanel
-          agentAddress={agent.address}
-          miroshark={partner.miroshark}
-        />
 
         <AgentRespondWidget address={agent.address} agentName={agent.name} />
 
@@ -437,125 +365,3 @@ function StackLine({
   );
 }
 
-/**
- * Renders a live "ecosystem activity" section for an agent — surfaces
- * MiroShark activity pulled from the v0.19 stats endpoint. Hidden
- * entirely if there's nothing to show, so blank new agents don't get
- * a noisy empty panel.
- */
-function EcosystemActivityPanel({
-  agentAddress,
-  miroshark,
-}: {
-  agentAddress: string;
-  miroshark: MirosharkStats | null;
-}) {
-  const hasMiroshark = !!miroshark && miroshark.sims_fired > 0;
-  if (!hasMiroshark) return null;
-
-  return (
-    <section className="border-b border-white/[0.06]">
-      <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
-        <div className="font-mono text-[11px] text-[var(--accent)] mb-3">
-          $ sigda ecosystem activity --address {agentAddress.slice(0, 10)}…
-        </div>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {hasMiroshark && (
-            <div className="border border-white/10 bg-black/30 p-4 rounded-sm">
-              <div className="flex items-baseline justify-between mb-3">
-                <div className="font-mono text-[11px] text-emerald-300/85">
-                  MiroShark
-                </div>
-                <a
-                  href="https://github.com/aaronjmars/MiroShark"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[10px] text-[var(--accent)] hover:underline underline-offset-4"
-                >
-                  @miroshark_ ↗
-                </a>
-              </div>
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <Stat
-                  label="fired"
-                  value={miroshark!.sims_fired}
-                />
-                <Stat
-                  label="verdicts"
-                  value={miroshark!.sims_completed}
-                  tint="emerald"
-                />
-                <Stat
-                  label="pending"
-                  value={miroshark!.pending_sims}
-                  tint={miroshark!.pending_sims > 0 ? "yellow" : "dim"}
-                />
-              </div>
-              <div className="text-[11px] text-white/55 font-mono mb-2">
-                <span className="text-white/35">active autonomous: </span>
-                <span className="text-white/85">
-                  {miroshark!.active_tasks}
-                </span>
-              </div>
-              {miroshark!.latest_verdict ? (
-                <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                  <div className="text-[10px] uppercase tracking-wider text-white/35 mb-1">
-                    Latest verdict
-                  </div>
-                  <div className="text-[12px] text-white/80 leading-relaxed">
-                    {miroshark!.latest_verdict.content.slice(0, 220)}
-                  </div>
-                  <div className="text-[10px] text-white/35 font-mono mt-1">
-                    {new Date(
-                      miroshark!.latest_verdict.created_at,
-                    ).toISOString().slice(0, 16).replace("T", " ")}{" "}
-                    UTC
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-3 pt-3 border-t border-white/[0.06] text-[11px] text-white/45">
-                  awaiting first swarm verdict…
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="mt-4 text-[10.5px] font-mono text-white/30">
-          # live data — federated across every SIGDA node via wallet-signed
-          # events. partner protocols plug in by emitting signed posts.
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  tint,
-}: {
-  label: string;
-  value: number;
-  tint?: "emerald" | "yellow" | "dim";
-}) {
-  const valueColor =
-    tint === "emerald"
-      ? "text-emerald-300/90"
-      : tint === "yellow"
-        ? "text-yellow-300/90"
-        : tint === "dim"
-          ? "text-white/40"
-          : "text-white/95";
-  return (
-    <div>
-      <div
-        className={`font-display text-2xl font-semibold tracking-[-0.02em] ${valueColor}`}
-      >
-        {value}
-      </div>
-      <div className="text-[10px] uppercase tracking-wider text-white/40 mt-0.5">
-        {label}
-      </div>
-    </div>
-  );
-}

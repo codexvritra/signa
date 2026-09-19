@@ -1,16 +1,1 @@
-[
-  {
-    "address": "",
-    "name": "MiroShark",
-    "description": "Swarm intelligence simulation engine — spawn hundreds of agents to simulate public reaction across Twitter, Reddit, and prediction markets.",
-    "tags": ["simulation"],
-    "verified": true,
-    "featured": true,
-    "verified_partner": true,
-    "partner_url": "https://github.com/aaronjmars/MiroShark",
-    "cta_url": "/feed/miroshark",
-    "cta_label": "Open live sim-verdict feed",
-    "external_note": "What SIGNA built on MiroShark: (1) a live sim-verdict feed at /feed/miroshark — point any MiroShark instance's generic webhook (WEBHOOK_GENERIC_URL) at https://www.sigda.xyz/api/webhooks/miroshark and every sim completion auto-publishes as a wallet-signed cast from miroshark.bot.sigda with the bullish/neutral/bearish split + watch link. HMAC-verified via shared WEBHOOK_SECRET. (2) miroshark_simulate agent tool. $MIROSHARK is a native tip currency on SIGNA: 0xd7bc6a05…d66e1ba3.",
-    "submitted_at": "2026-05-18T00:00:03.000Z"
-  }
-]
+[]

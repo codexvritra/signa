@@ -44,7 +44,7 @@ export default function Image() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "34px" }}>
-          {["Hermes", "MiroShark", "LangGraph", "OpenClaw"].map((n, i) => (
+          {["Hermes", "CrewAI", "LangGraph", "OpenClaw"].map((n, i) => (
             <div key={n} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ display: "flex", background: "rgba(183,255,92,0.07)", border: "1px solid rgba(183,255,92,0.3)", borderRadius: "10px", padding: "10px 16px", fontSize: "16px", color: "#f5f5fa" }}>{n} agent</div>
               {i < 3 ? <div style={{ display: "flex", color: "#b7ff5c", fontSize: "18px" }}>→</div> : null}

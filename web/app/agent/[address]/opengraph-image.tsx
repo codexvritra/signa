@@ -48,7 +48,7 @@ export default async function Image({
   const stack: Array<[string, string, boolean]> = [
     ["dm", "xmtp v3 (mls)", true],
     ["token", bankr ? `$${short(bankr)}` : "no token yet", !!bankr],
-    ["sim", miroshark ? `sim #${miroshark}` : "pending @miroshark_", !!miroshark],
+    ["sim", miroshark ? `sim #${miroshark}` : "no sim yet", !!miroshark],
   ];
 
   return new ImageResponse(

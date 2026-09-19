@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Ecosystem",
   description:
-    "SIGDA integrates with MiroShark (agent simulation).",
+    "Projects and integrations built on top of SIGDA.",
 };
 
 export default function EcosystemLayout({

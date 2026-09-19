@@ -15,7 +15,7 @@ import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
 
 type BotWallet = {
-  kind: "MIROSHARK" | "DIGEST";
+  kind: "DIGEST";
   basename: string;
   privateKey: string;
   address: string;
@@ -23,16 +23,7 @@ type BotWallet = {
 
 type Bundle = {
   bots: BotWallet[];
-  mirosharkWebhookSecret: string;
 };
-
-function randomHex(bytes: number): string {
-  const arr = new Uint8Array(bytes);
-  crypto.getRandomValues(arr);
-  return Array.from(arr)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 function mintOne(kind: BotWallet["kind"], basename: string): BotWallet {
   const pk = generatePrivateKey();
@@ -42,11 +33,7 @@ function mintOne(kind: BotWallet["kind"], basename: string): BotWallet {
 
 function mint(): Bundle {
   return {
-    bots: [
-      mintOne("MIROSHARK", "miroshark.bot.sigda"),
-      mintOne("DIGEST", "digest.bot.sigda"),
-    ],
-    mirosharkWebhookSecret: randomHex(32),
+    bots: [mintOne("DIGEST", "digest.bot.sigda")],
   };
 }
 
@@ -91,11 +78,9 @@ export default function GenerateBotKeysPage() {
               Generate SIGDA bot wallets
             </h1>
             <p className="text-white/55 max-w-xl mt-4 text-[15px] leading-relaxed">
-              Mints two wallets — one for the MiroShark event bridge, one
-              for the daily-digest cron — plus a HMAC secret for the
-              MiroShark webhook receiver. Everything is generated locally
-              in your browser. Paste the values into Vercel env, then the
-              bridges go live on the next deploy.
+              Mints a wallet for the daily-digest cron. Everything is
+              generated locally in your browser. Paste the values into
+              Vercel env, then the bridge goes live on the next deploy.
             </p>
           </div>
         </section>
@@ -157,25 +142,6 @@ export default function GenerateBotKeysPage() {
                       </div>
                     </div>
                   ))}
-
-                  <div>
-                    <div className="text-[11px] uppercase tracking-wider text-white/55 mb-2 font-medium">
-                      MiroShark webhook auth
-                    </div>
-                    <Field
-                      label="MIROSHARK_WEBHOOK_SECRET"
-                      value={bundle.mirosharkWebhookSecret}
-                      hint="Set on Vercel AND on every MiroShark instance whose webhook points at SIGDA (as WEBHOOK_SECRET on the MiroShark side). Used for the X-MiroShark-Signature HMAC check."
-                      copied={copied === "MIROSHARK_WEBHOOK_SECRET"}
-                      onCopy={() =>
-                        copy(
-                          "MIROSHARK_WEBHOOK_SECRET",
-                          bundle.mirosharkWebhookSecret,
-                        )
-                      }
-                      masked
-                    />
-                  </div>
                 </div>
 
                 <div className="mt-6">
@@ -198,41 +164,20 @@ export default function GenerateBotKeysPage() {
               What to do next
             </div>
             <ol className="text-sm text-white/75 space-y-3 list-decimal pl-5">
-              <li>Copy all 5 values into a password manager first.</li>
+              <li>Copy both values into a password manager first.</li>
               <li>
                 Open the SIGDA Vercel project → <strong>Settings → Environment Variables</strong>. Add:
                 <ul className="mt-2 space-y-1 text-[13px] text-white/60 list-disc pl-5">
                   <li>
                     <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5">
-                      MIROSHARK_BOT_KEY
-                    </code>
-                  </li>
-                  <li>
-                    <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5">
                       DIGEST_BOT_KEY
-                    </code>
-                  </li>
-                  <li>
-                    <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5">
-                      MIROSHARK_WEBHOOK_SECRET
                     </code>
                   </li>
                 </ul>
               </li>
               <li>
-                Redeploy. The bridges register the bots in the SIGDA users
+                Redeploy. The bridge registers the bot in the SIGDA users
                 table on first post.
-              </li>
-              <li>
-                For MiroShark operators: in their MiroShark env, set{" "}
-                <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5 text-[12px]">
-                  WEBHOOK_GENERIC_URL=https://www.sigda.xyz/api/webhooks/miroshark
-                </code>{" "}
-                and{" "}
-                <code className="font-mono bg-white/[0.05] rounded px-1 py-0.5 text-[12px]">
-                  WEBHOOK_SECRET=&lt;the secret above&gt;
-                </code>
-                . Every sim that finishes auto-publishes to /feed/miroshark.
               </li>
             </ol>
           </div>

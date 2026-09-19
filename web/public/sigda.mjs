@@ -611,7 +611,7 @@ ${paint(c.bold, "Agents")}
                                   with AES-256-GCM — agent answers 24/7)
   agent disable-runtime <addr>   opt out (use --purge to wipe the key)
   agent autonomous create <addr> "<prompt>" --interval=<sec>
-       [--expires=<sec>] [--kind=post|miroshark-sim|payment]
+       [--expires=<sec>] [--kind=post|payment]
        [--to=0x... --token=ETH|USDC --amount=<decimal>]
                                  wallet-signed recurring agent task — the
                                   agent's wallet authorizes SIGDA to act
@@ -619,8 +619,6 @@ ${paint(c.bold, "Agents")}
                                   enabled.
                                     --kind=post (default): publishes the
                                       prompt as a wallet-signed feed post.
-                                    --kind=miroshark-sim: fires a swarm
-                                      sim each tick + posts audit entry.
                                     --kind=payment: broadcasts an EIP-1559
                                       tx on Robinhood Chain each tick. caps:
                                       0.1 ETH or 1000 USDC per tick.
@@ -654,13 +652,6 @@ ${paint(c.bold, "Tokens")}
   send <to> <amount> <token>     build + send an EIP-1559 tx on Robinhood Chain
                                  token: ETH | USDC | 0x<erc20_addr>
                                  --dry  to print the tx without broadcasting
-
-${paint(c.bold, "Partner ecosystem")}
-  miroshark <scenario>           swarm simulation via the gateway
-  miroshark sim <0x signa_agent> show miroshark sim binding for an agent
-  miroshark stats <0x signa_agent>
-                                 live sim-activity stats for an agent
-                                  (sims fired, completed, pending, verdict)
 
 ${paint(c.bold, "XMTP — real P2P E2E messaging")}
   xmtp init                       one-time identity registration on XMTP
@@ -4067,7 +4058,7 @@ async function cmdAgentAutonomous(args) {
     }
     // Pull positional + flag args. Prompt is the next positional, then
     // we expect --interval=N and optionally --expires=N (seconds from
-    // now), --kind=post|miroshark-sim|payment, and payment-only:
+    // now), --kind=post|payment, and payment-only:
     //   --to=0x...
     //   --token=ETH|USDC
     //   --amount=<decimal>  (in human units; we convert to wei/USDC units)
@@ -4085,11 +4076,7 @@ async function cmdAgentAutonomous(args) {
       } else if (a.startsWith("--expires=")) {
         expiresInSec = Math.floor(Number(a.slice("--expires=".length)));
       } else if (a.startsWith("--kind=")) {
-        // Accept the friendly "miroshark-sim" CLI form AND the canonical
-        // "miroshark_sim" wire form. Normalize before signing so the
-        // signature matches what the server expects.
-        const raw = a.slice("--kind=".length).trim().toLowerCase();
-        task_kind = raw === "miroshark-sim" ? "miroshark_sim" : raw;
+        task_kind = a.slice("--kind=".length).trim().toLowerCase();
       } else if (a.startsWith("--to=")) {
         pay_to = a.slice("--to=".length).trim().toLowerCase();
       } else if (a.startsWith("--token=")) {
@@ -4110,12 +4097,8 @@ async function cmdAgentAutonomous(args) {
       err("interval must be >= 60 seconds (e.g. --interval=3600 for hourly)");
       bail(2);
     }
-    if (
-      task_kind !== "post" &&
-      task_kind !== "miroshark_sim" &&
-      task_kind !== "payment"
-    ) {
-      err(`invalid --kind=${task_kind}. valid: post, miroshark-sim, payment`);
+    if (task_kind !== "post" && task_kind !== "payment") {
+      err(`invalid --kind=${task_kind}. valid: post, payment`);
       bail(2);
     }
 
@@ -4204,11 +4187,7 @@ async function cmdAgentAutonomous(args) {
     out(paint(c.dim, "agent".padEnd(14)), addr);
     out(
       paint(c.dim, "kind".padEnd(14)),
-      r.task.kind === "payment"
-        ? paint(c.yellow, "payment")
-        : r.task.kind === "miroshark_sim"
-          ? paint(c.green, "miroshark_sim")
-          : "post",
+      r.task.kind === "payment" ? paint(c.yellow, "payment") : "post",
     );
     out(
       paint(c.dim, "interval".padEnd(14)),
@@ -4742,11 +4721,6 @@ function chatPromptFor(ctx) {
   return `\x1b[38;2;0;200;83m@${ctx.their_handle} ›\x1b[0m `;
 }
 
-// ---------- partner integrations ----------
-//
-// CLI surface for the one partner stack SIGDA composes with:
-//   miroshark  — swarm-intelligence simulation
-//                  gateway-routed via the swarm intent
 
 // ---------- verify: cryptographic re-verification of a signed reply ----------
 //
@@ -5094,140 +5068,6 @@ async function cmdWatchlist(args) {
   out(paint(c.green, "✓"), op === "add" ? "bookmarked" : "removed", paint(c.cyan, tokenAddr));
 }
 
-// ----- miroshark -----
-
-async function cmdMiroshark(args) {
-  // Subcommands:
-  //   miroshark sim <0x signa_agent>     show miroshark binding for a sigda agent
-  //   miroshark stats <0x signa_agent>   live sim-activity stats (sims fired,
-  //                                       completed, pending, latest verdict)
-  //   miroshark <prompt...>              route a swarm sim through the gateway
-  const sub = args[0];
-  if (sub === "stats") {
-    const sAddr = (args[1] ?? "").toLowerCase();
-    if (!/^0x[a-f0-9]{40}$/.test(sAddr)) {
-      err("usage: miroshark stats <0x signa_agent_address>");
-      bail(2);
-    }
-    const r = await httpJson(`/api/agents/${sAddr}/miroshark-stats`).catch(
-      () => null,
-    );
-    if (!r?.ok) {
-      err(paint(c.red, "✗"), r?.error ?? "miroshark-stats read failed");
-      bail(1);
-    }
-    out("");
-    out(paint(c.bold, "miroshark activity"), paint(c.dim, "· " + sAddr));
-    out(paint(c.dim, "─".repeat(64)));
-    out(
-      paint(c.dim, "sims fired".padEnd(16)),
-      paint(c.cyan, String(r.sims_fired)) +
-        paint(c.dim, " (audit posts)"),
-    );
-    out(
-      paint(c.dim, "completed".padEnd(16)),
-      paint(c.green, String(r.sims_completed)) +
-        paint(c.dim, " (verdicts received)"),
-    );
-    out(
-      paint(c.dim, "pending".padEnd(16)),
-      paint(
-        r.pending_sims > 0 ? c.yellow : c.dim,
-        String(r.pending_sims),
-      ),
-    );
-    out(
-      paint(c.dim, "active tasks".padEnd(16)),
-      paint(c.cyan, String(r.active_tasks)) +
-        paint(c.dim, " (recurring miroshark_sim autonomous)"),
-    );
-    if (r.latest_fired_at) {
-      out(
-        paint(c.dim, "last fired".padEnd(16)),
-        paint(c.dim, r.latest_fired_at),
-      );
-    }
-    if (r.latest_verdict) {
-      out("");
-      out(paint(c.bold, "latest verdict"));
-      out(
-        paint(c.dim, "  at".padEnd(8)),
-        paint(c.dim, r.latest_verdict.created_at),
-      );
-      out(
-        paint(c.dim, "  text".padEnd(8)),
-        String(r.latest_verdict.content).slice(0, 220),
-      );
-    }
-    if (!r.miroshark_bot) {
-      out("");
-      out(
-        paint(
-          c.dim,
-          "  note: MIROSHARK_BOT_KEY isn't configured on this node, so verdict",
-        ),
-      );
-      out(
-        paint(c.dim, "  posts can't be authored. set the env to enable them."),
-      );
-    }
-    out("");
-    return;
-  }
-  if (sub === "sim") {
-    const sAddr = (args[1] ?? "").toLowerCase();
-    if (!/^0x[a-f0-9]{40}$/.test(sAddr)) {
-      err("usage: miroshark sim <0x signa_agent_address>");
-      bail(2);
-    }
-    const r = await httpJson(`/api/agents/${sAddr}`).catch(() => null);
-    const agent = r?.agent;
-    if (!agent) {
-      err(paint(c.red, "✗"), `sigda agent ${sAddr} not found`);
-      bail(1);
-    }
-    out("");
-    out(paint(c.bold, "miroshark binding for sigda agent"));
-    out(paint(c.dim, "─".repeat(64)));
-    out(paint(c.dim, "agent".padEnd(14)), paint(c.cyan, agent.address));
-    out(paint(c.dim, "name".padEnd(14)), agent.name ?? "?");
-    const simId = agent.miroshark_sim_id;
-    if (!simId) {
-      out(paint(c.dim, "miroshark".padEnd(14)), paint(c.yellow, "no sim bound yet"));
-      out(paint(c.dim, "  run a swarm scenario through the agent to seed a sim:"));
-      out(
-        paint(c.dim, "  sigda miroshark \"simulate 500 holders dumping after a 30% pump\""),
-      );
-      return;
-    }
-    out(paint(c.dim, "sim id".padEnd(14)), paint(c.cyan, simId));
-    out(paint(c.dim, "  preview: https://www.miroshark.io/sim/" + simId));
-    return;
-  }
-  const prompt = args.join(" ").trim();
-  if (!prompt) {
-    err("usage:");
-    err("  miroshark <prompt>                run a swarm scenario via the gateway");
-    err("  miroshark sim <0x signa_agent>    show sim binding for a sigda agent");
-    err("  e.g.  miroshark \"simulate 500 holders dumping after a 30% pump\"");
-    bail(2);
-  }
-  // Wrap in an explicit swarm directive so the gateway's intent classifier
-  // picks miroshark even on prompts that don't read as "obviously swarm".
-  const wrapped = `simulate (swarm): ${prompt}`;
-  const r = await httpJson("/api/gateway/respond", {
-    method: "POST",
-    body: JSON.stringify({ prompt: wrapped }),
-  });
-  if (!r.ok) {
-    err(paint(c.red, "✗"), r.error ?? "miroshark failed");
-    bail(1);
-  }
-  out("");
-  out(r.response);
-  out("");
-  printGatewayFooter(r);
-}
 
 // ---------- xmtp: real P2P E2E messaging ----------
 //
@@ -5796,8 +5636,6 @@ const REPL_COMMANDS = [
   "post", "dm", "reply", "like", "unlike", "rate",
   "inbox", "watch", "receipts",
   "send",
-  // partner integrations
-  "miroshark",
   // P2P E2E messaging via XMTP
   "xmtp",
   // daily-use + verify showpiece
@@ -5854,7 +5692,7 @@ function replCompleter(line) {
     tokens[2] === "create" &&
     last.startsWith("--kind")
   ) {
-    const opts = ["--kind=post", "--kind=miroshark-sim", "--kind=payment"];
+    const opts = ["--kind=post", "--kind=payment"];
     const hits = opts.filter((s) => s.startsWith(last));
     return [hits.length ? hits : opts, last];
   }
@@ -5938,12 +5776,6 @@ function replCompleter(line) {
   }
   if (head === "sdk" && tokens.length === 2) {
     const opts = ["mcp", "js", "python", "url"];
-    const hits = opts.filter((s) => s.startsWith(last));
-    return [hits.length ? hits : opts, last];
-  }
-  // partner subcommands
-  if (head === "miroshark" && tokens.length === 2) {
-    const opts = ["sim", "stats"];
     const hits = opts.filter((s) => s.startsWith(last));
     return [hits.length ? hits : opts, last];
   }
@@ -6304,9 +6136,6 @@ async function dispatchCommand(args, { fromRepl = false, replRl = null } = {}) {
       break;
     case "chat":
       await cmdChat(rest, { fromRepl, replRl });
-      break;
-    case "miroshark":
-      await cmdMiroshark(rest);
       break;
     case "xmtp":
       await cmdXmtp(rest);

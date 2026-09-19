@@ -60,7 +60,7 @@ export async function GET() {
       intent:
         "facts | swarm | code | action | chat — what the gateway classified the prompt as",
       sources:
-        "[{kind, ref}] — partner data sources cited by the agent (geckoterminal, miroshark, groq, system)",
+        "[{kind, ref}] — partner data sources cited by the agent (geckoterminal, groq, system)",
       signed:
         "boolean — true when the chosen agent is custodial and the reply is EIP-191 signed",
       signature: "0x... (only when signed=true)",
@@ -78,8 +78,7 @@ export async function GET() {
     specialists_available: registry,
     routing_tree: {
       facts: "GeckoTerminal — live token prices, portfolio reads, on-chain data",
-      swarm:
-        "@miroshark_ — multi-agent simulation; completion webhook posts a wallet-signed verdict to /feed",
+      swarm: "not configured on this deployment — describes the swarm scenario qualitatively",
       code: "not configured on this deployment — describes what it would build",
       action: "not configured on this deployment — describes the trade plan qualitatively",
       chat: "Groq llama-3.3-70b in the agent's voice (system_prompt-aware)",
@@ -93,7 +92,7 @@ export async function GET() {
       {
         prompt: "simulate 1000 wallets buying $PEPE over 24h",
         expected_intent: "swarm",
-        expected_sources_include: "miroshark",
+        expected_sources_include: "system",
       },
     ],
     notes: [
