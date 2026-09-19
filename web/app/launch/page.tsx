@@ -5,6 +5,7 @@ import { RH_CHAIN_ID_HEX, RH_RPC, RH_CHAIN_NAME, RH_EXPLORER, RH_CHAIN_ID } from
 import { liveLaunchFeeWei, previewEconomics, buildPonsLaunchCalldata, randomSalt, NATIVE_PAIR, DEFAULT_LAUNCH_CONFIG_ID, DEFAULT_CREATOR_TAX_BPS, PONS_FACTORY } from "@/lib/pons";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
+import "@/app/marketing.css";
 
 /**
  * /launch — launch a token straight on Pons's own factory (Robinhood Chain),
@@ -100,49 +101,51 @@ export default function LaunchPage() {
   const feeEth = (Number(feeWei) / 1e18).toFixed(4);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-      <AppHeader />
+    <div className="p min-h-screen flex flex-col">
+      <AppHeader light />
       <main className="flex-1">
-        <div className="max-w-[720px] mx-auto px-6 lg:px-10 py-12">
-          <div className="text-[12px] uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">Launch · Pons · Robinhood Chain</div>
-          <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a token. It comes alive.</h1>
-          <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">Your wallet signs it — no redirect, no custody.</p>
+        <section className="hero" style={{ paddingBottom: 64 }}>
+          <div className="shell" style={{ maxWidth: 720 }}>
+            <span className="chip">Launch · Pons · Robinhood Chain</span>
+            <h1 style={{ fontSize: "clamp(34px, 5.5vw, 58px)" }}>Launch a token. It comes alive.</h1>
+            <p className="sub" style={{ marginBottom: 0 }}>Your wallet signs it — no redirect, no custody.</p>
 
-          <div className="mt-6 glass rounded-2xl p-5 border border-white/[0.07] flex flex-col gap-2.5">
-            <div className="flex gap-2.5">
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name" className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
-              <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="TICKER" maxLength={10} className="w-28 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
-            </div>
-            <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
-            <div className="grid grid-cols-3 gap-2.5">
-              <input value={tw} onChange={(e) => setTw(e.target.value)} placeholder="X / Twitter link" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
-              <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="Telegram link" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
-              <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="Website" className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-[var(--accent)]/60 transition-colors" />
+            <div className="panel" style={{ marginTop: 26, padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", gap: 10 }}>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name" className="tryit-input" style={{ flex: 1, height: 46 }} />
+                <input value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} placeholder="TICKER" maxLength={10} className="tryit-input" style={{ width: 120, height: 46 }} />
+              </div>
+              <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Short description" className="tryit-input" style={{ height: 46 }} />
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                <input value={tw} onChange={(e) => setTw(e.target.value)} placeholder="X / Twitter link" className="tryit-input" style={{ height: 42, fontSize: 13 }} />
+                <input value={tg} onChange={(e) => setTg(e.target.value)} placeholder="Telegram link" className="tryit-input" style={{ height: 42, fontSize: 13 }} />
+                <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="Website" className="tryit-input" style={{ height: 42, fontSize: 13 }} />
+              </div>
+
+              {account ? (
+                <button onClick={launch} disabled={busy} className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+                  {busy ? "launching…" : `Launch token · ${feeEth} ETH fee`}
+                </button>
+              ) : (
+                <button onClick={connect} className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>Connect wallet</button>
+              )}
+              {account && <div className="hero-note" style={{ margin: 0 }}>{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</div>}
             </div>
 
-            {account ? (
-              <button onClick={launch} disabled={busy} className="w-full mt-1.5 px-4 py-3 rounded-xl text-[15px] font-semibold bg-[var(--accent)] text-black disabled:opacity-60 hover:brightness-95 transition-[filter]">
-                {busy ? "launching…" : `Launch token · ${feeEth} ETH fee`}
-              </button>
-            ) : (
-              <button onClick={connect} className="w-full mt-1.5 px-4 py-3 rounded-xl text-[15px] font-semibold bg-[var(--accent)] text-black hover:brightness-95 transition-[filter]">Connect wallet</button>
+            {status && (
+              <div className={`tryit-note${status.k === "err" ? " err" : ""}`} style={{ marginTop: 18 }}>
+                {status.t}
+              </div>
             )}
-            {account && <div className="text-[11px] text-faint font-mono">{short(account)} · {RH_CHAIN_NAME} (chain {RH_CHAIN_ID})</div>}
+
+            <p style={{ marginTop: 40, fontSize: 12.5, lineHeight: 1.6, color: "var(--ink-soft)" }}>
+              Launches go straight to Pons&apos;s verified factory contract on Robinhood Chain — Sigda never holds your funds or keys.
+              Trade fee is 3% total (1% Pons base + 2% creator tax routed to Sigda). Not affiliated with Robinhood or Pons.
+            </p>
           </div>
-
-          {status && (
-            <div className={`mt-4 text-[13px] rounded-lg px-3.5 py-2.5 break-words border ${status.k === "ok" ? "bg-[#22c98a]/10 text-[#bdf5d2] border-[#5ee68f]/30" : status.k === "err" ? "bg-red-500/10 text-red-300 border-red-500/30" : "bg-white/[0.04] text-faint border-white/[0.08]"}`}>
-              {status.t}
-            </div>
-          )}
-
-          <p className="text-[11px] text-faint mt-10">
-            Launches go straight to Pons&apos;s verified factory contract on Robinhood Chain — Sigda never holds your funds or keys.
-            Trade fee is 3% total (1% Pons base + 2% creator tax routed to Sigda). Not affiliated with Robinhood or Pons.
-          </p>
-        </div>
+        </section>
       </main>
-      <Footer />
+      <Footer light />
     </div>
   );
 }
