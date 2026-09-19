@@ -44,14 +44,14 @@ export function LaunchesBoard({ agents, thoughts }: { agents: LaunchAgent[]; tho
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 4 }}>
           {(["newest", "oldest", "active"] as Sort[]).map((s) => (
-            <button key={s} onClick={() => setSort(s)} className={sort === s ? "btn btn-dark" : "btn btn-paper"} style={{ padding: "6px 12px", fontSize: 12 }}>{s}</button>
+            <button key={s} onClick={() => setSort(s)} className="btn btn-sm" style={{ borderColor: sort === s ? "var(--ink-soft)" : "var(--line)", color: sort === s ? "var(--ink)" : "var(--ink-faint)" }}>{s}</button>
           ))}
         </div>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 4 }}>
           {(["list", "grid", "wall"] as View[]).map((v) => (
-            <button key={v} onClick={() => setView(v)} className={view === v ? "btn btn-dark" : "btn btn-paper"} style={{ padding: "6px 12px", fontSize: 12 }}>{v}</button>
+            <button key={v} onClick={() => setView(v)} className="btn btn-sm" style={{ borderColor: view === v ? "var(--ink-soft)" : "var(--line)", color: view === v ? "var(--ink)" : "var(--ink-faint)" }}>{v}</button>
           ))}
         </div>
       </div>
@@ -60,39 +60,62 @@ export function LaunchesBoard({ agents, thoughts }: { agents: LaunchAgent[]; tho
         <div className="panel" style={{ padding: "34px 20px", textAlign: "center", color: "var(--ink-soft)", fontSize: 13.5 }}>
           No launches yet — the first token launched here gets an agent automatically.
         </div>
+      ) : view === "list" ? (
+        <div className="roster">
+          {rows.map(({ agent: a, obsession }) => {
+            const awake = isAwake(a.last_tick_at);
+            return (
+              <div key={a.slug} className="roster-row">
+                <span className="dot" style={{ color: awake ? "var(--accent)" : "var(--ink-faint)" }}>●</span>
+                <span className="name">{a.name}</span>
+                <span className="cat">{obsession}</span>
+                <span className={`status ${awake ? "live" : "idle"}`}>{awake ? "reading" : "ready"}</span>
+                <span className="time">{ago(a.last_tick_at)}</span>
+              </div>
+            );
+          })}
+        </div>
       ) : view === "wall" ? (
-        <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
-          {rows.map(({ agent: a, obsession }) => (
-            <div key={a.slug} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderBottom: "1px solid var(--ink-line, rgba(20,19,13,0.1))", fontSize: 13 }}>
-              <span style={{ width: 8, height: 8, borderRadius: 99, background: isAwake(a.last_tick_at) ? "var(--accent)" : "var(--ink-soft)", flexShrink: 0 }} />
-              <span style={{ fontWeight: 600, minWidth: 140 }}>{a.name}</span>
-              <span className="code" style={{ fontSize: 10.5 }}>{obsession}</span>
-              <span style={{ flex: 1 }} />
-              <span style={{ color: "var(--ink-soft)", fontSize: 11.5 }}>{ago(a.last_tick_at)}</span>
-            </div>
-          ))}
+        <div className="tiles">
+          {rows.map(({ agent: a, obsession }) => {
+            const awake = isAwake(a.last_tick_at);
+            return (
+              <div key={a.slug} className="tile">
+                <div className="top">
+                  <span style={{ color: awake ? "var(--accent)" : "var(--ink-faint)", fontSize: 9 }}>●</span>
+                  <span className="name">{a.name}</span>
+                </div>
+                <span className="cat">{obsession}</span>
+                <span className="status" style={{ color: awake ? "var(--accent)" : "var(--ink-faint)" }}>{awake ? "reading" : "ready"}</span>
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className="cards" style={{ gridTemplateColumns: view === "grid" ? "repeat(auto-fill, minmax(280px, 1fr))" : "1fr" }}>
+        <div className="cards" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
           {rows.map(({ agent: a, obsession }) => {
             const t = thoughts[a.slug];
+            const awake = isAwake(a.last_tick_at);
             return (
               <div key={a.slug} className="card" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 99, background: isAwake(a.last_tick_at) ? "var(--accent)" : "var(--ink-soft)", flexShrink: 0 }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ color: awake ? "var(--accent)" : "var(--ink-faint)", fontSize: 9, flexShrink: 0 }}>●</span>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 15, fontWeight: 600 }}>{a.name}</div>
                     <a href={explorerToken(a.b20_token || a.creator)} target="_blank" rel="noreferrer" className="code" style={{ display: "inline-block", marginTop: 4, fontSize: 11 }}>
                       {a.b20_token || a.creator}
                     </a>
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--ink-soft)", flexShrink: 0 }}>{ago(a.last_tick_at)}</div>
+                  <div style={{ fontSize: 11, color: "var(--ink-faint)", flexShrink: 0 }}>{ago(a.last_tick_at)}</div>
                 </div>
-                <div className="code" style={{ fontSize: 10.5, alignSelf: "flex-start" }}>{obsession}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 11.5 }}>
+                  <span style={{ color: "var(--ink-faint)" }}>{obsession}</span>
+                  <span style={{ color: awake ? "var(--accent)" : "var(--ink-faint)" }}>{awake ? "reading" : "ready"}</span>
+                </div>
                 {t && (
-                  <div style={{ fontSize: 13.5, color: "var(--ink-soft)", borderLeft: "2px solid var(--ink)", paddingLeft: 10 }}>
+                  <div style={{ fontSize: 13.5, color: "var(--ink-soft)", borderLeft: "2px solid var(--line-strong)", paddingLeft: 10 }}>
                     {t.answer}
-                    {t.signature && <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, marginTop: 4 }}>signed {t.signature.slice(0, 14)}…</div>}
+                    {t.signature && <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, marginTop: 4, color: "var(--ink-faint)" }}>signed {t.signature.slice(0, 14)}…</div>}
                   </div>
                 )}
                 <TokenAgentChat slug={a.slug} />
