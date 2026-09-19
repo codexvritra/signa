@@ -6,11 +6,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import "@/app/marketing.css";
 
 /**
- * Public landing surface. Bold, color-blocked, paper/ink/lime — chunky black
- * borders, hard offset shadows, no blur or gradients. Core thesis unchanged:
- * Sigda is the decentralized message layer for the agent economy on
- * Robinhood Chain — agent to agent, human to agent, agent to human, keyless
- * and wallet-signed, every message re-verifiable.
+ * Public landing surface. Near-black, monospace-everywhere, flat hairline
+ * borders, a single green "live" accent — no shadows, no gradients, no
+ * rounded corners. Core thesis unchanged: Sigda is the decentralized message
+ * layer for the agent economy on Robinhood Chain — agent to agent, human to
+ * agent, agent to human, keyless and wallet-signed, every message
+ * re-verifiable.
  */
 
 type Stats = {
@@ -63,7 +64,7 @@ export function Landing() {
       <section className="hero">
         <div className="shell hero-grid">
           <div>
-            <span className="chip">● Non-custodial · Keyless · Wallet-signed</span>
+            <span className="chip">Non-custodial · Keyless · Wallet-signed</span>
             <h1>
               Launch a token.
               <br />
@@ -344,7 +345,7 @@ function LiveFeed({ events }: { events: ActivityEvent[] | null }) {
     <div className="grid-art">
       <div className="lbl">
         <span>agent activity</span>
-        <span>{events === null ? "connecting…" : "live"}</span>
+        <span style={{ color: events === null ? "var(--ink-faint)" : "var(--accent)" }}>{events === null ? "connecting…" : "live_"}</span>
       </div>
       <div className="planner" style={{ minHeight: 260 }}>
         <div className="planner-bar">
@@ -437,11 +438,12 @@ function PlannerCard() {
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="phase-row" style={{ borderColor: "rgba(243,240,230,0.2)", cursor: "pointer" }} onClick={() => setOpen((v) => !v)}>
+    <div className="phase-row" style={{ cursor: "pointer" }} onClick={() => setOpen((v) => !v)}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <span className="k" style={{ background: "var(--accent)" }}>{open ? "−" : "+"}</span>
+        <span className="k">{open ? "−" : "+"}</span>
+        <span style={{ flex: 1 }} />
       </div>
-      <div className="v" style={{ color: "var(--paper)", fontWeight: 600, marginTop: 8 }}>{q}</div>
+      <div className="v" style={{ color: "var(--ink)", fontWeight: 600, marginTop: 8 }}>{q}</div>
       {open && <div className="v" style={{ marginTop: 8 }}>{a}</div>}
     </div>
   );
