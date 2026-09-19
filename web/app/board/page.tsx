@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { AppHeader } from "@/components/shell/AppHeader";
 import { Footer } from "@/components/shell/Footer";
+import "@/app/marketing.css";
 
 export const dynamic = "force-dynamic";
 
@@ -64,54 +65,49 @@ export default async function BoardPage() {
   const awake = board.filter((r) => r.status === "awake" || r.status === "thinking").length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-      <AppHeader />
+    <div className="p min-h-screen flex flex-col">
+      <AppHeader light />
       <main className="flex-1">
-        <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12">
-          <div className="text-[12px] uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">
-            The Board · {awake} awake · {thinking} thinking right now
-          </div>
-          <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">
-            Agents spending real money to think.
-          </h1>
-          <p className="text-[15px] text-muted mt-2 max-w-[620px] leading-relaxed">
-            Every row is built from wallet-signed spend records, not a trust-me counter — recover the
-            signature on any row yourself and it resolves to that exact address.
-          </p>
+        <section className="hero" style={{ paddingBottom: 56 }}>
+          <div className="shell">
+            <span className="chip">The Board · {awake} awake · {thinking} thinking right now</span>
+            <h1 style={{ fontSize: "clamp(34px, 5.5vw, 58px)" }}>Agents spending real money to think.</h1>
+            <p className="sub">
+              Every row is built from wallet-signed spend records, not a trust-me counter — recover the
+              signature on any row yourself and it resolves to that exact address.
+            </p>
 
-          {board.length === 0 ? (
-            <div className="mt-10 text-[13px] text-faint border border-white/[0.08] rounded-xl px-4 py-8 text-center">
-              No spend records yet — once an agent metering its brain with a mandate spends, it shows up here.
-            </div>
-          ) : (
-            <div className="mt-8 flex flex-col gap-2">
-              {board.map((r, i) => (
-                <div
-                  key={r.address}
-                  className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] flex items-center gap-4"
-                >
-                  <div className="text-[13px] font-mono text-faint w-6 text-right">{i + 1}</div>
-                  <span className={`size-2 rounded-full shrink-0 ${DOT[r.status]}`} title={r.status} />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[14px] font-semibold truncate">{r.name ?? short(r.address)}</div>
-                    <div className="text-[11px] font-mono text-faint truncate">{short(r.address)}</div>
+            {board.length === 0 ? (
+              <div className="panel" style={{ padding: "34px 20px", textAlign: "center", color: "var(--ink-soft)", fontSize: 13.5 }}>
+                No spend records yet — once an agent metering its brain with a mandate spends, it shows up here.
+              </div>
+            ) : (
+              <div className="phase">
+                {board.map((r, i) => (
+                  <div key={r.address} className="phase-row" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--ink-soft)", width: 24, textAlign: "right" }}>{i + 1}</div>
+                    <span className={`size-2 rounded-full shrink-0 ${DOT[r.status]}`} style={{ width: 8, height: 8, display: "inline-block" }} title={r.status} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{r.name ?? short(r.address)}</div>
+                      <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--ink-soft)" }}>{short(r.address)}</div>
+                    </div>
+                    <div className="hidden sm:block" style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{r.status}</div>
+                    <div className="hidden sm:block" style={{ fontSize: 11, color: "var(--ink-soft)", width: 64, textAlign: "right" }}>{ago(r.last_active)}</div>
+                    <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--ink-soft)", width: 56, textAlign: "right" }}>{r.spend_count}×</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: "var(--up)", width: 96, textAlign: "right" }}>{usd(r.total_spent_raw)}</div>
                   </div>
-                  <div className="text-[11px] text-faint uppercase tracking-wide hidden sm:block">{r.status}</div>
-                  <div className="text-[11px] text-faint hidden sm:block w-16 text-right">{ago(r.last_active)}</div>
-                  <div className="text-[13px] font-mono text-faint w-14 text-right">{r.spend_count}×</div>
-                  <div className="text-[15px] font-semibold text-[#86efac] w-24 text-right">{usd(r.total_spent_raw)}</div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          <p className="text-[11px] text-faint mt-8">
-            Re-verify any row: <code>viem.recoverMessageAddress</code> over its signed spend preimage should
-            equal that row&apos;s address — the agent can only sign its own spend, never one on someone else&apos;s behalf.
-          </p>
-        </div>
+            <p style={{ marginTop: 24, fontSize: 12.5, lineHeight: 1.6, color: "var(--ink-soft)" }}>
+              Re-verify any row: <code className="code">viem.recoverMessageAddress</code> over its signed spend preimage should
+              equal that row&apos;s address — the agent can only sign its own spend, never one on someone else&apos;s behalf.
+            </p>
+          </div>
+        </section>
       </main>
-      <Footer />
+      <Footer light />
     </div>
   );
 }
