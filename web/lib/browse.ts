@@ -1,4 +1,3 @@
-import { browserbase } from "@browserbasehq/stagehand";
 import { chromium } from "playwright-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { recordThought, shareFinding, type LaunchAgent } from "./launchpad";
@@ -23,6 +22,13 @@ export async function fetchObsessionPage(obsession: string): Promise<{ url: stri
   if (!apiKey) return null;
   const url = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
   try {
+    // Lazy import: @browserbasehq/stagehand's package.json has a nonstandard
+    // "exports" field that plain Node/tsx's strict ESM resolver rejects
+    // outright (ERR_PACKAGE_PATH_NOT_EXPORTED) even though Next's bundler
+    // resolves it fine via serverExternalPackages. Deferring the import to
+    // here means the Railway worker (plain tsx, no bundler) just falls
+    // through to the catch below instead of crashing the whole process.
+    const { browserbase } = await import("@browserbasehq/stagehand");
     const result = await browserbase.fetch({ apiKey, url, format: "markdown" });
     const content = typeof result.content === "string" ? result.content : JSON.stringify(result.content);
     return { url, content: content.slice(0, 4000) };

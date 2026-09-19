@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "worker": "tsx scripts/browse-worker.ts",
     "test": "node --test \"lib/**/*.test.ts\""
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "react-dom": "^19.0.0",
     "sonner": "^1.7.0",
     "three": "^0.171.0",
+    "tsx": "^4.23.13",
     "tweetnacl": "^1.0.3",
     "viem": "^2.21.0",
     "wagmi": "^2.14.0"
