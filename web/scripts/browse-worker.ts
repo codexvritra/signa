@@ -2,6 +2,7 @@ import { serverClient } from "../lib/supabase";
 import { autoBrowseTick } from "../lib/browse";
 import { getAgent } from "../lib/launchpad";
 import { makePrediction, resolveDuePredictions } from "../lib/predictions";
+import { refreshTokenPrices } from "../lib/rwa";
 
 /**
  * Always-on browsing + predicting worker — the real fix for "our agents
@@ -50,4 +51,27 @@ async function loop() {
   }
 }
 
+/**
+ * Separate, coarser loop: the explorer's price API now sits behind a
+ * Cloudflare challenge only a real browser passes (see lib/rwa.ts), so
+ * prices are refreshed here via one Browserbase session covering all 24
+ * curated tokens, then read from cache everywhere else. Every 15min is
+ * plenty — stock prices don't need per-tick freshness, and this is a
+ * separate paid session each run.
+ */
+const PRICE_REFRESH_MS = 15 * 60_000;
+
+async function priceLoop() {
+  for (;;) {
+    try {
+      const result = await refreshTokenPrices();
+      console.log(`[browse-worker] price refresh`, result);
+    } catch (err) {
+      console.error("[browse-worker] price refresh failed", err);
+    }
+    await new Promise((r) => setTimeout(r, PRICE_REFRESH_MS));
+  }
+}
+
 loop();
+priceLoop();

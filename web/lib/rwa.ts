@@ -21,6 +21,7 @@ import { createPublicClient, http, parseAbi, formatUnits, type Address } from "v
 import { keccak256, toBytes } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { RH_CHAIN_ID, RH_RPC, RH_EXPLORER, rhChain, explorerToken } from "./chain";
+import { serverClient } from "./supabase";
 
 /**
  * The SIGDA RWA attestor — a deterministic, keyless service identity (like the x402 attestor).
@@ -112,7 +113,19 @@ export async function readOnchainState(address: string, blockNumber?: bigint): P
 
 export type Market = { price_usd: number | null; market_cap: number | null; holders: number | null };
 
-/** Best-effort market read from the chain's explorer. NOT part of the signed proof. */
+/**
+ * Best-effort market read. NOT part of the signed proof.
+ *
+ * The explorer's own JSON API (`/api/v2/tokens/:address`) now sits behind a
+ * Cloudflare managed challenge that only a real browser can pass — a plain
+ * server-side fetch gets an HTML challenge page back instead of JSON,
+ * discovered 2026-09-19 when every prediction started silently failing with
+ * "no live price" for every ticker, not just illiquid ones. The direct fetch
+ * stays here as a cheap first try (in case the challenge lifts), but the
+ * real path now is the `token_prices` cache — refreshed periodically by a
+ * real Browserbase session (refreshTokenPrices, which a browser CAN pass)
+ * reading the explorer's rendered page instead of its blocked API.
+ */
 export async function fetchMarket(address: string): Promise<Market> {
   try {
     const ctrl = new AbortController();
@@ -121,10 +134,68 @@ export async function fetchMarket(address: string): Promise<Market> {
     clearTimeout(t);
     const j: any = await r.json().catch(() => ({}));
     const num = (v: unknown) => (v == null || v === "" ? null : Number(v));
-    return { price_usd: num(j.exchange_rate), market_cap: num(j.circulating_market_cap), holders: num(j.holders_count) };
-  } catch {
-    return { price_usd: null, market_cap: null, holders: null };
+    const direct = { price_usd: num(j.exchange_rate), market_cap: num(j.circulating_market_cap), holders: num(j.holders_count) };
+    if (direct.price_usd != null) return direct;
+  } catch { /* fall through to cache */ }
+
+  try {
+    const { data } = await serverClient().from("token_prices").select("price_usd, market_cap, holders").eq("address", address.toLowerCase()).single();
+    if (data) return { price_usd: data.price_usd, market_cap: data.market_cap, holders: data.holders };
+  } catch { /* no cache row yet */ }
+  return { price_usd: null, market_cap: null, holders: null };
+}
+
+/**
+ * Refreshes the token_prices cache via a real Browserbase session — the
+ * explorer's rendered page passes its own Cloudflare challenge (it's a real
+ * browser), unlike a plain server-side fetch. Visits all curated tokens in
+ * ONE session (cheap: one Browserbase session, ~24 page loads) rather than
+ * one session per ticker. Called periodically by the always-on worker.
+ */
+export async function refreshTokenPrices(): Promise<{ ok: boolean; updated: number; error?: string }> {
+  const apiKey = process.env.BROWSERBASE_API_KEY;
+  if (!apiKey) return { ok: false, updated: 0, error: "BROWSERBASE_API_KEY not configured" };
+  const { chromium } = await import("playwright-core");
+
+  const sessionRes = await fetch("https://api.browserbase.com/v1/sessions", {
+    method: "POST",
+    headers: { "x-bb-api-key": apiKey, "content-type": "application/json" },
+    body: JSON.stringify({}),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!sessionRes.ok) return { ok: false, updated: 0, error: `session create failed (${sessionRes.status})` };
+  const session = (await sessionRes.json()) as { connectUrl: string };
+
+  const browser = await chromium.connectOverCDP(session.connectUrl, { timeout: 20000 });
+  let updated = 0;
+  try {
+    const context = browser.contexts()[0] ?? (await browser.newContext());
+    const page = context.pages()[0] ?? (await context.newPage());
+    const db = serverClient();
+
+    for (const token of STOCK_TOKENS) {
+      try {
+        await page.goto(explorerToken(token.address), { timeout: 15000, waitUntil: "domcontentloaded" });
+        const text = await page.innerText("body").catch(() => "");
+        const price = /Price\s*\n\$([\d,]+\.?\d*)/.exec(text)?.[1];
+        const cap = /Circulating market cap\s*\n\$([\d,]+\.?\d*)/.exec(text)?.[1];
+        const holderMatches = [...text.matchAll(/Holders\s*\n([\d,]+)/g)];
+        const holders = holderMatches.at(-1)?.[1];
+        if (!price) continue;
+        await db.from("token_prices").upsert({
+          address: token.address.toLowerCase(), ticker: token.ticker,
+          price_usd: Number(price.replace(/,/g, "")),
+          market_cap: cap ? Number(cap.replace(/,/g, "")) : null,
+          holders: holders ? Number(holders.replace(/,/g, "")) : null,
+          updated_at: new Date().toISOString(),
+        });
+        updated++;
+      } catch { /* skip this ticker, keep going */ }
+    }
+  } finally {
+    await browser.close().catch(() => {});
   }
+  return { ok: true, updated };
 }
 
 export type Impostor = { address: string; name: string; symbol: string; market_cap: number | null };
