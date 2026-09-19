@@ -8,6 +8,7 @@ import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { Providers } from "./providers";
 import { wagmiConfig } from "@/lib/wagmi";
+import { LiveBrowseWidget } from "@/components/shell/LiveBrowseWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -91,6 +92,7 @@ export default async function RootLayout({
     >
       <body>
         <Providers initialState={initialWagmiState}>{children}</Providers>
+        <LiveBrowseWidget />
         <Toaster
           theme="dark"
           position="top-center"
