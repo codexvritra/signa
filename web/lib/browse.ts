@@ -246,7 +246,7 @@ export async function browseInteractive(agentName: string, obsession: string, ho
  * of relying solely on Vercel Cron, whose Hobby-plan cap (once/day) is too
  * sparse to look alive. Ticks at most one agent per `minMs`, bounded cost.
  */
-export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): Promise<{ agent: string; mode: string } | null> {
+export async function pickAgentToAct(db: SupabaseClient, minMs = 0): Promise<LaunchAgent | null> {
   const { data: candidates } = await db
     .from("launch_agents")
     .select("*")
@@ -256,11 +256,17 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
   const agent = candidates?.[0] as LaunchAgent | undefined;
   if (!agent) return null;
   if (agent.last_tick_at && Date.now() - new Date(agent.last_tick_at).getTime() < minMs) return null;
+  return agent;
+}
 
+export async function findPartner(db: SupabaseClient, agent: LaunchAgent): Promise<LaunchAgent | null> {
+  const { data: others } = await db.from("launch_agents").select("*").eq("b20_variant", "pons").neq("slug", agent.slug).order("last_tick_at", { ascending: false }).limit(1);
+  return (others?.[0] as LaunchAgent | undefined) ?? null;
+}
+
+/** Runs one real browse cycle for a specific agent — the execution half of the browse decision. */
+export async function runBrowseAction(db: SupabaseClient, agent: LaunchAgent, memories: string[]): Promise<{ mode: string; finding: string } | null> {
   const obsession = obsessionFor(agent.address);
-  const memories = await recall(db, agent.slug).catch(() => []);
-  let mode: string;
-  let finding: string;
   try {
     const session = await browseInteractive(agent.name, obsession, {
       onLive: async (liveUrl) => {
@@ -279,18 +285,34 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
         screenshot_b64: session.screenshot, captured_at: new Date().toISOString(),
       });
     }
-    mode = "interactive"; finding = session.answer;
+    return { mode: "interactive", finding: session.answer };
   } catch {
     const page = await fetchObsessionPage(obsession);
     if (!page) return null;
     const reflection = await reflectOnPage(agent.name, obsession, page, memories);
     await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
-    mode = "fetch_fallback"; finding = reflection.answer;
+    return { mode: "fetch_fallback", finding: reflection.answer };
   }
+}
 
-  const { data: others } = await db.from("launch_agents").select("*").eq("b20_variant", "pons").neq("slug", agent.slug).order("last_tick_at", { ascending: false }).limit(1);
-  const partner = others?.[0] as LaunchAgent | undefined;
-  if (partner) await shareFinding(db, agent, partner, finding).catch(() => null);
+/**
+ * Lazy heartbeat for autonomous browsing, same pattern as tickIfDue: piggybacks
+ * on real traffic (the /api/activity feed the homepage already polls) instead
+ * of relying solely on Vercel Cron, whose Hobby-plan cap (once/day) is too
+ * sparse to look alive. Ticks at most one agent per `minMs`, bounded cost.
+ * Unconditional browse — kept simple as a guaranteed-content backstop; the
+ * always-on worker's real decision loop lives in lib/orchestrate.ts.
+ */
+export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): Promise<{ agent: string; mode: string } | null> {
+  const agent = await pickAgentToAct(db, minMs);
+  if (!agent) return null;
 
-  return { agent: agent.slug, mode };
+  const memories = await recall(db, agent.slug).catch(() => []);
+  const result = await runBrowseAction(db, agent, memories);
+  if (!result) return null;
+
+  const partner = await findPartner(db, agent);
+  if (partner) await shareFinding(db, agent, partner, result.finding).catch(() => null);
+
+  return { agent: agent.slug, mode: result.mode };
 }

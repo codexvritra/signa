@@ -74,7 +74,7 @@ async function researchDirection(stock: StockToken, priceUsd: number, track: str
 }
 
 /** This agent's own resolved track record, most recent first — real learning material, not generic memory. */
-async function ownTrackRecord(db: SupabaseClient, agentSlug: string, limit = 5): Promise<string[]> {
+export async function ownTrackRecord(db: SupabaseClient, agentSlug: string, limit = 5): Promise<string[]> {
   const { data } = await db.from("stock_predictions")
     .select("ticker, direction, correct")
     .eq("agent_slug", agentSlug).eq("resolved", true)
