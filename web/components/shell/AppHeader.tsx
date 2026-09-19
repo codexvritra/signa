@@ -4,9 +4,47 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Settings, ChevronDown } from "lucide-react";
+import { Settings, ChevronDown, Check, Copy } from "lucide-react";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { cn } from "@/lib/cn";
+
+const SIGDA_CA = "0x1fb373d6f16380972212b9106eb032fa517de447";
+const SIGDA_X_URL = "https://x.com/SIGDA_AI";
+const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function CaPill({ mono }: { mono?: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(SIGDA_CA).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  };
+  return (
+    <button
+      onClick={copy}
+      title={SIGDA_CA}
+      className={cn(
+        "hidden sm:inline-flex items-center gap-1.5 shrink-0 transition-colors font-mono text-[11px]",
+        mono
+          ? "px-2 py-1 border border-[#262626] text-[#8a8a86] hover:text-[#e8e8e6] hover:border-[#383838]"
+          : "px-2.5 py-1 rounded-md border border-white/10 text-white/55 hover:text-white hover:bg-white/[0.05]",
+      )}
+    >
+      <span className="uppercase tracking-wide opacity-70">CA</span>
+      <span>{short(SIGDA_CA)}</span>
+      {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+    </button>
+  );
+}
 
 // The homepage itself now explains and embeds the whole product (launch,
 // live agents, activity feed) — the nav only needs the one action (Launch)
@@ -170,6 +208,17 @@ export function AppHeader({ onOpenSettings, light }: { onOpenSettings?: () => vo
         </nav>
 
         <div className="flex items-center gap-2 shrink-0">
+          <CaPill mono />
+          <a
+            href={SIGDA_X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="size-7 flex items-center justify-center text-[#8a8a86] hover:text-[#e8e8e6] transition-colors"
+            aria-label="Sigda on X"
+            title="@SIGDA_AI on X"
+          >
+            <XIcon className="size-3.5" />
+          </a>
           {onOpenSettings && (
             <button
               onClick={onOpenSettings}
@@ -257,6 +306,17 @@ export function AppHeader({ onOpenSettings, light }: { onOpenSettings?: () => vo
       </div>
 
       <div className="flex items-center gap-1.5">
+        <CaPill />
+        <a
+          href={SIGDA_X_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="size-9 rounded-md flex items-center justify-center transition-colors text-white/55 hover:text-white hover:bg-white/[0.05]"
+          aria-label="Sigda on X"
+          title="@SIGDA_AI on X"
+        >
+          <XIcon className="size-4" />
+        </a>
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}

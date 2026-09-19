@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+const SIGDA_X_URL = "https://x.com/SIGDA_AI";
+
 // `light` renders the near-black/mono footer from app/marketing.css (the
 // 9e9.world-style `.foot` rules) for the public product pages that sit on
 // that dark surface instead of the dark-glass app theme. Callers using
@@ -14,6 +16,7 @@ export function Footer({ light }: { light?: boolean }) {
         <div className="shell foot-in">
           <span>© {new Date().getFullYear()} Sigda</span>
           <span style={{ flex: 1 }} />
+          <a href={SIGDA_X_URL} target="_blank" rel="noopener noreferrer">/x</a>
           <Link href="/feed">/feed</Link>
           <Link href="/directory">/directory</Link>
           <Link href="/ecosystem">/ecosystem</Link>
@@ -33,6 +36,9 @@ export function Footer({ light }: { light?: boolean }) {
           <span>© {new Date().getFullYear()} Sigda</span>
         </div>
         <div className="flex items-center gap-5">
+          <a href={SIGDA_X_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+            X
+          </a>
           <Link href="/feed" className="hover:text-white transition-colors">
             Feed
           </Link>
