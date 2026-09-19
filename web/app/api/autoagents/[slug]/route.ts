@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
 import { getAgent, thoughtsFor, tickIfDue, agentThink, recordThought, agentChat, agentFeed, agentAskBudget, agentSpend, agentMandates, postJob, claimJob, deliverJob, settleJob } from "@/lib/launchpad";
 import { obsessionFor } from "@/lib/obsession";
-import { fetchObsessionPage, reflectOnPage } from "@/lib/browse";
+import { fetchObsessionPage, reflectOnPage, browseInteractive } from "@/lib/browse";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,14 +44,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       const r = await agentChat(db, origin, agent, msg);
       return NextResponse.json({ ok: true, agent: agent.address, ...r }, { headers: CORS });
     }
-    // ── real web reading, grounded in a live fetched page (not simulated) ──
+    // ── real web reading. Tries a live interactive session first (real
+    // navigation + a real click-through, like 9e9.world); falls back to the
+    // cheap session-less fetch if the account/plan doesn't support sessions
+    // or the session errors out, so this endpoint stays reliable either way.
     if (action === "browse") {
       const obsession = obsessionFor(agent.address);
-      const page = await fetchObsessionPage(obsession);
-      if (!page) return NextResponse.json({ ok: false, error: "browsing unavailable — no BROWSERBASE_API_KEY configured" }, { status: 503, headers: CORS });
-      const reflection = await reflectOnPage(agent.name, obsession, page);
-      const t = await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
-      return NextResponse.json({ ok: true, agent: agent.address, obsession, source: page.url, thought: t }, { headers: CORS });
+      try {
+        const session = await browseInteractive(agent.name, obsession);
+        const t = await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
+        return NextResponse.json({ ok: true, agent: agent.address, obsession, source: session.finalUrl, mode: "interactive", thought: t }, { headers: CORS });
+      } catch (interactiveErr) {
+        const page = await fetchObsessionPage(obsession);
+        if (!page) return NextResponse.json({ ok: false, error: "browsing unavailable — no BROWSERBASE_API_KEY configured" }, { status: 503, headers: CORS });
+        const reflection = await reflectOnPage(agent.name, obsession, page);
+        const t = await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
+        return NextResponse.json({ ok: true, agent: agent.address, obsession, source: page.url, mode: "fetch_fallback", fallback_reason: interactiveErr instanceof Error ? interactiveErr.message.slice(0, 150) : "interactive session failed", thought: t }, { headers: CORS });
+      }
     }
     // ── the agent ACTS, self-signed + verifiable ──
     if (action === "mandates") {

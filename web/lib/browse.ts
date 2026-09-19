@@ -1,4 +1,4 @@
-import { browserbase } from "@browserbasehq/stagehand";
+import { browserbase, Stagehand } from "@browserbasehq/stagehand";
 
 /**
  * Real web reading for launched agents, via Browserbase's session-less
@@ -70,5 +70,50 @@ export async function reflectOnPage(agentName: string, obsession: string, page: 
     return { trace, answer };
   } catch {
     return { trace: [], answer: raw || "(no reflection)" };
+  }
+}
+
+export type InteractiveSession = { trace: string[]; answer: string; finalUrl: string };
+
+/**
+ * Real interactive browsing — a live Browserbase session (not the cheap
+ * fetch facade): opens a seed page, clicks into one real link chosen by
+ * the model, reads the destination. This is the same shape as 9e9.world's
+ * "agent browses the web" loop, bounded to one click-through so a single
+ * run stays short and predictable in cost. Requires a Browserbase plan
+ * that supports live sessions (fetch-only plans will fail here — caller
+ * should fall back to fetchObsessionPage + reflectOnPage on error).
+ */
+export async function browseInteractive(agentName: string, obsession: string): Promise<InteractiveSession> {
+  const apiKey = process.env.BROWSERBASE_API_KEY;
+  const projectId = process.env.BROWSERBASE_PROJECT_ID;
+  const groqKey = process.env.GROQ_API_KEY;
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  if (!apiKey || !groqKey) throw new Error("BROWSERBASE_API_KEY / GROQ_API_KEY not configured");
+  const seedUrl = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
+
+  const browser = await browserbase.launch({ apiKey, projectId } as any);
+  const trace: string[] = [];
+  try {
+    const stagehand = await Stagehand.create({
+      browser,
+      model: { modelName: `groq/${model.replace(/^groq\//, "")}` as any, apiKey: groqKey },
+    } as any);
+
+    const [page] = await browser.context.pages();
+    await page.goto(seedUrl, { timeout: 15000 } as any);
+    trace.push(`Opened ${seedUrl}.`);
+
+    await stagehand.act(`click the headline or link most related to "${obsession}"`, { timeoutMs: 15000 } as any);
+    const afterUrl = (page as any).url ? String((page as any).url()) : seedUrl;
+    trace.push(`Followed a link into ${afterUrl}.`);
+
+    const extracted = await stagehand.extract(`In one sentence, what is this page actually about? Focus on anything related to "${obsession}".`);
+    const summary = String((extracted as any)?.data?.extraction ?? (extracted as any)?.data ?? "").trim() || "(nothing extracted)";
+    trace.push(`Read it: ${summary}`);
+
+    return { trace, answer: `As ${agentName}, obsessed with ${obsession}: ${summary}`, finalUrl: afterUrl };
+  } finally {
+    await browser.close().catch(() => {});
   }
 }
