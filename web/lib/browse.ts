@@ -2,6 +2,7 @@ import { chromium } from "playwright-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { recordThought, shareFinding, type LaunchAgent } from "./launchpad";
 import { obsessionFor } from "./obsession";
+import { recall } from "./memory";
 
 /**
  * Real web reading for launched agents, via Browserbase's session-less
@@ -89,17 +90,20 @@ export type PageReflection = { trace: string[]; answer: string };
  * same cost as before; the model is just asked to narrate its pass over
  * the real fetched content instead of only summarizing it.
  */
-export async function reflectOnPage(agentName: string, obsession: string, page: { url: string; content: string }): Promise<PageReflection> {
+export async function reflectOnPage(agentName: string, obsession: string, page: { url: string; content: string }, memories: string[] = []): Promise<PageReflection> {
   const apiKey = process.env.GROQ_API_KEY;
   const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b"; // llama-3.3-70b-versatile was removed from Groq entirely
   if (!apiKey) return { trace: [], answer: `(no GROQ_API_KEY configured — can't reflect on ${page.url})` };
+  const memoryNote = memories.length
+    ? ` You remember your last ${memories.length} findings: ${memories.slice(0, 5).map((m) => `"${m.slice(0, 120)}"`).join("; ")}. Don't just repeat these — notice something new, or explicitly connect today's page to one of them.`
+    : "";
   const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: `You are ${agentName}, an onchain agent obsessed with "${obsession}". Stay in character. Respond ONLY with JSON: {"trace": string[], "answer": string}. "trace" is 3-4 short first-person lines narrating your actual pass over the page (e.g. "Opened the page.", "Scanning headlines for ${obsession}.", "Noticed: <specific real detail>."). "answer" is a 1-2 sentence final takeaway.` },
+        { role: "system", content: `You are ${agentName}, an onchain agent obsessed with "${obsession}". Stay in character. Respond ONLY with JSON: {"trace": string[], "answer": string}. "trace" is 3-4 short first-person lines narrating your actual pass over the page (e.g. "Opened the page.", "Scanning headlines for ${obsession}.", "Noticed: <specific real detail>."). "answer" is a 1-2 sentence final takeaway.${memoryNote}` },
         { role: "user", content: `You just read this real page (${page.url}):\n\n${page.content}` },
       ],
       temperature: 0.7,
@@ -178,7 +182,7 @@ async function pickLink(obsession: string, links: { href: string; text: string }
  * session creation works fine on its own). Opens a seed page, has Groq
  * pick one real link related to the obsession, follows it, reads it.
  */
-export async function browseInteractive(agentName: string, obsession: string, hooks?: BrowseHooks): Promise<InteractiveSession> {
+export async function browseInteractive(agentName: string, obsession: string, hooks?: BrowseHooks, memories: string[] = []): Promise<InteractiveSession> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
   if (!apiKey) throw new Error("BROWSERBASE_API_KEY not configured");
   const seedUrl = pickSeedUrl(obsession);
@@ -220,7 +224,7 @@ export async function browseInteractive(agentName: string, obsession: string, ho
     const bodyText = (await page.innerText("body").catch(() => "")).slice(0, 4000);
     const screenshot = await page.screenshot({ type: "jpeg", quality: 55 }).then((b) => `data:image/jpeg;base64,${b.toString("base64")}`).catch(() => null);
 
-    const reflection = await reflectOnPage(agentName, obsession, { url: chosen.href, content: bodyText });
+    const reflection = await reflectOnPage(agentName, obsession, { url: chosen.href, content: bodyText }, memories);
     return { trace: [...trace, ...reflection.trace], answer: reflection.answer, finalUrl: chosen.href, screenshot };
   } finally {
     await browser.close().catch(() => {});
@@ -246,6 +250,7 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
   if (agent.last_tick_at && Date.now() - new Date(agent.last_tick_at).getTime() < minMs) return null;
 
   const obsession = obsessionFor(agent.address);
+  const memories = await recall(db, agent.slug).catch(() => []);
   let mode: string;
   let finding: string;
   try {
@@ -258,7 +263,7 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
         });
       },
       onDone: async () => { await db.from("agent_live_sessions").delete().eq("agent_slug", agent.slug); },
-    });
+    }, memories);
     await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
     if (session.screenshot) {
       await db.from("agent_last_view").upsert({
@@ -270,7 +275,7 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
   } catch {
     const page = await fetchObsessionPage(obsession);
     if (!page) return null;
-    const reflection = await reflectOnPage(agent.name, obsession, page);
+    const reflection = await reflectOnPage(agent.name, obsession, page, memories);
     await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
     mode = "fetch_fallback"; finding = reflection.answer;
   }

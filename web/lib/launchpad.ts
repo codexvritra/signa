@@ -16,6 +16,7 @@ import { keccak256, toBytes, recoverMessageAddress, type Hex } from "viem";
 import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { runBrain2 } from "./brain2";
+import { recall, remember, memoryBlock } from "./memory";
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 // USDG on Robinhood Chain — the default settlement asset for the agent economy
@@ -157,6 +158,7 @@ export async function recordThought(db: SupabaseClient, agent: LaunchAgent, goal
     .insert({ agent_slug: agent.slug, goal, answer, steps, tools_used, dm_id, signature, ts })
     .select("*").single();
   await db.from("launch_agents").update({ last_tick_at: new Date().toISOString() }).eq("slug", agent.slug);
+  await remember(db, agent.slug, answer).catch(() => {});
 
   return (row as AgentThought) ?? { id: "", agent_slug: agent.slug, goal, answer, steps, tools_used, dm_id, signature, ts };
 }
@@ -165,8 +167,9 @@ export async function recordThought(db: SupabaseClient, agent: LaunchAgent, goal
 export async function agentThink(db: SupabaseClient, origin: string, agent: LaunchAgent, goalOverride?: string): Promise<AgentThought> {
   const { count } = await db.from("launch_agent_thoughts").select("id", { count: "exact", head: true }).eq("agent_slug", agent.slug);
   const goal = goalOverride?.trim() || goalFor(agent, count ?? 0);
+  const memories = await recall(db, agent.slug).catch(() => []);
 
-  const res = await runBrain2(origin, goal, 3);
+  const res = await runBrain2(origin, goal + memoryBlock(memories), 3);
   const answer = (res.answer ?? "").slice(0, 3000);
   const account = agentAccount(agent.slug);
   const feed = agentFeed(agent.slug);
@@ -186,6 +189,7 @@ export async function agentThink(db: SupabaseClient, origin: string, agent: Laun
     .insert({ agent_slug: agent.slug, goal, answer, steps: res.steps, tools_used: res.tools_used, dm_id, signature, ts })
     .select("*").single();
   await db.from("launch_agents").update({ last_tick_at: new Date().toISOString() }).eq("slug", agent.slug);
+  await remember(db, agent.slug, answer).catch(() => {});
 
   return (row as AgentThought) ?? { id: "", agent_slug: agent.slug, goal, answer, steps: res.steps, tools_used: res.tools_used, dm_id, signature, ts };
 }
@@ -198,13 +202,15 @@ export async function tickIfDue(db: SupabaseClient, origin: string, agent: Launc
 
 /** Talk to the agent: it answers in character, grounded in live tools, and signs the reply. */
 export async function agentChat(db: SupabaseClient, origin: string, agent: LaunchAgent, message: string): Promise<{ answer: string; signature: string; signer: string; reverify: Record<string, unknown> }> {
-  const goal = `You are ${agent.name}, a live onchain agent on Robinhood Chain. Your mission: ${agent.mission}\n${agent.persona ? `Style: ${agent.persona}\n` : ""}A user asks: "${message.slice(0, 500)}"\nAnswer in character, concise, and ground any claim in a live number if relevant.`;
+  const memories = await recall(db, agent.slug).catch(() => []);
+  const goal = `You are ${agent.name}, a live onchain agent on Robinhood Chain. Your mission: ${agent.mission}\n${agent.persona ? `Style: ${agent.persona}\n` : ""}A user asks: "${message.slice(0, 500)}"\nAnswer in character, concise, and ground any claim in a live number if relevant.${memoryBlock(memories)}`;
   const res = await runBrain2(origin, goal, 3);
   const answer = (res.answer ?? "").slice(0, 2000);
   const account = agentAccount(agent.slug);
   const ts = Date.now();
   const preimage = dmPreimage(agent.address, agent.address, answer, ts); // self-signed reply, re-verifiable as a dm
   const signature = await account.signMessage({ message: preimage });
+  await remember(db, agent.slug, answer, "chat").catch(() => {});
   return { answer, signature, signer: agent.address, reverify: { kind: "dm", ts, from: agent.address, to: agent.address, body: answer, signature } };
 }
 
