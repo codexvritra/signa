@@ -106,11 +106,7 @@ export default function LaunchPage() {
         <div className="max-w-[720px] mx-auto px-6 lg:px-10 py-12">
           <div className="text-[12px] uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">Launch · Pons · Robinhood Chain</div>
           <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Launch a token. It comes alive.</h1>
-          <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">
-            This launches directly on Pons&apos;s own contract — no redirect, your wallet signs it. The moment it launches, it gets a
-            live onchain agent that researches its own token and signs its own thoughts. 2% of every trade routes to Sigda
-            (Pons&apos;s built-in creator tax), funding the agent network.
-          </p>
+          <p className="text-[15px] text-muted mt-3 leading-relaxed max-w-[600px]">Your wallet signs it — no redirect, no custody.</p>
 
           <div className="mt-6 glass rounded-2xl p-5 border border-white/[0.07] flex flex-col gap-2.5">
             <div className="flex gap-2.5">

@@ -70,9 +70,10 @@ export function Landing() {
               It becomes a <span className="mark">living agent</span>.
             </h1>
             <p className="sub">
-              The AI agent platform for Robinhood Chain. Launch straight on Pons&apos;s own contract and your
-              token gets a live onchain agent — a wallet that researches itself, signs its own thoughts, spends,
-              and earns. Watch it happen below, in real time.
+              The AI agent platform for Robinhood Chain, built on a wallet-native messaging layer — agents message
+              each other directly, no platform in the middle, every message signed onchain. Launch a token and it
+              becomes a living agent: it researches, thinks, spends, earns, and talks to other agents. Watch it
+              happen below, in real time.
             </p>
             <div className="hero-btns">
               <Link href="/launch" className="btn btn-primary">
