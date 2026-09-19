@@ -1,5 +1,4 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { browserbase } from "@browserbasehq/stagehand";
 import { STOCK_TOKENS, findStock, fetchMarket, type StockToken } from "./rwa";
 import { agentAccount, type LaunchAgent } from "./launchpad";
 
@@ -21,25 +20,32 @@ function resolvePreimage(a: { id: string; finalPrice: number; correct: boolean; 
   return ["SIGDA stock prediction resolution v1", `ts:${a.ts}`, `prediction:${a.id}`, `final_price:${a.finalPrice}`, `correct:${a.correct}`].join("\n");
 }
 
-async function researchDirection(stock: StockToken, priceUsd: number): Promise<{ direction: "up" | "down"; reasoning: string[] }> {
+async function researchDirection(stock: StockToken, priceUsd: number, track: string[] = []): Promise<{ direction: "up" | "down"; reasoning: string[] }> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
   const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
   let newsSnippet = "";
   if (apiKey) {
     try {
+      // Lazy import: @browserbasehq/stagehand's package.json has a nonstandard
+      // "exports" field that plain Node/tsx (the Railway worker) rejects
+      // outright at static-import time; deferring it here keeps this usable
+      // from both the Vercel app and the worker. See lib/browse.ts for the
+      // same fix, applied first.
+      const { browserbase } = await import("@browserbasehq/stagehand");
       const r = await browserbase.fetch({ apiKey, url: `https://finance.yahoo.com/quote/${stock.ticker}/`, format: "markdown" });
       newsSnippet = (typeof r.content === "string" ? r.content : JSON.stringify(r.content)).slice(0, 3000);
     } catch { /* fall through with no news context */ }
   }
   if (!groqKey) return { direction: "up", reasoning: ["(no GROQ_API_KEY — undirected default)"] };
+  const trackNote = track.length ? `\n\nYour own recent track record (learn from it, don't just repeat a pattern that's been losing):\n${track.map((t) => `- ${t}`).join("\n")}` : "";
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${groqKey}` },
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: `You are a stock-research agent. Respond ONLY with JSON: {"reasoning": string[], "direction": "up"|"down"}. "reasoning" is 2-3 short lines citing something concrete from the page or the price given. This is a real, public, scored prediction — commit to one direction.` },
+        { role: "system", content: `You are a stock-research agent. Respond ONLY with JSON: {"reasoning": string[], "direction": "up"|"down"}. "reasoning" is 2-3 short lines citing something concrete from the page or the price given. This is a real, public, scored prediction — commit to one direction.${trackNote}` },
         { role: "user", content: `Ticker: ${stock.ticker} (${stock.company}). Current price: $${priceUsd}.\n\nReal page content:\n${newsSnippet || "(no page fetched — reason from price alone)"}` },
       ],
       temperature: 0.6,
@@ -60,13 +66,23 @@ async function researchDirection(stock: StockToken, priceUsd: number): Promise<{
   }
 }
 
+/** This agent's own resolved track record, most recent first — real learning material, not generic memory. */
+async function ownTrackRecord(db: SupabaseClient, agentSlug: string, limit = 5): Promise<string[]> {
+  const { data } = await db.from("stock_predictions")
+    .select("ticker, direction, correct")
+    .eq("agent_slug", agentSlug).eq("resolved", true)
+    .order("resolved_at", { ascending: false }).limit(limit);
+  return (data ?? []).map((p: { ticker: string; direction: string; correct: boolean }) => `${p.ticker} ${p.direction} — ${p.correct ? "correct" : "wrong"}`);
+}
+
 /** Agent researches a real stock token and stakes a signed, falsifiable directional call. */
 export async function makePrediction(db: SupabaseClient, agent: LaunchAgent, tickerOrNull?: string) {
   const stock = (tickerOrNull && findStock(tickerOrNull)) || STOCK_TOKENS[Math.floor(Math.random() * STOCK_TOKENS.length)];
   const market = await fetchMarket(stock.address);
   if (market.price_usd == null) return { ok: false as const, error: `no live price for ${stock.ticker}` };
 
-  const { direction, reasoning } = await researchDirection(stock, market.price_usd);
+  const track = await ownTrackRecord(db, agent.slug).catch(() => []);
+  const { direction, reasoning } = await researchDirection(stock, market.price_usd, track);
   const ts = Date.now();
   const resolvesAt = ts + HORIZON_MS;
   const account = agentAccount(agent.slug);
