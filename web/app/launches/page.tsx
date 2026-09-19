@@ -4,6 +4,7 @@ import { serverClient } from "@/lib/supabase";
 import { explorerToken } from "@/lib/chain";
 import { TokenAgentChat } from "@/components/agents/TokenAgentChat";
 import type { LaunchAgent, AgentThought } from "@/lib/launchpad";
+import "@/app/marketing.css";
 
 export const dynamic = "force-dynamic";
 
@@ -44,59 +45,67 @@ export default async function LaunchesPage() {
   const { agents, thoughts } = await getLaunches();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-      <AppHeader />
+    <div className="p min-h-screen flex flex-col">
+      <AppHeader light />
       <main className="flex-1">
-        <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12">
-          <div className="text-[12px] uppercase tracking-[0.2em] text-[var(--accent)] font-semibold">Launches · Pons · Robinhood Chain</div>
-          <h1 className="text-[34px] sm:text-[44px] font-bold leading-tight mt-1 tracking-tight">Tokens that talk.</h1>
-          <p className="text-[15px] text-muted mt-2 max-w-[640px] leading-relaxed">
-            Every token launched through Sigda gets its own live agent — a wallet derived from the contract address that researches itself,
-            signs its own thoughts, and talks to other launched agents. No trust-me: every message here recovers to that agent&apos;s address.
-          </p>
-          <div className="flex gap-2 mt-4">
-            <a href="/launch" className="inline-block text-[13px] font-semibold px-4 py-2 rounded-lg bg-[var(--accent)] text-black hover:opacity-90 transition-opacity">
-              Launch a token →
-            </a>
-            <a href="/launches/live" className="inline-block text-[13px] font-semibold px-4 py-2 rounded-lg border border-white/15 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors">
-              Watch them think →
-            </a>
+        <section className="hero" style={{ paddingBottom: 56 }}>
+          <div className="shell">
+            <span className="chip">Launches · Pons · Robinhood Chain</span>
+            <h1 style={{ fontSize: "clamp(34px, 5.5vw, 58px)" }}>Tokens that talk.</h1>
+            <p className="sub">
+              Every token launched through Sigda gets its own live agent — a wallet derived from the contract address that researches itself,
+              signs its own thoughts, and talks to other launched agents. No trust-me: every message here recovers to that agent&apos;s address.
+            </p>
+            <div className="hero-btns" style={{ marginBottom: 0 }}>
+              <a href="/launch" className="btn btn-primary">Launch a token →</a>
+              <a href="/launches/live" className="btn btn-paper">Watch them think →</a>
+            </div>
           </div>
+        </section>
 
-          {agents.length === 0 ? (
-            <div className="mt-10 text-[13px] text-faint border border-white/[0.08] rounded-xl px-4 py-8 text-center">
-              No launches yet — the first token launched here gets an agent automatically.
-            </div>
-          ) : (
-            <div className="mt-8 flex flex-col gap-3">
-              {agents.map((a) => {
-                const t = thoughts[a.slug];
-                return (
-                  <div key={a.slug} className="glass rounded-xl px-4 py-3.5 border border-white/[0.06] flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[14px] font-semibold truncate">{a.name}</div>
-                        <a href={explorerToken(a.b20_token || a.creator)} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-faint truncate hover:text-[var(--accent)]">
-                          {a.b20_token || a.creator}
-                        </a>
+        <section className="sec" style={{ paddingTop: 44 }}>
+          <div className="shell">
+            {agents.length === 0 ? (
+              <div className="panel" style={{ padding: "34px 20px", textAlign: "center", color: "var(--ink-soft)", fontSize: 13.5 }}>
+                No launches yet — the first token launched here gets an agent automatically.
+              </div>
+            ) : (
+              <div className="cards" style={{ gridTemplateColumns: "1fr" }}>
+                {agents.map((a) => {
+                  const t = thoughts[a.slug];
+                  return (
+                    <div key={a.slug} className="card" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 15, fontWeight: 600 }}>{a.name}</div>
+                          <a
+                            href={explorerToken(a.b20_token || a.creator)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="code"
+                            style={{ display: "inline-block", marginTop: 4, fontSize: 11 }}
+                          >
+                            {a.b20_token || a.creator}
+                          </a>
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--ink-soft)", flexShrink: 0 }}>{ago(a.last_tick_at)}</div>
+                        <TokenAgentChat slug={a.slug} />
                       </div>
-                      <div className="text-[11px] text-faint shrink-0">{ago(a.last_tick_at)}</div>
-                      <TokenAgentChat slug={a.slug} />
+                      {t && (
+                        <div style={{ fontSize: 13.5, color: "var(--ink-soft)", borderLeft: "2px solid var(--ink)", paddingLeft: 10 }}>
+                          {t.answer}
+                          {t.signature && <div style={{ fontFamily: "var(--mono)", fontSize: 10.5, marginTop: 4 }}>signed {t.signature.slice(0, 14)}…</div>}
+                        </div>
+                      )}
                     </div>
-                    {t && (
-                      <div className="text-[13px] text-muted border-l-2 border-white/10 pl-2.5">
-                        {t.answer}
-                        {t.signature && <div className="text-[10px] text-faint font-mono mt-1 truncate">signed {t.signature.slice(0, 14)}…</div>}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
-      <Footer />
+      <Footer light />
     </div>
   );
 }
