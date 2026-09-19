@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Stagehand's package has internal relative imports that trip up webpack's
+  // static bundling ("Module not found: Can't resolve '../'") but resolve
+  // fine under plain Node — leave it unbundled or server code fails to build.
+  serverExternalPackages: ["@browserbasehq/stagehand"],
   webpack: (config) => {
     config.experiments = {
       ...config.experiments,
