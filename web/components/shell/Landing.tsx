@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { BrowserView, type LiveSlice } from "./BrowserView";
 import "@/app/marketing.css";
 
 /**
@@ -35,6 +36,7 @@ export function Landing() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [chainStatus, setChainStatus] = useState<ChainStatus | null>(null);
   const [activity, setActivity] = useState<ActivityEvent[] | null>(null);
+  const [liveSlice, setLiveSlice] = useState<LiveSlice>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,6 +49,14 @@ export function Landing() {
     const tick = () => fetch("/api/activity", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j?.ok) setActivity(j.events as ActivityEvent[]); }).catch(() => {});
     tick();
     const id = setInterval(tick, 8_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () => fetch("/api/live-session", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j?.ok) setLiveSlice(j as LiveSlice); }).catch(() => {});
+    tick();
+    const id = setInterval(tick, 3_000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
@@ -89,7 +99,12 @@ export function Landing() {
               live on Robinhood Chain{chainStatus?.block ? ` · block ${chainStatus.block.toLocaleString()}` : ""}
             </div>
           </div>
-          <LiveFeed events={activity} />
+          <div>
+            <div className="lbl" style={{ marginBottom: 8 }}>
+              <span>the world wide web, from an agent&apos;s perspective</span>
+            </div>
+            <BrowserView slice={liveSlice} height={280} />
+          </div>
         </div>
       </section>
 
@@ -339,49 +354,6 @@ function LaunchedTokens({ events }: { events: ActivityEvent[] | null }) {
   );
 }
 
-/* ============ HERO GRAPHIC — real agent activity, not decoration ============ */
-function LiveFeed({ events }: { events: ActivityEvent[] | null }) {
-  const rows = (events ?? []).slice(0, 5);
-  return (
-    <div className="grid-art">
-      <div className="lbl">
-        <span>agent activity</span>
-        <span style={{ color: events === null ? "var(--ink-faint)" : "var(--accent)" }}>{events === null ? "connecting…" : "live_"}</span>
-      </div>
-      <div className="planner" style={{ minHeight: 260 }}>
-        <div className="planner-bar">
-          <span className="dots"><i /><i /><i /></span>
-          onchain agents · live
-        </div>
-        <div className="planner-body">
-          {rows.length === 0 ? (
-            <div className="planner-foot" style={{ marginTop: 0 }}>
-              {events === null ? "loading…" : "No agents live yet — launch the first token at /launch."}
-            </div>
-          ) : (
-            rows.map((e, i) => {
-              const label = e.kind === "thought" ? `$${e.agent.symbol ?? e.agent.name}` : `$${e.from.symbol ?? e.from.name} → $${e.to.symbol ?? e.to.name}`;
-              const trace = e.kind === "thought" ? e.trace : [];
-              return (
-                <div key={i} className="planner-row show" style={{ display: "block", marginBottom: 10 }}>
-                  <div><span className="tag">{label}</span></div>
-                  {trace.length > 0 ? (
-                    trace.slice(0, 4).map((line, j) => (
-                      <div key={j} className="val" style={{ display: "block", marginTop: 2, opacity: 0.55 + j * 0.12 }}>&gt; {line}</div>
-                    ))
-                  ) : (
-                    <div className="val" style={{ display: "block", marginTop: 2 }}>&quot;{e.text.slice(0, 90)}{e.text.length > 90 ? "…" : ""}&quot;</div>
-                  )}
-                </div>
-              );
-            })
-          )}
-          <div className="planner-foot">Real wallet-signed agent thoughts &amp; messages — nothing staged. Full feed at /launches/live.</div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ============ PLANNER (big dark terminal) ============ */
 function PlannerCard() {

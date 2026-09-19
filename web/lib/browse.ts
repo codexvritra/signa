@@ -6,21 +6,59 @@ import { obsessionFor } from "./obsession";
 /**
  * Real web reading for launched agents, via Browserbase's session-less
  * fetch facade — cheap (no interactive browser session, no LLM-driven
- * click loop), read-only. One seed page per obsession category.
+ * click loop), read-only. Several seed pages per obsession category —
+ * a single agent has a fixed obsession, so with only one seed URL it kept
+ * landing on the exact same site every cycle. Picking a random seed from
+ * a pool each time gives real variety without changing the obsession model.
  */
-const SEED_URL: Record<string, string> = {
-  "things that move": "https://www.therobotreport.com/",
-  "the odd corners": "https://www.atlasobscura.com/",
-  "theory of everything": "https://www.quantamagazine.org/physics/",
-  "living machines": "https://www.wired.com/tag/robots/",
-  "open problems": "https://www.quantamagazine.org/mathematics/",
-  "machines that learn": "https://www.quantamagazine.org/computer-science/",
+const SEED_URL: Record<string, string[]> = {
+  "things that move": [
+    "https://www.therobotreport.com/",
+    "https://spectrum.ieee.org/topic/robotics/",
+    "https://www.therobotreport.com/category/mobile-robots/",
+    "https://www.autoevolution.com/robots/",
+  ],
+  "the odd corners": [
+    "https://www.atlasobscura.com/",
+    "https://www.atlasobscura.com/articles",
+    "https://damninteresting.com/",
+    "https://www.messynessychic.com/",
+  ],
+  "theory of everything": [
+    "https://www.quantamagazine.org/physics/",
+    "https://www.symmetrymagazine.org/",
+    "https://phys.org/physics-news/",
+    "https://www.quantamagazine.org/archive/",
+  ],
+  "living machines": [
+    "https://www.wired.com/tag/robots/",
+    "https://spectrum.ieee.org/topic/robotics/",
+    "https://www.therobotreport.com/category/humanoid-robots/",
+    "https://newatlas.com/robotics/",
+  ],
+  "open problems": [
+    "https://www.quantamagazine.org/mathematics/",
+    "https://www.quantamagazine.org/archive/",
+    "https://phys.org/physics-news/",
+    "https://www.scientificamerican.com/mathematics/",
+  ],
+  "machines that learn": [
+    "https://www.quantamagazine.org/computer-science/",
+    "https://www.technologyreview.com/topic/artificial-intelligence/",
+    "https://spectrum.ieee.org/topic/artificial-intelligence/",
+    "https://phys.org/technology-news/",
+  ],
 };
+
+function pickSeedUrl(obsession: string): string {
+  const pool = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 export async function fetchObsessionPage(obsession: string): Promise<{ url: string; content: string } | null> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
   if (!apiKey) return null;
-  const url = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
+  const url = pickSeedUrl(obsession);
   try {
     // Lazy import: @browserbasehq/stagehand's package.json has a nonstandard
     // "exports" field that plain Node/tsx's strict ESM resolver rejects
@@ -143,7 +181,7 @@ async function pickLink(obsession: string, links: { href: string; text: string }
 export async function browseInteractive(agentName: string, obsession: string, hooks?: BrowseHooks): Promise<InteractiveSession> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
   if (!apiKey) throw new Error("BROWSERBASE_API_KEY not configured");
-  const seedUrl = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
+  const seedUrl = pickSeedUrl(obsession);
 
   const sessionRes = await fetch("https://api.browserbase.com/v1/sessions", {
     method: "POST",
