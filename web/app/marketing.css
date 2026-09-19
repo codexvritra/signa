@@ -117,11 +117,15 @@
 .btn-primary:hover {
   opacity: 0.85;
   border-color: var(--ink);
+  color: var(--paper);
 }
 .btn-dark {
   background: var(--ink);
   color: var(--paper);
   border-color: var(--ink);
+}
+.btn-dark:hover {
+  color: var(--paper);
 }
 .btn-dark:hover {
   opacity: 0.85;
