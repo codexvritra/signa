@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
-import { getAgent, thoughtsFor, tickIfDue, agentThink, agentChat, agentFeed, agentAskBudget, agentSpend, agentMandates, postJob, claimJob, deliverJob, settleJob } from "@/lib/launchpad";
+import { getAgent, thoughtsFor, tickIfDue, agentThink, recordThought, agentChat, agentFeed, agentAskBudget, agentSpend, agentMandates, postJob, claimJob, deliverJob, settleJob } from "@/lib/launchpad";
 import { obsessionFor } from "@/lib/obsession";
-import { fetchObsessionPage } from "@/lib/browse";
+import { fetchObsessionPage, reflectOnPage } from "@/lib/browse";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,8 +49,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
       const obsession = obsessionFor(agent.address);
       const page = await fetchObsessionPage(obsession);
       if (!page) return NextResponse.json({ ok: false, error: "browsing unavailable — no BROWSERBASE_API_KEY configured" }, { status: 503, headers: CORS });
-      const goal = `You are ${agent.name}. Your obsession is "${obsession}". You just read this real page (${page.url}):\n\n${page.content}\n\nReact in character — what's the single most interesting thing here, in 2 sentences.`;
-      const t = await agentThink(db, origin, agent, goal);
+      const answer = await reflectOnPage(agent.name, obsession, page);
+      const t = await recordThought(db, agent, `read ${page.url}`, answer, [], ["browserbase.fetch"]);
       return NextResponse.json({ ok: true, agent: agent.address, obsession, source: page.url, thought: t }, { headers: CORS });
     }
     // ── the agent ACTS, self-signed + verifiable ──

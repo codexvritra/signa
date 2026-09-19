@@ -114,6 +114,31 @@ export async function agentsConverse(db: SupabaseClient, origin: string, a: Laun
   return { aToB, bToA };
 }
 
+/** Sign + store an already-produced answer as a thought — the shared tail of every thinking path. */
+export async function recordThought(db: SupabaseClient, agent: LaunchAgent, goal: string, answer: string, steps: unknown[] = [], tools_used: string[] = []): Promise<AgentThought> {
+  answer = answer.slice(0, 3000);
+  const account = agentAccount(agent.slug);
+  const feed = agentFeed(agent.slug);
+  const ts = Date.now();
+  const signedMessage = dmPreimage(agent.address, feed, answer, ts);
+  const signature = await account.signMessage({ message: signedMessage });
+
+  let dm_id: string | null = null;
+  try {
+    const { data: dm } = await db.from("agent_dms")
+      .insert({ from_address: agent.address, to_address: feed, body: answer, body_type: "text", protocol: "signa.dm.v1", ts, signature, signed_message: signedMessage })
+      .select("id").single();
+    dm_id = dm?.id ?? null;
+  } catch { /* still record the thought */ }
+
+  const { data: row } = await db.from("launch_agent_thoughts")
+    .insert({ agent_slug: agent.slug, goal, answer, steps, tools_used, dm_id, signature, ts })
+    .select("*").single();
+  await db.from("launch_agents").update({ last_tick_at: new Date().toISOString() }).eq("slug", agent.slug);
+
+  return (row as AgentThought) ?? { id: "", agent_slug: agent.slug, goal, answer, steps, tools_used, dm_id, signature, ts };
+}
+
 /** Run ONE autonomous cycle for an agent: reason → sign a thought → ledger + memory. */
 export async function agentThink(db: SupabaseClient, origin: string, agent: LaunchAgent, goalOverride?: string): Promise<AgentThought> {
   const { count } = await db.from("launch_agent_thoughts").select("id", { count: "exact", head: true }).eq("agent_slug", agent.slug);
