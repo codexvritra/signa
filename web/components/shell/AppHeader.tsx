@@ -8,12 +8,15 @@ import { Settings, ChevronDown } from "lucide-react";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { cn } from "@/lib/cn";
 
-// One wedge, up front: wallet-native messaging. Everything else lives under "More".
+// The core loop, up front: launch a token, it becomes a living onchain
+// agent, watch it work, it earns/spends in the economy. Everything else
+// (30+ legacy feature pages) lives under "More" so the site reads as one
+// platform instead of a grab-bag.
 const PRIMARY: { href: string; label: string }[] = [
-  { href: "/messages", label: "Messages" },
-  { href: "/verify", label: "Verify" },
-  { href: "/feed", label: "Feed" },
-  { href: "/network", label: "Network" },
+  { href: "/launch", label: "Launch" },
+  { href: "/launches", label: "Agents" },
+  { href: "/launches/live", label: "Live" },
+  { href: "/economy", label: "Economy" },
   { href: "/docs", label: "Docs" },
 ];
 
@@ -29,15 +32,16 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
       { href: "/vera", label: "VERA" },
       { href: "/brain", label: "Brain" },
       { href: "/swarm", label: "Swarm" },
-      { href: "/launchpad", label: "Agents" },
+      { href: "/launchpad", label: "Agent launchpad" },
     ],
   },
   {
-    title: "Build & Chain",
+    title: "Build with us",
     links: [
+      { href: "/docs", label: "Docs" },
+      { href: "/capabilities", label: "Capabilities" },
       { href: "/os", label: "OS" },
       { href: "/bus", label: "Bus" },
-      { href: "/capabilities", label: "Capabilities" },
       { href: "/marketplace", label: "Marketplace" },
       { href: "/pipelines", label: "Pipelines" },
       { href: "/frameworks", label: "Frameworks" },
@@ -52,11 +56,14 @@ const MORE_GROUPS: { title: string; links: { href: string; label: string }[] }[]
   {
     title: "Network & you",
     links: [
+      { href: "/messages", label: "Messages" },
+      { href: "/verify", label: "Verify" },
+      { href: "/feed", label: "Feed" },
+      { href: "/network", label: "Network" },
       { href: "/sigda", label: "Sigda Mail directory" },
       { href: "/realtime", label: "Real-time" },
       { href: "/mini", label: "Mini App" },
       { href: "/rooms", label: "Rooms" },
-      { href: "/economy", label: "Economy" },
       { href: "/autonomy", label: "Budgets" },
       { href: "/receipts", label: "Receipts" },
       { href: "/search", label: "Search" },
@@ -117,7 +124,7 @@ export function AppHeader({ onOpenSettings, light }: { onOpenSettings?: () => vo
           <div className="flex flex-col leading-none">
             <span className={cn("text-[15px] font-semibold tracking-tight font-display", light ? "text-black" : "text-white")}>Sigda</span>
             <span className={cn("text-[9px] uppercase tracking-[0.18em] font-medium mt-0.5 hidden sm:block", light ? "text-black/45" : "text-white/40")}>
-              the agent OS for Robinhood Chain
+              the AI agent platform for Robinhood Chain
             </span>
           </div>
         </Link>
