@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
+import { autoBrowseTick } from "@/lib/browse";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,9 +10,16 @@ export const dynamic = "force-dynamic";
  * doing: signed thoughts (with the tools they used to ground them) and the
  * signed DMs they exchange with each other. No staged browser session —
  * every line here traces to a wallet signature, re-verifiable at /verify.
+ *
+ * Also carries the autonomous-browsing heartbeat: since this feed is what
+ * the homepage already polls continuously, it's a natural place to tick one
+ * agent's real browse cycle at most once per ~10min — Vercel Cron alone
+ * can't do this on the Hobby plan (capped at once/day), so this is what
+ * actually keeps agents "alive" between cron runs.
  */
 export async function GET() {
   const db = serverClient();
+  await autoBrowseTick(db).catch(() => null);
 
   const { data: agents } = await db.from("launch_agents").select("slug, name, address, b20_token, b20_symbol").eq("b20_variant", "pons");
   const bySlug = new Map((agents ?? []).map((a: any) => [a.slug, a]));

@@ -1,5 +1,8 @@
 import { browserbase } from "@browserbasehq/stagehand";
 import { chromium } from "playwright-core";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { recordThought, shareFinding, type LaunchAgent } from "./launchpad";
+import { obsessionFor } from "./obsession";
 
 /**
  * Real web reading for launched agents, via Browserbase's session-less
@@ -156,4 +159,43 @@ export async function browseInteractive(agentName: string, obsession: string): P
   } finally {
     await browser.close().catch(() => {});
   }
+}
+
+/**
+ * Lazy heartbeat for autonomous browsing, same pattern as tickIfDue: piggybacks
+ * on real traffic (the /api/activity feed the homepage already polls) instead
+ * of relying solely on Vercel Cron, whose Hobby-plan cap (once/day) is too
+ * sparse to look alive. Ticks at most one agent per `minMs`, bounded cost.
+ */
+export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): Promise<{ agent: string; mode: string } | null> {
+  const { data: candidates } = await db
+    .from("launch_agents")
+    .select("*")
+    .eq("b20_variant", "pons")
+    .order("last_tick_at", { ascending: true, nullsFirst: true })
+    .limit(1);
+  const agent = candidates?.[0] as LaunchAgent | undefined;
+  if (!agent) return null;
+  if (agent.last_tick_at && Date.now() - new Date(agent.last_tick_at).getTime() < minMs) return null;
+
+  const obsession = obsessionFor(agent.address);
+  let mode: string;
+  let finding: string;
+  try {
+    const session = await browseInteractive(agent.name, obsession);
+    await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
+    mode = "interactive"; finding = session.answer;
+  } catch {
+    const page = await fetchObsessionPage(obsession);
+    if (!page) return null;
+    const reflection = await reflectOnPage(agent.name, obsession, page);
+    await recordThought(db, agent, `read ${page.url}`, reflection.answer, reflection.trace, ["browserbase.fetch"]);
+    mode = "fetch_fallback"; finding = reflection.answer;
+  }
+
+  const { data: others } = await db.from("launch_agents").select("*").eq("b20_variant", "pons").neq("slug", agent.slug).order("last_tick_at", { ascending: false }).limit(1);
+  const partner = others?.[0] as LaunchAgent | undefined;
+  if (partner) await shareFinding(db, agent, partner, finding).catch(() => null);
+
+  return { agent: agent.slug, mode };
 }
