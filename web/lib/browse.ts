@@ -77,7 +77,7 @@ export async function reflectOnPage(agentName: string, obsession: string, page: 
   }
 }
 
-export type InteractiveSession = { trace: string[]; answer: string; finalUrl: string };
+export type InteractiveSession = { trace: string[]; answer: string; finalUrl: string; screenshot: string | null };
 
 /** Browserbase's Live View debug URL — an iframe-embeddable feed of the actual running session. */
 async function fetchLiveViewUrl(sessionId: string, apiKey: string): Promise<string | null> {
@@ -167,15 +167,17 @@ export async function browseInteractive(agentName: string, obsession: string, ho
     const chosen = await pickLink(obsession, links);
     if (!chosen) {
       trace.push("Found no real links to follow.");
-      return { trace, answer: `Landed on ${seedUrl} but found nothing to follow related to ${obsession}.`, finalUrl: seedUrl };
+      const shot = await page.screenshot({ type: "jpeg", quality: 55 }).then((b) => `data:image/jpeg;base64,${b.toString("base64")}`).catch(() => null);
+      return { trace, answer: `Landed on ${seedUrl} but found nothing to follow related to ${obsession}.`, finalUrl: seedUrl, screenshot: shot };
     }
     trace.push(`Chose a real link: "${chosen.text}".`);
 
     await page.goto(chosen.href, { timeout: 15000, waitUntil: "domcontentloaded" });
     const bodyText = (await page.innerText("body").catch(() => "")).slice(0, 4000);
+    const screenshot = await page.screenshot({ type: "jpeg", quality: 55 }).then((b) => `data:image/jpeg;base64,${b.toString("base64")}`).catch(() => null);
 
     const reflection = await reflectOnPage(agentName, obsession, { url: chosen.href, content: bodyText });
-    return { trace: [...trace, ...reflection.trace], answer: reflection.answer, finalUrl: chosen.href };
+    return { trace: [...trace, ...reflection.trace], answer: reflection.answer, finalUrl: chosen.href, screenshot };
   } finally {
     await browser.close().catch(() => {});
     if (hooks?.onDone) await hooks.onDone().catch(() => {});
@@ -214,6 +216,12 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
       onDone: async () => { await db.from("agent_live_sessions").delete().eq("agent_slug", agent.slug); },
     });
     await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
+    if (session.screenshot) {
+      await db.from("agent_last_view").upsert({
+        agent_slug: agent.slug, obsession, page_url: session.finalUrl,
+        screenshot_b64: session.screenshot, captured_at: new Date().toISOString(),
+      });
+    }
     mode = "interactive"; finding = session.answer;
   } catch {
     const page = await fetchObsessionPage(obsession);
