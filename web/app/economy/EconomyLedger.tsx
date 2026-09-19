@@ -56,60 +56,74 @@ export function EconomyLedger() {
   const t = d?.totals;
 
   return (
-    <div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Stat v={t ? `$${usd(t.granted_raw)}` : "—"} l="budgets granted" />
-        <Stat v={t ? `$${usd(t.spent_raw)}` : "—"} l="spent (signed)" />
-        <Stat v={t ? `$${usd(t.requested_raw)}` : "—"} l="requested" />
-        <Stat v={t ? `$${usd(t.receipts_volume_raw)}` : "—"} l="receipt volume" />
-        <Stat v={t ? String(t.agents_funded) : "—"} l="agents funded" />
-        <Stat v={t ? String(t.receipts) : "—"} l="x402 receipts" />
+    <div style={{ marginTop: 36 }}>
+      <div className="panel">
+        <div className="stat-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <div className="stat-cell">
+            <div className="n">{t ? `$${usd(t.granted_raw)}` : "—"}</div>
+            <div className="l">budgets granted</div>
+          </div>
+          <div className="stat-cell">
+            <div className="n">{t ? `$${usd(t.spent_raw)}` : "—"}</div>
+            <div className="l">spent (signed)</div>
+          </div>
+          <div className="stat-cell">
+            <div className="n">{t ? `$${usd(t.requested_raw)}` : "—"}</div>
+            <div className="l">requested</div>
+          </div>
+          <div className="stat-cell">
+            <div className="n">{t ? `$${usd(t.receipts_volume_raw)}` : "—"}</div>
+            <div className="l">receipt volume</div>
+          </div>
+          <div className="stat-cell">
+            <div className="n">{t ? String(t.agents_funded) : "—"}</div>
+            <div className="l">agents funded</div>
+          </div>
+          <div className="stat-cell">
+            <div className="n">{t ? String(t.receipts) : "—"}</div>
+            <div className="l">x402 receipts</div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-between">
-        <div className="text-[13px] font-semibold">Live ledger</div>
-        <div className="text-[11px] text-faint flex items-center gap-1.5">
-          <span className="inline-block size-2 rounded-full" style={{ background: err ? "#ef4444" : "#22c55e" }} />
+      <div style={{ marginTop: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>Live ledger</div>
+        <div style={{ fontSize: 11.5, color: "var(--ink-soft)", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--mono)" }}>
+          <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 999, background: err ? "#ef4444" : "var(--up)" }} />
           {err ? `error: ${err}` : updated ? `refreshed ${updated}` : "loading…"}
         </div>
       </div>
 
-      <div className="mt-3 flex flex-col gap-2">
+      <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
         {(d?.feed ?? []).map((e: any, i: number) => {
           const tone = TONE[e.type] ?? TONE.spend;
           return (
-            <div key={i} className="flex items-start gap-3 rounded-xl px-3.5 py-2.5 border border-white/[0.07] bg-white/[0.02]">
-              <span className="size-2 rounded-full mt-1.5 shrink-0" style={{ background: tone.dot }} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color: tone.dot, background: `${tone.dot}1a` }}>
+            <div
+              key={i}
+              style={{ display: "flex", alignItems: "flex-start", gap: 12, borderRadius: 10, padding: "13px 15px", border: "2px solid var(--ink)", background: "var(--paper)", boxShadow: "var(--shadow-sm)" }}
+            >
+              <span style={{ display: "inline-block", width: 8, height: 8, marginTop: 5, borderRadius: 999, background: tone.dot, flexShrink: 0 }} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.06em", padding: "2px 6px", borderRadius: 5, color: tone.dot, background: `${tone.dot}1a` }}>
                     {tone.label}
                   </span>
-                  <span className="font-mono text-[12px] text-faint">{e.who}</span>
-                  <span className="text-[13px] font-semibold tabular-nums">${usd(e.amount_raw)}</span>
-                  <span className="text-[12px] text-muted truncate">{e.label}</span>
+                  <span style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--ink-soft)" }}>{e.who}</span>
+                  <span style={{ fontSize: 13.5, fontWeight: 600 }}>${usd(e.amount_raw)}</span>
+                  <span style={{ fontSize: 12.5, color: "var(--ink-soft)" }} className="truncate">{e.label}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                 {e.link && (
-                  <a href={e.link} target="_blank" rel="noreferrer" className="text-[11px] text-[#86efac] hover:underline">receipt →</a>
+                  <a href={e.link} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "var(--up)" }}>receipt →</a>
                 )}
-                <span className="text-[11px] text-faint">{ago(e.ts)}</span>
+                <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>{ago(e.ts)}</span>
               </div>
             </div>
           );
         })}
-        {d && (d.feed ?? []).length === 0 && <div className="text-[13px] text-faint py-6 text-center">no activity yet</div>}
+        {d && (d.feed ?? []).length === 0 && <div style={{ fontSize: 13.5, color: "var(--ink-soft)", padding: "24px 0", textAlign: "center" }}>no activity yet</div>}
       </div>
-    </div>
-  );
-}
-
-function Stat({ v, l }: { v: string; l: string }) {
-  return (
-    <div className="glass rounded-xl p-3.5">
-      <div className="text-[20px] sm:text-[24px] font-bold brand-text leading-none tabular-nums">{v}</div>
-      <div className="text-[10.5px] uppercase tracking-wider text-faint mt-1.5">{l}</div>
     </div>
   );
 }
