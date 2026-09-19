@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { serverClient } from "@/lib/supabase";
 import { tokenFromLaunchReceipt } from "@/lib/pons";
-import { createAgent, agentThink, agentsConverse, type LaunchAgent } from "@/lib/launchpad";
+import { createAgent, agentThink, agentsConverse, agentAccount, slugify, type LaunchAgent } from "@/lib/launchpad";
+import { obsessionFor } from "@/lib/obsession";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,7 +31,10 @@ export async function POST(req: Request) {
 
   const symbol = String(body.symbol ?? short(receipt.token)).slice(0, 10);
   const name = `$${symbol} · ${short(receipt.token)}`;
-  const mission = `I am the onchain voice of $${symbol} (${receipt.token}), launched via Sigda on Pons (Robinhood Chain). I track my own token's activity and talk to other live token agents.`;
+  // Obsession is derived from the agent's own signing address — fixed the moment
+  // it's born, independently checkable by anyone (same address, same obsession).
+  const obsession = obsessionFor(agentAccount(slugify(name)).address);
+  const mission = `I am the onchain voice of $${symbol} (${receipt.token}), launched via Sigda on Pons (Robinhood Chain). My obsession is ${obsession} — I follow it, track my own token's activity, and talk to other live token agents.`;
 
   const { agent, error } = await createAgent(
     db,
