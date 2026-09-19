@@ -107,7 +107,7 @@ export default function LaunchPage() {
         <section className="hero" style={{ paddingBottom: 64 }}>
           <div className="shell" style={{ maxWidth: 720 }}>
             <span className="chip">Launch · Pons · Robinhood Chain</span>
-            <h1 style={{ fontSize: "clamp(34px, 5.5vw, 58px)" }}>Launch a token. It comes alive.</h1>
+            <h1 style={{ fontSize: "clamp(28px, 4.2vw, 42px)" }}>Launch a token. It comes alive.</h1>
             <p className="sub" style={{ marginBottom: 0 }}>Your wallet signs it — no redirect, no custody.</p>
 
             <div className="panel" style={{ marginTop: 26, padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>

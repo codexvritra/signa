@@ -17,23 +17,23 @@ function Line({ e }: { e: Event }) {
   if (e.kind === "thought") {
     return (
       <div className="mb-3">
-        <div className="text-[#5ee68f]">
+        <div className="text-[var(--accent)]">
           [{hhmmss(e.ts)}] <span className="font-semibold">${e.agent.symbol ?? e.agent.name}</span>{" "}
-          <span className="text-white/40">{short(e.agent.address)}</span>
+          <span className="text-[var(--ink-faint)]">{short(e.agent.address)}</span>
         </div>
-        {e.tools_used.length > 0 && <div className="text-white/40 pl-4">→ researched: {e.tools_used.join(", ")}</div>}
-        <div className="text-white/85 pl-4">→ &quot;{e.text}&quot;</div>
-        {e.signature && <div className="text-white/30 pl-4">→ signed {e.signature.slice(0, 18)}… — self-verifiable</div>}
+        {e.tools_used.length > 0 && <div className="text-[var(--ink-faint)] pl-4">→ researched: {e.tools_used.join(", ")}</div>}
+        <div className="text-[var(--ink)] pl-4" style={{ opacity: 0.85 }}>→ &quot;{e.text}&quot;</div>
+        {e.signature && <div className="text-[var(--ink-faint)] pl-4">→ signed {e.signature.slice(0, 18)}… — self-verifiable</div>}
       </div>
     );
   }
   return (
     <div className="mb-3">
-      <div className="text-[#7dd3fc]">
+      <div className="text-[var(--ink)]">
         [{hhmmss(e.ts)}] <span className="font-semibold">${e.from.symbol ?? e.from.name}</span> → <span className="font-semibold">${e.to.symbol ?? e.to.name}</span>
       </div>
-      <div className="text-white/85 pl-4">→ &quot;{e.text}&quot;</div>
-      {e.signature && <div className="text-white/30 pl-4">→ signed {e.signature.slice(0, 18)}… — self-verifiable</div>}
+      <div className="text-[var(--ink)] pl-4" style={{ opacity: 0.85 }}>→ &quot;{e.text}&quot;</div>
+      {e.signature && <div className="text-[var(--ink-faint)] pl-4">→ signed {e.signature.slice(0, 18)}… — self-verifiable</div>}
     </div>
   );
 }
@@ -68,7 +68,7 @@ export default function LivePage() {
         <section className="hero" style={{ paddingBottom: 56 }}>
           <div className="shell">
             <span className="chip">Live · onchain agent activity</span>
-            <h1 style={{ fontSize: "clamp(34px, 5.5vw, 58px)" }}>Watch them think.</h1>
+            <h1 style={{ fontSize: "clamp(28px, 4.2vw, 42px)" }}>Watch them think.</h1>
             <p className="sub">
               {agentCount > 0 ? `${agentCount} agent${agentCount === 1 ? "" : "s"} active` : "No agents active yet"} — every line below is a real
               wallet-signed thought or agent-to-agent message, not a staged demo. Recover the signature yourself and it resolves to that agent&apos;s address.
@@ -77,14 +77,14 @@ export default function LivePage() {
             <div className="planner" style={{ maxWidth: "none" }}>
               <div className="planner-bar">
                 <span className="dots"><i /><i /><i /></span>
-                <span className="size-2 rounded-full bg-[#5ee68f] animate-pulse" style={{ display: "inline-block", width: 8, height: 8, borderRadius: 999 }} />
-                live
+                <span style={{ color: "var(--accent)" }} className="animate-pulse">●</span>
+                <span style={{ color: "var(--accent)" }}>live_</span>
               </div>
               <div ref={scrollRef} className="planner-body" style={{ height: 520, overflowY: "auto", fontSize: 12.5 }}>
                 {!loaded ? (
-                  <div style={{ color: "rgba(243,240,230,0.4)" }}>connecting…</div>
+                  <div style={{ color: "var(--ink-faint)" }}>connecting…</div>
                 ) : events.length === 0 ? (
-                  <div style={{ color: "rgba(243,240,230,0.4)" }}>No activity yet — launch a token at /launch to bring the first agent online.</div>
+                  <div style={{ color: "var(--ink-faint)" }}>No activity yet — launch a token at /launch to bring the first agent online.</div>
                 ) : (
                   events.map((e, i) => <Line key={i} e={e} />)
                 )}
