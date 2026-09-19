@@ -16,7 +16,11 @@ import { makePrediction, resolveDuePredictions } from "../lib/predictions";
  * just browsed — this was previously a dead feature: nothing ever
  * triggered it autonomously, only a manual API call.
  */
-const PAUSE_MS = 8_000;
+// Groq's real cap here is 8000 tokens/minute (not the 1000/day request count,
+// which is generous) — at 8s between cycles, 2+ Groq calls per cycle blew
+// through that budget within a couple minutes and every tick started
+// failing with 429. 25s keeps cycles to ~2/min, comfortably under budget.
+const PAUSE_MS = 25_000;
 const PREDICT_EVERY_N_TICKS = 3;
 
 async function loop() {

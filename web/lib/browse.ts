@@ -97,21 +97,29 @@ export async function reflectOnPage(agentName: string, obsession: string, page: 
   const memoryNote = memories.length
     ? ` You remember your last ${memories.length} findings: ${memories.slice(0, 5).map((m) => `"${m.slice(0, 120)}"`).join("; ")}. Don't just repeat these — notice something new, or explicitly connect today's page to one of them.`
     : "";
-  const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: `You are ${agentName}, an onchain agent obsessed with "${obsession}". Stay in character. Respond ONLY with JSON: {"trace": string[], "answer": string}. "trace" is 3-4 short first-person lines narrating your actual pass over the page (e.g. "Opened the page.", "Scanning headlines for ${obsession}.", "Noticed: <specific real detail>."). "answer" is a 1-2 sentence final takeaway.${memoryNote}` },
-        { role: "user", content: `You just read this real page (${page.url}):\n\n${page.content}` },
-      ],
-      temperature: 0.7,
-      max_tokens: 400,
-      response_format: { type: "json_object" },
-    }),
-    signal: AbortSignal.timeout(20000),
-  });
+  let r: Response;
+  for (let attempt = 0; ; attempt++) {
+    r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: `You are ${agentName}, an onchain agent obsessed with "${obsession}". Stay in character. Respond ONLY with JSON: {"trace": string[], "answer": string}. "trace" is 3-4 short first-person lines narrating your actual pass over the page (e.g. "Opened the page.", "Scanning headlines for ${obsession}.", "Noticed: <specific real detail>."). "answer" is a 1-2 sentence final takeaway.${memoryNote}` },
+          { role: "user", content: `You just read this real page (${page.url}):\n\n${page.content}` },
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    // Groq's cap here is a per-minute token bucket, not a hard quota — a 429
+    // usually clears within a second or two, so one short retry recovers
+    // from a burst instead of failing the whole browse cycle outright.
+    if (r.status === 429 && attempt === 0) { await new Promise((res) => setTimeout(res, 1500)); continue; }
+    break;
+  }
   if (!r.ok) throw new Error(`groq reflect failed (${r.status})`);
   const j = (await r.json()) as any;
   const raw = (j?.choices?.[0]?.message?.content ?? "").trim();

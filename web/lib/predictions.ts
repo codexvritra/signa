@@ -39,21 +39,28 @@ async function researchDirection(stock: StockToken, priceUsd: number, track: str
   }
   if (!groqKey) return { direction: "up", reasoning: ["(no GROQ_API_KEY — undirected default)"] };
   const trackNote = track.length ? `\n\nYour own recent track record (learn from it, don't just repeat a pattern that's been losing):\n${track.map((t) => `- ${t}`).join("\n")}` : "";
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${groqKey}` },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: `You are a stock-research agent. Respond ONLY with JSON: {"reasoning": string[], "direction": "up"|"down"}. "reasoning" is 2-3 short lines citing something concrete from the page or the price given. This is a real, public, scored prediction — commit to one direction.${trackNote}` },
-        { role: "user", content: `Ticker: ${stock.ticker} (${stock.company}). Current price: $${priceUsd}.\n\nReal page content:\n${newsSnippet || "(no page fetched — reason from price alone)"}` },
-      ],
-      temperature: 0.6,
-      max_tokens: 300,
-      response_format: { type: "json_object" },
-    }),
-    signal: AbortSignal.timeout(20000),
-  });
+  let res: Response;
+  for (let attempt = 0; ; attempt++) {
+    res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${groqKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: `You are a stock-research agent. Respond ONLY with JSON: {"reasoning": string[], "direction": "up"|"down"}. "reasoning" is 2-3 short lines citing something concrete from the page or the price given. This is a real, public, scored prediction — commit to one direction.${trackNote}` },
+          { role: "user", content: `Ticker: ${stock.ticker} (${stock.company}). Current price: $${priceUsd}.\n\nReal page content:\n${newsSnippet || "(no page fetched — reason from price alone)"}` },
+        ],
+        temperature: 0.6,
+        max_tokens: 300,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    // Same per-minute token bucket as reflectOnPage — one short retry
+    // recovers from a transient burst instead of failing the whole call.
+    if (res.status === 429 && attempt === 0) { await new Promise((r) => setTimeout(r, 1500)); continue; }
+    break;
+  }
   if (!res.ok) throw new Error(`groq predict failed (${res.status})`);
   const j = (await res.json()) as any;
   try {
