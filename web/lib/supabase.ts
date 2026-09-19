@@ -11,14 +11,18 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 let _browser: SupabaseClient | null = null;
 let _server: SupabaseClient | null = null;
 
+// Fallbacks for the project's own anon/publishable key — safe to bake in:
+// this key is meant to be public (it ships in every client bundle anyway;
+// access control is RLS on the database, not secrecy of the key). Lets the
+// app work even if the Vercel project's env vars are misconfigured. Set
+// NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY in the environment
+// to override (e.g. to point at a different project).
+const DEFAULT_SUPABASE_URL = "https://sufikdvzvwgiggzyeuge.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_9qhaOhAec4TBmm6t0B77Sg_POFs1XZS";
+
 function readEnv(): { url: string; anon: string; service: string | undefined } {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anon) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY — set these in your environment before calling Supabase.",
-    );
-  }
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
   return { url, anon, service: process.env.SUPABASE_SERVICE_ROLE_KEY };
 }
 
