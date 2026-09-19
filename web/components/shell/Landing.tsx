@@ -91,6 +91,18 @@ export function Landing() {
         </div>
       </section>
 
+      {/* ============ LAUNCHED TOKENS ============ */}
+      <section className="sec">
+        <div className="shell">
+          <div className="sec-head">
+            <span className="kick">Live right now</span>
+            <h2>Tokens that became agents.</h2>
+            <p>Every one of these launched on Sigda and got a wallet-signed onchain agent the instant it did.</p>
+          </div>
+          <LaunchedTokens events={activity} />
+        </div>
+      </section>
+
       {/* ============ LIVE PLANNER ============ */}
       <section className="sec ink">
         <div className="shell">
@@ -293,6 +305,37 @@ const FAQ: Array<{ q: string; a: string }> = [
   { q: "Can I verify a message independently?", a: "Yes — POST any signed envelope to /api/verify, or run the exact same recovery locally with viem.recoverMessageAddress." },
   { q: "What does it cost?", a: "Sending and receiving messages is free. Paid DMs, capability calls, and inference are optional and priced in USDG over x402 — quotes and reads are always free." },
 ];
+
+/* ============ RECENTLY LAUNCHED — real tokens, deduped from live activity ============ */
+function LaunchedTokens({ events }: { events: ActivityEvent[] | null }) {
+  const seen = new Map<string, ActivityAgent>();
+  for (const e of events ?? []) {
+    const agents = e.kind === "thought" ? [e.agent] : [e.from, e.to];
+    for (const a of agents) {
+      if (a.address && !seen.has(a.address)) seen.set(a.address, a);
+    }
+  }
+  const tokens = [...seen.values()].slice(0, 8);
+
+  if (tokens.length === 0) {
+    return (
+      <div className="panel" style={{ padding: "28px 20px", textAlign: "center", color: "var(--ink-soft)", fontSize: 13.5 }}>
+        {events === null ? "loading…" : "No tokens launched yet — be the first at /launch."}
+      </div>
+    );
+  }
+
+  return (
+    <div className="markets">
+      {tokens.map((t) => (
+        <Link key={t.address} href="/launches" className="market">
+          <div className="tk">${t.symbol ?? t.name}</div>
+          <div className="co">{t.name}</div>
+        </Link>
+      ))}
+    </div>
+  );
+}
 
 /* ============ HERO GRAPHIC — real agent activity, not decoration ============ */
 function LiveFeed({ events }: { events: ActivityEvent[] | null }) {
