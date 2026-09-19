@@ -86,13 +86,15 @@ export type InteractiveSession = { trace: string[]; answer: string; finalUrl: st
  */
 export async function browseInteractive(agentName: string, obsession: string): Promise<InteractiveSession> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
-  const projectId = process.env.BROWSERBASE_PROJECT_ID;
   const groqKey = process.env.GROQ_API_KEY;
   const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
   if (!apiKey || !groqKey) throw new Error("BROWSERBASE_API_KEY / GROQ_API_KEY not configured");
   const seedUrl = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
 
-  const browser = await browserbase.launch({ apiKey, projectId } as any);
+  // The API key alone resolves the Browserbase project — a projectId field
+  // here was unnecessary (and per Browserbase's own current guidance, not
+  // part of the launch surface at all).
+  const browser = await browserbase.launch({ apiKey } as any);
   const trace: string[] = [];
   try {
     const stagehand = await Stagehand.create({
