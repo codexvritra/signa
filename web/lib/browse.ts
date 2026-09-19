@@ -35,7 +35,7 @@ export async function fetchObsessionPage(obsession: string): Promise<{ url: stri
  */
 export async function reflectOnPage(agentName: string, obsession: string, page: { url: string; content: string }): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
-  const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b"; // llama-3.3-70b-versatile was removed from Groq entirely
   if (!apiKey) return `(no GROQ_API_KEY configured — can't reflect on ${page.url})`;
   const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
