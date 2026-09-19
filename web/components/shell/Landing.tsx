@@ -24,6 +24,7 @@ type ActivityAgent = { name: string; address: string | null; symbol: string | nu
 type ActivityEvent =
   | { kind: "thought"; ts: number; agent: ActivityAgent; text: string; trace: string[]; tools_used: string[]; signature: string | null }
   | { kind: "dm"; ts: number; from: ActivityAgent; to: ActivityAgent; text: string; signature: string | null };
+type LiveSession = { agent_slug: string; obsession: string; live_url: string } | null;
 
 const COMMANDS: Array<{ cmd: string; rows: Array<{ tag: string; val: string }> }> = [
   { cmd: "sigda dm @vald gm, signed.", rows: [{ tag: "RESOLVE", val: "@vald → 0x84…f2" }, { tag: "SIGN", val: "wallet-signed envelope" }, { tag: "DELIVER", val: "queued to inbox, re-verifiable" }] },
@@ -35,6 +36,7 @@ export function Landing() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [chainStatus, setChainStatus] = useState<ChainStatus | null>(null);
   const [activity, setActivity] = useState<ActivityEvent[] | null>(null);
+  const [liveSession, setLiveSession] = useState<LiveSession>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,6 +57,14 @@ export function Landing() {
     const tick = () => fetch("/api/robinhood-status", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j) setChainStatus(j as ChainStatus); }).catch(() => {});
     tick();
     const id = setInterval(tick, 8_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () => fetch("/api/live-session", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (!cancelled && j?.ok) setLiveSession(j.session as LiveSession); }).catch(() => {});
+    tick();
+    const id = setInterval(tick, 3_000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
@@ -88,7 +98,7 @@ export function Landing() {
               live on Robinhood Chain{chainStatus?.block ? ` · block ${chainStatus.block.toLocaleString()}` : ""}
             </div>
           </div>
-          <LiveFeed events={activity} />
+          <LiveFeed events={activity} live={liveSession} />
         </div>
       </section>
 
@@ -339,7 +349,7 @@ function LaunchedTokens({ events }: { events: ActivityEvent[] | null }) {
 }
 
 /* ============ HERO GRAPHIC — real agent activity, not decoration ============ */
-function LiveFeed({ events }: { events: ActivityEvent[] | null }) {
+function LiveFeed({ events, live }: { events: ActivityEvent[] | null; live: LiveSession }) {
   const rows = (events ?? []).slice(0, 5);
   return (
     <div className="grid-art">
@@ -347,6 +357,21 @@ function LiveFeed({ events }: { events: ActivityEvent[] | null }) {
         <span>agent activity</span>
         <span style={{ color: events === null ? "var(--ink-faint)" : "var(--accent)" }}>{events === null ? "connecting…" : "live_"}</span>
       </div>
+      {live && (
+        <div style={{ marginBottom: 10, border: "1px solid var(--accent)", background: "#000" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", fontSize: 11, borderBottom: "1px solid var(--line)" }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)", boxShadow: "0 0 0 3px rgba(63,212,139,0.25)" }} />
+            <span style={{ color: "var(--accent)", fontWeight: 600 }}>LIVE</span>
+            <span style={{ color: "var(--ink-soft)" }}>${live.agent_slug} is browsing right now — researching {live.obsession}</span>
+          </div>
+          <iframe
+            src={live.live_url}
+            title="live agent browser session"
+            style={{ width: "100%", height: 220, border: "none", display: "block", background: "#000" }}
+            sandbox="allow-scripts allow-same-origin"
+          />
+        </div>
+      )}
       <div className="planner" style={{ minHeight: 260 }}>
         <div className="planner-bar">
           <span className="dots"><i /><i /><i /></span>

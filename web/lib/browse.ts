@@ -79,6 +79,23 @@ export async function reflectOnPage(agentName: string, obsession: string, page: 
 
 export type InteractiveSession = { trace: string[]; answer: string; finalUrl: string };
 
+/** Browserbase's Live View debug URL — an iframe-embeddable feed of the actual running session. */
+async function fetchLiveViewUrl(sessionId: string, apiKey: string): Promise<string | null> {
+  try {
+    const r = await fetch(`https://api.browserbase.com/v1/sessions/${sessionId}/debug`, {
+      headers: { "x-bb-api-key": apiKey },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!r.ok) return null;
+    const j = (await r.json()) as { debuggerFullscreenUrl?: string };
+    return j.debuggerFullscreenUrl ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export type BrowseHooks = { onLive?: (liveUrl: string) => Promise<void>; onDone?: () => Promise<void> };
+
 async function pickLink(obsession: string, links: { href: string; text: string }[]): Promise<{ href: string; text: string } | null> {
   if (links.length === 0) return null;
   const groqKey = process.env.GROQ_API_KEY;
@@ -117,7 +134,7 @@ async function pickLink(obsession: string, links: { href: string; text: string }
  * session creation works fine on its own). Opens a seed page, has Groq
  * pick one real link related to the obsession, follows it, reads it.
  */
-export async function browseInteractive(agentName: string, obsession: string): Promise<InteractiveSession> {
+export async function browseInteractive(agentName: string, obsession: string, hooks?: BrowseHooks): Promise<InteractiveSession> {
   const apiKey = process.env.BROWSERBASE_API_KEY;
   if (!apiKey) throw new Error("BROWSERBASE_API_KEY not configured");
   const seedUrl = SEED_URL[obsession] ?? SEED_URL["the odd corners"];
@@ -129,7 +146,10 @@ export async function browseInteractive(agentName: string, obsession: string): P
     signal: AbortSignal.timeout(15000),
   });
   if (!sessionRes.ok) throw new Error(`browserbase session create failed (${sessionRes.status})`);
-  const session = (await sessionRes.json()) as { connectUrl: string };
+  const session = (await sessionRes.json()) as { id: string; connectUrl: string };
+
+  const liveUrl = await fetchLiveViewUrl(session.id, apiKey);
+  if (liveUrl && hooks?.onLive) await hooks.onLive(liveUrl).catch(() => {});
 
   const browser = await chromium.connectOverCDP(session.connectUrl, { timeout: 20000 });
   const trace: string[] = [];
@@ -158,6 +178,7 @@ export async function browseInteractive(agentName: string, obsession: string): P
     return { trace: [...trace, ...reflection.trace], answer: reflection.answer, finalUrl: chosen.href };
   } finally {
     await browser.close().catch(() => {});
+    if (hooks?.onDone) await hooks.onDone().catch(() => {});
   }
 }
 
@@ -182,7 +203,16 @@ export async function autoBrowseTick(db: SupabaseClient, minMs = 10 * 60_000): P
   let mode: string;
   let finding: string;
   try {
-    const session = await browseInteractive(agent.name, obsession);
+    const session = await browseInteractive(agent.name, obsession, {
+      onLive: async (liveUrl) => {
+        await db.from("agent_live_sessions").delete().lt("expires_at", new Date().toISOString());
+        await db.from("agent_live_sessions").insert({
+          agent_slug: agent.slug, obsession, live_url: liveUrl,
+          expires_at: new Date(Date.now() + 45_000).toISOString(),
+        });
+      },
+      onDone: async () => { await db.from("agent_live_sessions").delete().eq("agent_slug", agent.slug); },
+    });
     await recordThought(db, agent, `browsed from ${obsession}`, session.answer, session.trace, ["browserbase.session"]);
     mode = "interactive"; finding = session.answer;
   } catch {
